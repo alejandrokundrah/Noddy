@@ -152,6 +152,10 @@ has a Stop button. Choosing another
 
 ### Changed
 
+- **Send to your phone from more Linux file managers.** Right-click files
+  or folders in Nemo (Cinnamon) or Thunar (XFCE) as well as GNOME Files,
+  Dolphin and Caja, and folders now work in all of them
+  ([#49](https://github.com/thtbee/nectarlink/issues/49)).
 - **Setup on Windows asks about the desktop shortcut.** Untick **Add a
   desktop shortcut** to skip it. Updates leave it as you had it, so one
   you deleted no longer comes back

@@ -26,6 +26,7 @@ You can send files or entire folders from your PC using any of these entry point
 2. **Flick to send**: Drag a file toward the screen edge where your `Shelf` sits with a quick flick gesture. A 3-second **Undo** toast appears before the transfer begins.
 3. **Home screen button**: Click **Send files** on the PC Home screen and pick files or folders.
 4. **File Explorer `Send to` menu**: Right-click any file or folder in Windows File Explorer, choose **Send to**, and click your phone's name.
+   On Linux, right-click files or folders and choose **Send to *your phone* (NectarLink)**: under **Scripts** in GNOME Files, and in the menu itself in Dolphin, Nemo, Thunar and Caja (Caja needs the `caja-actions` package).
 5. **Command Palette or CLI**: Press `Ctrl+Alt+Space` and choose **Send files to phone**, or run `nectarlink send <path>` in a terminal.
 
 Received files on your phone are saved to `Download/Nectarlink` (preserving subfolder structure when you send a folder).
@@ -100,7 +101,7 @@ NectarLink includes a built-in LocalSend v2.1 client and server so you can excha
 
 ## What the Options Do
 
-- **File Explorer Send to** (`Settings › Files & Sync` on PC, default: **On**): Adds paired phones to the right-click `Send to` menu in Windows File Explorer.
+- **File Explorer Send to** (**File manager Send to** on Linux; `Settings › Files & Sync` on PC, default: **On**): Adds paired phones to the right-click `Send to` menu in Windows File Explorer, or to the right-click menu of GNOME Files, Dolphin, Nemo, Thunar and Caja on Linux.
 - **Your PC in your pocket** (`Settings › Files & Sync` on PC, default: **Off**): Allows paired phones with storage permission to browse your PC's user folders (`Downloads`, `Documents`, `Desktop`, `Pictures`).
 - **LocalSend on local network** (`Settings › Files & Sync` on PC and `Settings › Features & Data › LocalSend` on Android, default: **Off**): Enables un-paired LAN file sharing with LocalSend devices.
 - **Synced folders** (`Settings › Files & Sync` on PC): Manages one-way and two-way folder synchronization rules.
