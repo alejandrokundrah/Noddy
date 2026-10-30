@@ -2437,7 +2437,10 @@ Item {
                             if (event.text && event.text.length > 0 && event.text.charCodeAt(0) >= 32
                                     && (!(event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))
                                         // AltGr (@ on a French keyboard, say) arrives as Ctrl+Alt on Windows.
-                                        || ((event.modifiers & Qt.ControlModifier) && (event.modifiers & Qt.AltModifier)))) {
+                                        // A plain letter, digit or space with Ctrl+Alt is a shortcut:
+                                        // Qt gives Ctrl+Alt+2 the text "2" even without AltGr.
+                                        || ((event.modifiers & Qt.ControlModifier) && (event.modifiers & Qt.AltModifier)
+                                            && !/^[A-Za-z0-9 ]$/.test(event.text)))) {
                                 Mirror.keyboardText(home.deviceId, event.text)
                                 typeOnPhoneCard.lastSent = event.text
                                 event.accepted = true
