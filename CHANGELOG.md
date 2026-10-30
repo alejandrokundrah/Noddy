@@ -156,6 +156,11 @@ has a Stop button. Choosing another
 
 ### Changed
 
+- **Windows 10 looks right.** The window no longer shows Windows 10's own
+  title bar over NectarLink's, Snap and resizing work, and the caption
+  buttons show. Phone as webcam still needs Windows 11. Thanks to
+  [@waytoo-average](https://github.com/waytoo-average)
+  ([#103](https://github.com/thtbee/nectarlink/pull/103)).
 - **Send to your phone from more Linux file managers.** Right-click files
   or folders in Nemo (Cinnamon) or Thunar (XFCE) as well as GNOME Files,
   Dolphin and Caja, and folders now work in all of them

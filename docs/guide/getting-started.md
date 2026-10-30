@@ -1,19 +1,19 @@
 # Getting Started
 
-This guide walks you through installing NectarLink on Windows 11, Linux and Android, completing the first-run setup walkthrough, pairing your devices, and choosing the Android power level that fits how you work.
+This guide walks you through installing NectarLink on Windows, Linux and Android, completing the first-run setup walkthrough, pairing your devices, and choosing the Android power level that fits how you work.
 
 ## System Requirements
 
 | Platform | Minimum Version | Notes |
 | :--- | :--- | :--- |
-| **Windows PC** | Windows 11 (build 22000 or newer, 64-bit) | Required for Mica backdrop, Windows Cloud Files (`cfapi`) storage mounting, and the `MFCreateVirtualCamera` webcam add-on. |
+| **Windows PC** | Windows 10 (version 2004 or newer) or Windows 11, 64-bit | The phone as webcam (`MFCreateVirtualCamera`) and the Mica backdrop need Windows 11 (build 22000 or newer). The phone's storage in File Explorer has only been tested on Windows 11. |
 | **Linux PC** | Ubuntu 24.04 or newer, Debian 13, Fedora 40 or newer, or another distribution from 2024 on (glibc 2.39 or newer), 64-bit Intel or AMD | X11 or Wayland. The phone as a webcam needs the `v4l2loopback` driver, which the install command sets up. |
 | **Android Phone or Tablet** | Android 8.0 (API 26) or newer | Android 10+ required for internal audio capture during mirroring; Android 11+ required for on-device Wireless Debugging (`Elevated`) and `app window` streaming; Android 12+ required for `Elevated` in-call mute/hold/speaker controls. |
 | **Network** | Shared Wi-Fi / LAN, USB cable, or **Connect over mobile data** | By default, all device-to-device traffic travels directly over your local network or a USB data cable without leaving your LAN (installed copies only contact GitHub Releases over HTTPS to check for app updates; see [Privacy and Security](privacy-and-security.md)). |
 
 ## Installing NectarLink
 
-### On Windows 11
+### On Windows
 
 1. Download the latest Windows installer (`Nectarlink-<version>-x64-setup.exe` for Intel/AMD PCs or `Nectarlink-<version>-arm64-setup.exe` for Snapdragon/ARM64 PCs) from the project's GitHub Releases page.
 2. Run the installer. The installer isn't code-signed yet, so Windows SmartScreen may show **Windows protected your PC**: choose **More info**, then **Run anyway**.
