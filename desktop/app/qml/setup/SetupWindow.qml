@@ -289,7 +289,79 @@ NativeWindow {
                     onClicked: window.close()
                 }
             }
-            Item { width: 1; height: 18 }
+
+            // Whether setup adds a desktop shortcut (Windows; #102).
+            Item { width: 1; height: shortcutChoice.visible ? 18 : 0 }
+            Item {
+                id: shortcutChoice
+                visible: !window.removing && window.phase !== "working" && Qt.platform.os === "windows"
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: shortcutRow.implicitWidth
+                height: visible ? 24 : 0
+                activeFocusOnTab: visible
+                Accessible.role: Accessible.CheckBox
+                Accessible.name: shortcutLabel.text
+                Accessible.checkable: true
+                Accessible.checked: Setup.desktopShortcut
+                Accessible.onToggleAction: Setup.desktopShortcut = !Setup.desktopShortcut
+                Accessible.onPressAction: Setup.desktopShortcut = !Setup.desktopShortcut
+                Keys.onSpacePressed: Setup.desktopShortcut = !Setup.desktopShortcut
+
+                Row {
+                    id: shortcutRow
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 10
+                    Rectangle {
+                        width: 18
+                        height: 18
+                        radius: 5
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: Setup.desktopShortcut ? window.honey : "transparent"
+                        border.width: Setup.desktopShortcut ? 0 : 1.5
+                        border.color: window.muted
+                        Shape {
+                            anchors.centerIn: parent
+                            width: 10
+                            height: 8
+                            visible: Setup.desktopShortcut
+                            preferredRendererType: Shape.CurveRenderer
+                            ShapePath {
+                                strokeColor: window.onHoney
+                                strokeWidth: 2
+                                fillColor: "transparent"
+                                capStyle: ShapePath.RoundCap
+                                joinStyle: ShapePath.RoundJoin
+                                PathSvg { path: "M 1 4 L 4 7 L 9 1" }
+                            }
+                        }
+                    }
+                    Text {
+                        id: shortcutLabel
+                        anchors.verticalCenter: parent.verticalCenter
+                        font.family: "Figtree"
+                        font.pixelSize: 13
+                        color: window.ink
+                        text: qsTr("Add a desktop shortcut")
+                    }
+                }
+                Rectangle {
+                    anchors.fill: parent
+                    anchors.margins: -5
+                    radius: 8
+                    color: "transparent"
+                    border.width: 2
+                    border.color: window.honey
+                    visible: shortcutChoice.activeFocus
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    anchors.margins: -6
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: Setup.desktopShortcut = !Setup.desktopShortcut
+                }
+            }
+
+            Item { width: 1; height: shortcutChoice.visible ? 14 : 18 }
             Text {
                 id: details
                 visible: window.phase === "welcome" && !window.removing
@@ -456,7 +528,7 @@ NativeWindow {
                         text: qsTr("NectarLink goes into Program Files for everyone on this PC. Setup also:")
                             + "<br>&#8226; " + qsTr("allows it through Windows Firewall on private networks, so your phone can connect")
                             + "<br>&#8226; " + qsTr("adds a task that installs updates without an administrator prompt")
-                            + "<br>&#8226; " + qsTr("adds Start menu and desktop shortcuts, and starts it with Windows (turn this off in Settings)")
+                            + "<br>&#8226; " + qsTr("adds a Start menu shortcut, and a desktop one if you leave that ticked, and starts it with Windows (turn this off in Settings)")
                             + "<br>&#8226; " + qsTr("adds it to the Windows Share sheet")
                             + "<br><br>" + qsTr("It checks GitHub for updates once a day, which you can turn off in Settings. Otherwise your phone and PC only talk to each other.")
                     }

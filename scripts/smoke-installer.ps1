@@ -24,6 +24,7 @@ $dir = Join-Path $env:ProgramFiles 'Nectarlink'
 $exe = Join-Path $dir 'nectarlink-desktop.exe'
 $uninstallKey = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Nectarlink'
 $shortcut = Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs\Nectarlink.lnk'
+$desktopShortcut = Join-Path $env:PUBLIC 'Desktop\NectarLink.lnk'
 $data = if ($env:RUNNER_TEMP) { Join-Path $env:RUNNER_TEMP 'nectarlink-smoke' } else { Join-Path $env:TEMP 'nectarlink-smoke' }
 
 function Check($what, [bool]$ok) {
@@ -59,6 +60,7 @@ Check "the app is installed" (Test-Path $exe)
 Check "an uninstaller is installed" (Test-Path (Join-Path $dir 'uninstall.exe'))
 Check "it's in Apps (uninstall entry)" (Test-Path $uninstallKey)
 Check "it's in the Start menu" (Test-Path $shortcut)
+Check "a first install adds a desktop shortcut" (Test-Path $desktopShortcut)
 Check "the firewall lets phones in" ([bool](FirewallRule))
 Check "license notices are included" ((Get-Item (Join-Path $dir 'THIRD-PARTY-NOTICES.txt')).Length -gt 100KB)
 $task = UpdateTask
@@ -81,6 +83,19 @@ Check "signed-in users may start the update task" (
     (Test-TaskRights $sd 'S-1-5-11' 0x20) -or (Test-TaskRights $sd 'S-1-5-11' 0x20000000))
 Check "nobody else may change or delete the update task" (-not (Test-OthersMayWrite $sd))
 
+# The desktop shortcut: an update (no /DESKTOP, as the updater runs it) leaves
+# a deleted one deleted; the setup window's choice adds or removes it.
+Remove-Item $desktopShortcut
+Start-Process $Setup -ArgumentList '/S' -Wait
+Check "an update doesn't bring back a deleted desktop shortcut" (-not (Test-Path $desktopShortcut))
+Start-Process $Setup -ArgumentList '/S', '/DESKTOP=1' -Wait
+Check "asking for a desktop shortcut adds it" (Test-Path $desktopShortcut)
+Start-Process $Setup -ArgumentList '/S' -Wait
+Check "an update keeps the desktop shortcut" (Test-Path $desktopShortcut)
+Start-Process $Setup -ArgumentList '/S', '/DESKTOP=0' -Wait
+Check "declining a desktop shortcut removes it" (-not (Test-Path $desktopShortcut))
+Start-Process $Setup -ArgumentList '/S', '/DESKTOP=1' -Wait
+
 # The installed copy starts on its own files and quits when asked.
 $app = Start-Process $exe -ArgumentList '--minimized', '--data-dir', $data -PassThru
 Start-Sleep 8
@@ -97,6 +112,7 @@ while ((Test-Path $dir) -and (Get-Date) -lt $deadline) { Start-Sleep 1 }
 Check "the app folder is gone" (-not (Test-Path $dir))
 Check "the uninstall entry is gone" (-not (Test-Path $uninstallKey))
 Check "the Start menu shortcut is gone" (-not (Test-Path $shortcut))
+Check "the desktop shortcut is gone" (-not (Test-Path $desktopShortcut))
 Check "the firewall rule is gone" (-not (FirewallRule))
 Check "the update task is gone" ($null -eq (UpdateTask))
 Write-Host "Installer smoke test passed."

@@ -66,6 +66,8 @@ Var Interactive
 ; Where each step is written, for the setup window (/PROGRESS=<file>).
 Var ProgressFile
 Var AppDir
+; Where an earlier copy was installed, if there is one.
+Var PreviousDir
 
 !macro Progress line
   ${If} $ProgressFile != ""
@@ -165,6 +167,7 @@ Section "Install"
     InitPluginsDir
     StrCpy $AppDir "$PLUGINSDIR\app"
   ${Else}
+    ReadRegStr $PreviousDir HKLM "Software\${APP}" "InstallDir"
     !insertmacro Progress "step closing"
     !insertmacro QuitRunningApp
     !insertmacro Progress "step files"
@@ -229,7 +232,24 @@ Section "Install"
 
   !insertmacro Progress "step shortcuts"
   CreateShortCut "$SMPROGRAMS\${DISPLAY}.lnk" "$INSTDIR\${EXE}" "" "$INSTDIR\${EXE}" 0 "" "" "Your phone, on your PC"
-  CreateShortCut "$DESKTOP\${DISPLAY}.lnk" "$INSTDIR\${EXE}" "" "$INSTDIR\${EXE}" 0 "" "" "Your phone, on your PC"
+  ; The desktop shortcut is a choice in the setup window (/DESKTOP=1 or 0).
+  ; Without one (the app's updater), a first install adds it and an update
+  ; keeps it only if it's still there, so a deleted one stays deleted (#102).
+  ${GetParameters} $R0
+  ClearErrors
+  ${GetOptions} $R0 "/DESKTOP=" $R1
+  ${If} ${Errors}
+    StrCpy $R1 1
+    ${If} $PreviousDir != ""
+    ${AndIfNot} ${FileExists} "$DESKTOP\${DISPLAY}.lnk"
+      StrCpy $R1 0
+    ${EndIf}
+  ${EndIf}
+  ${If} $R1 == 1
+    CreateShortCut "$DESKTOP\${DISPLAY}.lnk" "$INSTDIR\${EXE}" "" "$INSTDIR\${EXE}" 0 "" "" "Your phone, on your PC"
+  ${Else}
+    Delete "$DESKTOP\${DISPLAY}.lnk"
+  ${EndIf}
 
   ; The Windows Share sheet needs the app's sparse package registered, which
   ; Windows allows for an unsigned one only with Developer Mode on. Why it

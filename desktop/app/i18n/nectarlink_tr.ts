@@ -8044,8 +8044,8 @@ Neler gerekir
     <message>
         <location filename="../qml/setup/SetupWindow.qml" line="108"/>
         <location filename="../qml/setup/SetupWindow.qml" line="286"/>
-        <location filename="../qml/setup/SetupWindow.qml" line="396"/>
-        <location filename="../qml/setup/SetupWindow.qml" line="405"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="468"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="477"/>
         <source>Close</source>
         <translation>Kapat</translation>
     </message>
@@ -8140,78 +8140,87 @@ Neler gerekir
         <translation>NectarLink&apos;i tut</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="301"/>
-        <location filename="../qml/setup/SetupWindow.qml" line="446"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="344"/>
+        <source>Add a desktop shortcut</source>
+        <translation>Masaüstü kısayolu ekle</translation>
+    </message>
+    <message>
+        <location filename="../qml/setup/SetupWindow.qml" line="373"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="518"/>
         <source>What this installs</source>
         <translation>Neler kurulur</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="334"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="406"/>
         <source>NectarLink is uninstalled</source>
         <translation>NectarLink kaldırıldı</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="334"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="406"/>
         <source>NectarLink is ready</source>
         <translation>NectarLink hazır</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="346"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="418"/>
         <source>Your received files are still in %1. Thanks for giving it a try.</source>
         <translation>Aldığınız dosyalar hâlâ %1 konumunda. Denediğiniz için teşekkürler.</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="347"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="419"/>
         <source>Next, get the Android app. Scan this code with your phone&apos;s camera to open its download page.</source>
         <translation>Şimdi Android uygulamasını edinin. İndirme sayfasını açmak için bu kodu telefonunuzun kamerasıyla tarayın.</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="368"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="440"/>
         <source>QR code for the Android app download page</source>
         <translation>Android uygulaması indirme sayfası için QR kodu</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="381"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="453"/>
         <source>Open the Android app download page</source>
         <translation>Android uygulaması indirme sayfasını aç</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="396"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="468"/>
         <source>Open NectarLink</source>
         <translation>NectarLink&apos;i aç</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="456"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="528"/>
         <source>NectarLink goes into Program Files for everyone on this PC. Setup also:</source>
         <translation>NectarLink, bu bilgisayardaki herkes için Program Files klasörüne kurulur. Kurulum ayrıca:</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="457"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="529"/>
         <source>allows it through Windows Firewall on private networks, so your phone can connect</source>
         <translation>telefonunuzun bağlanabilmesi için özel ağlarda Windows Güvenlik Duvarı&apos;ndan geçmesine izin verir</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="458"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="530"/>
         <source>adds a task that installs updates without an administrator prompt</source>
         <translation>güncellemeleri yönetici onayı istemeden kuran bir görev ekler</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="459"/>
-        <source>adds Start menu and desktop shortcuts, and starts it with Windows (turn this off in Settings)</source>
-        <translation>Başlat menüsü ve masaüstü kısayolları ekler ve Windows ile birlikte başlatır (bunu Ayarlar&apos;dan kapatabilirsiniz)</translation>
+        <location filename="../qml/setup/SetupWindow.qml" line="531"/>
+        <source>adds a Start menu shortcut, and a desktop one if you leave that ticked, and starts it with Windows (turn this off in Settings)</source>
+        <translation>Başlat menüsü kısayolu ekler, işaretli bırakırsanız masaüstü kısayolu da ekler ve Windows ile birlikte başlatır (bunu Ayarlar&apos;dan kapatabilirsiniz)</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="460"/>
+        <source>adds Start menu and desktop shortcuts, and starts it with Windows (turn this off in Settings)</source>
+        <translation type="vanished">Başlat menüsü ve masaüstü kısayolları ekler ve Windows ile birlikte başlatır (bunu Ayarlar&apos;dan kapatabilirsiniz)</translation>
+    </message>
+    <message>
+        <location filename="../qml/setup/SetupWindow.qml" line="532"/>
         <source>adds it to the Windows Share sheet</source>
         <translation>Windows Paylaş penceresine ekler</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="461"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="533"/>
         <source>It checks GitHub for updates once a day, which you can turn off in Settings. Otherwise your phone and PC only talk to each other.</source>
         <translation>Günde bir kez GitHub&apos;da güncelleme olup olmadığını denetler; bunu Ayarlar&apos;dan kapatabilirsiniz. Bunun dışında telefonunuz ve bilgisayarınız yalnızca birbiriyle iletişim kurar.</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="468"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="540"/>
         <source>Privacy details</source>
         <translation>Gizlilik ayrıntıları</translation>
     </message>

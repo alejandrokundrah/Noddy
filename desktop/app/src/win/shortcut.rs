@@ -7,7 +7,8 @@ use windows::{
     Win32::{
         System::Com::{CLSCTX_INPROC_SERVER, CoCreateInstance, CoTaskMemFree, IPersistFile},
         UI::Shell::{
-            FOLDERID_Recent, FOLDERID_SendTo, IShellLinkW, KF_FLAG_DEFAULT, SHGetKnownFolderPath, ShellLink,
+            FOLDERID_PublicDesktop, FOLDERID_Recent, FOLDERID_SendTo, IShellLinkW, KF_FLAG_DEFAULT,
+            SHGetKnownFolderPath, ShellLink,
         },
     },
     core::{HSTRING, Interface},
@@ -81,6 +82,11 @@ pub fn target(path: &Path) -> Option<PathBuf> {
 /// The user's "Send to" folder.
 pub fn send_to_dir() -> Option<PathBuf> {
     known_folder(&FOLDERID_SendTo)
+}
+
+/// The desktop every user of the PC sees, where setup puts its shortcut.
+pub fn public_desktop_dir() -> Option<PathBuf> {
+    known_folder(&FOLDERID_PublicDesktop)
 }
 
 /// The user's Recent folder: a shortcut to each file opened lately.

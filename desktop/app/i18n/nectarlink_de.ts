@@ -8052,8 +8052,8 @@ Voraussetzungen
     <message>
         <location filename="../qml/setup/SetupWindow.qml" line="108"/>
         <location filename="../qml/setup/SetupWindow.qml" line="286"/>
-        <location filename="../qml/setup/SetupWindow.qml" line="396"/>
-        <location filename="../qml/setup/SetupWindow.qml" line="405"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="468"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="477"/>
         <source>Close</source>
         <translation>Schließen</translation>
     </message>
@@ -8148,78 +8148,87 @@ Voraussetzungen
         <translation>NectarLink behalten</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="301"/>
-        <location filename="../qml/setup/SetupWindow.qml" line="446"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="344"/>
+        <source>Add a desktop shortcut</source>
+        <translation>Desktop-Verknüpfung erstellen</translation>
+    </message>
+    <message>
+        <location filename="../qml/setup/SetupWindow.qml" line="373"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="518"/>
         <source>What this installs</source>
         <translation>Was installiert wird</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="334"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="406"/>
         <source>NectarLink is uninstalled</source>
         <translation>NectarLink wurde deinstalliert</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="334"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="406"/>
         <source>NectarLink is ready</source>
         <translation>NectarLink ist bereit</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="346"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="418"/>
         <source>Your received files are still in %1. Thanks for giving it a try.</source>
         <translation>Deine empfangenen Dateien befinden sich weiterhin in %1. Danke fürs Ausprobieren!</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="347"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="419"/>
         <source>Next, get the Android app. Scan this code with your phone&apos;s camera to open its download page.</source>
         <translation>Hole dir als Nächstes die Android-App. Scanne diesen Code mit der Kamera deines Geräts, um die Download-Seite zu öffnen.</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="368"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="440"/>
         <source>QR code for the Android app download page</source>
         <translation>QR-Code für die Download-Seite der Android-App</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="381"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="453"/>
         <source>Open the Android app download page</source>
         <translation>Download-Seite der Android-App öffnen</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="396"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="468"/>
         <source>Open NectarLink</source>
         <translation>NectarLink öffnen</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="456"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="528"/>
         <source>NectarLink goes into Program Files for everyone on this PC. Setup also:</source>
         <translation>NectarLink wird unter „Programme“ für alle Benutzer dieses PCs installiert. Außerdem führt die Installation Folgendes aus:</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="457"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="529"/>
         <source>allows it through Windows Firewall on private networks, so your phone can connect</source>
         <translation>lässt NectarLink in privaten Netzwerken durch die Windows-Firewall zu, damit sich dein Gerät verbinden kann</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="458"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="530"/>
         <source>adds a task that installs updates without an administrator prompt</source>
         <translation>richtet eine Aufgabe ein, die Updates ohne Administratorabfrage installiert</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="459"/>
-        <source>adds Start menu and desktop shortcuts, and starts it with Windows (turn this off in Settings)</source>
-        <translation>erstellt Verknüpfungen im Startmenü und auf dem Desktop und startet die App mit Windows (in den Einstellungen deaktivierbar)</translation>
+        <location filename="../qml/setup/SetupWindow.qml" line="531"/>
+        <source>adds a Start menu shortcut, and a desktop one if you leave that ticked, and starts it with Windows (turn this off in Settings)</source>
+        <translation>erstellt eine Verknüpfung im Startmenü, auf Wunsch auch eine auf dem Desktop, und startet die App mit Windows (in den Einstellungen deaktivierbar)</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="460"/>
+        <source>adds Start menu and desktop shortcuts, and starts it with Windows (turn this off in Settings)</source>
+        <translation type="vanished">erstellt Verknüpfungen im Startmenü und auf dem Desktop und startet die App mit Windows (in den Einstellungen deaktivierbar)</translation>
+    </message>
+    <message>
+        <location filename="../qml/setup/SetupWindow.qml" line="532"/>
         <source>adds it to the Windows Share sheet</source>
         <translation>fügt NectarLink zum Teilen-Menü von Windows hinzu</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="461"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="533"/>
         <source>It checks GitHub for updates once a day, which you can turn off in Settings. Otherwise your phone and PC only talk to each other.</source>
         <translation>Es sucht einmal täglich auf GitHub nach Updates, was du in den Einstellungen ausschalten kannst. Ansonsten kommunizieren dein Gerät und dein PC ausschließlich direkt miteinander.</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="468"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="540"/>
         <source>Privacy details</source>
         <translation>Details zum Datenschutz</translation>
     </message>

@@ -152,6 +152,10 @@ has a Stop button. Choosing another
 
 ### Changed
 
+- **Setup on Windows asks about the desktop shortcut.** Untick **Add a
+  desktop shortcut** to skip it. Updates leave it as you had it, so one
+  you deleted no longer comes back
+  ([#102](https://github.com/thtbee/nectarlink/issues/102)).
 - **Files received on Windows are marked as from another device,** the way
   a browser marks a download, so Windows checks a program with SmartScreen
   before it runs and Office opens documents in Protected View.

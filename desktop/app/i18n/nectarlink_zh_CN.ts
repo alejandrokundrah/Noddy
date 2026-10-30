@@ -8048,8 +8048,8 @@ What it needs
     <message>
         <location filename="../qml/setup/SetupWindow.qml" line="108"/>
         <location filename="../qml/setup/SetupWindow.qml" line="286"/>
-        <location filename="../qml/setup/SetupWindow.qml" line="396"/>
-        <location filename="../qml/setup/SetupWindow.qml" line="405"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="468"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="477"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
@@ -8144,78 +8144,87 @@ What it needs
         <translation>保留 NectarLink</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="301"/>
-        <location filename="../qml/setup/SetupWindow.qml" line="446"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="344"/>
+        <source>Add a desktop shortcut</source>
+        <translation>添加桌面快捷方式</translation>
+    </message>
+    <message>
+        <location filename="../qml/setup/SetupWindow.qml" line="373"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="518"/>
         <source>What this installs</source>
         <translation>安装内容</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="334"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="406"/>
         <source>NectarLink is uninstalled</source>
         <translation>NectarLink 已卸载</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="334"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="406"/>
         <source>NectarLink is ready</source>
         <translation>NectarLink 已就绪</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="346"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="418"/>
         <source>Your received files are still in %1. Thanks for giving it a try.</source>
         <translation>你收到的文件仍保留在 %1。谢谢你的试用。</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="347"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="419"/>
         <source>Next, get the Android app. Scan this code with your phone&apos;s camera to open its download page.</source>
         <translation>接下来，获取 Android 应用。用手机相机扫描此二维码即可打开其下载页面。</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="368"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="440"/>
         <source>QR code for the Android app download page</source>
         <translation>Android 应用下载页面的二维码</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="381"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="453"/>
         <source>Open the Android app download page</source>
         <translation>打开 Android 应用下载页面</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="396"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="468"/>
         <source>Open NectarLink</source>
         <translation>打开 NectarLink</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="456"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="528"/>
         <source>NectarLink goes into Program Files for everyone on this PC. Setup also:</source>
         <translation>NectarLink 将安装到 Program Files，供本机所有用户使用。安装程序还会：</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="457"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="529"/>
         <source>allows it through Windows Firewall on private networks, so your phone can connect</source>
         <translation>在专用网络上允许其通过 Windows 防火墙，以便你的手机可以连接</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="458"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="530"/>
         <source>adds a task that installs updates without an administrator prompt</source>
         <translation>添加一个无需管理员提示即可安装更新的任务</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="459"/>
-        <source>adds Start menu and desktop shortcuts, and starts it with Windows (turn this off in Settings)</source>
-        <translation>添加开始菜单和桌面快捷方式，并随 Windows 启动（可在设置中关闭）</translation>
+        <location filename="../qml/setup/SetupWindow.qml" line="531"/>
+        <source>adds a Start menu shortcut, and a desktop one if you leave that ticked, and starts it with Windows (turn this off in Settings)</source>
+        <translation>添加开始菜单快捷方式（勾选时也添加桌面快捷方式），并随 Windows 启动（可在设置中关闭）</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="460"/>
+        <source>adds Start menu and desktop shortcuts, and starts it with Windows (turn this off in Settings)</source>
+        <translation type="vanished">添加开始菜单和桌面快捷方式，并随 Windows 启动（可在设置中关闭）</translation>
+    </message>
+    <message>
+        <location filename="../qml/setup/SetupWindow.qml" line="532"/>
         <source>adds it to the Windows Share sheet</source>
         <translation>将其添加到 Windows 共享面板</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="461"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="533"/>
         <source>It checks GitHub for updates once a day, which you can turn off in Settings. Otherwise your phone and PC only talk to each other.</source>
         <translation>它每天会检查一次 GitHub 上的更新，你可以在设置中关闭。除此之外，你的手机和电脑只会在彼此之间通信。</translation>
     </message>
     <message>
-        <location filename="../qml/setup/SetupWindow.qml" line="468"/>
+        <location filename="../qml/setup/SetupWindow.qml" line="540"/>
         <source>Privacy details</source>
         <translation>隐私详情</translation>
     </message>

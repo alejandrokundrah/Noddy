@@ -246,16 +246,28 @@ pub enum Outcome {
     Failed(String),
 }
 
+/// Whether the desktop has NectarLink's shortcut, which setup only adds when
+/// asked to (#102).
+#[cfg(windows)]
+pub fn has_desktop_shortcut() -> bool {
+    crate::win::shortcut::public_desktop_dir().is_some_and(|dir| dir.join("NectarLink.lnk").is_file())
+}
+
+#[cfg(not(windows))]
+pub fn has_desktop_shortcut() -> bool {
+    false
+}
+
 /// Installs from `installer` with administrator rights, reporting each step.
 #[cfg(windows)]
-pub fn install(installer: &Path, on_event: impl FnMut(Event)) -> Outcome {
+pub fn install(installer: &Path, desktop_shortcut: bool, on_event: impl FnMut(Event)) -> Outcome {
     let progress = progress_file("install");
-    let params = format!("/S /PROGRESS={}", progress.display());
+    let params = format!("/S /DESKTOP={} /PROGRESS={}", u8::from(desktop_shortcut), progress.display());
     run_tracked(installer, &params, &progress, Duration::from_secs(600), true, on_event)
 }
 
 #[cfg(target_os = "linux")]
-pub fn install(installer: &Path, mut on_event: impl FnMut(Event)) -> Outcome {
+pub fn install(installer: &Path, _desktop_shortcut: bool, mut on_event: impl FnMut(Event)) -> Outcome {
     let name = installer.file_name().and_then(|s| s.to_str()).unwrap_or_default();
     if name.ends_with(".deb") {
         on_event(Event::Step(Step::Closing));
@@ -306,7 +318,7 @@ pub fn install(installer: &Path, mut on_event: impl FnMut(Event)) -> Outcome {
 
 /// The app installs from a disk image on macOS, not through this setup.
 #[cfg(not(any(windows, target_os = "linux")))]
-pub fn install(installer: &Path, _on_event: impl FnMut(Event)) -> Outcome {
+pub fn install(installer: &Path, _desktop_shortcut: bool, _on_event: impl FnMut(Event)) -> Outcome {
     Outcome::Failed(tr!("Setup", "Couldn't start setup: %1", installer.display()))
 }
 

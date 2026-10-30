@@ -40,6 +40,8 @@ pub mod qobject {
         #[qproperty(QString, icon_url, cxx_name = "iconUrl")]
         #[qproperty(QString, qr_url, cxx_name = "qrUrl")]
         #[qproperty(QString, android_url, cxx_name = "androidUrl")]
+        /// Windows: whether setup adds a desktop shortcut.
+        #[qproperty(bool, desktop_shortcut, cxx_name = "desktopShortcut")]
         type Setup = super::SetupRust;
     }
 
@@ -77,6 +79,7 @@ pub struct SetupRust {
     icon_url: QString,
     qr_url: QString,
     android_url: QString,
+    desktop_shortcut: bool,
 }
 
 static MODE: OnceLock<Mode> = OnceLock::new();
@@ -119,6 +122,8 @@ impl cxx_qt::Initialize for qobject::Setup {
                     Kind::Older => "older",
                 };
                 self.as_mut().set_kind(QString::from(kind));
+                // A first install adds it; otherwise it stays as the user left it.
+                self.as_mut().set_desktop_shortcut(kind == "fresh" || setup::has_desktop_shortcut());
                 self.as_mut().set_mode(QString::from("install"));
             }
         }
@@ -162,6 +167,7 @@ impl qobject::Setup {
         self.as_mut().set_message(QString::default());
         self.as_mut().set_progress(0.02);
         let removing = matches!(mode, Mode::Remove { .. });
+        let desktop_shortcut = *self.desktop_shortcut();
         self.as_mut().set_step(QString::from("Waiting for permission"));
         let qt = self.qt_thread();
         std::thread::spawn(move || {
@@ -175,7 +181,7 @@ impl qobject::Setup {
                 }
             };
             let outcome = match &mode {
-                Mode::Install { installer } => setup::install(installer, report),
+                Mode::Install { installer } => setup::install(installer, desktop_shortcut, report),
                 Mode::Remove { installed } => setup::remove(installed, report),
             };
             if outcome == Outcome::Done && !removing {

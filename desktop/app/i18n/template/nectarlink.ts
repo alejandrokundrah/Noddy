@@ -7768,8 +7768,8 @@ What it needs
     <message>
         <location filename="../../qml/setup/SetupWindow.qml" line="108"/>
         <location filename="../../qml/setup/SetupWindow.qml" line="286"/>
-        <location filename="../../qml/setup/SetupWindow.qml" line="396"/>
-        <location filename="../../qml/setup/SetupWindow.qml" line="405"/>
+        <location filename="../../qml/setup/SetupWindow.qml" line="468"/>
+        <location filename="../../qml/setup/SetupWindow.qml" line="477"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7864,78 +7864,83 @@ What it needs
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../qml/setup/SetupWindow.qml" line="301"/>
-        <location filename="../../qml/setup/SetupWindow.qml" line="446"/>
+        <location filename="../../qml/setup/SetupWindow.qml" line="344"/>
+        <source>Add a desktop shortcut</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../qml/setup/SetupWindow.qml" line="373"/>
+        <location filename="../../qml/setup/SetupWindow.qml" line="518"/>
         <source>What this installs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../qml/setup/SetupWindow.qml" line="334"/>
+        <location filename="../../qml/setup/SetupWindow.qml" line="406"/>
         <source>NectarLink is uninstalled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../qml/setup/SetupWindow.qml" line="334"/>
+        <location filename="../../qml/setup/SetupWindow.qml" line="406"/>
         <source>NectarLink is ready</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../qml/setup/SetupWindow.qml" line="346"/>
+        <location filename="../../qml/setup/SetupWindow.qml" line="418"/>
         <source>Your received files are still in %1. Thanks for giving it a try.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../qml/setup/SetupWindow.qml" line="347"/>
+        <location filename="../../qml/setup/SetupWindow.qml" line="419"/>
         <source>Next, get the Android app. Scan this code with your phone&apos;s camera to open its download page.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../qml/setup/SetupWindow.qml" line="368"/>
+        <location filename="../../qml/setup/SetupWindow.qml" line="440"/>
         <source>QR code for the Android app download page</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../qml/setup/SetupWindow.qml" line="381"/>
+        <location filename="../../qml/setup/SetupWindow.qml" line="453"/>
         <source>Open the Android app download page</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../qml/setup/SetupWindow.qml" line="396"/>
+        <location filename="../../qml/setup/SetupWindow.qml" line="468"/>
         <source>Open NectarLink</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../qml/setup/SetupWindow.qml" line="456"/>
+        <location filename="../../qml/setup/SetupWindow.qml" line="528"/>
         <source>NectarLink goes into Program Files for everyone on this PC. Setup also:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../qml/setup/SetupWindow.qml" line="457"/>
+        <location filename="../../qml/setup/SetupWindow.qml" line="529"/>
         <source>allows it through Windows Firewall on private networks, so your phone can connect</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../qml/setup/SetupWindow.qml" line="458"/>
+        <location filename="../../qml/setup/SetupWindow.qml" line="530"/>
         <source>adds a task that installs updates without an administrator prompt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../qml/setup/SetupWindow.qml" line="459"/>
-        <source>adds Start menu and desktop shortcuts, and starts it with Windows (turn this off in Settings)</source>
+        <location filename="../../qml/setup/SetupWindow.qml" line="531"/>
+        <source>adds a Start menu shortcut, and a desktop one if you leave that ticked, and starts it with Windows (turn this off in Settings)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../qml/setup/SetupWindow.qml" line="460"/>
+        <location filename="../../qml/setup/SetupWindow.qml" line="532"/>
         <source>adds it to the Windows Share sheet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../qml/setup/SetupWindow.qml" line="461"/>
+        <location filename="../../qml/setup/SetupWindow.qml" line="533"/>
         <source>It checks GitHub for updates once a day, which you can turn off in Settings. Otherwise your phone and PC only talk to each other.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../qml/setup/SetupWindow.qml" line="468"/>
+        <location filename="../../qml/setup/SetupWindow.qml" line="540"/>
         <source>Privacy details</source>
         <translation type="unfinished"></translation>
     </message>
