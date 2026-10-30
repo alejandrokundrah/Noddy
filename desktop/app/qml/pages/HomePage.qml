@@ -2426,8 +2426,18 @@ Item {
                                 event.accepted = true
                                 return
                             }
-                            if (event.text && event.text.length > 0
-                                    && !(event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))) {
+                            const edit = (event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.ShiftModifier | Qt.MetaModifier))
+                                === Qt.ControlModifier
+                                ? ({ [Qt.Key_C]: "copy", [Qt.Key_X]: "cut", [Qt.Key_A]: "select_all" })[event.key] : undefined
+                            if (edit !== undefined) {
+                                Mirror.keyboardPress(home.deviceId, edit)
+                                event.accepted = true
+                                return
+                            }
+                            if (event.text && event.text.length > 0 && event.text.charCodeAt(0) >= 32
+                                    && (!(event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))
+                                        // AltGr (@ on a French keyboard, say) arrives as Ctrl+Alt on Windows.
+                                        || ((event.modifiers & Qt.ControlModifier) && (event.modifiers & Qt.AltModifier)))) {
                                 Mirror.keyboardText(home.deviceId, event.text)
                                 typeOnPhoneCard.lastSent = event.text
                                 event.accepted = true

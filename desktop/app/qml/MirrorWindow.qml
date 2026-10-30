@@ -245,14 +245,27 @@ Window {
             keys[Qt.Key_Up] = "up"
             keys[Qt.Key_Down] = "down"
             keys[Qt.Key_Tab] = "tab"
+            // Copy, cut and select all on the phone; what's copied there
+            // comes back with the clipboard.
+            const edits = {}
+            edits[Qt.Key_C] = "copy"
+            edits[Qt.Key_X] = "cut"
+            edits[Qt.Key_A] = "select_all"
+            const ctrlOnly = (event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.ShiftModifier | Qt.MetaModifier))
+                === Qt.ControlModifier
             if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_V) {
                 Mirror.paste(win.mirrorKey)
+                event.accepted = true
+            } else if (ctrlOnly && edits[event.key] !== undefined) {
+                Mirror.press(win.mirrorKey, edits[event.key])
                 event.accepted = true
             } else if (keys[event.key] !== undefined) {
                 Mirror.press(win.mirrorKey, keys[event.key])
                 event.accepted = true
-            } else if (event.text.length > 0 && !(event.modifiers & (Qt.ControlModifier | Qt.AltModifier))
-                       && event.text.charCodeAt(0) >= 32) {
+            } else if (event.text.length > 0 && event.text.charCodeAt(0) >= 32
+                       && (!(event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))
+                           // AltGr (@ on a French keyboard, say) arrives as Ctrl+Alt on Windows.
+                           || ((event.modifiers & Qt.ControlModifier) && (event.modifiers & Qt.AltModifier)))) {
                 Mirror.text(win.mirrorKey, event.text)
                 event.accepted = true
             }

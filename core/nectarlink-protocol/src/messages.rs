@@ -1529,6 +1529,11 @@ pub mod mirror_keys {
     pub const NOTIFICATIONS: &str = "notifications";
     pub const KEYBOARD_ON: &str = "keyboard_on";
     pub const KEYBOARD_OFF: &str = "keyboard_off";
+    /// Copy, cut and select all in the focused text field (the PC's Ctrl+C,
+    /// Ctrl+X and Ctrl+A). Phones from before these drop them.
+    pub const COPY: &str = "copy";
+    pub const CUT: &str = "cut";
+    pub const SELECT_ALL: &str = "select_all";
     pub const ALL: &[&str] = &[
         BACK,
         HOME,
@@ -1544,6 +1549,9 @@ pub mod mirror_keys {
         NOTIFICATIONS,
         KEYBOARD_ON,
         KEYBOARD_OFF,
+        COPY,
+        CUT,
+        SELECT_ALL,
     ];
 }
 
@@ -4843,6 +4851,9 @@ mod tests {
         assert!(!MirrorInput::Touch { action: TouchAction::Up, x: f32::NAN, y: 0.0 }.is_valid());
         assert!(MirrorInput::Key { key: "back".into() }.is_valid());
         assert!(!MirrorInput::Key { key: "power".into() }.is_valid());
+        for key in [mirror_keys::COPY, mirror_keys::CUT, mirror_keys::SELECT_ALL] {
+            assert!(MirrorInput::Key { key: key.into() }.is_valid());
+        }
         assert!(!MirrorInput::Text { text: String::new() }.is_valid());
         assert!(!format!("{:?}", MirrorInput::Text { text: "secret".into() }).contains("secret"));
     }

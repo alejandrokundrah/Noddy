@@ -263,6 +263,23 @@ class InputService : AccessibilityService() {
                 Edit(text, if (nextNewline >= 0) (nextNewline + 1).coerceAtMost(text.length) else text.length)
             }
             "tab" -> focused()?.focusSearch(android.view.View.FOCUS_FORWARD)?.performAction(AccessibilityNodeInfo.ACTION_FOCUS)
+            "copy" -> focused()?.performAction(AccessibilityNodeInfo.ACTION_COPY)
+            "cut" -> focused()?.let { node ->
+                pendingText = null
+                node.performAction(AccessibilityNodeInfo.ACTION_CUT)
+            }
+            "select_all" -> focused()?.takeIf { isNodeEditable(it) }?.let { node ->
+                runCatching { node.refresh() }
+                val length = if (node.isShowingHintText) 0 else node.text?.length ?: 0
+                pendingText = null
+                node.performAction(
+                    AccessibilityNodeInfo.ACTION_SET_SELECTION,
+                    android.os.Bundle().apply {
+                        putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, 0)
+                        putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, length)
+                    },
+                )
+            }
         }
     }
 

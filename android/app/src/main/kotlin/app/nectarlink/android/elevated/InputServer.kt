@@ -559,6 +559,10 @@ object InputServer {
                     scroll(x, y, dx, dy)
                 }
                 "K" -> key(rest.toInt())
+                "Y" -> {
+                    val (code, meta) = rest.split(' ').map { it.toInt() }
+                    shortcut(code, meta)
+                }
                 "T" -> type(rest)
                 "G" -> gamepad(rest)
                 "C" -> if (allowedCommand(rest) && display < 0) {
@@ -620,6 +624,18 @@ object InputServer {
                 for (action in intArrayOf(KeyEvent.ACTION_DOWN, KeyEvent.ACTION_UP)) {
                     send(KeyEvent(now, now, action, code, 0, 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0, InputDevice.SOURCE_KEYBOARD))
                 }
+            }
+        }
+
+        /**
+         * A key with modifiers (`Y <code> <meta>`), Ctrl+A say. Injected, since
+         * the virtual HID keyboard sends no modifiers. A helper from before
+         * this ignores the line.
+         */
+        private fun shortcut(code: Int, meta: Int) {
+            val now = SystemClock.uptimeMillis()
+            for (action in intArrayOf(KeyEvent.ACTION_DOWN, KeyEvent.ACTION_UP)) {
+                send(KeyEvent(now, now, action, code, 0, meta, KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0, InputDevice.SOURCE_KEYBOARD))
             }
         }
 

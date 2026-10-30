@@ -739,8 +739,12 @@ object Elevated {
                 "$action ${event.x * w} ${event.y * h}"
             }
             is MirrorInputEvent.Scroll -> "S ${event.x * w} ${event.y * h} ${event.dx} ${event.dy}"
-            is MirrorInputEvent.Key -> keys[event.key]?.let { "K $it" }
-                ?: if (event.key == "notifications" && display == null) "C cmd statusbar expand-notifications" else return true
+            is MirrorInputEvent.Key -> keys[event.key]?.let { "K $it" } ?: when {
+                // No key code selects all: Ctrl+A, which text fields take as a shortcut.
+                event.key == "select_all" -> "Y ${KeyEvent.KEYCODE_A} ${KeyEvent.META_CTRL_ON or KeyEvent.META_CTRL_LEFT_ON}"
+                event.key == "notifications" && display == null -> "C cmd statusbar expand-notifications"
+                else -> return true
+            }
             // A key typed on the PC types; anything longer (a paste, a word from
             // an input method, an emoji) goes on the clipboard, quietly, and is
             // pasted at once: typing it out took a moment per letter, and a line
@@ -914,6 +918,9 @@ object Elevated {
         "up" to KeyEvent.KEYCODE_DPAD_UP,
         "down" to KeyEvent.KEYCODE_DPAD_DOWN,
         "tab" to KeyEvent.KEYCODE_TAB,
+        // Text fields copy and cut on these, as on a keyboard's Copy and Cut keys.
+        "copy" to KeyEvent.KEYCODE_COPY,
+        "cut" to KeyEvent.KEYCODE_CUT,
     )
 
     /** The screen's size in pixels, as it's turned now. */
