@@ -200,6 +200,12 @@ has a Stop button. Choosing another
 
 ### Fixed
 
+- **Typing on the phone from the PC with a non-US keyboard.** Characters
+  typed with AltGr (@ and € on a French or German keyboard, say) were
+  dropped in the mirror window and in Type on phone. Ctrl+C, Ctrl+X and
+  Ctrl+A now copy, cut and select all on the phone, too; what you copy
+  there reaches the PC with the clipboard
+  ([#107](https://github.com/thtbee/nectarlink/issues/107)).
 - **A big phone folder showed only part of its files** in File Explorer (a
   camera folder of thousands of photos, say). Folders now come in pages, so
   every file shows, and listing one no longer holds up the connection.
