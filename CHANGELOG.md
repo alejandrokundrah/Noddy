@@ -34,6 +34,10 @@ change things that need a step from you, and its notes say so.
   from the PC turns the phone's screen on if it's off, so the phone can stay
   in a pocket; a locked phone shows its lock screen in the window
   ([#82](https://github.com/thtbee/nectarlink/issues/82)).
+- **Watch the PC and move its pointer at once.** Control PC's Screen tab
+  on the phone has a touchpad under the PC's screen (it hides in full
+  screen). Thanks to [@waytoo-average](https://github.com/waytoo-average)
+  ([#104](https://github.com/thtbee/nectarlink/pull/104)).
 - **Call or text a copied number from the command palette.** Copy a phone
   number anywhere, open the palette with its shortcut, and Call and Text
   for that number are at the top
