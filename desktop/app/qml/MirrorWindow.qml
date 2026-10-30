@@ -60,7 +60,13 @@ Window {
     onHeightChanged: if (info.app && sized && readyForResize) resizeTimer.restart()
     onXChanged: if (info.app && sized && readyForResize) moveTimer.restart()
     onYChanged: if (info.app && sized && readyForResize) moveTimer.restart()
-    onPhaseChanged: if (phase === "showing" && info.app && sized) resizeTimer.restart()
+    onPhaseChanged: {
+        if (phase === "showing" && info.app && sized)
+            resizeTimer.restart()
+        // Typing goes to the picture again, not to the hidden Try again button.
+        if (phase === "showing")
+            video.forceActiveFocus()
+    }
     onActiveChanged: if (win.active) Mirror.syncClipboardOnFocus(win.mirrorKey)
 
     onFrameChanged: {
