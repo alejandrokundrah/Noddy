@@ -2712,7 +2712,7 @@ Item {
                 spacing: 8
                 Button {
                     text: qsTr("Cancel")
-                    outlined: true
+                    variant: "outline"
                     onClicked: nicknameSheet.close()
                 }
                 Button {
