@@ -36,6 +36,25 @@ constexpr int kBackdropMica = 2;             // DWMSBT_MAINWINDOW
 constexpr int kBackdropAcrylic = 3;          // DWMSBT_TRANSIENTWINDOW (Desktop Acrylic blur)
 constexpr COLORREF kColorNone = 0xFFFFFFFE;  // DWMWA_COLOR_NONE
 
+constexpr DWORD kFirstWindows11Build = 22000;
+
+// The real Windows build: GetVersionEx lies without a manifest entry, and
+// RtlGetVersion doesn't.
+DWORD windowsBuild()
+{
+    using RtlGetVersionFn = LONG(WINAPI *)(OSVERSIONINFOW *);
+    static const DWORD build = [] {
+        OSVERSIONINFOW info { sizeof(info) };
+        if (const HMODULE ntdll = GetModuleHandleW(L"ntdll.dll")) {
+            const auto fn = reinterpret_cast<RtlGetVersionFn>(GetProcAddress(ntdll, "RtlGetVersion"));
+            if (fn && fn(&info) == 0)
+                return info.dwBuildNumber;
+        }
+        return DWORD(0);
+    }();
+    return build;
+}
+
 HWND hwndOf(const QWindow *window)
 {
     return reinterpret_cast<HWND>(window->winId());
@@ -345,7 +364,14 @@ NativeWindow::NativeWindow(QWindow *parent)
 {
     // Qt removes the system title bar and lets content fill the window.
 #ifdef _WIN32
-    setFlags(flags() | Qt::ExpandedClientAreaHint);
+    if (systemBackdropSupported()) {
+        setFlags(flags() | Qt::ExpandedClientAreaHint);
+    } else {
+        // Windows 10 keeps drawing its own caption (icon, title, buttons) over an
+        // expanded client area. A frameless window has no caption at all; the
+        // app bar's buttons and WM_NCHITTEST still give drag, resize and maximize.
+        setFlags(flags() | Qt::FramelessWindowHint);
+    }
     setColor(Qt::transparent);
 #elif defined(__linux__)
     setFlags(flags() | Qt::FramelessWindowHint);
@@ -363,6 +389,15 @@ NativeWindow::NativeWindow(QWindow *parent)
 #ifdef __linux__
     setProperty("_nl_linux_filter", true);
     installEventFilter(new LinuxWindowEventFilter(this));
+#endif
+}
+
+bool NativeWindow::systemBackdropSupported()
+{
+#ifdef _WIN32
+    return windowsBuild() >= kFirstWindows11Build;
+#else
+    return false;
 #endif
 }
 
@@ -547,12 +582,31 @@ void NativeWindow::applyFrame()
     // its own caption buttons over the app's.
     const MARGINS margins { 0, 0, 0, 0 };
     DwmExtendFrameIntoClientArea(hwnd, &margins);
+    if (!systemBackdropSupported()) {
+        // Windows 10, frameless: give back the frame styles so Snap, Win+arrow,
+        // min/max animations and the shadow work. WM_NCCALCSIZE below keeps the
+        // whole window as client area, so no caption is drawn.
+        const LONG_PTR style = GetWindowLongPtrW(hwnd, GWL_STYLE);
+        const LONG_PTR want = (style & ~LONG_PTR(WS_POPUP))
+            | WS_THICKFRAME | WS_CAPTION | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
+        if (style != want) {
+            SetWindowLongPtrW(hwnd, GWL_STYLE, want);
+            SetWindowPos(hwnd, nullptr, 0, 0, 0, 0,
+                         SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        const MARGINS shadow { 0, 0, 1, 0 };  // a 1px frame keeps the DWM shadow
+        DwmExtendFrameIntoClientArea(hwnd, &shadow);
+    }
     const BOOL dark = m_darkFrame;
     DwmSetWindowAttribute(hwnd, kUseImmersiveDarkMode, &dark, sizeof(dark));
-    const int backdrop = m_backdrop ? (m_acrylic ? kBackdropAcrylic : kBackdropMica) : kBackdropNone;
-    DwmSetWindowAttribute(hwnd, kSystemBackdropType, &backdrop, sizeof(backdrop));
-    const COLORREF none = kColorNone;
-    DwmSetWindowAttribute(hwnd, kCaptionColor, &none, sizeof(none));
+    // Windows 10 has no system backdrop or caption color: skip both, and the
+    // QML side keeps the window opaque there (see systemBackdropSupported).
+    if (systemBackdropSupported()) {
+        const int backdrop = m_backdrop ? (m_acrylic ? kBackdropAcrylic : kBackdropMica) : kBackdropNone;
+        DwmSetWindowAttribute(hwnd, kSystemBackdropType, &backdrop, sizeof(backdrop));
+        const COLORREF none = kColorNone;
+        DwmSetWindowAttribute(hwnd, kCaptionColor, &none, sizeof(none));
+    }
 #elif defined(__linux__)
     setColor(m_darkFrame ? QColor(0x14, 0x13, 0x11) : QColor(0xF8, 0xF6, 0xF2));
     if (!property("_nl_linux_filter").toBool()) {
@@ -631,6 +685,24 @@ bool NativeWindow::nativeEvent(const QByteArray &eventType, void *message, qintp
     const MSG *msg = static_cast<const MSG *>(message);
 
     switch (msg->message) {
+    case WM_NCCALCSIZE:
+        // Windows 10 (frame styles on a frameless window): all client area.
+        if (msg->wParam == TRUE && !systemBackdropSupported()) {
+            if (IsZoomed(msg->hwnd)) {
+                // Maximized windows hang their frame off-screen: pull it back in.
+                auto *params = reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam);
+                const UINT dpi = GetDpiForWindow(msg->hwnd);
+                const int fx = GetSystemMetricsForDpi(SM_CXFRAME, dpi) + GetSystemMetricsForDpi(SM_CXPADDEDBORDER, dpi);
+                const int fy = GetSystemMetricsForDpi(SM_CYFRAME, dpi) + GetSystemMetricsForDpi(SM_CXPADDEDBORDER, dpi);
+                params->rgrc[0].left += fx;
+                params->rgrc[0].right -= fx;
+                params->rgrc[0].top += fy;
+                params->rgrc[0].bottom -= fy;
+            }
+            *result = 0;
+            return true;
+        }
+        break;
     case WM_NCHITTEST: {
         const long hit = hitTest(GET_X_LPARAM(msg->lParam), GET_Y_LPARAM(msg->lParam));
         if (hit != HTCLIENT) {
