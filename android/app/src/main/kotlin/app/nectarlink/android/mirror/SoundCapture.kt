@@ -37,6 +37,14 @@ class SoundCapture(
     @Volatile private var elevatedSocket: Socket? = null
     private var thread: Thread? = null
 
+    /**
+     * After [start]: whether the sound comes through Android's playback
+     * capture, which leaves the phone's speaker playing (the Elevated helper's
+     * remote submix takes the sound off it).
+     */
+    var usesPlaybackCapture = false
+        private set
+
     @SuppressLint("MissingPermission")
     fun start() {
         val proj = projection
@@ -62,6 +70,7 @@ class SoundCapture(
 
             if (record != null && record.state == AudioRecord.STATE_INITIALIZED) {
                 running = true
+                usesPlaybackCapture = true
                 thread = Thread({ runRecord(record) }, "sound-capture").apply {
                     priority = Thread.MAX_PRIORITY
                     start()

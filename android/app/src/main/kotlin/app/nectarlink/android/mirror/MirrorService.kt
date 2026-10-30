@@ -340,6 +340,8 @@ class MirrorService : Service() {
                 return@post
             }
             sound = SoundCapture(running, stream) { endSharing() }.also { it.start() }
+            // Only the sound, so it's heard on the PC instead of the phone (#94).
+            if (soundOnly && sound?.usesPlaybackCapture == true) PhoneQuiet.start(this)
         }
     }
 
@@ -379,6 +381,7 @@ class MirrorService : Service() {
         encoder = null
         sound?.stop()
         sound = null
+        PhoneQuiet.end(this)
         projection?.let { runCatching { it.stop() } }
         projection = null
         pcId = null

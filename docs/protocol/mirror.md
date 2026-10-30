@@ -177,7 +177,12 @@ permission to record audio, which the phone asks for the first time a PC
 wants the sound. Apps that don't allow playback capture, and calls, aren't
 heard. Sharing all sound (`mirror.audio`) is planned for Elevated.
 
-The phone's own speaker keeps playing; the PC can mute its copy.
+While mirroring, the phone's own speaker keeps playing with playback
+capture, and the PC can mute its copy. Through Elevated the sound comes
+from the remote submix, which takes it off the speaker. With only the sound
+(`sound_only`), the phone turns its media volume to 0 for playback capture
+and gives it back afterwards: a loopback capture is fixed volume, so the PC
+still gets it at full level.
 
 ## 6. App windows
 
