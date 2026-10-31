@@ -17,9 +17,7 @@ use std::{
 };
 
 use noddy_core::{DeviceId, Error, NodeEvent, WebcamConfig, WebcamSink, WebcamStart};
-use noddy_vcam::{
-    DEFAULT_MAPPING_NAME, LOCAL_MAPPING_NAME, SharedFrameMapping, render_placeholder_bgrx,
-};
+use noddy_vcam::{DEFAULT_MAPPING_NAME, LOCAL_MAPPING_NAME, SharedFrameMapping, render_placeholder_bgrx};
 
 use crate::{
     bridge::{app::describe, native::ffi},
@@ -228,11 +226,8 @@ pub fn selected_phone() -> Option<DeviceId> {
         {
             return Some(id);
         }
-        if let Some(online_id) = app
-            .devices
-            .iter()
-            .find(|d| matches!(d.link, noddy_core::LinkState::Online { .. }))
-            .map(|d| d.id)
+        if let Some(online_id) =
+            app.devices.iter().find(|d| matches!(d.link, noddy_core::LinkState::Online { .. })).map(|d| d.id)
         {
             return Some(online_id);
         }

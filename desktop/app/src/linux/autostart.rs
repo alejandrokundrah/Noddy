@@ -135,8 +135,7 @@ pub fn is_installed_location(exe: &Path) -> bool {
         || exe.starts_with("/opt")
         || s.contains("/.local/share/noddy-app/")
         || s.contains("/.local/bin/")
-        || dirs::data_local_dir()
-            .is_some_and(|d| exe.starts_with(&d) || exe.starts_with(d.join("noddy-app")))
+        || dirs::data_local_dir().is_some_and(|d| exe.starts_with(&d) || exe.starts_with(d.join("noddy-app")))
         || dirs::executable_dir().is_some_and(|d| exe.starts_with(d))
         || dirs::home_dir().is_some_and(|h| {
             exe.starts_with(h.join(".local/share/noddy-app"))
@@ -178,9 +177,7 @@ mod tests {
         assert!(is_installed(Path::new("/usr/bin/noddy-desktop")));
         assert!(is_installed(Path::new("/usr/local/bin/noddy-desktop")));
         assert!(is_installed(Path::new("/opt/noddy/noddy-desktop")));
-        assert!(is_installed_location(Path::new(
-            "/home/user/.local/share/noddy-app/noddy-desktop"
-        )));
+        assert!(is_installed_location(Path::new("/home/user/.local/share/noddy-app/noddy-desktop")));
         assert!(is_installed_location(Path::new("/home/user/.local/bin/noddy-desktop")));
         assert!(!is_installed(Path::new("/home/user/repo/target/debug/noddy-desktop")));
         assert!(!is_installed(Path::new("/home/user/repo/target/release/noddy-desktop")));
@@ -203,9 +200,6 @@ mod tests {
     #[test]
     fn command_escapes_desktop_entry_special_characters() {
         let exe = Path::new("/opt/my \"quoted\" $dir`1`\\bin%20/noddy-desktop");
-        assert_eq!(
-            command(exe),
-            r#""/opt/my \"quoted\" \$dir\`1\`\\bin%%20/noddy-desktop" --minimized"#
-        );
+        assert_eq!(command(exe), r#""/opt/my \"quoted\" \$dir\`1\`\\bin%%20/noddy-desktop" --minimized"#);
     }
 }

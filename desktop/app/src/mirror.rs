@@ -958,15 +958,11 @@ fn request(window: Window, options: MirrorStart) {
         if let Err(e) = node.mirror_start(window.device, options).await {
             let reason = match e {
                 Error::Denied => tr!("Mirror", "Mirroring is turned off for this phone."),
-                Error::Unsupported if app => tr!(
-                    "Mirror",
-                    "Set up Wireless debugging in Noddy on the phone to open its apps here."
-                ),
+                Error::Unsupported if app => {
+                    tr!("Mirror", "Set up Wireless debugging in Noddy on the phone to open its apps here.")
+                }
                 Error::Unsupported => {
-                    tr!(
-                        "Mirror",
-                        "This phone's app doesn't share its screen yet. Update Noddy on the phone."
-                    )
+                    tr!("Mirror", "This phone's app doesn't share its screen yet. Update Noddy on the phone.")
                 }
                 Error::Offline | Error::NotPaired => tr!("Mirror", "The phone isn't connected."),
                 e => describe(&e),
@@ -1260,12 +1256,10 @@ pub fn palette_apps(device: DeviceId) -> Vec<(String, String)> {
 /// The PC's mouse, keyboard, and gamepad on a mirrored screen or app window,
 /// sent in order.
 pub fn input(window: Window, input: noddy_core::MirrorInput) {
-    static QUEUE: std::sync::OnceLock<
-        tokio::sync::mpsc::UnboundedSender<(Window, noddy_core::MirrorInput)>,
-    > = std::sync::OnceLock::new();
+    static QUEUE: std::sync::OnceLock<tokio::sync::mpsc::UnboundedSender<(Window, noddy_core::MirrorInput)>> =
+        std::sync::OnceLock::new();
     let queue = QUEUE.get_or_init(|| {
-        let (queue, mut inputs) =
-            tokio::sync::mpsc::unbounded_channel::<(Window, noddy_core::MirrorInput)>();
+        let (queue, mut inputs) = tokio::sync::mpsc::unbounded_channel::<(Window, noddy_core::MirrorInput)>();
         core_host::spawn(async move {
             while let Some((window, input)) = inputs.recv().await {
                 if let Some(node) = core_host::node()
@@ -1355,10 +1349,7 @@ pub fn drop_files(raw_urls: &[String]) {
 pub fn request_control(key: &str) {
     let Some(window) = Window::parse(key) else { return };
     set_notice(window, "On your phone, tap Allow / turn on Control from your PC in Noddy");
-    input(
-        window,
-        noddy_core::MirrorInput::Touch { action: noddy_core::TouchAction::Up, x: 0.5, y: 0.5 },
-    );
+    input(window, noddy_core::MirrorInput::Touch { action: noddy_core::TouchAction::Up, x: 0.5, y: 0.5 });
 }
 
 /// Notifies PC-to-phone cursor/keyboard Flow when the mouse enters `key`.

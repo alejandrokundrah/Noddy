@@ -180,10 +180,7 @@ mod tests {
             PairingUri::parse("noddy://pair?v=9&id=x&s=y"),
             Err(PairingUriError::UnsupportedVersion("9".into()))
         );
-        assert_eq!(
-            PairingUri::parse("noddy://pair?v=0&s=AAAA"),
-            Err(PairingUriError::Missing("device ID"))
-        );
+        assert_eq!(PairingUri::parse("noddy://pair?v=0&s=AAAA"), Err(PairingUriError::Missing("device ID")));
         let good =
             PairingUri { id: id(1), secret: [0; SECRET_LEN], name: "x".into(), addrs: vec![] }.to_uri();
         let bad_secret = good.replace("s=AAAAAAAAAAAAAAAAAAAAAA", "s=AAAA");

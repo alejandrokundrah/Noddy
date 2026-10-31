@@ -336,9 +336,7 @@ fn newer_release_for(release: Release, current: &str, suffix: &str) -> Option<Up
     // The name becomes a file name under %TEMP%: a plain name only, never a path.
     let installer = release.assets.iter().find(|a| {
         a.name.ends_with(suffix)
-            && (a.name.starts_with("Noddy-")
-                || a.name.starts_with("noddy_")
-                || a.name.starts_with("noddy-"))
+            && (a.name.starts_with("Noddy-") || a.name.starts_with("noddy_") || a.name.starts_with("noddy-"))
             && a.name.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '.' | '_'))
             && !a.name.contains("..")
             && a.browser_download_url.starts_with(RELEASE_DOWNLOADS)
@@ -1225,11 +1223,8 @@ mod tests {
 
     #[test]
     fn the_relauncher_waits_for_the_version_then_opens_the_app() {
-        let script = relauncher_script(
-            r"C:\Program Files\Noddy\noddy-desktop.exe",
-            "0.2.0",
-            "--minimized --updated",
-        );
+        let script =
+            relauncher_script(r"C:\Program Files\Noddy\noddy-desktop.exe", "0.2.0", "--minimized --updated");
         assert!(script.contains("$installed -eq '0.2.0'"));
         assert!(script.contains("Noddy-*-setup"));
         assert!(script.contains(
