@@ -85,6 +85,7 @@ import app.noddy.android.ui.remote.RemoteScreen
 import app.noddy.android.ui.settings.SettingsScreen
 import app.noddy.android.ui.theme.Appearance
 import app.noddy.android.ui.theme.GlassBackdrop
+import app.noddy.android.ui.theme.LocalGlassTheme
 import app.noddy.android.ui.theme.LocalReducedMotion
 import app.noddy.android.ui.theme.NoddyTheme
 import app.noddy.android.ui.theme.glassBackdropSource
@@ -158,11 +159,7 @@ class MainActivity : ComponentActivity() {
                     ConnectionService.stop(this@MainActivity)
                 }
             }
-            NoddyTheme(
-                appearance = appearance,
-                mediaSeedColor = state.activeMediaColor,
-                backdrop = true,
-            ) {
+            NoddyTheme(appearance = appearance) {
                 // Every screen sits on the theme's background, not the
                 // window's (which can't follow the app's own light/dark choice).
                 Surface(color = MaterialTheme.colorScheme.background) {
@@ -746,7 +743,7 @@ private fun App(
                 }
             }
             ScreenRoute.Main -> Box(Modifier.fillMaxSize()) {
-                val isGlass = appearance.theme == "glass"
+                val isGlass = LocalGlassTheme.current
                 val glassBackdrop = app.noddy.android.ui.theme.rememberGlassBackdrop()
                 val onlineCount by remember(state.devices) {
                     androidx.compose.runtime.derivedStateOf { state.devices.count { it.online } }
@@ -785,7 +782,6 @@ private fun App(
                     val suggestClipboardActions by preferences.suggestClipboardActions.collectAsStateWithLifecycle()
                     val volumeKeysControlPc by preferences.volumeKeysControlPc.collectAsStateWithLifecycle()
                     val backgroundServiceEnabled by preferences.backgroundServiceEnabled.collectAsStateWithLifecycle()
-                    val hiveInviteShown by preferences.hiveInviteShown.collectAsStateWithLifecycle()
                     val saveableStateHolder = androidx.compose.runtime.saveable.rememberSaveableStateHolder()
 
                     // Only apply top scaffold padding here so LazyColumns in HomeScreen/SettingsScreen
@@ -905,12 +901,6 @@ private fun App(
                                     onOpenRecorder = { pcId -> recordPcId = pcId },
                                     onStopRecorder = { RecorderService.stop(context) },
                                     showWhatsNewGuideBanner = startupWalkthrough.showWhatsNewGuideBanner,
-                                    showHiveInvite = hiveInviteShown && appearance.theme != "hive",
-                                    onTryHive = {
-                                        preferences.answerHiveInvite()
-                                        preferences.update { it.copy(theme = "hive") }
-                                    },
-                                    onDismissHiveInvite = preferences::answerHiveInvite,
                                     backgroundServiceEnabled = backgroundServiceEnabled,
                                     onTurnOnBackgroundService = {
                                         preferences.updateBackgroundServiceEnabled(true)

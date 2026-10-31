@@ -43,7 +43,6 @@ import app.noddy.core.MediaPlayer
  */
 class PcMedia(
     context: Context,
-    private val onSeedColorChanged: () -> Unit = {},
     private val setPcAudio: (pc: String, volume: Int?, muted: Boolean?) -> Unit = { _, _, _ -> },
     private val send: (pc: String, player: String, action: MediaAction, position: ULong?) -> Unit,
 ) {
@@ -53,9 +52,9 @@ class PcMedia(
     /** Players per PC, in the PC's order, and the PCs' names. */
     private val players = linkedMapOf<String, List<MediaPlayer>>()
     private val names = mutableMapOf<String, String>()
-    /** Decoded artwork and seed color by PC and key (artwork arrives once per key). */
-    private val art = object : LinkedHashMap<String, Pair<Bitmap, UInt?>>(8, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Pair<Bitmap, UInt?>>) = size > 8
+    /** Decoded artwork by PC and key (artwork arrives once per key). */
+    private val art = object : LinkedHashMap<String, Bitmap>(8, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Bitmap>) = size > 8
     }
 
     @androidx.compose.runtime.Immutable
@@ -66,10 +65,6 @@ class PcMedia(
         val playing: Boolean,
         val artwork: Bitmap?,
     )
-
-    @Volatile
-    var activeSeedColor: UInt? = null
-        private set
 
     private val _playing = kotlinx.coroutines.flow.MutableStateFlow<Map<String, Boolean>>(emptyMap())
 
@@ -135,7 +130,7 @@ class PcMedia(
             val key = player.artKey ?: return@mapNotNull null
             val bytes = player.art ?: return@mapNotNull null
             val bmp = decodeArtwork(bytes) ?: return@mapNotNull null
-            "$pc/$key" to (bmp to extractArtworkSeedColor(bmp, "$pc/$key"))
+            "$pc/$key" to bmp
         }
         main.post {
             names[pc] = pcName
@@ -200,13 +195,7 @@ class PcMedia(
             it.setSessionActivity(openApp())
             session = it
         }
-        val artEntry = player.artKey?.let { art["$pc/$it"] }
-        val picture = artEntry?.first
-        val nextSeed = artEntry?.second
-        if (activeSeedColor != nextSeed) {
-            activeSeedColor = nextSeed
-            onSeedColorChanged()
-        }
+        val picture = player.artKey?.let { art["$pc/$it"] }
         val pcName = names[pc].orEmpty().ifBlank { context.getString(R.string.your_pc) }
         val cleanApp = sanitizeAppName(player.app)
         val cleanTitle = player.title?.trim()?.takeIf { it.isNotEmpty() } ?: cleanApp.ifEmpty { pcName }
@@ -347,10 +336,6 @@ class PcMedia(
         remote = null
         val hadSummary = currentSummary != null
         currentSummary = null
-        if (activeSeedColor != null) {
-            activeSeedColor = null
-            onSeedColorChanged()
-        }
         session?.run {
             isActive = false
             release()

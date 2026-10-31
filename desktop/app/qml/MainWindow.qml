@@ -432,41 +432,6 @@ NativeWindow {
         Behavior on color { ColorAnimation { duration: Theme.fadeNormal } }
     }
 
-    // Hive: the living comb behind everything, growing from the logo. It
-    // holds its frame while the window isn't in front or is minimized.
-    HiveBackdrop {
-        id: hiveComb
-        anchors.fill: parent
-        visible: opacity > 0
-        opacity: Theme.hive ? 1 : 0
-        Behavior on opacity {
-            enabled: !Theme.reduceMotion
-            NumberAnimation { duration: 420; easing.type: Easing.OutCubic }
-        }
-        animate: Theme.combMotion
-        ownClock: false
-        time: Theme.combTime
-        cell: Theme.comb.cell
-        frameMs: Theme.comb.frameMs
-        breathSeconds: Theme.comb.breathSeconds
-        pulseSeconds: Theme.comb.pulseSeconds
-        lineColor: Theme.combLine
-        glowColor: Theme.combGlow
-        // The center of the logo mark in the rail; the comb and its pulses
-        // carry across the whole window.
-        origin: Qt.point(Theme.railWidth / 2, Theme.topBarHeight / 2)
-        reach: 2.4
-        pulseReach: 1.05
-    }
-
-    // The comb's clock runs while this window is in front and showing Hive.
-    Binding {
-        target: Theme
-        property: "combClockRunning"
-        value: window.active && window.visible
-               && window.visibility !== Window.Minimized && window.visibility !== Window.Hidden
-    }
-
     // Dynamic native GPU-blurred ambient layer when "Glass" theme mode is active.
     Item {
         id: artworkAmbient

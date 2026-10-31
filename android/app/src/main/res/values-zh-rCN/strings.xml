@@ -45,12 +45,9 @@
     <string name="not_connected">未连接</string>
     <string name="settings_title">设置</string>
     <string name="settings_appearance">外观</string>
-    <string name="settings_theme">主题</string>
     <string name="settings_mode">模式</string>
     <string name="settings_language">语言</string>
     <string name="settings_language_more">更多</string>
-    <string name="settings_dynamic_color">壁纸取色</string>
-    <string name="settings_dynamic_color_hint">使用壁纸的颜色。</string>
     <string name="settings_devices">电脑</string>
     <string name="settings_about">关于</string>
     <string name="settings_notifications">通知</string>
@@ -214,15 +211,6 @@
     <string name="battery_guide_pixel">Pixel：打开应用信息 › 应用电池用量 › 点按“允许后台使用”并选择“不受限制”。</string>
     <string name="action_manage">管理</string>
     <string name="action_app_info">应用信息</string>
-    <string name="theme_hive">蜂巢</string>
-    <string name="hive_invite_title">试试新主题“蜂巢”</string>
-    <string name="hive_invite_text">炭黑或暖蜡底色上的蜜色，应用背后是鲜活的蜂巢。随时可在设置中更换。</string>
-    <string name="hive_invite_try">试用蜂巢</string>
-    <string name="hive_invite_dismiss">暂不</string>
-    <string name="settings_comb_motion">动态蜂巢</string>
-    <string name="settings_comb_motion_hint">蜂巢会呼吸与脉动。开启“移除动画”或省电模式后保持静止。</string>
-    <string name="theme_bloom">绽放</string>
-    <string name="theme_graphite">石墨</string>
     <string name="mode_system">跟随系统</string>
     <string name="mode_light">浅色</string>
     <string name="mode_dark">深色</string>
@@ -560,13 +548,6 @@
     <string name="error_timed_out">电脑未及时响应。</string>
     <string name="error_unsupported">电脑端应用尚不支持此操作。</string>
     <string name="error_generic">出了点问题。</string>
-    <string name="settings_seed_honey">蜂蜜</string>
-    <string name="settings_seed_lavender">薰衣草</string>
-    <string name="settings_seed_ocean">海洋</string>
-    <string name="settings_seed_sage">鼠尾草</string>
-    <string name="settings_seed_black">黑色</string>
-    <string name="settings_amoled">纯黑（AMOLED）</string>
-    <string name="settings_amoled_hint">为 OLED 屏幕提供真正的 #000000 深色界面。</string>
     <string name="deck_tile_with_badge">%1$s，%2$s</string>
     <string name="deck_default_page_main">主页面</string>
     <string name="deck_default_play_pause">播放 / 暂停</string>
@@ -1183,7 +1164,6 @@
     <string name="home_section_system">系统与电源</string>
     <string name="settings_category_devices">设备</string>
     <string name="settings_category_features">功能与数据</string>
-    <string name="settings_theme_artwork_color">跟随封面取色</string>
     <string name="settings_mobile_data_body">离开 Wi-Fi 时通过 LTE/5G 或中继保持连接</string>
     <string name="settings_background_clipboard_title">后台剪贴板权限</string>
     <string name="settings_guide_card_body">浏览全部功能、查看实时要求，或直接跳到对应开关。</string>
@@ -1202,7 +1182,6 @@
     <string name="queue_kind_task_alert">任务提醒</string>
     <string name="queue_kind_camera_request">摄像头请求</string>
 
-    <string name="settings_theme_artwork_body">让应用与玻璃配色跟随播放中的媒体封面</string>
     <string name="settings_wireless_debugging_active">无线调试已启用 · 剪贴板会自动同步</string>
     <string name="settings_wireless_debugging_hint">允许无线调试后，剪贴板才能在后台同步；也可以在通知里点「发送剪贴板」</string>
     <!-- Pause for banking apps -->

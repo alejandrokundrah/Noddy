@@ -18,7 +18,7 @@ use cxx_qt_lib::{QString, QUrl};
 
 use crate::{
     core_host,
-    settings::{ColorMode, RecordingFormat, Settings, Theme},
+    settings::{ColorMode, RecordingFormat, Settings},
 };
 
 pub use super::deck::DeckControllerRust;
@@ -35,19 +35,10 @@ pub mod qobject {
         #[qobject]
         #[qml_element]
         #[qml_singleton]
-        /// "bloom" or "graphite".
-        #[qproperty(QString, theme)]
-        /// Bloom colors: "wallpaper", or a preset: "honey", "sage", "lavender"
-        /// or "ocean".
-        #[qproperty(QString, seed)]
         /// "system", "light" or "dark".
         #[qproperty(QString, color_mode)]
-        /// Pure #000000 OLED black surfaces in dark mode.
-        #[qproperty(bool, amoled)]
         /// Mica behind the window.
         #[qproperty(bool, backdrop)]
-        /// Hive's comb breathes and pulses.
-        #[qproperty(bool, comb_motion)]
         #[qproperty(bool, close_to_tray)]
         /// Send what's copied on this PC to connected phones.
         #[qproperty(bool, auto_clipboard)]
@@ -131,8 +122,6 @@ pub mod qobject {
         #[qproperty(i32, walkthrough_step)]
         /// Whether the gentle "What's new" card on Home has been dismissed.
         #[qproperty(bool, whats_new_dismissed)]
-        /// Whether the card on Home inviting to try Hive has been answered.
-        #[qproperty(bool, hive_invite_dismissed)]
         /// JSON array of configured `FolderSyncRule` items.
         #[qproperty(QString, folder_sync_rules_json)]
         /// JSON array of configured `AutomationRule` items.
@@ -290,12 +279,8 @@ pub mod qobject {
 
 #[derive(Default)]
 pub struct PreferencesRust {
-    theme: QString,
-    seed: QString,
     color_mode: QString,
-    amoled: bool,
     backdrop: bool,
-    comb_motion: bool,
     close_to_tray: bool,
     auto_clipboard: bool,
     clipboard_history: bool,
@@ -338,7 +323,6 @@ pub struct PreferencesRust {
     walkthrough_completed: bool,
     walkthrough_step: i32,
     whats_new_dismissed: bool,
-    hive_invite_dismissed: bool,
     folder_sync_rules_json: QString,
     automation_rules_json: QString,
     window_screen: QString,
@@ -358,21 +342,12 @@ impl cxx_qt::Initialize for qobject::Preferences {
     fn initialize(mut self: Pin<&mut Self>) {
         let settings = Settings::load(&core_host::host().data_dir);
         settings.apply_runtime();
-        self.as_mut().set_theme(QString::from(match settings.theme {
-            Theme::Hive => "hive",
-            Theme::Bloom => "bloom",
-            Theme::Glass => "glass",
-            Theme::Graphite => "graphite",
-        }));
-        self.as_mut().set_seed(QString::from(&settings.seed));
         self.as_mut().set_color_mode(QString::from(match settings.color_mode {
             ColorMode::System => "system",
             ColorMode::Light => "light",
             ColorMode::Dark => "dark",
         }));
-        self.as_mut().set_amoled(settings.amoled);
         self.as_mut().set_backdrop(settings.backdrop);
-        self.as_mut().set_comb_motion(settings.comb_motion);
         let close_to_tray = if cfg!(target_os = "macos") { false } else { settings.close_to_tray };
         self.as_mut().set_close_to_tray(close_to_tray);
         self.as_mut().set_auto_clipboard(settings.auto_clipboard);
@@ -429,7 +404,6 @@ impl cxx_qt::Initialize for qobject::Preferences {
         self.as_mut().set_walkthrough_completed(settings.walkthrough_completed);
         self.as_mut().set_walkthrough_step(i32::from(settings.walkthrough_step.min(6)));
         self.as_mut().set_whats_new_dismissed(settings.whats_new_dismissed);
-        self.as_mut().set_hive_invite_dismissed(settings.hive_invite_dismissed);
         let folder_rules_json =
             serde_json::to_string(&settings.folder_sync_rules).unwrap_or_else(|_| "[]".into());
         self.as_mut().set_folder_sync_rules_json(QString::from(&folder_rules_json));
@@ -453,12 +427,8 @@ impl cxx_qt::Initialize for qobject::Preferences {
 
         // Save after any change (connected after loading, so loading doesn't
         // rewrite the file).
-        self.as_mut().on_theme_changed(|p| p.save()).release();
-        self.as_mut().on_seed_changed(|p| p.save()).release();
         self.as_mut().on_color_mode_changed(|p| p.save()).release();
-        self.as_mut().on_amoled_changed(|p| p.save()).release();
         self.as_mut().on_backdrop_changed(|p| p.save()).release();
-        self.as_mut().on_comb_motion_changed(|p| p.save()).release();
         self.as_mut()
             .on_close_to_tray_changed(|p| {
                 #[cfg(target_os = "macos")]
@@ -718,7 +688,6 @@ impl cxx_qt::Initialize for qobject::Preferences {
             })
             .release();
         self.as_mut().on_whats_new_dismissed_changed(|p| p.save()).release();
-        self.as_mut().on_hive_invite_dismissed_changed(|p| p.save()).release();
 
         super::subscribe(self.qt_thread(), crate::state::Changes::PREFS, Self::refresh_runtime_flags);
     }
@@ -731,21 +700,12 @@ impl qobject::Preferences {
             self.as_mut().set_stream_pc_audio_to_phone(on);
         }
         let disk = Settings::load(&core_host::host().data_dir);
-        let disk_theme = QString::from(match disk.theme {
-            Theme::Hive => "hive",
-            Theme::Bloom => "bloom",
-            Theme::Glass => "glass",
-            Theme::Graphite => "graphite",
-        });
         let disk_mode = QString::from(match disk.color_mode {
             ColorMode::System => "system",
             ColorMode::Light => "light",
             ColorMode::Dark => "dark",
         });
         let disk_step = i32::from(disk.walkthrough_step.min(6));
-        if *self.theme() != disk_theme {
-            self.as_mut().set_theme(disk_theme);
-        }
         if *self.color_mode() != disk_mode {
             self.as_mut().set_color_mode(disk_mode);
         }
@@ -1013,21 +973,12 @@ impl qobject::Preferences {
         let p = self.rust();
         let (win_screen, win_x, win_y, win_w, win_h, win_max) = crate::settings::window_geometry();
         Settings {
-            theme: match String::from(&p.theme).as_str() {
-                "hive" => Theme::Hive,
-                "graphite" => Theme::Graphite,
-                "glass" | "blurry" => Theme::Glass,
-                _ => Theme::Bloom,
-            },
-            seed: String::from(&p.seed),
             color_mode: match String::from(&p.color_mode).as_str() {
                 "light" => ColorMode::Light,
                 "dark" => ColorMode::Dark,
                 _ => ColorMode::System,
             },
-            amoled: p.amoled,
             backdrop: p.backdrop,
-            comb_motion: p.comb_motion,
             close_to_tray: if cfg!(target_os = "macos") { false } else { p.close_to_tray },
             auto_clipboard: p.auto_clipboard,
             clipboard_history: p.clipboard_history,
@@ -1079,7 +1030,6 @@ impl qobject::Preferences {
             walkthrough_completed: p.walkthrough_completed,
             walkthrough_step: p.walkthrough_step.clamp(0, 6) as u8,
             whats_new_dismissed: p.whats_new_dismissed,
-            hive_invite_dismissed: p.hive_invite_dismissed,
             obs_port: crate::settings::obs_settings().0,
             obs_password: crate::settings::obs_settings().1,
             window_screen: win_screen,

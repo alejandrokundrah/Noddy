@@ -51,12 +51,9 @@
     <!-- Settings -->
     <string name="settings_title">Ayarlar</string>
     <string name="settings_appearance">Görünüm</string>
-    <string name="settings_theme">Tema</string>
     <string name="settings_mode">Mod</string>
     <string name="settings_language">Dil</string>
     <string name="settings_language_more">Daha fazla</string>
-    <string name="settings_dynamic_color">Duvar kağıdından renkler</string>
-    <string name="settings_dynamic_color_hint">Duvar kağıdınızın renklerini kullanın.</string>
     <string name="settings_devices">Bilgisayarlar</string>
     <string name="settings_about">Hakkında</string>
     <string name="settings_notifications">Bildirimler</string>
@@ -220,15 +217,6 @@
     <string name="battery_guide_pixel">Pixel\'de: Uygulama bilgileri › Uygulama pil kullanımı bölümünü açın, Arka plan kullanımına izin ver\'e dokunun ve Kısıtlanmamış\'ı seçin.</string>
     <string name="action_manage">Yönet</string>
     <string name="action_app_info">Uygulama bilgileri</string>
-    <string name="theme_hive">Hive</string>
-    <string name="hive_invite_title">Yeni tema Hive\'ı deneyin</string>
-    <string name="hive_invite_text">Kömür karası üzerinde bal ya da sıcak balmumu tonları, uygulamanın arkasında canlı bir petekle. İstediğiniz zaman Ayarlar\'dan değiştirin.</string>
-    <string name="hive_invite_try">Hive\'ı dene</string>
-    <string name="hive_invite_dismiss">Şimdi değil</string>
-    <string name="settings_comb_motion">Hareketli petek</string>
-    <string name="settings_comb_motion_hint">Petek nefes alır ve atar. Animasyonları kaldır veya pil tasarrufu açıkken durağan kalır.</string>
-    <string name="theme_bloom">Bloom</string>
-    <string name="theme_graphite">Graphite</string>
     <string name="mode_system">Sistem</string>
     <string name="mode_light">Açık</string>
     <string name="mode_dark">Koyu</string>
@@ -595,14 +583,6 @@
     <string name="error_unsupported">Bilgisayardaki uygulama bunu henüz desteklemiyor.</string>
     <string name="error_generic">Bir sorun oluştu.</string>
 
-    <!-- Theme seed names -->
-    <string name="settings_seed_honey">Bal</string>
-    <string name="settings_seed_lavender">Lavanta</string>
-    <string name="settings_seed_ocean">Okyanus</string>
-    <string name="settings_seed_sage">Adaçayı</string>
-    <string name="settings_seed_black">Siyah</string>
-    <string name="settings_amoled">Saf siyah (AMOLED)</string>
-    <string name="settings_amoled_hint">OLED ekranlar için kapkara #000000 koyu yüzeyler.</string>
 
     <!-- Deck defaults & accessibility -->
     <string name="deck_tile_with_badge">%1$s, %2$s</string>
@@ -1320,7 +1300,6 @@
     <string name="home_section_system">Sistem ve Güç</string>
     <string name="settings_category_devices">Cihazlar</string>
     <string name="settings_category_features">Özellikler ve Veriler</string>
-    <string name="settings_theme_artwork_color">Medya kapak görseli rengi</string>
     <string name="settings_mobile_data_body">Wi-Fi\'dan uzaktayken LTE/5G veya aktarma sunucusu üzerinden bağlı kalın</string>
     <string name="settings_background_clipboard_title">Arka planda pano erişimi</string>
     <string name="settings_guide_card_body">Tüm özelliklere göz atın, gereksinimleri canlı olarak kontrol edin veya doğrudan kontrollerine gidin.</string>
@@ -1339,7 +1318,6 @@
     <string name="queue_kind_task_alert">Görev uyarısı</string>
     <string name="queue_kind_camera_request">Kamera isteği</string>
 
-    <string name="settings_theme_artwork_body">Uygulama ve cam renklerini çalan medyanın kapak görseliyle eşitle</string>
     <string name="settings_wireless_debugging_active">Kablosuz hata ayıklama ile etkin · pano otomatik olarak eşitlenir</string>
     <string name="settings_wireless_debugging_hint">Panonun arka planda eşitlenebilmesi için Kablosuz hata ayıklamaya izin verin veya bildirimdeki Panoyu gönder\'i kullanın</string>
 

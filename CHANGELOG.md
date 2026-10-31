@@ -156,6 +156,12 @@ has a Stop button. Choosing another
 
 ### Changed
 
+- **Glass is the only theme.** Hive, Bloom and Graphite are gone, along with
+  the Theme setting, the color swatches (wallpaper, artwork and phone colors),
+  Pure black (AMOLED) and the animated comb, on Windows, Linux and Android.
+  Noddy keeps Glass in the Honey colors; **Mode** (system, light or dark) and
+  the Mica backdrop stay. Saved theme and color choices are ignored.
+
 - **A new logo.** Noddy has a new logo: on the PC in the window, the taskbar,
   the tray, notifications and the installer, and on the phone in the launcher
   icon, the themed icon and notifications.

@@ -13,8 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 
 /**
  * The fonts bundled with the app (`assets/fonts` in the repository, packaged
- * as assets under `fonts/`): Figtree for text, Instrument Serif for
- * Graphite's headings, Space Mono for codes.
+ * as assets under `fonts/`): Figtree for text, Space Mono for codes.
  */
 @Immutable
 class AppFonts(assets: AssetManager) {
@@ -29,7 +28,6 @@ class AppFonts(assets: AssetManager) {
             )
         },
     )
-    val serif = FontFamily(Font("fonts/InstrumentSerif-Regular.ttf", assets))
     val mono = FontFamily(
         Font("fonts/SpaceMono-Regular.ttf", assets),
         Font("fonts/SpaceMono-Bold.ttf", assets, FontWeight.Bold),
@@ -40,14 +38,12 @@ val LocalAppFonts = staticCompositionLocalOf<AppFonts> { error("NoddyTheme provi
 
 /**
  * Material's type scale (sizes and line heights suit a phone) in the bundled
- * fonts, with the weights from docs/design/tokens.json: bold headings in
- * Bloom, serif headings in Graphite.
+ * fonts, with the weights from docs/design/tokens.json (bold headings).
  */
-internal fun typography(fonts: AppFonts, graphite: Boolean): Typography {
+internal fun typography(fonts: AppFonts): Typography {
     val base = Typography()
     fun TextStyle.text(weight: Int) = copy(fontFamily = fonts.sans, fontWeight = FontWeight(weight))
-    fun TextStyle.heading() =
-        if (graphite) copy(fontFamily = fonts.serif, fontWeight = FontWeight.Normal) else text(650)
+    fun TextStyle.heading() = text(650)
     return base.copy(
         displayLarge = base.displayLarge.heading(),
         displayMedium = base.displayMedium.heading(),

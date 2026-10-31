@@ -312,98 +312,6 @@ Item {
                 }
             }
 
-            // A one-time invitation to try Hive, after the What's new card.
-            Card {
-                id: hiveInvite
-                width: column.width
-                visible: Preferences.walkthroughCompleted && Preferences.whatsNewDismissed
-                         && !Preferences.hiveInviteDismissed && !Theme.hive
-                padding: 14
-                Binding {
-                    target: Theme
-                    property: "combPreviewShown"
-                    value: hiveInvite.visible
-                }
-                Item {
-                    width: parent.width
-                    height: Math.max(hiveSample.height, hiveInviteText.implicitHeight, hiveInviteButtons.implicitHeight)
-
-                    // A small window onto the comb, in Hive's own colors.
-                    Rectangle {
-                        id: hiveSample
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: 56; height: 56
-                        radius: 14
-                        color: Theme.dark ? "#121214" : "#FFF8F3"
-                        border.width: 1
-                        border.color: Theme.dark ? Qt.rgba(1.0, 0.73, 0.37, 0.24) : Qt.rgba(0.54, 0.32, 0.0, 0.20)
-                        HiveBackdrop {
-                            anchors.fill: parent
-                            corner: parent.radius
-                            ownClock: false
-                            growIn: false
-                            time: Theme.combTime
-                            animate: !Theme.reduceMotion && !AppController.powerSaver
-                            cell: 9
-                            lineColor: Theme.dark ? Qt.rgba(1.0, 0.73, 0.37, 0.28) : Qt.rgba(0.54, 0.32, 0.0, 0.16)
-                            glowColor: Theme.dark ? Qt.rgba(1.0, 0.62, 0.18, 0.70) : Qt.rgba(1.0, 0.72, 0.37, 0.75)
-                            origin: Qt.point(width / 2, height / 2)
-                        }
-                        Icon {
-                            anchors.centerIn: parent
-                            width: 22; height: 22
-                            path: Icons.mark
-                            stroke: 2.2
-                            color: Theme.dark ? "#FFB95F" : "#8A5100"
-                        }
-                    }
-                    Column {
-                        id: hiveInviteText
-                        anchors.left: hiveSample.right
-                        anchors.leftMargin: 14
-                        anchors.right: hiveInviteButtons.left
-                        anchors.rightMargin: 16
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: 4
-                        Txt {
-                            width: parent.width
-                            role: "title"
-                            text: qsTr("Try Hive, the new theme")
-                            wrapMode: Text.WordWrap
-                        }
-                        Txt {
-                            width: parent.width
-                            role: "bodySmall"
-                            muted: true
-                            text: qsTr("Honey on charcoal or warm wax, with a living honeycomb behind the app. Change it any time in Settings › Appearance.")
-                            wrapMode: Text.WordWrap
-                        }
-                    }
-                    Row {
-                        id: hiveInviteButtons
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: 8
-                        Button {
-                            variant: "text"
-                            size: "sm"
-                            text: qsTr("Not now")
-                            onClicked: Preferences.hiveInviteDismissed = true
-                        }
-                        Button {
-                            variant: "tonal"
-                            size: "sm"
-                            iconPath: Icons.sparkle
-                            text: qsTr("Try Hive")
-                            onClicked: {
-                                Preferences.hiveInviteDismissed = true
-                                Preferences.theme = "hive"
-                            }
-                        }
-                    }
-                }
-            }
-
             // Card shown when no phone is paired yet (for example after skipping first-run setup).
             Card {
                 width: column.width
@@ -854,28 +762,6 @@ Item {
                                 }
                             }
 
-                        }
-
-                        // Hive: the comb on the phone's screen, in step with the app's.
-                        HiveBackdrop {
-                            visible: Theme.hive
-                            x: phoneArt.bezel
-                            y: phoneArt.bezel
-                            width: phoneArt.innerW
-                            height: phoneArt.innerH
-                            corner: Math.max(2, Math.min(phoneArt.rTl, phoneArt.rTr) - phoneArt.bezel)
-                            ownClock: false
-                            growIn: false
-                            time: Theme.combTime
-                            animate: Theme.combMotion
-                            cell: 7
-                            strength: home.online ? 1 : 0.6
-                            frameMs: Theme.comb.frameMs
-                            breathSeconds: Theme.comb.breathSeconds
-                            pulseSeconds: Theme.comb.pulseSeconds
-                            lineColor: Theme.dark ? Qt.rgba(1.0, 0.73, 0.37, 0.26) : Qt.rgba(0.54, 0.32, 0.0, 0.16)
-                            glowColor: Theme.combGlow
-                            origin: Qt.point(width / 2, height * 0.42)
                         }
 
                         // 3. Measured front camera cutout (SVG path or bounding rects; empty when plain/unknown).

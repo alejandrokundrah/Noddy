@@ -36,9 +36,6 @@ class PhoneMedia(context: Context, private val onChange: (List<MediaPlayer>) -> 
     /** The players last sent, by ID, for commands. */
     @Volatile
     private var controllers: Map<String, MediaController> = emptyMap()
-    @Volatile
-    var activeSeedColor: UInt? = null
-        private set
     private val appNames = java.util.concurrent.ConcurrentHashMap<String, String>()
     private val art = ArtCache()
     private val worker = java.util.concurrent.Executors.newSingleThreadExecutor { r ->
@@ -76,7 +73,6 @@ class PhoneMedia(context: Context, private val onChange: (List<MediaPlayer>) -> 
         scheduled = false
         worker.execute {
             controllers = emptyMap()
-            activeSeedColor = null
             lastSent = null
             onChange(emptyList())
         }
@@ -193,8 +189,6 @@ class PhoneMedia(context: Context, private val onChange: (List<MediaPlayer>) -> 
         worker.execute {
             if (!running) return@execute
             val ids = mutableMapOf<String, MediaController>()
-            var topPlayingSeed: UInt? = null
-            var firstSeed: UInt? = null
             val players = snapshots.map { snap ->
                 var id = snap.packageName
                 var n = 2
@@ -202,12 +196,6 @@ class PhoneMedia(context: Context, private val onChange: (List<MediaPlayer>) -> 
                 ids[id] = snap.controller
                 val track = listOf(snap.packageName, snap.title, snap.rawArtist, snap.album).joinToString("\u0001")
                 val cachedArt = snap.picture?.let { art.get(track, it) }
-                if (firstSeed == null && cachedArt?.seedColor != null) {
-                    firstSeed = cachedArt.seedColor
-                }
-                if (topPlayingSeed == null && snap.playing && cachedArt?.seedColor != null) {
-                    topPlayingSeed = cachedArt.seedColor
-                }
                 MediaPlayer(
                     id = id,
                     app = appName(snap.packageName),
@@ -224,7 +212,6 @@ class PhoneMedia(context: Context, private val onChange: (List<MediaPlayer>) -> 
             }
             if (!running) return@execute
             controllers = ids
-            activeSeedColor = topPlayingSeed ?: firstSeed
             val now = SystemClock.elapsedRealtime()
             if (sameButLater(lastSent, lastSentAt, players, now)) return@execute
             lastSent = players
@@ -272,7 +259,7 @@ class PhoneMedia(context: Context, private val onChange: (List<MediaPlayer>) -> 
         return if (secs > 0) secs.toUInt() else null
     }
 
-    private class CachedArt(val key: String, val jpeg: ByteArray, val seedColor: UInt?)
+    private class CachedArt(val key: String, val jpeg: ByteArray)
 
     /**
      * Artwork as a small JPEG, made once per track and picture size (apps
@@ -287,7 +274,6 @@ class PhoneMedia(context: Context, private val onChange: (List<MediaPlayer>) -> 
         fun get(track: String, bitmap: Bitmap): CachedArt {
             val identity = "$track\u0001${bitmap.width}x${bitmap.height}"
             made[identity]?.let { return it }
-            val seedColor = extractArtworkSeedColor(bitmap, identity)
             val scale = minOf(1f, ART_SIZE.toFloat() / maxOf(bitmap.width, bitmap.height))
             val small = if (scale < 1f) {
                 bitmap.scale((bitmap.width * scale).toInt().coerceAtLeast(1), (bitmap.height * scale).toInt().coerceAtLeast(1))
@@ -297,7 +283,7 @@ class PhoneMedia(context: Context, private val onChange: (List<MediaPlayer>) -> 
             val jpeg = ByteArrayOutputStream().also { small.compress(Bitmap.CompressFormat.JPEG, 88, it) }.toByteArray()
             if (small !== bitmap) small.recycle()
             val key = jpeg.contentHashCode().toUInt().toString(16) + "-" + jpeg.size.toString(16)
-            return CachedArt(key, jpeg, seedColor).also { made[identity] = it }
+            return CachedArt(key, jpeg).also { made[identity] = it }
         }
     }
 
@@ -325,39 +311,3 @@ class PhoneMedia(context: Context, private val onChange: (List<MediaPlayer>) -> 
         const val ART_SIZE = 360
     }
 }
-
-/**
- * Extracts a perceptual Material 3 seed color (`0xRRGGBB`) using the shared
- * Rust perceptual color engine (`app.noddy.core.extractArtworkScheme`) over a
- * downsampled `<= 112x112` RGBA buffer so both Android and Desktop select the exact
- * same color for the same artwork.
- */
-internal fun extractArtworkSeedColor(bitmap: Bitmap, cacheKey: String? = null): UInt? = runCatching {
-    val w0 = bitmap.width
-    val h0 = bitmap.height
-    if (w0 <= 0 || h0 <= 0) return null
-    val maxDim = 112
-    val scale = minOf(1f, maxDim.toFloat() / maxOf(w0, h0))
-    val w = (w0 * scale).toInt().coerceAtLeast(1)
-    val h = (h0 * scale).toInt().coerceAtLeast(1)
-    val sampled = if (w != w0 || h != h0) {
-        bitmap.scale(w, h)
-    } else {
-        bitmap
-    }
-    val pixels = IntArray(w * h)
-    sampled.getPixels(pixels, 0, w, 0, 0, w, h)
-    if (sampled !== bitmap) sampled.recycle()
-
-    val rgba = ByteArray(w * h * 4)
-    var outIdx = 0
-    for (px in pixels) {
-        rgba[outIdx] = ((px ushr 16) and 0xFF).toByte()
-        rgba[outIdx + 1] = ((px ushr 8) and 0xFF).toByte()
-        rgba[outIdx + 2] = (px and 0xFF).toByte()
-        rgba[outIdx + 3] = ((px ushr 24) and 0xFF).toByte()
-        outIdx += 4
-    }
-    return app.noddy.core.extractArtworkScheme(rgba, w.toUInt(), h.toUInt(), cacheKey)?.seedRgb
-}.getOrNull()
-

@@ -4,10 +4,8 @@ package app.noddy.android
 import app.noddy.android.companion.PcCompanion
 import app.noddy.android.ui.Preferences
 import app.noddy.android.ui.theme.Appearance
-import app.noddy.android.ui.theme.Tokens
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -55,35 +53,14 @@ class CompanionAndMigrationTest {
     }
 
     @Test
-    fun `Preferences sanitizeAppearance falls back on unknown legacy theme, mode, and seed values`() {
-        val legacy = Preferences.sanitizeAppearance(
-            theme = "sepia",
-            mode = "neon",
-            seed = "cyberpunk",
-            dynamicColor = false,
-        )
-        assertEquals("graphite", legacy.theme)
-        assertEquals("system", legacy.mode)
-        assertEquals(Tokens.DEFAULT_SEED, legacy.seed)
-        assertFalse(legacy.dynamicColor)
+    fun `Preferences sanitizeAppearance ignores legacy theme values and keeps only a valid mode`() {
+        // Old installs saved a theme, a seed color, dynamic color, AMOLED and comb motion;
+        // none of them exist any more, and an unknown mode falls back to following the system.
+        assertEquals("system", Preferences.sanitizeAppearance(mode = "neon").mode)
+        assertEquals("system", Preferences.sanitizeAppearance(mode = null).mode)
+        assertEquals("system", Preferences.sanitizeAppearance(Appearance(mode = "")).mode)
 
-        val empty = Preferences.sanitizeAppearance(
-            Appearance(theme = "", mode = "", seed = "", dynamicColor = true),
-        )
-        assertEquals("graphite", empty.theme)
-        assertEquals("system", empty.mode)
-        assertEquals(Tokens.DEFAULT_SEED, empty.seed)
-        assertTrue(empty.dynamicColor)
-
-        val valid = Preferences.sanitizeAppearance(
-            theme = "graphite",
-            mode = "dark",
-            seed = "ocean",
-            dynamicColor = false,
-        )
-        assertEquals("graphite", valid.theme)
-        assertEquals("dark", valid.mode)
-        assertEquals("ocean", valid.seed)
-        assertFalse(valid.dynamicColor)
+        assertEquals("light", Preferences.sanitizeAppearance(mode = "light").mode)
+        assertEquals("dark", Preferences.sanitizeAppearance(Appearance(mode = "dark")).mode)
     }
 }

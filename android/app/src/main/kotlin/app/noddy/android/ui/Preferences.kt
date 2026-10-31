@@ -4,7 +4,6 @@ package app.noddy.android.ui
 import android.content.Context
 import androidx.core.content.edit
 import app.noddy.android.ui.theme.Appearance
-import app.noddy.android.ui.theme.Tokens
 import app.noddy.android.ui.walkthrough.WalkthroughPersistence
 import app.noddy.android.ui.walkthrough.WalkthroughStep
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,34 +40,12 @@ class Preferences(context: Context) {
         prefs.registerOnSharedPreferenceChangeListener(preferenceChangeListener)
     }
 
-    /**
-     * The invitation to try Hive shows until it's answered, and again after
-     * an update (a reinstall clears this anyway): it remembers the version
-     * that answered it.
-     */
-    private val _hiveInviteShown = MutableStateFlow(
-        prefs.getLong(HIVE_INVITE_ANSWERED, -1L) != app.noddy.android.BuildConfig.VERSION_CODE.toLong(),
-    )
-    val hiveInviteShown: StateFlow<Boolean> = _hiveInviteShown.asStateFlow()
-
-    fun answerHiveInvite() {
-        prefs.edit { putLong(HIVE_INVITE_ANSWERED, app.noddy.android.BuildConfig.VERSION_CODE.toLong()) }
-        _hiveInviteShown.value = false
-    }
-
     private val _walkthrough = MutableStateFlow(loadWalkthrough())
     val walkthrough: StateFlow<WalkthroughPersistence> = _walkthrough.asStateFlow()
 
     private fun load(): Appearance {
         val defaults = Appearance()
-        return sanitizeAppearance(
-            theme = prefs.getString(THEME, defaults.theme),
-            mode = prefs.getString(MODE, defaults.mode),
-            seed = prefs.getString(SEED, defaults.seed),
-            dynamicColor = prefs.getBoolean(DYNAMIC, defaults.dynamicColor),
-            amoled = prefs.getBoolean(AMOLED, defaults.amoled),
-            combMotion = prefs.getBoolean(COMB_MOTION, defaults.combMotion),
-        )
+        return sanitizeAppearance(mode = prefs.getString(MODE, defaults.mode))
     }
 
     private fun loadWalkthrough(): WalkthroughPersistence {
@@ -85,14 +62,7 @@ class Preferences(context: Context) {
 
     fun update(change: (Appearance) -> Appearance) {
         val next = sanitizeAppearance(change(_appearance.value))
-        prefs.edit {
-            putString(THEME, next.theme)
-            putString(MODE, next.mode)
-            putString(SEED, next.seed)
-            putBoolean(DYNAMIC, next.dynamicColor)
-            putBoolean(AMOLED, next.amoled)
-            putBoolean(COMB_MOTION, next.combMotion)
-        }
+        prefs.edit { putString(MODE, next.mode) }
         _appearance.value = next
     }
 
@@ -138,13 +108,7 @@ class Preferences(context: Context) {
     private val appContext = context.applicationContext
 
     companion object {
-        private const val THEME = "theme"
         private const val MODE = "mode"
-        private const val SEED = "seed"
-        private const val DYNAMIC = "dynamic_color"
-        private const val AMOLED = "amoled_black"
-        private const val COMB_MOTION = "comb_motion"
-        private const val HIVE_INVITE_ANSWERED = "hive_invite_answered_version"
         private const val TOUCHPAD_SENSITIVITY = "touchpad_sensitivity"
         private const val SUGGEST_CLIPBOARD_ACTIONS = "suggest_clipboard_actions"
         private const val VOLUME_KEYS_CONTROL_PC = "volume_keys_control_pc"
@@ -154,40 +118,13 @@ class Preferences(context: Context) {
         private const val WALKTHROUGH_STEP = "walkthrough_step"
         private const val WHATS_NEW_GUIDE_DISMISSED = "whats_new_guide_dismissed"
 
-        val VALID_THEMES = setOf("hive", "bloom", "graphite", "glass")
         val VALID_MODES = setOf("system", "light", "dark")
 
-        fun sanitizeAppearance(
-            theme: String?,
-            mode: String?,
-            seed: String?,
-            dynamicColor: Boolean = true,
-            amoled: Boolean = false,
-            combMotion: Boolean = true,
-        ): Appearance {
-            val defaults = Appearance()
-            val safeTheme = theme?.takeIf { it in VALID_THEMES } ?: defaults.theme
-            val safeMode = mode?.takeIf { it in VALID_MODES } ?: defaults.mode
-            val safeSeed = seed?.takeIf { it == "artwork" || it in Tokens.bloomSeeds } ?: defaults.seed
-            return Appearance(
-                theme = safeTheme,
-                mode = safeMode,
-                seed = safeSeed,
-                dynamicColor = dynamicColor,
-                amoled = amoled,
-                combMotion = combMotion,
-            )
-        }
+        /** Old saved values (a theme, a seed color, AMOLED, the comb) are ignored; only the mode is kept. */
+        fun sanitizeAppearance(mode: String?): Appearance =
+            Appearance(mode = mode?.takeIf { it in VALID_MODES } ?: Appearance().mode)
 
-        fun sanitizeAppearance(appearance: Appearance): Appearance =
-            sanitizeAppearance(
-                theme = appearance.theme,
-                mode = appearance.mode,
-                seed = appearance.seed,
-                dynamicColor = appearance.dynamicColor,
-                amoled = appearance.amoled,
-                combMotion = appearance.combMotion,
-            )
+        fun sanitizeAppearance(appearance: Appearance): Appearance = sanitizeAppearance(mode = appearance.mode)
 
         fun isSuggestClipboardActionsEnabled(context: Context): Boolean =
             context.applicationContext

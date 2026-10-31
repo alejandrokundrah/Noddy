@@ -52,8 +52,8 @@ sources; nothing generated is checked in except the theme tokens
   keeps the phone reachable and holds the Wi-Fi multicast lock local
   discovery needs.
 - `ui/`: pairing (QR scanner with CameraX + ZXing, no Google Play services;
-  nearby pairing with a 6-digit code), home and settings. Bloom uses
-  Material You colors from the wallpaper on Android 12+.
+  nearby pairing with a 6-digit code), home and settings. Glass is the only
+  theme (a fixed Honey palette, light or dark).
 
 The identity lives in `noBackupFilesDir`, so it's never restored onto
 another phone. `noddy://pair?...` links (a PC's QR code scanned with any
