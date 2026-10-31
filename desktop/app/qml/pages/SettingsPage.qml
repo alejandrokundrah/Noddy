@@ -525,6 +525,21 @@ Item {
                         width: parent.width
                         ListRow {
                             width: parent.width
+                            iconPath: Icons.palette
+                            title: qsTr("Theme")
+                            Segmented {
+                                options: [
+                                    { value: "glass", label: qsTr("Glass") },
+                                    { value: "ember", label: qsTr("Ember") }
+                                ]
+                                value: Preferences.theme
+                                onPicked: (value) => Preferences.theme = value
+                            }
+                        }
+                        Divider { width: parent.width; visible: !Theme.ember }
+                        ListRow {
+                            width: parent.width
+                            visible: !Theme.ember
                             iconPath: Icons.moon
                             title: qsTr("Mode")
                             Segmented {
@@ -537,11 +552,11 @@ Item {
                                 onPicked: (value) => Preferences.colorMode = value
                             }
                         }
-                        Divider { width: parent.width; visible: micaRow.visible }
+                        Divider { width: parent.width; visible: micaRow.visible && !Theme.ember }
                         ListRow {
                             id: micaRow
                             width: parent.width
-                            visible: Qt.platform.os === "windows"
+                            visible: !Theme.ember && Qt.platform.os === "windows"
                                 && !!Window.window && Window.window.systemBackdropSupported === true
                             iconPath: Icons.desktop
                             title: qsTr("Mica backdrop")
