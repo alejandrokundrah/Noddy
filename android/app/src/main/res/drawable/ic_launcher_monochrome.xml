@@ -3,13 +3,7 @@
 <!-- Themed (monochrome) icon, Android 13+: the mark in one color; the system tints it. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp" android:viewportWidth="100" android:viewportHeight="100">
-    <group android:pivotX="50" android:pivotY="50" android:scaleX="0.72" android:scaleY="0.72" android:rotation="-25">
-        <path android:pathData="M41.5,42.5C26,24 13.5,31 13.5,50C13.5,69 26,76 41.5,57.5"
-            android:strokeColor="#FFFFFF" android:strokeWidth="11.4" android:strokeLineCap="round"
-            android:fillColor="#00000000" />
-        <path android:pathData="M58.5,42.5C74,24 86.5,31 86.5,50C86.5,69 74,76 58.5,57.5"
-            android:strokeColor="#FFFFFF" android:strokeWidth="11.4" android:strokeLineCap="round"
-            android:fillColor="#00000000" />
-        <path android:pathData="M50,41.2a8.8,8.8 0,1 1,0 17.6a8.8,8.8 0,1 1,0 -17.6z" android:fillColor="#FFFFFF" />
-    </group>
+    <path
+        android:pathData="M55.69,63.12C55.66,62.29 55.48,57.19 52.26,53.32C41.71,40.62 34.5,45.56 29.9,42.54C20.51,36.37 30.17,22.81 39.31,28.29C46.76,32.76 40.47,37.25 48.44,45.41C60.83,58.06 65.16,51.2 70.56,55.22C81.11,63.08 68.78,77.54 59.92,71.33C55.21,68.03 55.76,63.96 55.69,63.12ZM43.6,61.9C45.32,77.88 22.88,75.41 25.61,61.91C26.77,56.19 31.3,57.4 33.63,50.47C34.67,47.36 35.91,51.17 35.98,51.36C37.76,56.85 41.09,54.84 43.6,61.9ZM73.65,38.65C71.62,44.32 69.16,42.66 66.35,47.97C65.51,49.56 64.14,46.96 64.04,46.77C62.89,44.59 54.39,40.53 58.11,33.48C62.07,25.97 74.83,27.89 73.65,38.65Z"
+        android:fillColor="#FFFFFF" />
 </vector>

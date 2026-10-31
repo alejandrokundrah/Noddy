@@ -3,12 +3,14 @@ import QtQuick
 import QtQuick.Shapes
 import app.noddy
 
-// A stroke icon from Icons (an SVG path on a 24×24 grid).
+// A stroke icon from Icons (an SVG path on a 24×24 grid), or, with `filled`,
+// a solid shape such as the Noddy mark.
 Item {
     id: icon
     property string path
     property color color: Theme.surfaceContent
     property real stroke: 1.8
+    property bool filled: false
 
     implicitWidth: 20
     implicitHeight: 20
@@ -21,8 +23,9 @@ Item {
         preferredRendererType: Shape.CurveRenderer
         ShapePath {
             strokeColor: icon.color
-            strokeWidth: icon.stroke
-            fillColor: "transparent"
+            // A negative width turns the stroke off for a filled shape.
+            strokeWidth: icon.filled ? -1 : icon.stroke
+            fillColor: icon.filled ? icon.color : "transparent"
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin
             PathSvg { path: icon.path }

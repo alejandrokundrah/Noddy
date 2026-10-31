@@ -22,6 +22,12 @@ Open the HTML files in a browser and switch themes and Material You seeds at the
   Monochrome by design (Material You off). Variants: Paper and Slate.
 - Directions **A (Honey Glass)** and **B (Graphite Pro)** were rejected.
 
+## Logo
+
+The Noddy logo is in [`assets/noddy`](../../assets/noddy/README.md): `Noddy black.svg` for light
+backgrounds and `Noddy white.svg` for dark ones. The app icon puts it in cream (`#FFF8F3`) on the
+Honey espresso tile.
+
 ## Principles
 
 - No traffic-light green: success, done and connected states use the theme's own color

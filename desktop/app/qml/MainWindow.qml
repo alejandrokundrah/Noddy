@@ -573,7 +573,7 @@ NativeWindow {
             Icon {
                 anchors.centerIn: parent
                 path: Icons.mark
-                stroke: 2.4
+                filled: true
                 color: Theme.graphite ? Theme.surface : Theme.primaryContent
             }
         }
