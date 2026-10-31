@@ -53,12 +53,8 @@ import java.util.Locale
 
 internal fun normalizeArgbSeed(argb: Int): UInt = (argb.toUInt() or 0xFF00_0000u)
 
-private val PRESET_SEEDS = mapOf(
-    "honey" to 0xFFB7_791Fu,
-    "lavender" to 0xFF7E_6AA8u,
-    "ocean" to 0xFF3D_7DA8u,
-    "sage" to 0xFF5B_8C5Au,
-)
+/** The Honey seed (the app's own color), for phones without Material You (before Android 12). */
+private const val HONEY_SEED = 0xFFB7_791Fu
 
 private fun parseSecureOverlaySeed(context: Context): UInt? = runCatching {
     val json = Settings.Secure.getString(context.contentResolver, "theme_customization_overlay_packages")
@@ -76,34 +72,15 @@ private fun parseSecureOverlaySeed(context: Context): UInt? = runCatching {
 }.getOrNull()
 
 /**
- * Reads the phone's active theme seed color (`0xFFRRGGBB` ARGB):
- * 1. If the user selected "Media artwork color" or a preset seed ("honey",
- *    "lavender", "ocean", "sage") in the Noddy Android app's Appearance
- *    settings, uses that seed so "My phone's colors" on the PC matches the
- *    phone app's chosen theme.
- * 2. When Dynamic Color is enabled on Android 12+ (`API 31+`), reads the
- *    live Material You seed from `Settings.Secure`, fresh configuration
- *    resources (`system_accent1_500`), and `WallpaperManager.getWallpaperColors`.
+ * Reads the phone's Material You seed color (`0xFFRRGGBB` ARGB) from
+ * `Settings.Secure`, fresh configuration resources (`system_accent1_500`) and
+ * `WallpaperManager.getWallpaperColors` (Android 12+, `API 31+`); Honey before that.
  */
 fun materialYouAccent(
     context: Context,
     wallpaperColors: WallpaperColors? = null,
-    activeMediaColor: UInt? = null,
 ): UInt? {
-    val prefs = runCatching {
-        context.applicationContext.getSharedPreferences("appearance", Context.MODE_PRIVATE)
-    }.getOrNull()
-    if (prefs != null) {
-        val seed = prefs.getString("seed", "honey") ?: "honey"
-        val dynamicColor = prefs.getBoolean("dynamic_color", true)
-        if (seed == "artwork" && activeMediaColor != null) {
-            return normalizeArgbSeed(activeMediaColor.toInt())
-        }
-        if (!dynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            return PRESET_SEEDS[seed] ?: PRESET_SEEDS["honey"]
-        }
-    }
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return PRESET_SEEDS["honey"]
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return HONEY_SEED
 
     // Kept as is so the stock check below can see it (a neighboring shade of a stock
     // palette is also stock, and would pass for a real choice).
@@ -154,7 +131,7 @@ internal fun modelName(manufacturer: String, model: String): String {
 }
 
 /** How this phone presents itself to PCs. */
-fun deviceInfo(context: Context, activeMediaColor: UInt? = null): DeviceInfo {
+fun deviceInfo(context: Context): DeviceInfo {
     val phoneName = Settings.Global.getString(context.contentResolver, Settings.Global.DEVICE_NAME)
         ?.takeIf { it.isNotBlank() } ?: Build.MODEL
     val name = profileLabel(context)?.let { context.getString(R.string.device_name_in_profile, phoneName, it) }
@@ -166,7 +143,7 @@ fun deviceInfo(context: Context, activeMediaColor: UInt? = null): DeviceInfo {
         os = "android",
         osVersion = Build.VERSION.RELEASE,
         model = modelName(Build.MANUFACTURER, Build.MODEL),
-        accent = materialYouAccent(context, activeMediaColor = activeMediaColor),
+        accent = materialYouAccent(context),
         screen = measureScreenShape(context),
         installId = installId(context),
     )
@@ -756,21 +733,10 @@ class NetworkMonitor(context: Context, private val onChange: () -> Unit) {
     }
 }
 
-/**
- * Listens for Noddy appearance preference changes, media artwork color
- * changes, and Material You wallpaper/configuration color changes without polling.
- */
+/** Listens for Material You wallpaper/configuration color changes without polling. */
 class AccentMonitor(private val context: Context, private val onChange: (UInt?) -> Unit) {
     private var lastReported: UInt? = null
-    private var activeMediaColor: UInt? = null
     private val mainHandler = Handler(Looper.getMainLooper())
-    private val prefs = runCatching {
-        context.applicationContext.getSharedPreferences("appearance", Context.MODE_PRIVATE)
-    }.getOrNull()
-
-    private val prefsListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
-        emitIfChanged()
-    }
 
     private val secureObserver = object : android.database.ContentObserver(mainHandler) {
         override fun onChange(selfChange: Boolean) {
@@ -800,22 +766,11 @@ class AccentMonitor(private val context: Context, private val onChange: (UInt?) 
 
     @Synchronized
     private fun emitIfChanged(wallpaperColors: WallpaperColors? = null, force: Boolean = false) {
-        val next = materialYouAccent(
-            context = context,
-            wallpaperColors = wallpaperColors,
-            activeMediaColor = activeMediaColor,
-        )
+        val next = materialYouAccent(context = context, wallpaperColors = wallpaperColors)
         if (next != null && (force || next != lastReported)) {
             lastReported = next
             onChange(next)
         }
-    }
-
-    @Synchronized
-    fun updateMediaColor(color: UInt?) {
-        if (activeMediaColor == color) return
-        activeMediaColor = color
-        emitIfChanged()
     }
 
     @Synchronized
@@ -824,7 +779,6 @@ class AccentMonitor(private val context: Context, private val onChange: (UInt?) 
     }
 
     fun start() {
-        prefs?.registerOnSharedPreferenceChangeListener(prefsListener)
         runCatching {
             val uri = Settings.Secure.getUriFor("theme_customization_overlay_packages")
             if (uri != null) {
@@ -844,7 +798,6 @@ class AccentMonitor(private val context: Context, private val onChange: (UInt?) 
     }
 
     fun stop() {
-        prefs?.unregisterOnSharedPreferenceChangeListener(prefsListener)
         runCatching { context.contentResolver.unregisterContentObserver(secureObserver) }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             colorsListener?.let { listener ->

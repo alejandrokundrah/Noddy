@@ -394,21 +394,6 @@ Card {
                 }
 
                 IconButton {
-                    visible: !Theme.graphite
-                    width: 24; height: 24
-                    iconSize: 13
-                    tonal: Theme.isArtworkSeed
-                    iconPath: Icons.colorSwatch
-                    iconColor: Theme.isArtworkSeed ? Theme.secondaryContainerContent : Theme.surfaceContentVariant
-                    label: Theme.isArtworkSeed
-                        ? qsTr("Artwork color sync is on (click to turn off)")
-                        : qsTr("Sync app colors & blur to playing artwork")
-                    onClicked: {
-                        Preferences.seed = Theme.isArtworkSeed ? "wallpaper" : "artwork"
-                    }
-                }
-
-                IconButton {
                     width: 24; height: 24
                     iconSize: 13
                     iconPath: card.expanded ? Icons.chevronUp : Icons.chevronDown

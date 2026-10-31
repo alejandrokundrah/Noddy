@@ -946,26 +946,17 @@ fn dispatch_jump_task(qt: &CxxQtThread<qobject::AppController>, action: String) 
             object.as_mut().trigger_highlight(&QString::from(target));
             object.activate_requested();
         }
-        // Test hook for screenshots and theme checks; debug builds only.
+        // Test hook for screenshots and color checks; debug builds only.
         s if cfg!(debug_assertions) && s.starts_with("theme:") => {
+            // `light` or `dark` (Glass is the only theme).
             let mode = &s["theme:".len()..];
             let dir = &core_host::host().data_dir;
             let mut st = crate::settings::Settings::load(dir);
-            // `<theme>` or `<theme>-dark` / `<theme>-light`; plain "graphite" is dark.
-            use crate::settings::{ColorMode, Theme};
-            let (name, color) = match mode.rsplit_once('-') {
-                Some((name, "dark")) => (name, Some(ColorMode::Dark)),
-                Some((name, "light")) => (name, Some(ColorMode::Light)),
-                _ => (mode, None),
+            st.color_mode = if mode.ends_with("dark") {
+                crate::settings::ColorMode::Dark
+            } else {
+                crate::settings::ColorMode::Light
             };
-            st.theme = match name {
-                "graphite" => Theme::Graphite,
-                "glass" => Theme::Glass,
-                "hive" => Theme::Hive,
-                _ => Theme::Bloom,
-            };
-            st.color_mode =
-                color.unwrap_or(if name == "graphite" { ColorMode::Dark } else { ColorMode::Light });
             let _ = st.save(dir);
             core_host::host().hub.changed(Changes::PREFS);
             object.activate_requested();

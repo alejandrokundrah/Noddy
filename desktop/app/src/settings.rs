@@ -14,29 +14,6 @@ const FILE_NAME: &str = "desktop-settings.json";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Default)]
 #[serde(rename_all = "lowercase")]
-pub enum Theme {
-    #[default]
-    Bloom,
-    /// Honey on charcoal or wax, with the living comb.
-    Hive,
-    Glass,
-    Graphite,
-}
-
-impl<'de> Deserialize<'de> for Theme {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        let s = String::deserialize(deserializer).unwrap_or_default();
-        Ok(match s.trim().to_ascii_lowercase().as_str() {
-            "hive" => Theme::Hive,
-            "graphite" => Theme::Graphite,
-            "glass" | "blurry" => Theme::Glass,
-            _ => Theme::Bloom,
-        })
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Default)]
-#[serde(rename_all = "lowercase")]
 pub enum ColorMode {
     #[default]
     System,
@@ -348,22 +325,10 @@ pub fn set_window_geometry(
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct Settings {
-    pub theme: Theme,
-    /// Bloom colors: "wallpaper" (from the desktop wallpaper) or a preset,
-    /// e.g. "honey" (see docs/design/tokens.json).
-    #[serde(alias = "accent")]
-    pub seed: String,
     #[serde(alias = "color_mode")]
     pub color_mode: ColorMode,
-    /// Pure #000000 OLED black surfaces when in dark mode.
-    #[serde(default)]
-    pub amoled: bool,
     /// Use the Windows 11 Mica backdrop.
     pub backdrop: bool,
-    /// Hive's comb breathes and pulses (it holds still when off, and with
-    /// reduced motion or battery saver whatever this says).
-    #[serde(default = "default_true", alias = "comb_motion")]
-    pub comb_motion: bool,
     /// Closing the window keeps Noddy running in the tray.
     #[serde(default = "default_close_to_tray", alias = "close_to_tray")]
     pub close_to_tray: bool,
@@ -516,9 +481,6 @@ pub struct Settings {
     /// Whether the gentle "What's new" card on Home has been dismissed.
     #[serde(default, alias = "whats_new_dismissed")]
     pub whats_new_dismissed: bool,
-    /// Whether the card on Home inviting to try Hive has been answered.
-    #[serde(default, alias = "hive_invite_dismissed")]
-    pub hive_invite_dismissed: bool,
     /// OBS Studio's WebSocket port, for `obs:` Deck commands.
     pub obs_port: u16,
     /// OBS's WebSocket password, encrypted with Windows DPAPI (base64). Never stored in clear.
@@ -546,12 +508,8 @@ pub struct Settings {
 impl Default for Settings {
     fn default() -> Self {
         Settings {
-            theme: Theme::default(),
-            seed: "wallpaper".into(),
             color_mode: ColorMode::default(),
-            amoled: false,
             backdrop: true,
-            comb_motion: true,
             close_to_tray: default_close_to_tray(),
             auto_clipboard: true,
             clipboard_history: true,
@@ -600,7 +558,6 @@ impl Default for Settings {
             walkthrough_completed: false,
             walkthrough_step: 0,
             whats_new_dismissed: false,
-            hive_invite_dismissed: false,
             obs_port: crate::obs::DEFAULT_PORT,
             obs_password: None,
             window_screen: None,
@@ -782,12 +739,8 @@ mod tests {
         assert!(!stream_pc_audio_to_phone());
 
         let settings = Settings {
-            theme: Theme::Graphite,
-            seed: "ocean".into(),
             color_mode: ColorMode::Dark,
-            amoled: false,
             backdrop: false,
-            comb_motion: false,
             close_to_tray: false,
             auto_clipboard: false,
             clipboard_history: false,
@@ -836,7 +789,6 @@ mod tests {
             walkthrough_completed: true,
             walkthrough_step: 4,
             whats_new_dismissed: true,
-            hive_invite_dismissed: true,
             obs_port: crate::obs::DEFAULT_PORT,
             obs_password: None,
             window_screen: Some("DP-1".into()),
@@ -853,10 +805,10 @@ mod tests {
     #[test]
     fn missing_fields_take_defaults_and_corrupt_files_are_set_aside() {
         let dir = tempfile::tempdir().unwrap();
-        fs::write(dir.path().join(FILE_NAME), r#"{ "theme": "graphite" }"#).unwrap();
+        fs::write(dir.path().join(FILE_NAME), r#"{ "backdrop": false }"#).unwrap();
         let loaded = Settings::load(dir.path());
-        assert_eq!(loaded.theme, Theme::Graphite);
-        assert_eq!(loaded.seed, "wallpaper");
+        assert!(!loaded.backdrop);
+        assert!(loaded.close_to_tray);
 
         fs::write(dir.path().join(FILE_NAME), "{ not json").unwrap();
         assert_eq!(Settings::load(dir.path()), Settings::default());
@@ -877,8 +829,6 @@ mod tests {
         }"#;
         fs::write(dir.path().join(FILE_NAME), snap_d16a106).unwrap();
         let s = Settings::load(dir.path());
-        assert_eq!(s.theme, Theme::Bloom);
-        assert_eq!(s.seed, "honey");
         assert_eq!(s.color_mode, ColorMode::Dark);
         assert!(!s.backdrop);
         assert!(!s.close_to_tray);
@@ -899,7 +849,6 @@ mod tests {
         }"#;
         fs::write(dir.path().join(FILE_NAME), snap_4659bd9).unwrap();
         let s = Settings::load(dir.path());
-        assert_eq!(s.theme, Theme::Graphite);
         assert_eq!(s.color_mode, ColorMode::Light);
         assert!(!s.auto_clipboard);
         assert!(!s.send_to_menu);
@@ -1003,8 +952,6 @@ mod tests {
         }"#;
         fs::write(dir.path().join(FILE_NAME), snap_ebe0012).unwrap();
         let s = Settings::load(dir.path());
-        assert_eq!(s.theme, Theme::Graphite);
-        assert_eq!(s.seed, "phone");
         assert_eq!(s.timeline_retention_days, 365);
         assert_eq!(s.continuity_photo_hotkey, "Ctrl+Shift+C");
         assert_eq!(s.continuity_scan_hotkey, "Ctrl+Shift+D");
@@ -1044,8 +991,6 @@ mod tests {
         }"#;
         fs::write(dir.path().join(FILE_NAME), legacy_snake).unwrap();
         let s = Settings::load(dir.path());
-        assert_eq!(s.theme, Theme::Graphite);
-        assert_eq!(s.seed, "ocean");
         assert_eq!(s.start_with_windows, Some(true));
         assert!(!s.close_to_tray);
         assert!(!s.auto_clipboard);
@@ -1064,8 +1009,6 @@ mod tests {
         }"#;
         fs::write(dir.path().join(FILE_NAME), unknown_enums).unwrap();
         let s = Settings::load(dir.path());
-        assert_eq!(s.theme, Theme::Bloom);
-        assert_eq!(s.seed, "ultraviolet");
         assert_eq!(s.color_mode, ColorMode::System);
         assert_eq!(s.recordings_format, RecordingFormat::M4a);
     }
@@ -1110,7 +1053,7 @@ mod tests {
 
         // 4. Upgrade with existing paired device: legacy settings JSON has no walkthrough fields,
         // so walkthrough_completed == false and walkthrough_step == 0, while paired_count > 0.
-        fs::write(dir.path().join(FILE_NAME), r#"{ "theme": "bloom" }"#).unwrap();
+        fs::write(dir.path().join(FILE_NAME), r#"{ "theme": "bloom", "seed": "honey" }"#).unwrap();
         let mut upgraded = Settings::load(dir.path());
         assert!(!upgraded.walkthrough_completed);
         assert_eq!(upgraded.walkthrough_step, 0);

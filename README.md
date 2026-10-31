@@ -139,8 +139,8 @@ The [user guide](docs/guide/README.md) walks through every step and feature.
 searchable **Timeline** of everything that moved, a **Command Palette**
 (`Ctrl+Alt+Space`), a slide-out **Shelf**, a home-screen widget, and a
 **Connection Doctor** that finds and fixes what keeps devices from connecting.
-Four themes, **Hive**, **Bloom**, **Glass** and **Graphite**, each in light
-and dark.
+One look, **Glass**: translucent cards over the window backdrop, in light and
+dark.
 
 ### Platform support
 
@@ -179,20 +179,11 @@ Details: [Privacy and security](docs/guide/privacy-and-security.md) and the
 
 ## Screenshots
 
-**Hive** is an exclusive theme: honey, with a living honeycomb that breathes
-behind the app.
+**Glass**, translucent cards over the Windows backdrop, in light and dark.
 
-| Hive, light | Hive, dark |
+| Home | Settings |
 |:---:|:---:|
-| <img src="docs/screenshots/desktop-hive-light.png" alt="Home in the Hive theme, light"> | <img src="docs/screenshots/desktop-hive-dark.png" alt="Home in the Hive theme, dark"> |
-
-Also **Bloom**, soft and colorful; **Glass**, translucent cards over the
-Windows backdrop; and **Graphite**, ink on paper. All in light and dark.
-
-| Bloom | Glass | Graphite |
-|:---:|:---:|:---:|
-| <img src="docs/screenshots/desktop-bloom-home.png" alt="Home with notifications and music playing on the PC, Bloom theme"> | <img src="docs/screenshots/desktop-glass-home.png" alt="Home with notifications and music playing on the PC, Glass theme"> | <img src="docs/screenshots/desktop-graphite-home.png" alt="Home with notifications and music playing on the PC, Graphite theme"> |
-| <img src="docs/screenshots/desktop-bloom-settings.png" alt="Settings, Bloom theme"> | <img src="docs/screenshots/desktop-glass-settings.png" alt="Settings, Glass theme"> | <img src="docs/screenshots/desktop-graphite-settings.png" alt="Settings, Graphite theme, dark"> |
+| <img src="docs/screenshots/desktop-glass-home.png" alt="Home with notifications and music playing on the PC, Glass theme"> | <img src="docs/screenshots/desktop-glass-settings.png" alt="Settings, Glass theme"> |
 
 <p align="center">
   <img src="docs/screenshots/desktop-apps.png" alt="The Apps page with two phone apps open in their own windows" width="880"><br>

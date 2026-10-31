@@ -6,9 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,15 +13,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
@@ -37,7 +31,6 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -89,7 +82,6 @@ import app.noddy.android.notifications.NotificationListener
 import app.noddy.android.ui.guide.GuideHighlightTarget
 import app.noddy.android.ui.theme.Appearance
 import app.noddy.android.ui.theme.LocalGlassTheme
-import app.noddy.android.ui.theme.Tokens
 import app.noddy.android.ui.theme.glassModalBlur
 import app.noddy.android.ui.theme.glassModalContainerColor
 import app.noddy.android.ui.theme.liquidGlassCard
@@ -225,7 +217,7 @@ fun SettingsScreen(
                             onClick = { activeCategory = id },
                             label = { Text(stringResource(label)) },
                             // Solid like the cards: the row sits right on the
-                            // background (Hive's comb showed through).
+                            // background.
                             colors = FilterChipDefaults.filterChipColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
                                 selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -240,16 +232,6 @@ fun SettingsScreen(
         if (showAppearance) {
             item(key = "appearance", contentType = "section") {
                 Section(stringResource(R.string.settings_appearance)) {
-                    Label(stringResource(R.string.settings_theme))
-                    Choice(
-                        listOf(
-                            "hive" to stringResource(R.string.theme_hive),
-                            "bloom" to stringResource(R.string.theme_bloom),
-                            "glass" to "Glass",
-                            "graphite" to stringResource(R.string.theme_graphite),
-                        ),
-                        appearance.theme,
-                    ) { value -> onAppearance { it.copy(theme = value) } }
                     Label(stringResource(R.string.settings_mode))
                     Choice(
                         listOf(
@@ -274,196 +256,6 @@ fun SettingsScreen(
                             language,
                         ) { value ->
                             if (value == "" || value == "en") AppLanguage.set(context, value) else pickLanguage = true
-                        }
-                    }
-                    if (appearance.theme == "hive") {
-                        SettingRowDivider()
-                        val combTitle = stringResource(R.string.settings_comb_motion)
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                            Column(Modifier.weight(1f).padding(end = 12.dp)) {
-                                Text(combTitle, style = MaterialTheme.typography.titleSmall)
-                                Text(
-                                    stringResource(R.string.settings_comb_motion_hint),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                            Switch(
-                                checked = appearance.combMotion,
-                                onCheckedChange = { on -> onAppearance { it.copy(combMotion = on) } },
-                                colors = app.noddy.android.ui.theme.nectarSwitchColors(),
-                                modifier = Modifier.semantics { contentDescription = combTitle },
-                            )
-                        }
-                    }
-                    if (appearance.theme == "graphite" && appearance.mode != "light") {
-                        SettingRowDivider()
-                        val amoledTitle = stringResource(R.string.settings_amoled)
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                            Column(Modifier.weight(1f).padding(end = 12.dp)) {
-                                Text(amoledTitle, style = MaterialTheme.typography.titleSmall)
-                                Text(
-                                    stringResource(R.string.settings_amoled_hint),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                            Switch(
-                                checked = appearance.amoled,
-                                onCheckedChange = { on -> onAppearance { it.copy(amoled = on) } },
-                                colors = app.noddy.android.ui.theme.nectarSwitchColors(),
-                                modifier = Modifier.semantics { contentDescription = amoledTitle },
-                            )
-                        }
-                    }
-                    if (appearance.theme == "bloom" || appearance.theme == "glass") {
-                        SettingRowDivider()
-                        val artworkSync = appearance.seed == "artwork"
-                        val artworkColorLabel = stringResource(R.string.settings_theme_artwork_color)
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                            Column(Modifier.weight(1f).padding(end = 12.dp)) {
-                                Text(stringResource(R.string.settings_theme_artwork_color), style = MaterialTheme.typography.titleSmall)
-                                Text(
-                                    stringResource(R.string.settings_theme_artwork_body),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                            Switch(
-                                checked = artworkSync,
-                                onCheckedChange = { on ->
-                                    onAppearance {
-                                        it.copy(seed = if (on) "artwork" else Tokens.DEFAULT_SEED)
-                                    }
-                                },
-                                colors = app.noddy.android.ui.theme.nectarSwitchColors(),
-                                modifier = Modifier.semantics { contentDescription = artworkColorLabel },
-                            )
-                        }
-                        if (!artworkSync && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            SettingRowDivider()
-                            val dynamicColorTitle = stringResource(R.string.settings_dynamic_color)
-                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                                Column(Modifier.weight(1f).padding(end = 12.dp)) {
-                                    Text(dynamicColorTitle, style = MaterialTheme.typography.titleSmall)
-                                    Text(
-                                        stringResource(R.string.settings_dynamic_color_hint),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                                Switch(
-                                    checked = appearance.dynamicColor,
-                                    onCheckedChange = { on -> onAppearance { it.copy(dynamicColor = on) } },
-                                    colors = app.noddy.android.ui.theme.nectarSwitchColors(),
-                                    modifier = Modifier.semantics { contentDescription = dynamicColorTitle },
-                                )
-                            }
-                        }
-                        if (!artworkSync) {
-                            SettingRowDivider()
-                            val blackSwatchSelected = (!appearance.dynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) && appearance.seed == "black"
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .horizontalScroll(rememberScrollState()),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Tokens.bloomSeeds.forEach { (name, seed) ->
-                                    val isSelected = (!appearance.dynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) && appearance.seed == name
-                                    val seedLabel = stringResource(
-                                        when (name) {
-                                            "honey" -> R.string.settings_seed_honey
-                                            "lavender" -> R.string.settings_seed_lavender
-                                            "ocean" -> R.string.settings_seed_ocean
-                                            "sage" -> R.string.settings_seed_sage
-                                            "black" -> R.string.settings_seed_black
-                                            else -> R.string.settings_seed_honey
-                                        },
-                                    )
-                                    val isBlackSeed = name == "black"
-                                    val borderColor = when {
-                                        isSelected -> MaterialTheme.colorScheme.onSurface
-                                        isBlackSeed -> androidx.compose.ui.graphics.Color.White.copy(alpha = 0.28f)
-                                        else -> MaterialTheme.colorScheme.outlineVariant
-                                    }
-                                    val borderWidth = when {
-                                        isSelected -> 2.5.dp
-                                        isBlackSeed -> 1.2.dp
-                                        else -> 1.dp
-                                    }
-                                    androidx.compose.foundation.layout.Box(
-                                        contentAlignment = Alignment.Center,
-                                        modifier = Modifier
-                                            .size(38.dp)
-                                            .drawBehind {
-                                                drawCircle(color = seed.color)
-                                                val strokePx = borderWidth.toPx()
-                                                drawCircle(
-                                                    color = borderColor,
-                                                    radius = (size.minDimension - strokePx) * 0.5f,
-                                                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = strokePx),
-                                                )
-                                            }
-                                            .clickable {
-                                                onAppearance {
-                                                    it.copy(dynamicColor = false, seed = name)
-                                                }
-                                            }
-                                            .semantics {
-                                                role = Role.RadioButton
-                                                selected = isSelected
-                                                contentDescription = seedLabel
-                                            },
-                                    ) {
-                                        if (isSelected) {
-                                            Text(
-                                                text = "✓",
-                                                style = MaterialTheme.typography.labelLarge,
-                                                color = if (isBlackSeed) androidx.compose.ui.graphics.Color.White else androidx.compose.ui.graphics.Color.Black,
-                                            )
-                                        }
-                                    }
-                                }
-
-                                // Compact inline AMOLED toggle pill inside the swatch row when Black seed is selected
-                                if (blackSwatchSelected) {
-                                    val amoledLabel = stringResource(R.string.settings_amoled)
-                                    Surface(
-                                        shape = RoundedCornerShape(20.dp),
-                                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                                        border = BorderStroke(
-                                            1.dp,
-                                            if (appearance.amoled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
-                                        ),
-                                        modifier = Modifier.height(38.dp),
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.padding(start = 12.dp, end = 6.dp),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                        ) {
-                                            Text(
-                                                text = "AMOLED",
-                                                style = MaterialTheme.typography.labelMedium,
-                                                color = if (appearance.amoled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                            )
-                                            Switch(
-                                                checked = appearance.amoled,
-                                                onCheckedChange = { on -> onAppearance { it.copy(amoled = on) } },
-                                                colors = app.noddy.android.ui.theme.nectarSwitchColors(),
-                                                modifier = Modifier
-                                                    .graphicsLayer {
-                                                        scaleX = 0.76f
-                                                        scaleY = 0.76f
-                                                    }
-                                                    .semantics { contentDescription = amoledLabel },
-                                            )
-                                        }
-                                    }
-                                }
-                            }
                         }
                     }
                 }

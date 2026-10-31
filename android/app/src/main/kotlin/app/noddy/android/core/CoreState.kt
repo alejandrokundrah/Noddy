@@ -250,8 +250,6 @@ data class CoreState(
     val localsendPeers: List<LocalSendPeer> = emptyList(),
     /** IDs of paired PCs currently typing on this phone without mirroring. */
     val keyboardFromPc: Set<String> = emptySet(),
-    /** Vibrant seed color (`0xRRGGBB`) extracted from currently playing phone or PC media artwork. */
-    val activeMediaColor: UInt? = null,
 ) {
     fun device(id: String): Device? = devices.firstOrNull { it.id == id }
 

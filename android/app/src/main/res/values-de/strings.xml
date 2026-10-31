@@ -51,12 +51,9 @@
     <!-- Settings -->
     <string name="settings_title">Einstellungen</string>
     <string name="settings_appearance">Darstellung</string>
-    <string name="settings_theme">Design</string>
     <string name="settings_mode">Modus</string>
     <string name="settings_language">Sprache</string>
     <string name="settings_language_more">Mehr</string>
-    <string name="settings_dynamic_color">Farben aus Hintergrundbild</string>
-    <string name="settings_dynamic_color_hint">Farben deines Hintergrundbilds verwenden.</string>
     <string name="settings_devices">PCs</string>
     <string name="settings_about">Info</string>
     <string name="settings_notifications">Benachrichtigungen</string>
@@ -220,15 +217,6 @@
     <string name="battery_guide_pixel">Auf Pixel: Öffne „App-Info › App-Akkunutzung“, tippe auf „Hintergrundnutzung zulassen“ und wähle „Uneingeschränkt“.</string>
     <string name="action_manage">Verwalten</string>
     <string name="action_app_info">App-Info</string>
-    <string name="theme_hive">Wabe</string>
-    <string name="hive_invite_title">Probiere „Wabe“, das neue Design</string>
-    <string name="hive_invite_text">Honig auf Anthrazit oder warmem Wachs, mit einer lebendigen Bienenwabe im Hintergrund der App. Jederzeit in den Einstellungen änderbar.</string>
-    <string name="hive_invite_try">Wabe ausprobieren</string>
-    <string name="hive_invite_dismiss">Jetzt nicht</string>
-    <string name="settings_comb_motion">Animierte Wabe</string>
-    <string name="settings_comb_motion_hint">Die Bienenwabe atmet und pulsiert sanft. Bei aktivierter Option „Animationen entfernen“ oder im Energiesparmodus bleibt sie ruhig.</string>
-    <string name="theme_bloom">Blüte</string>
-    <string name="theme_graphite">Graphit</string>
     <string name="mode_system">System</string>
     <string name="mode_light">Hell</string>
     <string name="mode_dark">Dunkel</string>
@@ -595,14 +583,6 @@
     <string name="error_unsupported">Die App auf dem PC unterstützt das noch nicht.</string>
     <string name="error_generic">Etwas ist schiefgelaufen.</string>
 
-    <!-- Theme seed names -->
-    <string name="settings_seed_honey">Honig</string>
-    <string name="settings_seed_lavender">Lavendel</string>
-    <string name="settings_seed_ocean">Ozean</string>
-    <string name="settings_seed_sage">Salbei</string>
-    <string name="settings_seed_black">Schwarz</string>
-    <string name="settings_amoled">Reines Schwarz (AMOLED)</string>
-    <string name="settings_amoled_hint">Echte dunkle Oberflächen in #000000 für OLED-Bildschirme.</string>
 
     <!-- Deck defaults & accessibility -->
     <string name="deck_tile_with_badge">%1$s, %2$s</string>
@@ -1321,7 +1301,6 @@
     <string name="home_section_system">System &amp; Energie</string>
     <string name="settings_category_devices">Geräte</string>
     <string name="settings_category_features">Funktionen &amp; Daten</string>
-    <string name="settings_theme_artwork_color">Farbe aus Mediencover</string>
     <string name="settings_mobile_data_body">Unterwegs ohne WLAN über LTE/5G oder Relay verbunden bleiben</string>
     <string name="settings_background_clipboard_title">Hintergrundzugriff auf Zwischenablage</string>
     <string name="settings_guide_card_body">Durchsuche alle Funktionen, prüfe aktuelle Voraussetzungen oder springe direkt zu den Einstellungen.</string>
@@ -1340,7 +1319,6 @@
     <string name="queue_kind_task_alert">Aufgabenbenachrichtigung</string>
     <string name="queue_kind_camera_request">Kameraanfrage</string>
 
-    <string name="settings_theme_artwork_body">App- &amp; Glasfarben an das aktuelle Mediencover anpassen</string>
     <string name="settings_wireless_debugging_active">Aktiv über Kabelloses Debugging · Zwischenablage wird automatisch synchronisiert</string>
     <string name="settings_wireless_debugging_hint">Erlaube Kabelloses Debugging, damit die Zwischenablage im Hintergrund synchronisiert wird, oder nutze „Zwischenablage senden“ in der Benachrichtigung</string>
 

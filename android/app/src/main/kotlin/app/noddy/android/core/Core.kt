@@ -100,7 +100,6 @@ class Core(context: Context, private val scope: CoroutineScope) : EventListener 
     private val pcSpeakerPlayer = PcSpeakerPlayer()
     /** What plays on this phone, for PCs (needs notification access). */
     private val phoneMedia = PhoneMedia(this.context) { players ->
-        syncActiveMediaColor()
         enqueueNotificationOp { it.mediaChanged(players) }
     }
     private val platform = PhonePlatform(
@@ -200,19 +199,11 @@ class Core(context: Context, private val scope: CoroutineScope) : EventListener 
     /** What plays on the PCs, in Android's media controls. */
     val pcMedia = PcMedia(
         context = this.context,
-        onSeedColorChanged = { syncActiveMediaColor() },
         setPcAudio = { pc, volume, muted -> setPcAudio(pc, volume, muted) },
     ) { pc, player, action, position ->
         command { it.mediaCommand(pc, player, action, position) }
     }.also { it.volumeKeys(app.noddy.android.ui.Preferences.isVolumeKeysControlPcEnabled(this.context)) }
 
-    private fun syncActiveMediaColor() {
-        val nextColor = phoneMedia.activeSeedColor ?: pcMedia.activeSeedColor
-        if (_state.value.activeMediaColor != nextColor) {
-            _state.update { if (it.activeMediaColor != nextColor) it.copy(activeMediaColor = nextColor) else it }
-        }
-        accent.updateMediaColor(nextColor)
-    }
     /**
      * Notification changes, in order: a removal must never overtake the post
      * it removes. Runs once the node is up.
@@ -484,7 +475,7 @@ class Core(context: Context, private val scope: CoroutineScope) : EventListener 
                     )
                     awaitClose { context.contentResolver.unregisterContentObserver(observer) }
                 }.collect {
-                    runCatching { started.updateDeviceInfo(deviceInfo(context, _state.value.activeMediaColor)) }
+                    runCatching { started.updateDeviceInfo(deviceInfo(context)) }
                         .onFailure { Log.w(TAG, "can't send the new device name", it) }
                 }
             }
