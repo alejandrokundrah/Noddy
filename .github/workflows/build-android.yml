@@ -1,0 +1,106 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Builds the Android APK on demand, without a version tag:
+# Actions > "Build Android APK" > Run workflow. The APK is attached to the
+# run as an artifact; tick "Publish" to also put it on a pre-release.
+#
+# debug   needs no secrets (signed with the debug key; it can't update to or
+#         from an official release, so uninstall one before installing the other)
+# release needs the ANDROID_KEYSTORE and ANDROID_KEYSTORE_PASSWORD secrets
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: "Build type"
+        type: choice
+        options: [debug, release]
+        default: debug
+      publish:
+        description: "Also publish it as a pre-release"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  android:
+    name: Android APK (${{ inputs.variant }})
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install the pinned Rust toolchain and the Android targets
+        run: |
+          rustup show active-toolchain || rustup toolchain install
+          rustup target add aarch64-linux-android armv7-linux-androideabi
+
+      - name: Install cargo-ndk
+        run: cargo install --locked cargo-ndk
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: android-actions/setup-android@v4
+        with:
+          cmdline-tools-version: "16111833"
+          packages: "platforms;android-37.0 ndk;30.0.16248370 build-tools;37.0.0"
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: The signing key (release only)
+        if: inputs.variant == 'release'
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
+        run: |
+          if [ -z "$KEYSTORE" ]; then echo "::error::the ANDROID_KEYSTORE secret isn't set; use the debug build type instead"; exit 1; fi
+          echo "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/release.jks"
+
+      - name: Build
+        working-directory: android
+        env:
+          NODDY_KEYSTORE: ${{ runner.temp }}/release.jks
+          NODDY_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        # Phones: 64-bit ARM, and 32-bit ARM for older ones.
+        run: |
+          if [ "${{ inputs.variant }}" = "release" ]; then task=assembleRelease; else task=assembleDebug; fi
+          ./gradlew --no-daemon "$task" -Pnoddy.abis=arm64-v8a,armeabi-v7a
+
+      - name: Name the APK
+        run: |
+          version=$(grep -m1 '^version = ' Cargo.toml | cut -d'"' -f2)
+          apk=$(ls android/app/build/outputs/apk/${{ inputs.variant }}/*.apk | head -n1)
+          if [ "${{ inputs.variant }}" = "release" ]; then
+            "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --print-certs "$apk"
+          fi
+          mkdir -p out
+          cp "$apk" "out/Noddy-${version}-android-${{ inputs.variant }}.apk"
+          ls -l out
+
+      - name: Forget the key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.jks"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: noddy-android-${{ inputs.variant }}
+          path: out/*.apk
+          if-no-files-found: error
+
+      - name: Publish as a pre-release
+        if: inputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "android-build-${{ github.run_number }}" out/*.apk \
+            --repo "${{ github.repository }}" \
+            --target "${{ github.sha }}" \
+            --prerelease \
+            --title "Android build ${{ github.run_number }} (${{ inputs.variant }})" \
+            --notes "Built from ${{ github.sha }} by the Build Android APK workflow."
