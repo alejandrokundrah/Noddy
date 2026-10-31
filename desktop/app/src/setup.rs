@@ -380,13 +380,7 @@ pub fn remove(installed: &Path, mut on_event: impl FnMut(Event)) -> Outcome {
     } else {
         crate::win::elevated::run_elevated(
             Path::new("rm"),
-            &[
-                "-rf",
-                "--",
-                "/opt/noddy",
-                "/usr/local/bin/noddy-desktop",
-                "/usr/bin/noddy-desktop",
-            ],
+            &["-rf", "--", "/opt/noddy", "/usr/local/bin/noddy-desktop", "/usr/bin/noddy-desktop"],
         )
     };
     match res {
@@ -574,8 +568,7 @@ pub fn open_app(dir: &Path) -> Result<(), String> {
 pub fn hand_over_removal(installed: &Path) -> Result<bool, String> {
     let exe = std::env::current_exe().map_err(|e| e.to_string())?;
     let temp = std::env::temp_dir();
-    if exe.starts_with(&temp)
-        || (cfg!(debug_assertions) && std::env::var_os("NODDY_SETUP_PREVIEW").is_some())
+    if exe.starts_with(&temp) || (cfg!(debug_assertions) && std::env::var_os("NODDY_SETUP_PREVIEW").is_some())
     {
         return Ok(false);
     }

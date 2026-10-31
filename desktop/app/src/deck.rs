@@ -245,9 +245,7 @@ pub fn handle_press(_peer: &DeviceId, tile_id: &str) -> Result<(), String> {
 /// (`Platform::set_pc_audio`).
 pub fn handle_set_audio(peer: &DeviceId, volume: Option<u8>, muted: Option<bool>) -> Result<(), String> {
     if let Some(level) = volume {
-        if level == noddy_core::deck::PHONE_SPEAKER_OFF
-            || level == noddy_core::deck::PHONE_SPEAKER_ON
-        {
+        if level == noddy_core::deck::PHONE_SPEAKER_OFF || level == noddy_core::deck::PHONE_SPEAKER_ON {
             let on = level == noddy_core::deck::PHONE_SPEAKER_ON;
             crate::pc_audio_stream::set_target(on.then_some(*peer));
             crate::pc_audio_stream::set_enabled(on);

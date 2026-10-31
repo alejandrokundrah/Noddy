@@ -126,11 +126,7 @@ impl Platform for DesktopPlatform {
     ) -> Result<(), MediaError> {
         win::media_sessions::command(player, action, position)
     }
-    fn mirror_requested(
-        &self,
-        peer: &noddy_core::DeviceId,
-        options: &MirrorStart,
-    ) -> Result<(), String> {
+    fn mirror_requested(&self, peer: &noddy_core::DeviceId, options: &MirrorStart) -> Result<(), String> {
         if options.session != noddy_core::MIRROR_SCREEN {
             return Err("unsupported mirror session on PC".into());
         }
@@ -157,16 +153,10 @@ impl Platform for DesktopPlatform {
     ) -> Option<std::sync::Arc<dyn noddy_core::MirrorSink>> {
         mirror::sink(peer, session)
     }
-    fn mic_sink(
-        &self,
-        peer: &noddy_core::DeviceId,
-    ) -> Option<std::sync::Arc<dyn noddy_core::MicSink>> {
+    fn mic_sink(&self, peer: &noddy_core::DeviceId) -> Option<std::sync::Arc<dyn noddy_core::MicSink>> {
         phone_mic::sink(peer)
     }
-    fn webcam_sink(
-        &self,
-        peer: &noddy_core::DeviceId,
-    ) -> Option<std::sync::Arc<dyn noddy_core::WebcamSink>> {
+    fn webcam_sink(&self, peer: &noddy_core::DeviceId) -> Option<std::sync::Arc<dyn noddy_core::WebcamSink>> {
         webcam::sink(peer)
     }
     fn remote_input(
@@ -762,18 +752,14 @@ mod tests {
     #[test]
     fn parse_options_recognizes_task_flag() {
         let find_opts = parse_options_from(
-            ["--data-dir", r"C:\Temp\noddy-test", "--task", "find-phone"]
-                .into_iter()
-                .map(OsString::from),
+            ["--data-dir", r"C:\Temp\noddy-test", "--task", "find-phone"].into_iter().map(OsString::from),
         );
         assert_eq!(find_opts.data_dir, Some(PathBuf::from(r"C:\Temp\noddy-test")));
         assert_eq!(find_opts.task.as_deref(), Some("find-phone"));
         assert!(find_opts.minimized);
 
         let timeline_opts = parse_options_from(
-            ["--data-dir", r"C:\Temp\noddy-test", "--task", "open-timeline"]
-                .into_iter()
-                .map(OsString::from),
+            ["--data-dir", r"C:\Temp\noddy-test", "--task", "open-timeline"].into_iter().map(OsString::from),
         );
         assert_eq!(timeline_opts.task.as_deref(), Some("open-timeline"));
         assert!(!timeline_opts.minimized);

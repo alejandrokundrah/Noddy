@@ -277,10 +277,7 @@ mod imp {
 
     pub fn on_event(event: &noddy_core::NodeEvent) {
         match event {
-            noddy_core::NodeEvent::LinkChanged {
-                device,
-                link: noddy_core::LinkState::Offline { .. },
-            }
+            noddy_core::NodeEvent::LinkChanged { device, link: noddy_core::LinkState::Offline { .. } }
             | noddy_core::NodeEvent::DeviceRemoved(device) => {
                 stop_for(device);
             }

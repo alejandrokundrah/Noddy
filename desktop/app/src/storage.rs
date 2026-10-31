@@ -804,10 +804,7 @@ mod imp {
         let body = if no_all_files_access {
             tr!("Storage", "On the phone, allow All files access for Noddy.")
         } else {
-            tr!(
-                "Storage",
-                "On the phone, turn on Browse this phone's storage in File Explorer in Noddy."
-            )
+            tr!("Storage", "On the phone, turn on Browse this phone's storage in File Explorer in Noddy.")
         };
         crate::win::toast::show(crate::win::toast::Toast {
             device: crate::transfers::TOAST_GROUP.into(),
@@ -1480,10 +1477,7 @@ mod imp {
             let root = Path::new(r"C:\Users\alice\Noddy\Pixel 9");
             assert_eq!(relative_path_under_root(root, root), Some(String::new()));
             assert_eq!(
-                relative_path_under_root(
-                    root,
-                    Path::new(r"C:\Users\alice\Noddy\Pixel 9\DCIM\Camera\a.jpg")
-                ),
+                relative_path_under_root(root, Path::new(r"C:\Users\alice\Noddy\Pixel 9\DCIM\Camera\a.jpg")),
                 Some("DCIM/Camera/a.jpg".into())
             );
             assert_eq!(
@@ -1493,10 +1487,7 @@ mod imp {
             // "İ" lowercases to two characters: the path still splits in the right place.
             let turkish = Path::new(r"C:\Users\alice\Noddy\İpek's Phone");
             assert_eq!(
-                relative_path_under_root(
-                    turkish,
-                    Path::new(r"C:\Users\alice\Noddy\İpek's Phone\DCIM\a.jpg")
-                ),
+                relative_path_under_root(turkish, Path::new(r"C:\Users\alice\Noddy\İpek's Phone\DCIM\a.jpg")),
                 Some("DCIM/a.jpg".into())
             );
             assert_eq!(

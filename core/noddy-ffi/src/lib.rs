@@ -1870,9 +1870,7 @@ impl From<core::Error> for NoddyError {
             core::Error::Network(reason) => NoddyError::Network { reason },
             core::Error::Storage(reason) => NoddyError::Storage { reason },
             core::Error::Io(e) => NoddyError::Storage { reason: e.to_string() },
-            core::Error::Protocol(reason) | core::Error::Internal(reason) => {
-                NoddyError::Internal { reason }
-            }
+            core::Error::Protocol(reason) | core::Error::Internal(reason) => NoddyError::Internal { reason },
         }
     }
 }
@@ -2355,9 +2353,7 @@ fn file_to_send(file: FileToSend) -> Result<core::OutgoingFile> {
         }
         #[cfg(not(unix))]
         FileToSend::Fd { .. } => {
-            return Err(NoddyError::Internal {
-                reason: "file descriptors exist only on Android".into(),
-            });
+            return Err(NoddyError::Internal { reason: "file descriptors exist only on Android".into() });
         }
     })
 }
@@ -4379,9 +4375,10 @@ impl NoddyNode {
         let mac_bytes = core::parse_mac(&mac)
             .ok_or_else(|| NoddyError::Internal { reason: "invalid MAC address".into() })?;
         let bcast = match broadcast.as_deref().map(str::trim).filter(|s| !s.is_empty()) {
-            Some(s) => Some(s.parse::<std::net::Ipv4Addr>().map_err(|_| NoddyError::Internal {
-                reason: "invalid broadcast IPv4 address".into(),
-            })?),
+            Some(s) => Some(
+                s.parse::<std::net::Ipv4Addr>()
+                    .map_err(|_| NoddyError::Internal { reason: "invalid broadcast IPv4 address".into() })?,
+            ),
             None => None,
         };
         let node = self.node.clone();

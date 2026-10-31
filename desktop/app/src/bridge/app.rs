@@ -550,9 +550,7 @@ pub fn install_update_in_background() {
             let _ = qt.queue(move |mut object| match result {
                 Ok(()) => {
                     object.as_mut().set_update_progress(-1.0);
-                    object
-                        .as_mut()
-                        .set_update_status(QString::from("Installing. Noddy reopens by itself."));
+                    object.as_mut().set_update_status(QString::from("Installing. Noddy reopens by itself."));
                 }
                 Err(message) => {
                     object.as_mut().set_update_busy(false);
@@ -1208,10 +1206,7 @@ impl qobject::AppController {
                 .send_queue
                 .iter()
                 .filter(|i| {
-                    matches!(
-                        i.status,
-                        noddy_core::QueueStatus::Waiting | noddy_core::QueueStatus::Sending
-                    )
+                    matches!(i.status, noddy_core::QueueStatus::Waiting | noddy_core::QueueStatus::Sending)
                 })
                 .count();
             (
@@ -1287,10 +1282,8 @@ impl qobject::AppController {
         let mut tooltip = match (devices, online) {
             (0, _) => tr!("App", "Noddy · no devices paired"),
             (_, 0) => tr!("App", "Noddy · not connected"),
-            (_, 1) => battery.map_or_else(
-                || tr!("App", "Noddy · 1 device connected"),
-                |b| tr!("App", "Noddy · %1", b),
-            ),
+            (_, 1) => battery
+                .map_or_else(|| tr!("App", "Noddy · 1 device connected"), |b| tr!("App", "Noddy · %1", b)),
             (_, n) => tr!("App", "Noddy · %1 devices connected", n),
         };
         if waiting_count > 0 {

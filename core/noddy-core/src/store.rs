@@ -2965,9 +2965,7 @@ mod tests {
 
     #[test]
     fn data_retention_counts_and_clear_all_preserves_peers_and_meta() {
-        use noddy_protocol::messages::{
-            Notification, NotificationChatMessage, NotificationConversation,
-        };
+        use noddy_protocol::messages::{Notification, NotificationChatMessage, NotificationConversation};
         let store = Store::in_memory().unwrap();
         let peer = DeviceId([8; 32]);
         let now = 1_700_000_000i64;

@@ -19,11 +19,7 @@ unsafe extern "C" {
         capacity: usize,
     ) -> *mut c_void;
     fn noddy_video_encoder_destroy(encoder: *mut c_void);
-    fn noddy_video_encoder_next_device(
-        encoder: *mut c_void,
-        error: *mut c_char,
-        capacity: usize,
-    ) -> bool;
+    fn noddy_video_encoder_next_device(encoder: *mut c_void, error: *mut c_char, capacity: usize) -> bool;
     fn noddy_video_encoder_backend(encoder: *const c_void) -> *const c_char;
     fn noddy_video_encoder_send(
         encoder: *mut c_void,
@@ -87,9 +83,8 @@ impl Encoder {
     pub(crate) fn next_device(&mut self) -> bool {
         let mut error = [0 as c_char; 512];
         // SAFETY: this capture thread owns the encoder and its packet storage.
-        let switched = unsafe {
-            noddy_video_encoder_next_device(self.native.as_ptr(), error.as_mut_ptr(), error.len())
-        };
+        let switched =
+            unsafe { noddy_video_encoder_next_device(self.native.as_ptr(), error.as_mut_ptr(), error.len()) };
         if switched {
             self.last_output = Instant::now();
         } else {

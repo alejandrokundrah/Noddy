@@ -55,11 +55,7 @@ impl NativePicture {
 unsafe extern "C" {
     fn noddy_video_decoder_create(hevc: bool, error: *mut c_char, capacity: usize) -> *mut c_void;
     fn noddy_video_decoder_destroy(decoder: *mut c_void);
-    fn noddy_video_decoder_next_device(
-        decoder: *mut c_void,
-        error: *mut c_char,
-        capacity: usize,
-    ) -> bool;
+    fn noddy_video_decoder_next_device(decoder: *mut c_void, error: *mut c_char, capacity: usize) -> bool;
     fn noddy_video_decoder_backend(decoder: *const c_void) -> *const c_char;
     fn noddy_video_decoder_send(
         decoder: *mut c_void,

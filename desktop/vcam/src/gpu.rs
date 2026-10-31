@@ -870,11 +870,8 @@ mod tests {
     }
 
     fn pair() -> (GpuPublisher, GpuReader) {
-        let name = format!(
-            "Local\\NoddyGpuTest_{}_{}",
-            std::process::id(),
-            TEST_ID.fetch_add(1, Ordering::Relaxed)
-        );
+        let name =
+            format!("Local\\NoddyGpuTest_{}_{}", std::process::id(), TEST_ID.fetch_add(1, Ordering::Relaxed));
         let reader = reader_with_mapping(&name);
         let publisher = GpuPublisher::new_with_mapping(&name).unwrap();
         (publisher, reader)
