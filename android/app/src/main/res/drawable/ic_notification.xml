@@ -3,13 +3,7 @@
 <!-- The Noddy mark for notifications: flat white, inside the 20dp live area. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp" android:height="24dp" android:viewportWidth="100" android:viewportHeight="100">
-    <group android:pivotX="50" android:pivotY="50" android:scaleX="0.96" android:scaleY="0.96" android:rotation="-25">
-        <path android:pathData="M41.5,42.5C26,24 13.5,31 13.5,50C13.5,69 26,76 41.5,57.5"
-            android:strokeColor="#FFFFFFFF" android:strokeWidth="11.4" android:strokeLineCap="round"
-            android:fillColor="#00000000" />
-        <path android:pathData="M58.5,42.5C74,24 86.5,31 86.5,50C86.5,69 74,76 58.5,57.5"
-            android:strokeColor="#FFFFFFFF" android:strokeWidth="11.4" android:strokeLineCap="round"
-            android:fillColor="#00000000" />
-        <path android:pathData="M50,41.2a8.8,8.8 0,1 1,0 17.6a8.8,8.8 0,1 1,0 -17.6z" android:fillColor="#FFFFFFFF" />
-    </group>
+    <path
+        android:pathData="M59.24,71.31C59.19,69.97 58.9,61.68 53.68,55.39C36.53,34.76 24.82,42.79 17.34,37.88C2.08,27.86 17.78,5.83 32.63,14.74C44.74,22 34.51,29.29 47.47,42.54C67.59,63.1 74.63,51.95 83.4,58.48C100.54,71.24 80.51,94.74 66.12,84.65C58.47,79.29 59.36,72.68 59.24,71.31ZM39.6,69.34C42.4,95.3 5.93,91.29 10.38,69.35C12.26,60.05 19.62,62.03 23.41,50.76C25.1,45.71 27.11,51.9 27.21,52.21C30.12,61.14 35.52,57.86 39.6,69.34ZM88.42,31.55C85.13,40.78 81.13,38.08 76.56,46.7C75.19,49.28 72.97,45.06 72.81,44.76C70.94,41.2 57.13,34.61 63.18,23.16C69.62,10.96 90.34,14.08 88.42,31.55Z"
+        android:fillColor="#FFFFFFFF" />
 </vector>

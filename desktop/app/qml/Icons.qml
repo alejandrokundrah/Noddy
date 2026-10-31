@@ -3,7 +3,7 @@ pragma Singleton
 import QtQuick
 
 // Stroke icons as SVG paths on a 24×24 grid (round caps and joins), drawn
-// by Icon. Same shapes as the design mockups.
+// by Icon, and the solid Noddy mark. Same shapes as the design mockups.
 QtObject {
     readonly property string home: "M3 10a2 2 0 0 1 .71-1.53l7-6a2 2 0 0 1 2.58 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6"
     readonly property string messages: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zM8 8.5h8M8 12.5h5"
@@ -43,7 +43,8 @@ QtObject {
     readonly property string star: "M11.53 2.3a.53.53 0 0 1 .95 0l2.31 4.68a2.12 2.12 0 0 0 1.6 1.16l5.16.75a.53.53 0 0 1 .3.9l-3.74 3.64a2.12 2.12 0 0 0-.61 1.88l.88 5.14a.53.53 0 0 1-.77.56l-4.62-2.43a2.12 2.12 0 0 0-1.97 0l-4.62 2.43a.53.53 0 0 1-.77-.56l.88-5.14a2.12 2.12 0 0 0-.61-1.88L2.16 9.8a.53.53 0 0 1 .3-.9l5.16-.76a2.12 2.12 0 0 0 1.6-1.16z"
     readonly property string backspace: "M10 5a2 2 0 0 0-1.34.52l-6.33 5.74a1 1 0 0 0 0 1.48l6.33 5.74A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zM12 9l6 6M18 9l-6 6"
     readonly property string lock: "M5 11h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2zM7 11V7a5 5 0 0 1 10 0v4M12 15.5v2"
-    readonly property string mark: "M9.39 11.23C4.14 8.78 2.13 11.57 4.06 15.70C5.99 19.83 9.42 20.09 10.91 14.49M13.09 9.51C14.58 3.91 18.01 4.17 19.94 8.30C21.87 12.43 19.86 15.22 14.61 12.77M12.6 12a0.6 0.6 0 1 1-1.2 0a0.6 0.6 0 1 1 1.2 0"
+    // The Noddy mark (assets/noddy/Noddy black.svg): a solid shape, drawn with `filled`.
+    readonly property string mark: "M14.309,17.328C14.298,16.991 14.225,14.919 12.919,13.348C8.632,8.189 5.705,10.197 3.836,8.97C0.021,6.466 3.945,0.958 7.658,3.184C10.685,4.999 8.128,6.823 11.368,10.134C16.397,15.275 18.158,12.488 20.35,14.12C24.636,17.311 19.627,23.184 16.029,20.662C14.118,19.322 14.34,17.67 14.309,17.328ZM9.4,16.835C10.099,23.325 0.983,22.322 2.094,16.837C2.564,14.512 4.406,15.006 5.351,12.189C5.774,10.928 6.278,12.476 6.304,12.553C7.03,14.784 8.379,13.965 9.4,16.835ZM21.605,7.388C20.783,9.694 19.783,9.019 18.641,11.175C18.298,11.821 17.742,10.765 17.703,10.69C17.235,9.801 13.782,8.153 15.294,5.29C16.904,2.241 22.084,3.02 21.605,7.388Z"
     readonly property string back: "M15 18l-6-6 6-6"
     readonly property string chevronRight: "M9 18l6-6-6-6"
     readonly property string chevronDown: "M6 9l6 6 6-6"

@@ -156,6 +156,9 @@ has a Stop button. Choosing another
 
 ### Changed
 
+- **A new logo.** Noddy has a new logo: on the PC in the window, the taskbar,
+  the tray, notifications and the installer, and on the phone in the launcher
+  icon, the themed icon and notifications.
 - **Windows 10 looks right.** The window no longer shows Windows 10's own
   title bar over Noddy's, Snap and resizing work, and the caption
   buttons show. Phone as webcam still needs Windows 11. Thanks to
