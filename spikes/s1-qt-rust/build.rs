@@ -2,7 +2,7 @@
 use cxx_qt_build::{CxxQtBuilder, QmlFile, QmlModule};
 
 fn main() {
-    CxxQtBuilder::new_qml_module(QmlModule::new("app.nectarlink.spike").qml_files([
+    CxxQtBuilder::new_qml_module(QmlModule::new("app.noddy.spike").qml_files([
         QmlFile::from("qml/App.qml"),
         QmlFile::from("qml/Main.qml"),
         QmlFile::from("qml/Theme.qml").singleton(true),

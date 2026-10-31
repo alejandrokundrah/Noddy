@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtQuick.Effects
-import app.nectarlink.spike
+import app.noddy.spike
 
 Window {
     id: window
@@ -11,7 +11,7 @@ Window {
     minimumWidth: 980
     minimumHeight: 640
     visible: true
-    title: "NectarLink · S1 proof"
+    title: "Noddy · S1 proof"
     color: mica ? "transparent" : Theme.surface
 
     // The frame and the Mica tint follow the app theme, not the system one.

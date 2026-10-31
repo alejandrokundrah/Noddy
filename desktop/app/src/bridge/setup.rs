@@ -83,7 +83,7 @@ pub struct SetupRust {
 }
 
 static MODE: OnceLock<Mode> = OnceLock::new();
-/// Where the app ended up, for Open NectarLink.
+/// Where the app ended up, for Open Noddy.
 static INSTALLED_DIR: Mutex<Option<PathBuf>> = Mutex::new(None);
 
 /// Sets what the window is for, before QML loads.
@@ -129,12 +129,12 @@ impl cxx_qt::Initialize for qobject::Setup {
         }
         // Debug builds only: open on a given screen, to check how it looks.
         if cfg!(debug_assertions)
-            && let Ok(phase) = std::env::var("NECTARLINK_SETUP_PREVIEW")
+            && let Ok(phase) = std::env::var("NODDY_SETUP_PREVIEW")
         {
-            if let Ok(theme) = std::env::var("NECTARLINK_SETUP_THEME") {
+            if let Ok(theme) = std::env::var("NODDY_SETUP_THEME") {
                 self.as_mut().set_dark(theme == "dark");
             }
-            if let Ok(kind) = std::env::var("NECTARLINK_SETUP_KIND") {
+            if let Ok(kind) = std::env::var("NODDY_SETUP_KIND") {
                 self.as_mut().set_kind(QString::from(&kind));
                 self.as_mut().set_installed_version(QString::from("0.1.0"));
             }
@@ -214,7 +214,7 @@ impl qobject::Setup {
         if let Some(dir) = dir
             && let Err(e) = setup::open_app(&dir)
         {
-            tracing::warn!(error = %e, "can't open NectarLink");
+            tracing::warn!(error = %e, "can't open Noddy");
         }
     }
 

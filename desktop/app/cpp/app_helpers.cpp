@@ -134,7 +134,7 @@ void qtLogMessageHandler(QtMsgType type, const QMessageLogContext &ctx, const QS
     if (type == QtDebugMsg)
         return;
     const QString dirPath = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)
-        + QStringLiteral("/Nectarlink/logs");
+        + QStringLiteral("/Noddy/logs");
     QDir().mkpath(dirPath);
     QFile file(dirPath + QStringLiteral("/qml.log"));
     if (file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
@@ -311,11 +311,11 @@ bool install_translator(rust::Str dir, rust::Str language)
             break;
     }
 
-    // NectarLink's own strings, staged beside the executable. A locale with no
-    // translation (`nectarlink_es_ES.qm` missing), or English, stays English.
+    // Noddy's own strings, staged beside the executable. A locale with no
+    // translation (`noddy_es_ES.qm` missing), or English, stays English.
     bool installed = false;
     auto *app = new QTranslator(QCoreApplication::instance());
-    if (app->load(locale, QStringLiteral("nectarlink"), QStringLiteral("_"), folder)) {
+    if (app->load(locale, QStringLiteral("noddy"), QStringLiteral("_"), folder)) {
         installed = QCoreApplication::installTranslator(app);
         appTranslator() = app;
     } else {
@@ -658,7 +658,7 @@ bool runOnQtMainThreadSync(F &&fn, uint32_t timeout_ms = 500)
 std::unique_ptr<QGuiApplication> create_qt_app()
 {
     static int s_argc = 1;
-    static char s_arg0[] = "nectarlink";
+    static char s_arg0[] = "noddy";
     static char *s_argv[] = { s_arg0, nullptr };
 #ifdef __linux__
     auto app = std::unique_ptr<QGuiApplication>(new QApplication(s_argc, s_argv));

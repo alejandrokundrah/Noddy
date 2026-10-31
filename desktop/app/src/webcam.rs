@@ -16,8 +16,8 @@ use std::{
     time::{Duration, Instant},
 };
 
-use nectarlink_core::{DeviceId, Error, NodeEvent, WebcamConfig, WebcamSink, WebcamStart};
-use nectarlink_vcam::{
+use noddy_core::{DeviceId, Error, NodeEvent, WebcamConfig, WebcamSink, WebcamStart};
+use noddy_vcam::{
     DEFAULT_MAPPING_NAME, LOCAL_MAPPING_NAME, SharedFrameMapping, render_placeholder_bgrx,
 };
 
@@ -224,14 +224,14 @@ pub fn selected_phone() -> Option<DeviceId> {
             && app
                 .devices
                 .iter()
-                .any(|d| d.id == id && matches!(d.link, nectarlink_core::LinkState::Online { .. }))
+                .any(|d| d.id == id && matches!(d.link, noddy_core::LinkState::Online { .. }))
         {
             return Some(id);
         }
         if let Some(online_id) = app
             .devices
             .iter()
-            .find(|d| matches!(d.link, nectarlink_core::LinkState::Online { .. }))
+            .find(|d| matches!(d.link, noddy_core::LinkState::Online { .. }))
             .map(|d| d.id)
         {
             return Some(online_id);
@@ -523,7 +523,7 @@ pub fn start(device: Option<DeviceId>) {
             let reason = match e {
                 Error::Denied => "Webcam is turned off for this phone.".to_owned(),
                 Error::Unsupported => {
-                    "This phone's app doesn't support Webcam yet. Update NectarLink on the phone.".into()
+                    "This phone's app doesn't support Webcam yet. Update Noddy on the phone.".into()
                 }
                 Error::Offline | Error::NotPaired => "The phone isn't connected.".into(),
                 e => describe(&e),
@@ -570,7 +570,7 @@ pub fn on_event(event: &NodeEvent) {
             core_host::host().hub.changed(Changes::WEBCAM);
         }
         NodeEvent::Webcam { device, on: false }
-        | NodeEvent::LinkChanged { device, link: nectarlink_core::LinkState::Offline { .. } }
+        | NodeEvent::LinkChanged { device, link: noddy_core::LinkState::Offline { .. } }
         | NodeEvent::DeviceRemoved(device) => {
             let changed = state(|s| {
                 if matches!(s.phase, Phase::Asking { device: d } | Phase::Streaming { device: d, .. } if d == *device)
@@ -740,7 +740,7 @@ fn decode(device: DeviceId, items: &Receiver<Item>, waiting: &AtomicUsize) {
     let mut local_mapping = mapping();
     let mut last_mapping_check = Instant::now();
     #[cfg(windows)]
-    let mut gpu_publisher = nectarlink_vcam::gpu::GpuPublisher::new();
+    let mut gpu_publisher = noddy_vcam::gpu::GpuPublisher::new();
     #[cfg(windows)]
     let mut shared_transport = false;
 

@@ -8,7 +8,7 @@ use std::{
     sync::{Mutex, OnceLock},
 };
 
-use nectarlink_core::{DeviceId, LinkState, NodeEvent};
+use noddy_core::{DeviceId, LinkState, NodeEvent};
 use serde::{Deserialize, Serialize};
 
 use crate::{deck, settings, win};
@@ -78,7 +78,7 @@ fn execute_rule(rule: &AutomationRule) {
         tracing::warn!(rule = %rule.name, trigger = %rule.trigger, error = %e, "automation action failed");
     } else {
         let _ = crate::pc_notifications::forward_to_phones(
-            "NectarLink Automations",
+            "Noddy Automations",
             &rule.name,
             &tr!("Automations", "Triggered by %1", rule.trigger),
         );

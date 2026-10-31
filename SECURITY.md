@@ -1,6 +1,6 @@
 # Security policy
 
-NectarLink handles sensitive data such as notifications, messages, one-time
+Noddy handles sensitive data such as notifications, messages, one-time
 codes and files, so security reports are taken seriously.
 
 ## Reporting a vulnerability

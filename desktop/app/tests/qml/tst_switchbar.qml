@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtTest
-import app.nectarlink
+import app.noddy
 
 // A SwitchBar reports the user's choice, shows its caption only when there
 // is one, and takes no input while greyed out.

@@ -184,8 +184,8 @@ mod tests {
 
     #[test]
     fn splits_quoted_and_unquoted_params() {
-        let args = split_params("--install-to \"/opt/NectarLink App\" --quiet");
-        assert_eq!(args, vec!["--install-to", "/opt/NectarLink App", "--quiet"]);
+        let args = split_params("--install-to \"/opt/Noddy App\" --quiet");
+        assert_eq!(args, vec!["--install-to", "/opt/Noddy App", "--quiet"]);
     }
 
     #[test]

@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="assets/brand/icon.svg" alt="" width="96" height="96">
+<img src="assets/noddy/icon.svg" alt="" width="96" height="96">
 
-# NectarLink
+# Noddy
 
 **Your Android phone and your PC, working as one.**
 
@@ -10,24 +10,22 @@ Notifications, messages, calls, clipboard, files, photos, screen mirroring and
 phone apps in windows, between Android and Windows 10 (2004+) or 11. Free and open source.
 Local-first, end-to-end encrypted, no account and no cloud.
 
-Hi, I'm Bee, and yes, a bee built an app called NectarLink. I build cool stuff
-in the open on [𝕏 @thtbee_](https://x.com/thtbee_), so come see what's next.
-Feedback, bugs or ideas? DM me directly.
+Hi, I'm Bee, and yes, a bee built an app called Noddy.
 
-[![Latest release](https://img.shields.io/github/v/release/thtbee/nectarlink?label=download)](https://github.com/thtbee/nectarlink/releases/latest)
-[![CI](https://github.com/thtbee/nectarlink/actions/workflows/ci.yml/badge.svg)](https://github.com/thtbee/nectarlink/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/alejandrokundrah/Noddy?label=download)](https://github.com/alejandrokundrah/Noddy/releases/latest)
+[![CI](https://github.com/alejandrokundrah/Noddy/actions/workflows/ci.yml/badge.svg)](https://github.com/alejandrokundrah/Noddy/actions/workflows/ci.yml)
 [![Apps: GPL-3.0-or-later](https://img.shields.io/badge/apps-GPL--3.0--or--later-blue)](LICENSE)
 [![Core: MPL-2.0](https://img.shields.io/badge/core-MPL--2.0-blue)](LICENSE)
 
 </div>
 
 <p align="center">
-  <img src="docs/screenshots/desktop-glass-home.png" alt="NectarLink for Windows: Home with the phone's notifications and music playing, Glass theme" width="880">
+  <img src="docs/screenshots/desktop-glass-home.png" alt="Noddy for Windows: Home with the phone's notifications and music playing, Glass theme" width="880">
 </p>
 
-## Why NectarLink
+## Why Noddy
 
-NectarLink came out of my own frustration. I kept juggling Phone Link for
+Noddy came out of my own frustration. I kept juggling Phone Link for
 notifications and messages, KDE Connect for the clipboard and LocalSend for
 files, and always wanted one app that did all of it. So I made one.
 
@@ -38,21 +36,21 @@ of new features I wanted that I think you'll enjoy having too.
 
 | | Download | Needs |
 |---|---|---|
-| **Windows (x64)** | [Installer (.exe)](https://github.com/thtbee/nectarlink/releases/download/v0.1.4/Nectarlink-0.1.4-x64-setup.exe) | Windows 10 (2004+) or 11, 64-bit Intel or AMD (Phone as webcam needs Windows 11) |
+| **Windows (x64)** | [Installer (.exe)](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.4/Noddy-0.1.4-x64-setup.exe) | Windows 10 (2004+) or 11, 64-bit Intel or AMD (Phone as webcam needs Windows 11) |
 | **Windows (ARM64)** | From the next release | Windows 11 on ARM (Snapdragon) |
 | **Linux (x86_64)** | From the next release: [one command](#on-linux), or a .deb, .rpm, AppImage or .tar.gz | Ubuntu 24.04 or newer, Debian 13, Fedora 40 or newer, 64-bit Intel or AMD |
-| **Android** | [App (.apk)](https://github.com/thtbee/nectarlink/releases/download/v0.1.4/Nectarlink-0.1.4-android.apk) | Android 8.0 or newer |
+| **Android** | [App (.apk)](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.4/Noddy-0.1.4-android.apk) | Android 8.0 or newer |
 
 The apps update themselves from GitHub Releases and check every download
 against its SHA-256 sums.
 
 ### On Linux
 
-From the next release, one command installs NectarLink with everything it
+From the next release, one command installs Noddy with everything it
 needs, and shows each step as it goes:
 
 ```bash
-curl -fsSL https://github.com/thtbee/nectarlink/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/alejandrokundrah/Noddy/releases/latest/download/install.sh | sh
 ```
 
 It picks the package for your system (.deb with apt, .rpm with dnf or zypper,
@@ -77,9 +75,9 @@ for the details.
 
 ## Get started
 
-1. Install NectarLink on your PC and on your phone.
+1. Install Noddy on your PC and on your phone.
 2. On the PC, the setup walkthrough shows a QR code. Scan it with the phone
-   (from the NectarLink app or any camera app), or pick the PC from the phone's
+   (from the Noddy app or any camera app), or pick the PC from the phone's
    list of nearby devices and compare a 6-digit code. A USB cable works too.
 3. Allow what you want to share. Every feature has its own switch per device,
    and the sensitive ones are off until you turn them on.
@@ -220,7 +218,7 @@ Windows backdrop; and **Graphite**, ink on paper. All in light and dark.
           │ UniFFI                                │ cxx-qt
           ▼                                       ▼
  ┌─────────────────────┐   QUIC (iroh),   ┌─────────────────────┐
- │  nectarlink-core    │◄────────────────►│  nectarlink-core    │
+ │  noddy-core    │◄────────────────►│  noddy-core    │
  │  pairing, sessions, │  end-to-end      │  pairing, sessions, │
  │  storage, features  │  encrypted       │  storage, features  │
  └─────────────────────┘                  └─────────────────────┘
@@ -240,18 +238,18 @@ Windows backdrop; and **Graphite**, ink on paper. All in light and dark.
 
 ```
 core/
-  nectarlink-protocol/   Message types, framing, pairing cryptography      (MPL-2.0)
-  nectarlink-core/       Identity, trust store, pairing, sessions, features (MPL-2.0)
-  nectarlink-ffi/        UniFFI bindings used by the Android app          (MPL-2.0)
-  nectarlink-adb/        Wireless debugging client for the phone's helper  (MPL-2.0)
-  nectarlink-cli/        Command-line client (`nectarlink`)                (GPL)
+  noddy-protocol/   Message types, framing, pairing cryptography      (MPL-2.0)
+  noddy-core/       Identity, trust store, pairing, sessions, features (MPL-2.0)
+  noddy-ffi/        UniFFI bindings used by the Android app          (MPL-2.0)
+  noddy-adb/        Wireless debugging client for the phone's helper  (MPL-2.0)
+  noddy-cli/        Command-line client (`noddy`)                (GPL)
 desktop/
   app/                   Windows app: Rust host, cxx-qt bridge, QML UI     (GPL)
   vcam/                  Windows 11 virtual camera Media Foundation DLL    (GPL)
   installer/             NSIS installer script and Sparse Package manifest (GPL)
 android/                 Android app: Kotlin and Jetpack Compose (API 26+) (GPL)
 assets/fonts/            Fonts both apps ship with                         (OFL-1.1)
-assets/brand/            The app icon (see the trademark policy)
+assets/noddy/            The app icon (see the trademark policy)
 tools/xtask/             Code generation (theme tokens) and checks         (GPL)
 spikes/                  Technical experiments with their results
 scripts/                 Build, packaging and check scripts
@@ -278,14 +276,14 @@ hardware backend, the existing software H.264 path remains available. HEVC
 encoding requires hardware; if unavailable, screen sharing falls back to H.264.
 
 ```sh
-cargo test -p nectarlink-protocol -p nectarlink-core -p nectarlink-ffi   # core and tests
-cargo run -p nectarlink-cli -- --help                                     # command-line client
-cargo run -p nectarlink-desktop                                           # Windows app (Qt's bin on PATH)
+cargo test -p noddy-protocol -p noddy-core -p noddy-ffi   # core and tests
+cargo run -p noddy-cli -- --help                                     # command-line client
+cargo run -p noddy-desktop                                           # Windows app (Qt's bin on PATH)
 cd android && ./gradlew assembleDebug                                     # Android app
 ```
 
 ```powershell
-./scripts/package.ps1    # Windows installer: target\package\Nectarlink-<version>-x64-setup.exe
+./scripts/package.ps1    # Windows installer: target\package\Noddy-<version>-x64-setup.exe
 ./scripts/check.ps1      # every check CI runs; add -Android and -Arm64 for the full set
 ```
 
@@ -303,7 +301,7 @@ Releases are built by CI from a `v*` tag; see
 ## Questions and ideas
 
 Ask questions, share ideas and show your setup in
-[Discussions](https://github.com/thtbee/nectarlink/discussions). Issues are for
+[Discussions](https://github.com/alejandrokundrah/Noddy/discussions). Issues are for
 bugs and agreed feature work.
 
 ## Contributing
@@ -313,7 +311,7 @@ for anything larger than a small fix, open an issue to agree on the approach.
 Contributions are accepted under the [Developer Certificate of Origin](DCO.txt),
 and everyone is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-To translate NectarLink into your language, see
+To translate Noddy into your language, see
 [docs/translating.md](docs/translating.md).
 
 To report a security issue, follow [SECURITY.md](SECURITY.md). Please don't
@@ -326,5 +324,5 @@ open a public issue.
 - Core libraries: [MPL-2.0](LICENSES/MPL-2.0.txt)
 - Protocol specification and documentation: [CC BY 4.0](LICENSES/CC-BY-4.0.txt)
 
-See [LICENSE](LICENSE) for which license applies where. The NectarLink name and
+See [LICENSE](LICENSE) for which license applies where. The Noddy name and
 logo are covered by the [trademark policy](TRADEMARKS.md).

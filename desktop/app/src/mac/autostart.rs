@@ -5,7 +5,7 @@ use std::path::Path;
 
 pub fn is_enabled() -> bool {
     if let Some(dir) = dirs::home_dir() {
-        let plist = dir.join("Library/LaunchAgents/com.thtbee.nectarlink.plist");
+        let plist = dir.join("Library/LaunchAgents/com.alejandrokundrah.noddy.plist");
         plist.exists()
     } else {
         false
@@ -27,7 +27,7 @@ fn xml_escape(s: &str) -> String {
 pub fn set_enabled(enabled: bool) -> Result<(), String> {
     if let Some(dir) = dirs::home_dir() {
         let agents = dir.join("Library/LaunchAgents");
-        let plist = agents.join("com.thtbee.nectarlink.plist");
+        let plist = agents.join("com.alejandrokundrah.noddy.plist");
         if enabled {
             let _ = std::fs::create_dir_all(&agents);
             let exe = std::env::current_exe().map_err(|e| e.to_string())?;
@@ -38,7 +38,7 @@ pub fn set_enabled(enabled: bool) -> Result<(), String> {
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.thtbee.nectarlink</string>
+    <string>com.alejandrokundrah.noddy</string>
     <key>ProgramArguments</key>
     <array>
         <string>{escaped_exe}</string>

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Linux Virtual Camera (`v4l2loopback`) discovery, registration, and
-//! shared-memory-to-V4L2 YUYV frame output for `"NectarLink Webcam"`.
+//! shared-memory-to-V4L2 YUYV frame output for `"Noddy Webcam"`.
 
 use std::{
     fs::{self, OpenOptions},
@@ -16,15 +16,15 @@ use std::{
     time::Duration,
 };
 
-use nectarlink_vcam::{DEFAULT_MAPPING_NAME, LOCAL_MAPPING_NAME, SharedFrameMapping};
+use noddy_vcam::{DEFAULT_MAPPING_NAME, LOCAL_MAPPING_NAME, SharedFrameMapping};
 
 pub const CLSID_STR: &str = "{8E6C3B74-5D4A-4B9E-9A12-7C8F1E2D3A40}";
-pub const FRIENDLY_NAME: &str = "NectarLink Webcam";
+pub const FRIENDLY_NAME: &str = "Noddy Webcam";
 pub const REGISTER_ARG: &str = "--register-vcam";
 pub const UNREGISTER_ARG: &str = "--unregister-vcam";
 
-const MODULES_LOAD_CONF: &str = "/etc/modules-load.d/nectarlink-vcam.conf";
-const MODPROBE_CONF: &str = "/etc/modprobe.d/nectarlink-vcam.conf";
+const MODULES_LOAD_CONF: &str = "/etc/modules-load.d/noddy-vcam.conf";
+const MODPROBE_CONF: &str = "/etc/modprobe.d/noddy-vcam.conf";
 
 const V4L2_BUF_TYPE_VIDEO_OUTPUT: u32 = 2;
 const V4L2_PIX_FMT_YUYV: u32 = 0x5659_5559; // 'Y' 'U' 'Y' 'V'
@@ -82,7 +82,7 @@ pub fn find_v4l2loopback_in_sysfs(sysfs_root: &Path, dev_root: &Path) -> Option<
                 continue;
             };
             let lower = card_name.to_ascii_lowercase();
-            if lower.contains("nectarlink") {
+            if lower.contains("noddy") {
                 candidates.push((0, dev_name, dev_node));
             } else if lower.contains("dummy video device") || lower.contains("v4l2loopback") {
                 candidates.push((1, dev_name, dev_node));
@@ -210,7 +210,7 @@ fn write_config_nofollow(path: &Path, content: &[u8]) {
     }
 }
 
-/// Loads `v4l2loopback` with `"NectarLink Webcam"` and writes persistent module config files.
+/// Loads `v4l2loopback` with `"Noddy Webcam"` and writes persistent module config files.
 pub fn register_hklm() -> Result<(), String> {
     write_config_nofollow(Path::new(MODULES_LOAD_CONF), b"v4l2loopback\n");
     write_config_nofollow(
@@ -228,7 +228,7 @@ pub fn unregister_hklm() -> Result<(), String> {
     run_modprobe(&["-r", "v4l2loopback"])
 }
 
-/// Launches `nectarlink-desktop <arg>` under `pkexec` and invokes `on_done` when it exits.
+/// Launches `noddy-desktop <arg>` under `pkexec` and invokes `on_done` when it exits.
 pub fn run_elevated(arg: &'static str, on_done: impl FnOnce(bool) + Send + 'static) {
     thread::spawn(move || {
         let Ok(exe) = std::env::current_exe() else {
@@ -440,7 +440,7 @@ mod tests {
     }
 
     #[test]
-    fn find_v4l2loopback_in_sysfs_prefers_nectarlink_and_matches_loopback() {
+    fn find_v4l2loopback_in_sysfs_prefers_noddy_and_matches_loopback() {
         let dir = tempfile::tempdir().unwrap();
         let sysfs = dir.path().join("sys");
         let dev = dir.path().join("dev");
@@ -451,7 +451,7 @@ mod tests {
         fs::create_dir_all(&dev).unwrap();
 
         fs::write(v0.join("name"), "Integrated Camera: USB\n").unwrap();
-        fs::write(v1.join("name"), "NectarLink Webcam\n").unwrap();
+        fs::write(v1.join("name"), "Noddy Webcam\n").unwrap();
         fs::write(dev.join("video0"), b"").unwrap();
         fs::write(dev.join("video1"), b"").unwrap();
 

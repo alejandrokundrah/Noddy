@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-#ifdef NECTARLINK_BUILTIN_VIDEO
+#ifdef NODDY_BUILTIN_VIDEO
 #include "linux_video_builtin.h"
 #endif
 #include "linux_video_codec.h"
@@ -468,7 +468,7 @@ struct Decoder
     }
 };
 
-NectarlinkDecodedNv12 decoded_picture(Decoder& decoder, AVFrame* picture)
+NoddyDecodedNv12 decoded_picture(Decoder& decoder, AVFrame* picture)
 {
     decoder.functions.check(decoder.functions.crop(picture, 0), "Crop decoded picture");
     const int width = picture->width & ~1;
@@ -564,7 +564,7 @@ struct DecoderSelection
 };
 } // namespace
 
-extern "C" void* nectarlink_video_encoder_create(bool hevc, int width, int height, int fps, int bitrate,
+extern "C" void* noddy_video_encoder_create(bool hevc, int width, int height, int fps, int bitrate,
                                                char* error, size_t capacity)
 {
     try {
@@ -577,8 +577,8 @@ extern "C" void* nectarlink_video_encoder_create(bool hevc, int width, int heigh
     }
 }
 
-extern "C" void nectarlink_video_encoder_destroy(void* encoder) { delete static_cast<EncoderSelection*>(encoder); }
-extern "C" bool nectarlink_video_encoder_next_device(void* pointer, char* error, size_t capacity)
+extern "C" void noddy_video_encoder_destroy(void* encoder) { delete static_cast<EncoderSelection*>(encoder); }
+extern "C" bool noddy_video_encoder_next_device(void* pointer, char* error, size_t capacity)
 {
     try {
         static_cast<EncoderSelection*>(pointer)->select_next();
@@ -588,13 +588,13 @@ extern "C" bool nectarlink_video_encoder_next_device(void* pointer, char* error,
         return false;
     }
 }
-extern "C" const char* nectarlink_video_encoder_backend(const void* encoder)
+extern "C" const char* noddy_video_encoder_backend(const void* encoder)
 {
     const auto& selected = *static_cast<const EncoderSelection*>(encoder);
     return selected.current ? selected.current->context->codec->name : "unavailable";
 }
 
-extern "C" int nectarlink_video_encoder_send(void* encoder, const uint8_t* bytes, size_t length, int64_t time_us,
+extern "C" int noddy_video_encoder_send(void* encoder, const uint8_t* bytes, size_t length, int64_t time_us,
                                            char* error, size_t capacity)
 {
     try {
@@ -606,7 +606,7 @@ extern "C" int nectarlink_video_encoder_send(void* encoder, const uint8_t* bytes
     }
 }
 
-extern "C" int nectarlink_video_encoder_receive(void* pointer, const uint8_t** bytes, size_t* length, bool* keyframe,
+extern "C" int noddy_video_encoder_receive(void* pointer, const uint8_t** bytes, size_t* length, bool* keyframe,
                                               char* error, size_t capacity)
 {
     try {
@@ -625,13 +625,13 @@ extern "C" int nectarlink_video_encoder_receive(void* pointer, const uint8_t** b
     }
 }
 
-extern "C" void nectarlink_video_encoder_request_keyframe(void* pointer)
+extern "C" void noddy_video_encoder_request_keyframe(void* pointer)
 {
     auto& selected = *static_cast<EncoderSelection*>(pointer);
     if (selected.current) selected.current->keyframe_requested = true;
 }
 
-extern "C" bool nectarlink_video_encoder_set_bitrate(void* pointer, int bitrate)
+extern "C" bool noddy_video_encoder_set_bitrate(void* pointer, int bitrate)
 {
     auto& selected = *static_cast<EncoderSelection*>(pointer);
     if (!selected.current) return false;
@@ -652,7 +652,7 @@ extern "C" bool nectarlink_video_encoder_set_bitrate(void* pointer, int bitrate)
     return changed;
 }
 
-extern "C" void* nectarlink_video_decoder_create(bool hevc, char* error, size_t capacity)
+extern "C" void* noddy_video_decoder_create(bool hevc, char* error, size_t capacity)
 {
     try {
         return new DecoderSelection(hevc);
@@ -662,9 +662,9 @@ extern "C" void* nectarlink_video_decoder_create(bool hevc, char* error, size_t 
     }
 }
 
-extern "C" void nectarlink_video_decoder_destroy(void* decoder) { delete static_cast<DecoderSelection*>(decoder); }
+extern "C" void noddy_video_decoder_destroy(void* decoder) { delete static_cast<DecoderSelection*>(decoder); }
 
-extern "C" bool nectarlink_video_decoder_next_device(void* pointer, char* error, size_t capacity)
+extern "C" bool noddy_video_decoder_next_device(void* pointer, char* error, size_t capacity)
 {
     try {
         static_cast<DecoderSelection*>(pointer)->select_next(true);
@@ -675,7 +675,7 @@ extern "C" bool nectarlink_video_decoder_next_device(void* pointer, char* error,
     }
 }
 
-extern "C" const char* nectarlink_video_decoder_backend(const void* pointer)
+extern "C" const char* noddy_video_decoder_backend(const void* pointer)
 {
     const auto& selected = *static_cast<const DecoderSelection*>(pointer);
     if (!selected.current) return "unavailable";
@@ -686,7 +686,7 @@ extern "C" const char* nectarlink_video_decoder_backend(const void* pointer)
     return name ? name : "unknown";
 }
 
-extern "C" int nectarlink_video_decoder_send(void* pointer, const uint8_t* bytes, size_t length,
+extern "C" int noddy_video_decoder_send(void* pointer, const uint8_t* bytes, size_t length,
                                            char* error, size_t capacity)
 {
     try {
@@ -705,7 +705,7 @@ extern "C" int nectarlink_video_decoder_send(void* pointer, const uint8_t* bytes
     }
 }
 
-extern "C" int nectarlink_video_decoder_receive(void* pointer, NectarlinkDecodedNv12* frame,
+extern "C" int noddy_video_decoder_receive(void* pointer, NoddyDecodedNv12* frame,
                                               char* error, size_t capacity)
 {
     try {
@@ -732,7 +732,7 @@ extern "C" int nectarlink_video_decoder_receive(void* pointer, NectarlinkDecoded
     }
 }
 
-extern "C" void nectarlink_video_decoder_flush(void* pointer)
+extern "C" void noddy_video_decoder_flush(void* pointer)
 {
     auto& selected = *static_cast<DecoderSelection*>(pointer);
     if (!selected.current) return;

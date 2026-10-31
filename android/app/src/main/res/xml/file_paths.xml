@@ -4,7 +4,7 @@
      a PC put on the clipboard (see clipboard/PhoneClipboard.kt), and
      outgoing MMS PDUs (see sms/PhoneSms.kt). -->
 <paths>
-    <external-files-path name="received" path="Download/Nectarlink/" />
+    <external-files-path name="received" path="Download/Noddy/" />
     <cache-path name="clipboard" path="clipboard/" />
     <cache-path name="mms" path="mms/" />
 </paths>

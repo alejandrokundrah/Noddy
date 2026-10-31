@@ -12,7 +12,7 @@ use std::{
     sync::Mutex,
 };
 
-use nectarlink_core::{
+use noddy_core::{
     ChatMessageRecord, ChatThreadRecord, DeviceId, Error, LinkState, NodeEvent, SmsAttachment, SmsMessage,
     SmsPart, SmsThread,
 };
@@ -24,7 +24,7 @@ use crate::{core_host, state::Changes};
 const THREADS: u32 = 60;
 const PAGE: u32 = 100;
 
-/// Maximum MMS image attachment size (`nectarlink_protocol::messages::sms::MAX_ATTACHMENT_BYTES`).
+/// Maximum MMS image attachment size (`noddy_protocol::messages::sms::MAX_ATTACHMENT_BYTES`).
 pub const MAX_ATTACHMENT_BYTES: usize = 900 * 1024;
 
 /// What the Messages page can show.
@@ -403,7 +403,7 @@ fn sender_of(thread: &SmsThread, address: &str) -> String {
 /// A one-time code in a text ("243928 is your OTP"): 4 to 8 digits (or
 /// common alphanumeric formats like "G-123456") near an OTP keyword.
 pub fn one_time_code(body: &str) -> Option<String> {
-    nectarlink_core::otp::one_time_code(body)
+    noddy_core::otp::one_time_code(body)
 }
 
 fn message_json(m: &SmsMessage, pictures: &HashMap<String, PathBuf>, sender: Option<String>) -> Value {
@@ -1098,7 +1098,7 @@ pub fn send_problem(error: &Error) -> &'static str {
     match error {
         Error::Denied => "Messages are turned off for this phone.",
         Error::Unsupported => {
-            "The phone doesn't send texts for this PC. Allow it in the NectarLink app on the phone."
+            "The phone doesn't send texts for this PC. Allow it in the Noddy app on the phone."
         }
         Error::Offline | Error::NotPaired | Error::Timeout => "The phone isn't connected.",
         Error::TooLarge => "That attachment or message is too large (MMS supports up to 900 KB).",

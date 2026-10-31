@@ -24,14 +24,14 @@ plugs into. Phase 0 ends when the exit criteria at the bottom are met.
 ## 2. Repository scaffold (W2)
 
 ```
-nectarlink/
+noddy/
   Cargo.toml                 Rust workspace (core + desktop crates)
   rust-toolchain.toml        pinned stable toolchain
   core/
-    nectarlink-protocol/     message types, framing, CBOR codec       (MPL-2.0)
-    nectarlink-core/         Node, identity, pairing, sessions, store  (MPL-2.0)
-    nectarlink-ffi/          UniFFI bindings                           (MPL-2.0)
-    nectarlink-cli/          dev/debug CLI: pair, ping, status         (GPL)
+    noddy-protocol/     message types, framing, CBOR codec       (MPL-2.0)
+    noddy-core/         Node, identity, pairing, sessions, store  (MPL-2.0)
+    noddy-ffi/          UniFFI bindings                           (MPL-2.0)
+    noddy-cli/          dev/debug CLI: pair, ping, status         (GPL)
   desktop/
     app/                     the desktop app, one crate               (GPL)
       src/bridge/            cxx-qt bridge: the only Rust↔Qt code
@@ -52,7 +52,7 @@ locally):**
 |---|---|---|
 | `core` | windows-latest, ubuntu-latest | `cargo fmt --check`, `clippy -D warnings`, `cargo test`, fuzz smoke test |
 | `desktop` | windows-latest | Install Qt 6.12 (aqtinstall, cached), build x64 + ARM64, run QML tests |
-| `android` | ubuntu-latest | `cargo ndk` build of `nectarlink-ffi`, Gradle build, unit tests |
+| `android` | ubuntu-latest | `cargo ndk` build of `noddy-ffi`, Gradle build, unit tests |
 | `licenses` | ubuntu-latest | SPDX header check, dependency license audit (`cargo deny`) |
 
 Local equivalent: `scripts/check.ps1` runs the same steps on this machine.
@@ -66,7 +66,7 @@ Local equivalent: `scripts/check.ps1` runs the same steps on this machine.
 | C3 | Pairing | QR flow and nearby (SAS) flow per protocol §9, with tests including a simulated man-in-the-middle that must fail |
 | C4 | Sessions | Paired devices connect over iroh, `hello` exchange, version negotiation, `ping`/`pong`, reconnect with backoff |
 | C5 | Events & capabilities | Battery and device events, capability matrix computed and emitted |
-| C6 | CLI | `nectarlink-cli pair`, `status`, `ping`, `ring` work between two machines (or two processes) |
+| C6 | CLI | `noddy-cli pair`, `status`, `ping`, `ring` work between two machines (or two processes) |
 
 ## 4. Spikes
 

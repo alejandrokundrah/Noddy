@@ -312,7 +312,7 @@ QtObject {
           }
         },
         "graphite": {
-          "description": "Built-in alternative, from github.com/thtbee/graphite. Monochrome ink on paper / chalk on slate; dynamic color off.",
+          "description": "Built-in alternative. Monochrome ink on paper / chalk on slate; dynamic color off.",
           "dynamicColor": false,
           "fonts": {
             "display": "Instrument Serif",

@@ -7,7 +7,7 @@ use std::{
     time::Duration,
 };
 
-use nectarlink_core::{DeviceId, LinkState, NodeEvent, RemoteInput};
+use noddy_core::{DeviceId, LinkState, NodeEvent, RemoteInput};
 
 use crate::{core_host, state::Changes, win};
 

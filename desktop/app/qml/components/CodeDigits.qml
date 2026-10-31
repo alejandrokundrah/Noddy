@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink
+import app.noddy
 
 // The 6-digit pairing code, one digit per tile, as both screens show it.
 Row {

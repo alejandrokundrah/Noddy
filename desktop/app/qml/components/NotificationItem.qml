@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtQuick.Window
-import app.nectarlink
+import app.noddy
 
 // One phone notification in the feed: app, title and text, its actions,
 // an inline reply when the app offers one, and dismiss and options buttons

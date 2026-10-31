@@ -4,7 +4,7 @@
 //! and signal subscriptions (`PropertiesChanged`, `Seeked`, `NameOwnerChanged`),
 //! artwork resolution/caching, and remote transport commands.
 //!
-//! NectarLink's own MPRIS session (`org.mpris.MediaPlayer2.nectarlink`) is
+//! Noddy's own MPRIS session (`org.mpris.MediaPlayer2.noddy`) is
 //! excluded so a phone never gets its own music echoed back.
 
 use std::collections::HashMap;
@@ -14,7 +14,7 @@ use std::process::Command;
 use std::sync::{Mutex, OnceLock, mpsc};
 use std::time::{Duration, Instant};
 
-use nectarlink_core::{MediaAction, MediaError, MediaPlayer};
+use noddy_core::{MediaAction, MediaError, MediaPlayer};
 use zbus::zvariant::{ObjectPath, OwnedValue};
 
 /// Maximum inline artwork payload (256 KiB); larger covers are scaled and JPEG-encoded.
@@ -575,10 +575,10 @@ fn query_via_playerctl() -> Option<Vec<RawMprisPlayer>> {
 fn is_excluded_player(name: &str) -> bool {
     let lower = name.trim().to_ascii_lowercase();
     lower.is_empty()
-        || lower == "nectarlink"
+        || lower == "noddy"
         || lower == "playerctld"
-        || lower.starts_with("nectarlink.")
-        || lower.ends_with(".nectarlink")
+        || lower.starts_with("noddy.")
+        || lower.ends_with(".noddy")
         || lower.ends_with(".playerctld")
 }
 
@@ -676,7 +676,7 @@ pub(crate) fn parse_playerctl_line(line: &str) -> Option<RawMprisPlayer> {
 }
 
 /// Extracts `org.mpris.MediaPlayer2.*` bus names from `gdbus ListNames` output,
-/// excluding `org.mpris.MediaPlayer2.nectarlink` and `playerctld`.
+/// excluding `org.mpris.MediaPlayer2.noddy` and `playerctld`.
 pub(crate) fn parse_mpris_bus_names(gdbus_output: &str) -> Vec<String> {
     let mut names = Vec::new();
     for token in gdbus_output.split(|c: char| {
@@ -1190,15 +1190,15 @@ mod tests {
         assert_eq!(parsed.art_url.as_deref(), Some("file:///tmp/cover%20art.jpg"));
 
         // Self-player and playerctld must be ignored
-        let self_line = "nectarlink\tPlaying\t/1\tPhone Song\tArtist\tAlbum\t1000000\t0\t";
+        let self_line = "noddy\tPlaying\t/1\tPhone Song\tArtist\tAlbum\t1000000\t0\t";
         assert!(parse_playerctl_line(self_line).is_none());
         let daemon_line = "playerctld\tPlaying\t/1\tPhone Song\tArtist\tAlbum\t1000000\t0\t";
         assert!(parse_playerctl_line(daemon_line).is_none());
     }
 
     #[test]
-    fn parses_mpris_bus_names_and_excludes_nectarlink() {
-        let gdbus_out = "([':1.0', 'org.freedesktop.DBus', 'org.mpris.MediaPlayer2.spotify', 'org.mpris.MediaPlayer2.nectarlink', 'org.mpris.MediaPlayer2.playerctld', 'org.mpris.MediaPlayer2.vlc.instance42'],)";
+    fn parses_mpris_bus_names_and_excludes_noddy() {
+        let gdbus_out = "([':1.0', 'org.freedesktop.DBus', 'org.mpris.MediaPlayer2.spotify', 'org.mpris.MediaPlayer2.noddy', 'org.mpris.MediaPlayer2.playerctld', 'org.mpris.MediaPlayer2.vlc.instance42'],)";
         let buses = parse_mpris_bus_names(gdbus_out);
         assert_eq!(
             buses,

@@ -9,7 +9,7 @@ use std::{
     process::ExitCode,
 };
 
-use nectarlink_core::LinkState;
+use noddy_core::LinkState;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
@@ -19,7 +19,7 @@ use crate::{core_host, launch::Request, win::single_instance};
 pub const ARG: &str = "--widget-provider";
 
 /// Widget definition ID in the widget manifest.
-pub const WIDGET_ID: &str = "NectarlinkPhoneStatus";
+pub const WIDGET_ID: &str = "NoddyPhoneStatus";
 
 /// Snapshot of the primary phone's live status for the widget card.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -241,8 +241,8 @@ pub(crate) fn normalize_action_verb(verb: &str) -> Result<&'static str, String> 
 }
 
 /// Dispatches an Adaptive Card `Action.Execute` verb (`"send-clipboard"`, `"find-phone"`,
-/// `"take-photo"`, `"open-timeline"`, `"open-shelf"`, `"open"`) to the running NectarLink
-/// instance (or launches NectarLink with `--task <verb>` if not running).
+/// `"take-photo"`, `"open-timeline"`, `"open-shelf"`, `"open"`) to the running Noddy
+/// instance (or launches Noddy with `--task <verb>` if not running).
 pub fn handle_action_verb(verb: &str, data_dir: Option<&Path>) -> Result<(), String> {
     let action = normalize_action_verb(verb)?;
 
@@ -319,13 +319,13 @@ mod tests {
             phone_name: "Pixel 9 Pro".into(),
             battery_level: Some(84),
             battery_charging: true,
-            last_clip_preview: "https://nectarlink.dev/docs".into(),
+            last_clip_preview: "https://noddy.dev/docs".into(),
         };
         let card_str = render_adaptive_card(&connected);
         let parsed: Value = serde_json::from_str(&card_str).unwrap();
         assert_eq!(parsed["body"][0]["text"], "Pixel 9 Pro · Connected");
         assert_eq!(parsed["body"][1]["text"], "Battery: 84% (Charging)");
-        assert_eq!(parsed["body"][3]["text"], "https://nectarlink.dev/docs");
+        assert_eq!(parsed["body"][3]["text"], "https://noddy.dev/docs");
     }
 
     #[test]

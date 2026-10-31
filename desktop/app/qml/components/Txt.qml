@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink
+import app.noddy
 
 // Text in one of the design's type roles: displayLarge, displaySmall,
 // headline, title, body, bodySmall, label, caption, code.

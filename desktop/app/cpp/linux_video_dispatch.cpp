@@ -2,21 +2,21 @@
 #include "linux_video_builtin.h"
 #include "linux_video_codec.h"
 
-#undef nectarlink_video_decoder_create
-#undef nectarlink_video_decoder_destroy
-#undef nectarlink_video_decoder_next_device
-#undef nectarlink_video_decoder_backend
-#undef nectarlink_video_decoder_send
-#undef nectarlink_video_decoder_receive
-#undef nectarlink_video_decoder_flush
-#undef nectarlink_video_encoder_create
-#undef nectarlink_video_encoder_destroy
-#undef nectarlink_video_encoder_next_device
-#undef nectarlink_video_encoder_backend
-#undef nectarlink_video_encoder_send
-#undef nectarlink_video_encoder_receive
-#undef nectarlink_video_encoder_request_keyframe
-#undef nectarlink_video_encoder_set_bitrate
+#undef noddy_video_decoder_create
+#undef noddy_video_decoder_destroy
+#undef noddy_video_decoder_next_device
+#undef noddy_video_decoder_backend
+#undef noddy_video_decoder_send
+#undef noddy_video_decoder_receive
+#undef noddy_video_decoder_flush
+#undef noddy_video_encoder_create
+#undef noddy_video_encoder_destroy
+#undef noddy_video_encoder_next_device
+#undef noddy_video_encoder_backend
+#undef noddy_video_encoder_send
+#undef noddy_video_encoder_receive
+#undef noddy_video_encoder_request_keyframe
+#undef noddy_video_encoder_set_bitrate
 
 #include <array>
 #include <cstdio>
@@ -70,7 +70,7 @@ std::unique_ptr<Backend> load_backend(const std::filesystem::path& path)
     std::unique_ptr<void, CloseLibrary> library(dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL));
     if (!library) return {};
     auto result = std::make_unique<Backend>();
-#define LOAD(name) load_symbol(library.get(), result->name, "nectarlink_video_" #name)
+#define LOAD(name) load_symbol(library.get(), result->name, "noddy_video_" #name)
     if (!(LOAD(decoder_create) && LOAD(decoder_destroy) && LOAD(decoder_next_device)
         && LOAD(decoder_backend) && LOAD(decoder_send) && LOAD(decoder_receive) && LOAD(decoder_flush)
         && LOAD(encoder_create) && LOAD(encoder_destroy) && LOAD(encoder_next_device)
@@ -92,7 +92,7 @@ const auto& alternates()
         const auto executable = std::filesystem::read_symlink("/proc/self/exe", error);
         if (error) return result;
         for (size_t i = 0; i < result.size(); ++i) {
-            const auto name = "libnectarlink-video-ffmpeg" + std::to_string(i + 7) + ".so";
+            const auto name = "libnoddy-video-ffmpeg" + std::to_string(i + 7) + ".so";
             result[i] = load_backend(executable.parent_path() / name);
         }
         return result;
@@ -131,83 +131,83 @@ void* create(Create create, Destroy destroy, char* error, size_t capacity)
 }
 }
 
-extern "C" void* nectarlink_video_decoder_create(bool hevc, char* error, size_t capacity)
+extern "C" void* noddy_video_decoder_create(bool hevc, char* error, size_t capacity)
 {
     return create([&](const Backend& b) { return b.decoder_create(hevc, error, capacity); },
                   [](const Backend& b, void* p) { b.decoder_destroy(p); }, error, capacity);
 }
-extern "C" void nectarlink_video_decoder_destroy(void* p)
+extern "C" void noddy_video_decoder_destroy(void* p)
 {
     auto* h = static_cast<Handle*>(p);
     h->backend->decoder_destroy(h->object);
     delete h;
 }
-extern "C" bool nectarlink_video_decoder_next_device(void* p, char* error, size_t n)
+extern "C" bool noddy_video_decoder_next_device(void* p, char* error, size_t n)
 {
     auto* h = static_cast<Handle*>(p);
     return h->backend->decoder_next_device(h->object, error, n);
 }
-extern "C" const char* nectarlink_video_decoder_backend(const void* p)
+extern "C" const char* noddy_video_decoder_backend(const void* p)
 {
     auto* h = static_cast<const Handle*>(p);
     return h->backend->decoder_backend(h->object);
 }
-extern "C" int nectarlink_video_decoder_send(void* p, const uint8_t* data, size_t len, char* error, size_t n)
+extern "C" int noddy_video_decoder_send(void* p, const uint8_t* data, size_t len, char* error, size_t n)
 {
     auto* h = static_cast<Handle*>(p);
     return h->backend->decoder_send(h->object, data, len, error, n);
 }
-extern "C" int nectarlink_video_decoder_receive(void* p, NectarlinkDecodedNv12* frame, char* error, size_t n)
+extern "C" int noddy_video_decoder_receive(void* p, NoddyDecodedNv12* frame, char* error, size_t n)
 {
     auto* h = static_cast<Handle*>(p);
     return h->backend->decoder_receive(h->object, frame, error, n);
 }
-extern "C" void nectarlink_video_decoder_flush(void* p)
+extern "C" void noddy_video_decoder_flush(void* p)
 {
     auto* h = static_cast<Handle*>(p);
     h->backend->decoder_flush(h->object);
 }
 
-extern "C" void* nectarlink_video_encoder_create(bool hevc, int width, int height, int fps, int bitrate,
+extern "C" void* noddy_video_encoder_create(bool hevc, int width, int height, int fps, int bitrate,
                                                    char* error, size_t capacity)
 {
     return create([&](const Backend& b) { return b.encoder_create(hevc, width, height, fps, bitrate, error, capacity); },
                   [](const Backend& b, void* p) { b.encoder_destroy(p); }, error, capacity);
 }
-extern "C" void nectarlink_video_encoder_destroy(void* p)
+extern "C" void noddy_video_encoder_destroy(void* p)
 {
     auto* h = static_cast<Handle*>(p);
     h->backend->encoder_destroy(h->object);
     delete h;
 }
-extern "C" bool nectarlink_video_encoder_next_device(void* p, char* error, size_t n)
+extern "C" bool noddy_video_encoder_next_device(void* p, char* error, size_t n)
 {
     auto* h = static_cast<Handle*>(p);
     return h->backend->encoder_next_device(h->object, error, n);
 }
-extern "C" const char* nectarlink_video_encoder_backend(const void* p)
+extern "C" const char* noddy_video_encoder_backend(const void* p)
 {
     auto* h = static_cast<const Handle*>(p);
     return h->backend->encoder_backend(h->object);
 }
-extern "C" int nectarlink_video_encoder_send(void* p, const uint8_t* data, size_t len, int64_t time,
+extern "C" int noddy_video_encoder_send(void* p, const uint8_t* data, size_t len, int64_t time,
                                              char* error, size_t n)
 {
     auto* h = static_cast<Handle*>(p);
     return h->backend->encoder_send(h->object, data, len, time, error, n);
 }
-extern "C" int nectarlink_video_encoder_receive(void* p, const uint8_t** data, size_t* len, bool* key,
+extern "C" int noddy_video_encoder_receive(void* p, const uint8_t** data, size_t* len, bool* key,
                                                 char* error, size_t n)
 {
     auto* h = static_cast<Handle*>(p);
     return h->backend->encoder_receive(h->object, data, len, key, error, n);
 }
-extern "C" void nectarlink_video_encoder_request_keyframe(void* p)
+extern "C" void noddy_video_encoder_request_keyframe(void* p)
 {
     auto* h = static_cast<Handle*>(p);
     h->backend->encoder_request_keyframe(h->object);
 }
-extern "C" bool nectarlink_video_encoder_set_bitrate(void* p, int bitrate)
+extern "C" bool noddy_video_encoder_set_bitrate(void* p, int bitrate)
 {
     auto* h = static_cast<Handle*>(p);
     return h->backend->encoder_set_bitrate(h->object, bitrate);

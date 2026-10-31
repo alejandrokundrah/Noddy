@@ -79,9 +79,9 @@ fn has_desktop_session() -> bool {
         || has_wayland_display()
 }
 
-fn is_nectarlink_title(title: &str) -> bool {
+fn is_noddy_title(title: &str) -> bool {
     let trimmed = title.trim();
-    trimmed.is_empty() || trimmed.get(..10).is_some_and(|prefix| prefix.eq_ignore_ascii_case("nectarlink"))
+    trimmed.is_empty() || trimmed.get(..10).is_some_and(|prefix| prefix.eq_ignore_ascii_case("noddy"))
 }
 
 fn parse_window_handle(raw: &str) -> Option<isize> {
@@ -412,7 +412,7 @@ fn x11_query_active_window() -> Option<(isize, String)> {
             return None;
         }
         let (win, title) = res?;
-        if is_nectarlink_title(&title) {
+        if is_noddy_title(&title) {
             return None;
         }
         let hwnd = win as isize;
@@ -505,7 +505,7 @@ fn x11_focus_window(hwnd: isize) -> bool {
 }
 
 /// Queries the currently active external window via X11 `_NET_ACTIVE_WINDOW`
-/// (in-process), `kdotool` (KDE Wayland), or `xdotool`, ignoring NectarLink's own windows.
+/// (in-process), `kdotool` (KDE Wayland), or `xdotool`, ignoring Noddy's own windows.
 pub fn query_active_window() -> Option<(isize, String)> {
     if has_x11_display()
         && let Some((hwnd, title)) = x11_query_active_window()
@@ -516,7 +516,7 @@ pub fn query_active_window() -> Option<(isize, String)> {
         && let Some(raw_id) = run_command_stdout("kdotool", &["getactivewindow"])
         && let Some(hwnd) = parse_window_handle(&raw_id)
         && let Some(title) = run_command_stdout("kdotool", &["getwindowname", &raw_id])
-        && !is_nectarlink_title(&title)
+        && !is_noddy_title(&title)
     {
         return Some((hwnd, title));
     }
@@ -524,7 +524,7 @@ pub fn query_active_window() -> Option<(isize, String)> {
         && let Some(raw_id) = run_command_stdout("xdotool", &["getactivewindow"])
         && let Some(hwnd) = parse_window_handle(&raw_id)
         && let Some(title) = run_command_stdout("xdotool", &["getwindowname", &raw_id])
-        && !is_nectarlink_title(&title)
+        && !is_noddy_title(&title)
     {
         return Some((hwnd, title));
     }
@@ -532,7 +532,7 @@ pub fn query_active_window() -> Option<(isize, String)> {
 }
 
 /// Records the current foreground window if it belongs to an external
-/// user-facing application (not NectarLink itself).
+/// user-facing application (not Noddy itself).
 pub fn record_foreground_window() {
     if let Some((hwnd, title)) = query_active_window() {
         let mut guard = LAST_EXTERNAL_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
@@ -1023,7 +1023,7 @@ pub(crate) fn parse_portal_shortcut_id(id: &str) -> Option<TrayEvent> {
     }
 }
 
-/// Converts a NectarLink hotkey spec (e.g. `"Ctrl+Alt+C"`) into an XDG GlobalShortcuts
+/// Converts a Noddy hotkey spec (e.g. `"Ctrl+Alt+C"`) into an XDG GlobalShortcuts
 /// `preferred_trigger` string (e.g. `"CTRL+ALT+c"`).
 pub(crate) fn hotkey_to_portal_trigger(spec: &str) -> Option<String> {
     let (mods, vk) = parse_hotkey(spec)?;
@@ -1102,7 +1102,7 @@ fn bind_portal_global_shortcuts(
     }
 
     *bind_seq += 1;
-    let token = format!("nectarlink_gs_bind_{}", *bind_seq);
+    let token = format!("noddy_gs_bind_{}", *bind_seq);
     let mut options: HashMap<&str, Value<'_>> = HashMap::new();
     options.insert("handle_token", Value::from(token.as_str()));
 
@@ -1150,8 +1150,8 @@ fn try_run_wayland_portal_shortcuts(stop: &AtomicBool, handler: &SharedHandler) 
     }
 
     let pid = std::process::id();
-    let req_token = format!("nectarlink_gs_req_{pid}");
-    let session_token = format!("nectarlink_gs_sess_{pid}");
+    let req_token = format!("noddy_gs_req_{pid}");
+    let session_token = format!("noddy_gs_sess_{pid}");
     let mut create_opts: HashMap<&str, Value<'_>> = HashMap::new();
     create_opts.insert("handle_token", Value::from(req_token.as_str()));
     create_opts.insert("session_handle_token", Value::from(session_token.as_str()));
@@ -1307,10 +1307,10 @@ impl SharedHandler {
 
 fn tray_icon_cache_path() -> PathBuf {
     if let Some(dir) = dirs::runtime_dir().or_else(dirs::cache_dir).filter(|p| p.is_absolute()) {
-        dir.join("nectarlink").join("tray-icon.png")
+        dir.join("noddy").join("tray-icon.png")
     } else {
         let uid = unsafe { libc::geteuid() };
-        env::temp_dir().join(format!("nectarlink-{uid}")).join("tray-icon.png")
+        env::temp_dir().join(format!("noddy-{uid}")).join("tray-icon.png")
     }
 }
 
@@ -1643,8 +1643,8 @@ mod tests {
             open_link: "Open link".into(),
             quit: "Quit".into(),
         };
-        let tray = Tray::create("NectarLink", labels, |_| {}).expect("create tray");
-        tray.set_tooltip("NectarLink · Pixel 9");
+        let tray = Tray::create("Noddy", labels, |_| {}).expect("create tray");
+        tray.set_tooltip("Noddy · Pixel 9");
         tray.set_find_phone_enabled(true);
         assert!(tray.icon_path.exists());
         drop(tray);

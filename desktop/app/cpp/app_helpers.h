@@ -46,13 +46,13 @@ void register_qml_app_engine(QQmlApplicationEngine &engine);
 // so items dragged out of the Shelf can be dropped into Explorer or any app.
 bool start_external_drag(rust::Str file_path, rust::Str text_fallback);
 
-// Installs the NectarLink and Qt translations for `language` (a locale name
+// Installs the Noddy and Qt translations for `language` (a locale name
 // such as "zh_CN", or "" for the system's), replacing those installed before.
 // `dir` is the folder holding the executable, where windeployqt and the
 // packaging script stage the .qm files. Call after QGuiApplication is
 // created and before the QML engine loads, so that every qsTr() resolves on
 // the first pass; called again later, it retranslates the open windows.
-// Returns true when NectarLink's own translation was found and installed.
+// Returns true when Noddy's own translation was found and installed.
 bool install_translator(rust::Str dir, rust::Str language);
 
 // `text` in the installed language (Qt's translate), for the strings the app

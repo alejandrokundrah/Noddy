@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Explorer's "Send to" menu: a shortcut per paired phone, which starts
-//! NectarLink with `--send-to <device> <files…>`. The running app sends the
+//! Noddy with `--send-to <device> <files…>`. The running app sends the
 //! files and follows the transfer in a Windows notification with a progress
 //! bar, so nothing else needs to open.
 
@@ -16,7 +16,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use nectarlink_core::{DeviceId, Error, NodeEvent, Transfer, TransferFailure, TransferState};
+use noddy_core::{DeviceId, Error, NodeEvent, Transfer, TransferFailure, TransferState};
 
 use crate::{
     bridge::app::{describe, request_activation},
@@ -152,8 +152,8 @@ fn reconcile(dir: &Path, desired: &[(DeviceId, String)], exe: &Path) -> io::Resu
                     .any(|(p, _)| p.file_name().is_some_and(|n| n.to_string_lossy().to_lowercase() == lower))
         };
         let candidate = std::iter::once(base.clone())
-            .chain(std::iter::once(format!("{base} (NectarLink)")))
-            .chain((2..).map(|n| format!("{base} (NectarLink {n})")))
+            .chain(std::iter::once(format!("{base} (Noddy)")))
+            .chain((2..).map(|n| format!("{base} (Noddy {n})")))
             .find(|c| !taken(c))
             .unwrap_or(base);
         planned.push((
@@ -161,7 +161,7 @@ fn reconcile(dir: &Path, desired: &[(DeviceId, String)], exe: &Path) -> io::Resu
             Shortcut {
                 target: exe.to_owned(),
                 arguments: format!("{ARG} {id}"),
-                description: tr!("SendTo", "Send to %1 with NectarLink", name),
+                description: tr!("SendTo", "Send to %1 with Noddy", name),
             },
         ));
     }
@@ -227,7 +227,7 @@ fn share(files: Vec<PathBuf>, url: Option<String>, text: Option<String>) {
             let online: Vec<(DeviceId, String)> = s
                 .devices
                 .iter()
-                .filter(|d| matches!(d.link, nectarlink_core::LinkState::Online { .. }))
+                .filter(|d| matches!(d.link, noddy_core::LinkState::Online { .. }))
                 .map(|d| (d.id, d.info.name.clone()))
                 .collect();
             let all: Vec<(DeviceId, String)> =
@@ -246,7 +246,7 @@ fn share(files: Vec<PathBuf>, url: Option<String>, text: Option<String>) {
             request_activation();
         }
         let Some((device_id, device_name)) = target else {
-            failed("No phone paired", "Pair your phone in NectarLink to share with it.");
+            failed("No phone paired", "Pair your phone in Noddy to share with it.");
             return;
         };
         if !files.is_empty() {
@@ -258,7 +258,7 @@ fn share(files: Vec<PathBuf>, url: Option<String>, text: Option<String>) {
         if let Some(text) = text.filter(|t| !t.trim().is_empty()) {
             let is_online = core_host::host().hub.read(|s| {
                 s.device(&device_id)
-                    .is_some_and(|d| matches!(d.link, nectarlink_core::LinkState::Online { .. }))
+                    .is_some_and(|d| matches!(d.link, noddy_core::LinkState::Online { .. }))
             });
             match node.send_clipboard(device_id, text).await {
                 Ok(()) => {
@@ -268,7 +268,7 @@ fn share(files: Vec<PathBuf>, url: Option<String>, text: Option<String>) {
                             key: "share-text".into(),
                             title: tr!("SendTo", "Sent to %1", device_name),
                             body: tr!("SendTo", "Copied to your phone's clipboard."),
-                            attribution: "NectarLink".into(),
+                            attribution: "Noddy".into(),
                             icon: None,
                             image: None,
                             actions: Vec::new(),
@@ -287,7 +287,7 @@ fn share(files: Vec<PathBuf>, url: Option<String>, text: Option<String>) {
     });
 }
 
-fn task_notify(device: Option<String>, task: nectarlink_core::TaskNotify) {
+fn task_notify(device: Option<String>, task: noddy_core::TaskNotify) {
     core_host::spawn(async move {
         let Ok(Some(node)) = tokio::time::timeout(START_TIMEOUT, core_host::wait_for_node()).await else {
             tracing::warn!("task notification wasn't sent: the core didn't start");
@@ -299,7 +299,7 @@ fn task_notify(device: Option<String>, task: nectarlink_core::TaskNotify) {
                 let target = core_host::host().hub.read(|s| {
                     s.devices
                         .iter()
-                        .find(|d| matches!(d.link, nectarlink_core::LinkState::Online { .. }))
+                        .find(|d| matches!(d.link, noddy_core::LinkState::Online { .. }))
                         .or_else(|| s.devices.first())
                         .map(|d| d.id)
                 });
@@ -361,7 +361,7 @@ fn send(device: String, paths: Vec<PathBuf>) {
             return failed("Couldn't send", "That device isn't paired with this PC anymore.");
         };
         let outgoing =
-            match tokio::task::spawn_blocking(move || nectarlink_core::outgoing_paths(&paths)).await {
+            match tokio::task::spawn_blocking(move || noddy_core::outgoing_paths(&paths)).await {
                 Ok(Ok(files)) if !files.is_empty() => files,
                 Ok(Ok(_)) => {
                     return failed(
@@ -386,7 +386,7 @@ fn send(device: String, paths: Vec<PathBuf>) {
             }
             Err(Error::Denied) => failed(
                 &tr!("SendTo", "Couldn't send to %1", name),
-                "Files are turned off for this device. Turn them on in NectarLink.",
+                "Files are turned off for this device. Turn them on in Noddy.",
             ),
             Err(e) => failed(&tr!("SendTo", "Couldn't send to %1", name), &describe(&e)),
         }
@@ -399,7 +399,7 @@ fn failed(title: &str, body: &str) {
         key: format!("failed-{title}"),
         title: title.into(),
         body: body.into(),
-        attribution: "NectarLink".into(),
+        attribution: "Noddy".into(),
         icon: None,
         image: None,
         actions: Vec::new(),
@@ -428,7 +428,7 @@ fn track(id: String, device_name: String) {
             key: id,
             title,
             body: format!("{device_name} is offline. Will send when it's back."),
-            attribution: "NectarLink".into(),
+            attribution: "Noddy".into(),
             icon: None,
             image: None,
             actions: vec![(ACTION_CANCEL.into(), "Cancel".into())],
@@ -458,7 +458,7 @@ fn update(map: &mut HashMap<String, Tracked>, transfer: &Transfer) {
         key: transfer.id.clone(),
         title,
         body,
-        attribution: "NectarLink".into(),
+        attribution: "Noddy".into(),
         icon: None,
         image: None,
         actions: Vec::new(),
@@ -585,11 +585,11 @@ mod tests {
         reconcile(dir.path(), &[(a, "Pixel".into()), (b, "Tab".into()), (c, "Pixel".into())], &exe).unwrap();
         assert_eq!(
             names(dir.path()),
-            ["Pixel (NectarLink).lnk", "Pixel.lnk", "Tab (NectarLink).lnk", "Tab.lnk"]
+            ["Pixel (Noddy).lnk", "Pixel.lnk", "Tab (Noddy).lnk", "Tab.lnk"]
         );
         assert_eq!(shortcut::arguments(&dir.path().join("Pixel.lnk")).unwrap(), format!("{ARG} {a}"));
         assert_eq!(
-            shortcut::arguments(&dir.path().join("Pixel (NectarLink).lnk")).unwrap(),
+            shortcut::arguments(&dir.path().join("Pixel (Noddy).lnk")).unwrap(),
             format!("{ARG} {c}")
         );
 

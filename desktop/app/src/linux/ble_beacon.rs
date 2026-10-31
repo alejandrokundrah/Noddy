@@ -13,14 +13,14 @@ use std::sync::{
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
-use nectarlink_core::DeviceId;
+use noddy_core::DeviceId;
 use zbus::zvariant::{ObjectPath, OwnedObjectPath, OwnedValue, Value};
 
 pub const COMPANY_ID: u16 = 0xFFFF;
 pub const MAGIC: &[u8; 5] = b"NCTR\x01";
 pub const NEAR_RSSI_DBM: i16 = -72;
 pub const WALK_AWAY_RSSI_DBM: i16 = -85;
-pub const NECTARLINK_BLE_UUID: &str = "f81d4fae-7dec-11d0-a765-00a0c91e6bf6";
+pub const NODDY_BLE_UUID: &str = "f81d4fae-7dec-11d0-a765-00a0c91e6bf6";
 
 const POLL_INTERVAL: Duration = Duration::from_secs(2);
 /// How often the beacon is checked when walk-away is off: it comes back this
@@ -29,7 +29,7 @@ const BEACON_CHECK_INTERVAL: Duration = Duration::from_secs(15);
 
 const BLUEZ: &str = "org.bluez";
 const ADVERTISING_MANAGER: &str = "org.bluez.LEAdvertisingManager1";
-const ADVERTISEMENT_PATH: &str = "/app/nectarlink/beacon";
+const ADVERTISEMENT_PATH: &str = "/app/noddy/beacon";
 
 static RUNNING: AtomicBool = AtomicBool::new(false);
 static STOP_MU: Mutex<bool> = Mutex::new(false);
@@ -174,11 +174,11 @@ fn names_match(candidate: &str, phone_name: &str) -> bool {
 
 /// Matches a BlueZ device candidate ONLY if:
 /// 1. It carries a valid `NCTR\x01` manufacturer payload (not our own prefix), OR
-/// 2. It advertises the NectarLink BLE service UUID (`f81d4fae-7dec-11d0-a765-00a0c91e6bf6`), OR
+/// 2. It advertises the Noddy BLE service UUID (`f81d4fae-7dec-11d0-a765-00a0c91e6bf6`), OR
 /// 3. Its `Name` or `Alias` matches a paired phone in `hub`.
 ///
 /// Arbitrary Bluetooth peripherals (headphones, mice, keyboards, etc.) never match.
-pub fn match_nectarlink_device(
+pub fn match_noddy_device(
     candidate: &BluezDeviceCandidate,
     own_prefix: &[u8; 8],
     paired_phones: &[PairedPhone],
@@ -204,7 +204,7 @@ pub fn match_nectarlink_device(
         })
     };
 
-    if candidate.uuids.iter().any(|u| u.eq_ignore_ascii_case(NECTARLINK_BLE_UUID)) {
+    if candidate.uuids.iter().any(|u| u.eq_ignore_ascii_case(NODDY_BLE_UUID)) {
         if let Some(phone) = find_matching_phone() {
             return Some(phone.prefix);
         }
@@ -424,7 +424,7 @@ fn poll_bluez_devices(objects: &ManagedObjects, own_prefix: &[u8; 8], tracker: &
             uuids: props.get("UUIDs").map(extract_string_list).unwrap_or_default(),
             mfg_payload: props.get("ManufacturerData").and_then(extract_mfg_ffff),
         };
-        if let Some(prefix) = match_nectarlink_device(&candidate, own_prefix, &paired_phones)
+        if let Some(prefix) = match_noddy_device(&candidate, own_prefix, &paired_phones)
             && tracker.record(prefix, rssi)
         {
             tracing::info!("BLE walk-away threshold reached for paired phone; firing trigger");
@@ -560,7 +560,7 @@ mod tests {
     }
 
     #[test]
-    fn matches_only_paired_phones_or_nectarlink_uuid_and_ignores_peripherals() {
+    fn matches_only_paired_phones_or_noddy_uuid_and_ignores_peripherals() {
         let own_prefix = [0xAA; 8];
         let phone_prefix = [1, 2, 3, 4, 5, 6, 7, 8];
         let paired = vec![PairedPhone {
@@ -578,7 +578,7 @@ mod tests {
             uuids: vec!["0000110b-0000-1000-8000-00805f9b34fb".into()],
             mfg_payload: None,
         };
-        assert_eq!(match_nectarlink_device(&headphones, &own_prefix, &paired), None);
+        assert_eq!(match_noddy_device(&headphones, &own_prefix, &paired), None);
 
         // Paired phone matched by Name/Alias.
         let by_name = BluezDeviceCandidate {
@@ -589,18 +589,18 @@ mod tests {
             uuids: Vec::new(),
             mfg_payload: None,
         };
-        assert_eq!(match_nectarlink_device(&by_name, &own_prefix, &paired), Some(phone_prefix));
+        assert_eq!(match_noddy_device(&by_name, &own_prefix, &paired), Some(phone_prefix));
 
-        // Device advertising the NectarLink BLE service UUID matches.
+        // Device advertising the Noddy BLE service UUID matches.
         let by_uuid = BluezDeviceCandidate {
             address: Some("AA:BB:CC:DD:EE:FF".into()),
             name: Some("Android".into()),
             alias: None,
             rssi: Some(-65),
-            uuids: vec![NECTARLINK_BLE_UUID.to_uppercase()],
+            uuids: vec![NODDY_BLE_UUID.to_uppercase()],
             mfg_payload: None,
         };
-        assert_eq!(match_nectarlink_device(&by_uuid, &own_prefix, &paired), Some(phone_prefix));
+        assert_eq!(match_noddy_device(&by_uuid, &own_prefix, &paired), Some(phone_prefix));
     }
 
     fn adapter(path: &str, powered: bool, can_advertise: bool) -> ManagedObjects {

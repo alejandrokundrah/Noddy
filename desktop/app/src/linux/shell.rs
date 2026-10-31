@@ -11,7 +11,7 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
-const ALLOWED_URL_SCHEMES: &[&str] = &["http", "https", "mailto", "tel", "sms", "mms", "geo", "nectarlink"];
+const ALLOWED_URL_SCHEMES: &[&str] = &["http", "https", "mailto", "tel", "sms", "mms", "geo", "noddy"];
 
 /// Spawns `cmd` with null stdio and reaps the child in a background thread so
 /// terminated subprocesses never remain as `<defunct>` zombies.
@@ -30,7 +30,7 @@ fn spawn_detached(program: &str, args: &[&str]) -> Result<(), String> {
 }
 
 /// Validates that `url` uses an allowed scheme (`http`, `https`, `mailto`, `tel`,
-/// `sms`, `mms`, `geo`, `nectarlink`), does not begin with `-`, and contains no
+/// `sms`, `mms`, `geo`, `noddy`), does not begin with `-`, and contains no
 /// control or whitespace characters.
 fn validate_url(url: &str) -> Result<&str, String> {
     let trimmed = url.trim();
@@ -60,7 +60,7 @@ fn validate_url(url: &str) -> Result<&str, String> {
 }
 
 /// Opens a validated URL (`http`, `https`, `mailto`, `tel`, `sms`, `mms`, `geo`,
-/// `nectarlink`) via `org.freedesktop.portal.OpenURI` over D-Bus first so the
+/// `noddy`) via `org.freedesktop.portal.OpenURI` over D-Bus first so the
 /// URL is not exposed in process command-line arguments, falling back to
 /// `gio open` / `xdg-open`.
 pub fn open_url(url: &str) -> Result<(), String> {
@@ -127,7 +127,7 @@ pub fn open_maps(address: &str) -> Result<(), String> {
     if trimmed.is_empty() {
         return Err("empty address".into());
     }
-    open_url(&nectarlink_core::maps_web_url(trimmed))
+    open_url(&noddy_core::maps_web_url(trimmed))
 }
 
 /// Checks whether a custom URI scheme has a registered handler via `xdg-mime`.

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtQuick.Window
-import app.nectarlink
+import app.noddy
 
 // Slide-out edge panel ("The Shelf") showing the latest photo, latest
 // screenshot, current clipboard item, and recent received files. Dragging
@@ -13,7 +13,7 @@ import app.nectarlink
 Window {
     id: shelfWin
 
-    title: qsTr("NectarLink Shelf")
+    title: qsTr("Noddy Shelf")
     flags: Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowDoesNotAcceptFocus
     color: "transparent"
     visible: true

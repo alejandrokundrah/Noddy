@@ -14,7 +14,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use nectarlink_core::{DeviceId, Error, NodeEvent, Notification};
+use noddy_core::{DeviceId, Error, NodeEvent, Notification};
 
 use crate::{
     core_host, icons,
@@ -94,14 +94,14 @@ fn quiet_device_toasts(device: DeviceId) {
 /// (so a phone number in the title is never mistaken for a code).
 pub fn notification_otp(n: &Notification) -> Option<String> {
     let text = n.text.as_deref().unwrap_or_default();
-    if let Some(code) = nectarlink_core::otp::one_time_code(text) {
+    if let Some(code) = noddy_core::otp::one_time_code(text) {
         return Some(code);
     }
     if let Some(title) = n.title.as_deref().filter(|t| !t.trim().is_empty())
         && !text.trim().is_empty()
     {
         let combined = format!("{title}: {text}");
-        if let Some(code) = nectarlink_core::otp::one_time_code(&combined)
+        if let Some(code) = noddy_core::otp::one_time_code(&combined)
             && (text.contains(&code)
                 || (code.len() == 6 && text.contains(&format!("{}-{}", &code[..3], &code[3..]))))
         {
@@ -483,7 +483,7 @@ pub fn on_toast(event: ToastEvent) {
             if let Ok(dev) = device.parse::<DeviceId>() {
                 let app_target = core_host::host().hub.read(|s| {
                     let can_open = s.matrices.get(&dev).and_then(|m| m.state("mirroring.app_windows"))
-                        == Some(nectarlink_core::FeatureState::Available);
+                        == Some(noddy_core::FeatureState::Available);
                     if !can_open {
                         return None;
                     }
@@ -598,7 +598,7 @@ fn report(error: &Error) {
 
 #[cfg(test)]
 mod tests {
-    use nectarlink_core::NotificationLive;
+    use noddy_core::NotificationLive;
 
     use super::*;
 

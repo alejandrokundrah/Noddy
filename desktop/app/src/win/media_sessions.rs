@@ -3,7 +3,7 @@
 //! sessions apps report to Windows (Global System Media Transport
 //! Controls), and commands from a phone sent to them.
 //!
-//! NectarLink's own session (a phone's media in the flyout) is left out, so
+//! Noddy's own session (a phone's media in the flyout) is left out, so
 //! a phone never gets its own music back.
 
 use std::{
@@ -12,7 +12,7 @@ use std::{
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
-use nectarlink_core::{MediaAction, MediaError, MediaPlayer};
+use noddy_core::{MediaAction, MediaError, MediaPlayer};
 use windows::{
     ApplicationModel::AppInfo,
     Foundation::TypedEventHandler,
@@ -189,7 +189,7 @@ fn watch(
     Ok(())
 }
 
-/// Every session but NectarLink's own, the one Windows considers current
+/// Every session but Noddy's own, the one Windows considers current
 /// first.
 fn snapshot(
     manager: &GlobalSystemMediaTransportControlsSessionManager,
@@ -640,7 +640,7 @@ pub fn command(player: &str, action: MediaAction, position: Option<u64>) -> Resu
 }
 
 /// Tracks which PC media sessions were actively playing when a phone call
-/// started and were paused by NectarLink, so only those sessions are resumed
+/// started and were paused by Noddy, so only those sessions are resumed
 /// when the call ends.
 #[derive(Debug, Default)]
 pub(crate) struct PausedForCall {
@@ -680,8 +680,8 @@ fn paused_for_call<T>(f: impl FnOnce(&mut PausedForCall) -> T) -> T {
 }
 
 /// Pauses any PC media sessions that are currently playing (excluding
-/// NectarLink's own SMTC session) and remembers them so [`resume_after_call`]
-/// can resume only what NectarLink paused.
+/// Noddy's own SMTC session) and remembers them so [`resume_after_call`]
+/// can resume only what Noddy paused.
 pub fn pause_for_call() {
     let Some(manager) = MANAGER.get().cloned() else { return };
     std::thread::spawn(move || {

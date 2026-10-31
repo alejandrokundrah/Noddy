@@ -1,16 +1,16 @@
 # Storage and Retention
 
-NectarLink persists all relational state in an embedded SQLite database (`nectarlink.db`) managed by `core/nectarlink-core/src/store.rs`, supplemented by a `KeyProtector`-encrypted clipboard vault (`core/nectarlink-core/src/clipboard_history.rs`) and bounded desktop notification state files (`desktop/app/src/notification_store.rs`).
+Noddy persists all relational state in an embedded SQLite database (`noddy.db`) managed by `core/noddy-core/src/store.rs`, supplemented by a `KeyProtector`-encrypted clipboard vault (`core/noddy-core/src/clipboard_history.rs`) and bounded desktop notification state files (`desktop/app/src/notification_store.rs`).
 
 ## Data Directory Layout
 
-- **Windows (`%LOCALAPPDATA%\Nectarlink`)** or custom `--data-dir`
+- **Windows (`%LOCALAPPDATA%\Noddy`)** or custom `--data-dir`
 - **Android (`context.filesDir`)**
 
 ```text
 <data_dir>/
 ├── identity.key                  Ed25519 secret key (NLK1 header + DPAPI/Keystore ciphertext)
-├── nectarlink.db                 SQLite database (WAL mode, schema v8)
+├── noddy.db                 SQLite database (WAL mode, schema v8)
 ├── clipboard_history.enc         KeyProtector-encrypted clipboard index (NLCB\x01 header)
 ├── clipboard_images/
 │   └── <clip_id>.enc             KeyProtector-encrypted PNG/image payloads (NLCI\x01 header)
@@ -25,7 +25,7 @@ NectarLink persists all relational state in an embedded SQLite database (`nectar
 
 ## SQLite Schema (`SCHEMA_VERSION = 7`)
 
-Configured in `core/nectarlink-core/src/store.rs` with `PRAGMA journal_mode = WAL`, `PRAGMA foreign_keys = ON`, and `PRAGMA user_version = 7`. All 7 tables use SQLite `STRICT` typing:
+Configured in `core/noddy-core/src/store.rs` with `PRAGMA journal_mode = WAL`, `PRAGMA foreign_keys = ON`, and `PRAGMA user_version = 7`. All 7 tables use SQLite `STRICT` typing:
 
 | Table | Primary Key | Purpose | Retention & Bounding Policy |
 |---|---|---|---|
@@ -61,9 +61,9 @@ In addition to SQLite conversation threads, the desktop app maintains fast JSON-
 
 ## Persistent Bidirectional Send Queue (`send_queue`)
 
-Implemented across `core/nectarlink-core/src/store.rs`, `core/nectarlink-core/src/node.rs`, and `core/nectarlink-core/src/transfer.rs`.
+Implemented across `core/noddy-core/src/store.rs`, `core/noddy-core/src/node.rs`, and `core/noddy-core/src/transfer.rs`.
 
-Whenever a user sends files, folders, links, clipboard payloads, voice recordings, handoff documents, task alerts, or camera requests while the target device is offline (or when the connection drops mid-operation), NectarLink enqueues the action into `send_queue` and delivers it automatically when a session is established.
+Whenever a user sends files, folders, links, clipboard payloads, voice recordings, handoff documents, task alerts, or camera requests while the target device is offline (or when the connection drops mid-operation), Noddy enqueues the action into `send_queue` and delivers it automatically when a session is established.
 
 ### Queue Item Kinds and Default TTLs (`QueueKind`)
 

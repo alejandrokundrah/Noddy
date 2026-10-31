@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Spike S1: can Qt Quick + Rust deliver the NectarLink design within the
+//! Spike S1: can Qt Quick + Rust deliver the Noddy design within the
 //! performance budgets? See README.md for what is measured and the results.
 
 mod bridge;
@@ -19,14 +19,14 @@ fn main() {
     let mut app = QGuiApplication::new();
     let mut engine = QQmlApplicationEngine::new();
     if let Some(app) = app.as_mut() {
-        app.set_application_name(&QString::from("NectarLink S1"));
+        app.set_application_name(&QString::from("Noddy S1"));
     }
     // The tray test closes the main window and keeps running, like tray mode.
     if std::env::args().any(|a| a == "--tray-test") {
         native::ffi::set_quit_on_last_window_closed(false);
     }
     if let Some(engine) = engine.as_mut() {
-        engine.load(&QUrl::from("qrc:/qt/qml/app/nectarlink/spike/qml/App.qml"));
+        engine.load(&QUrl::from("qrc:/qt/qml/app/noddy/spike/qml/App.qml"));
     }
     if mica {
         mica::apply_to_process_windows();

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Local authenticated HTTP/JSON automation API (`127.0.0.1:<port>`, default
-//! `53320`, off by default): lets local tools (such as the NectarLink PowerToys
+//! `53320`, off by default): lets local tools (such as the Noddy PowerToys
 //! Command Palette / Run extension, Raycast scripts, AutoHotkey, or CLI scripts)
 //! list paired phones, send files/links/clipboard text, trigger Continuity
 //! Camera, ring a phone, or read recent timeline and clipboard items.
@@ -26,7 +26,7 @@ use std::{
 };
 
 use data_encoding::HEXLOWER;
-use nectarlink_core::{DeviceId, LinkState, TaskNotify};
+use noddy_core::{DeviceId, LinkState, TaskNotify};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use tokio::{
@@ -442,12 +442,12 @@ fn with_state<T>(_f: impl FnOnce(&crate::state::AppState) -> T) -> Option<T> {
 }
 
 #[cfg(not(test))]
-fn try_node() -> Option<nectarlink_core::Node> {
+fn try_node() -> Option<noddy_core::Node> {
     crate::core_host::node()
 }
 
 #[cfg(test)]
-fn try_node() -> Option<nectarlink_core::Node> {
+fn try_node() -> Option<noddy_core::Node> {
     None
 }
 
@@ -529,9 +529,9 @@ fn handle_get_devices() -> (u16, &'static str, Value) {
                     LinkState::Online { path, .. } => (
                         true,
                         match path {
-                            nectarlink_core::ConnectionPath::Lan => "lan",
-                            nectarlink_core::ConnectionPath::Usb => "usb",
-                            nectarlink_core::ConnectionPath::Relay => "relay",
+                            noddy_core::ConnectionPath::Lan => "lan",
+                            noddy_core::ConnectionPath::Usb => "usb",
+                            noddy_core::ConnectionPath::Relay => "relay",
                         },
                     ),
                     LinkState::Connecting => (false, "connecting"),
@@ -588,7 +588,7 @@ async fn handle_post_send(body: &[u8]) -> (u16, &'static str, Value) {
         if !payload.paths.is_empty() {
             let paths: Vec<PathBuf> = payload.paths.iter().map(PathBuf::from).collect();
             if let Ok(Ok(outgoing)) =
-                tokio::task::spawn_blocking(move || nectarlink_core::outgoing_paths(&paths)).await
+                tokio::task::spawn_blocking(move || noddy_core::outgoing_paths(&paths)).await
                 && !outgoing.is_empty()
             {
                 let _ = node.send_files(device, outgoing).await;
@@ -614,8 +614,8 @@ fn handle_get_clipboard() -> (u16, &'static str, Value) {
                 .take(20)
                 .map(|item| {
                     let kind = match item.kind {
-                        nectarlink_core::ClipboardItemKind::Text => "text",
-                        nectarlink_core::ClipboardItemKind::Image => "image",
+                        noddy_core::ClipboardItemKind::Text => "text",
+                        noddy_core::ClipboardItemKind::Image => "image",
                     };
                     json!({
                         "id": item.id,
@@ -783,12 +783,12 @@ fn handle_get_timeline(query: &HashMap<String, String>) -> (u16, &'static str, V
         .get("limit")
         .and_then(|s| s.parse::<u32>().ok())
         .unwrap_or(20)
-        .clamp(1, nectarlink_core::MAX_TIMELINE_PAGE_LIMIT);
+        .clamp(1, noddy_core::MAX_TIMELINE_PAGE_LIMIT);
     let search = query.get("q").map(|s| s.trim().to_owned()).filter(|s| !s.is_empty());
 
     let items = try_node()
         .and_then(|node| {
-            node.timeline_page(&nectarlink_core::TimelineQuery {
+            node.timeline_page(&noddy_core::TimelineQuery {
                 kind: None,
                 device: None,
                 search,
@@ -959,7 +959,7 @@ mod tests {
         .await;
         assert_eq!(code, 200);
 
-        let send_body = r#"{"url":"https://nectarlink.dev"}"#;
+        let send_body = r#"{"url":"https://noddy.dev"}"#;
         let (code, _) = raw_http_call(
             addr,
             &format!(

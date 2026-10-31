@@ -11,7 +11,7 @@ use std::{
     sync::{Mutex, MutexGuard},
 };
 
-use nectarlink_core::{DeviceId, Error, MediaAction, NodeEvent};
+use noddy_core::{DeviceId, Error, MediaAction, NodeEvent};
 
 use crate::{
     bridge::app::{describe, show_message},
@@ -208,7 +208,7 @@ fn send(device: DeviceId, player: String, action: MediaAction, position: Option<
 }
 
 /// The hub's view of a player, with when its position was measured.
-pub fn view(device: DeviceId, mut player: nectarlink_core::MediaPlayer, art: Option<PathBuf>) -> PlayerView {
+pub fn view(device: DeviceId, mut player: noddy_core::MediaPlayer, art: Option<PathBuf>) -> PlayerView {
     player.art = None;
     PlayerView { device, player, art, at: std::time::SystemTime::now() }
 }
@@ -233,7 +233,7 @@ pub fn on_event(event: &NodeEvent) {
 }
 
 /// Latest local media players on this PC and when they were sampled.
-static LOCAL_PLAYERS: Mutex<Vec<(nectarlink_core::MediaPlayer, std::time::SystemTime, std::time::Instant)>> =
+static LOCAL_PLAYERS: Mutex<Vec<(noddy_core::MediaPlayer, std::time::SystemTime, std::time::Instant)>> =
     Mutex::new(Vec::new());
 /// Saved artwork paths by player ID for local PC media sessions.
 static LOCAL_PLAYER_ART: Mutex<Option<HashMap<String, PathBuf>>> = Mutex::new(None);
@@ -273,7 +273,7 @@ pub fn local_playback_position_secs() -> Option<u32> {
 }
 
 /// What plays on this PC changed: tell the phones and refresh Desktop UI.
-pub fn local_changed(players: Vec<nectarlink_core::MediaPlayer>) {
+pub fn local_changed(players: Vec<noddy_core::MediaPlayer>) {
     let now_sys = std::time::SystemTime::now();
     let now = std::time::Instant::now();
     *lock(&LOCAL_PLAYERS) = players.iter().cloned().map(|p| (p, now_sys, now)).collect();

@@ -18,7 +18,7 @@ mod imp {
         time::{Duration, Instant},
     };
 
-    use nectarlink_core::{DeviceId, Error, FeatureState, LinkState, MediaAction, PlayOnPhone};
+    use noddy_core::{DeviceId, Error, FeatureState, LinkState, MediaAction, PlayOnPhone};
     #[cfg(windows)]
     use windows::Win32::{
         Foundation::{HWND, RECT},
@@ -164,7 +164,7 @@ mod imp {
                 .as_ref()
                 .filter(|w| browser::is_browser(&w.program))
                 .and_then(|w| Automation::new().ok()?.page_url(w));
-            let plan = nectarlink_core::play_on_phone::plan(url.as_deref(), position);
+            let plan = noddy_core::play_on_phone::plan(url.as_deref(), position);
             let Some(node) = core_host::node() else { return };
             core_host::spawn(async move {
                 if let Some(file) = file {
@@ -236,7 +236,7 @@ mod imp {
 
     fn failed(error: &Error, phone: &str) -> String {
         match error {
-            Error::Unsupported => tr!("PlayOnPhone", "Update NectarLink on %1 to play on it.", phone),
+            Error::Unsupported => tr!("PlayOnPhone", "Update Noddy on %1 to play on it.", phone),
             Error::Denied => tr!("PlayOnPhone", "Media is turned off for %1.", phone),
             other => describe(other),
         }
@@ -380,7 +380,7 @@ mod imp {
 mod imp {
     #![allow(dead_code)]
 
-    use nectarlink_core::DeviceId;
+    use noddy_core::DeviceId;
 
     pub fn phone() -> Option<(DeviceId, String)> {
         None

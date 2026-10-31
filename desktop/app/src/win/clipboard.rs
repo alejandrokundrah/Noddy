@@ -3,7 +3,7 @@
 //! and writing what a phone sent (docs/protocol/clipboard.md).
 //!
 //! A hidden message-only window on its own thread listens for clipboard
-//! changes and owns what NectarLink writes, so text that came from a phone
+//! changes and owns what Noddy writes, so text that came from a phone
 //! is never sent back. Content that password managers mark as private is
 //! never read for sending. Images are read as PNG when the app offers it,
 //! or else as a bitmap (converted to PNG off the clipboard thread), and
@@ -110,7 +110,7 @@ static ON_COPY: OnceLock<OnCopy> = OnceLock::new();
 /// A fingerprint of the last content reported, so one copy reported several
 /// times (apps often write the clipboard in steps) is sent once.
 static LAST_REPORTED: Mutex<Option<u64>> = Mutex::new(None);
-/// The last rich-text clip written by NectarLink, so if a host-clipboard bridge
+/// The last rich-text clip written by Noddy, so if a host-clipboard bridge
 /// (such as the Android emulator's QEMU clipboard pipe) immediately echoes the
 /// same plain text without rich formats, we preserve the rich formats.
 static LAST_WRITTEN_RICH: Mutex<Option<WrittenRich>> = Mutex::new(None);
@@ -126,7 +126,7 @@ fn fingerprint(clip: &Clip) -> Option<u64> {
 }
 
 /// Starts watching the clipboard; `on_copy` gets each newly copied text or
-/// image that isn't private and didn't come from NectarLink, on the watcher
+/// image that isn't private and didn't come from Noddy, on the watcher
 /// thread.
 pub fn start(on_copy: impl Fn(Clip) + Send + Sync + 'static) {
     if ON_COPY.set(Box::new(on_copy)).is_err() {
@@ -151,14 +151,14 @@ fn run() -> windows::core::Result<()> {
             cbSize: std::mem::size_of::<WNDCLASSEXW>() as u32,
             lpfnWndProc: Some(window_proc),
             hInstance: instance.into(),
-            lpszClassName: w!("Nectarlink.Clipboard"),
+            lpszClassName: w!("Noddy.Clipboard"),
             ..Default::default()
         };
         RegisterClassExW(&class);
         CreateWindowExW(
             WINDOW_EX_STYLE(0),
-            w!("Nectarlink.Clipboard"),
-            w!("NectarLink clipboard"),
+            w!("Noddy.Clipboard"),
+            w!("Noddy clipboard"),
             WINDOW_STYLE(0),
             0,
             0,
@@ -193,7 +193,7 @@ unsafe extern "system" fn window_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lpar
 }
 
 fn on_clipboard_changed(hwnd: HWND) {
-    // What NectarLink wrote (a phone's text) isn't sent back.
+    // What Noddy wrote (a phone's text) isn't sent back.
     // SAFETY: GetClipboardOwner has no preconditions.
     if unsafe { GetClipboardOwner() }.is_ok_and(|owner| owner == hwnd) {
         return;
@@ -512,7 +512,7 @@ pub(crate) fn encode_cf_html(fragment: &str) -> Vec<u8> {
 pub(crate) fn decode_cf_html(bytes: &[u8]) -> Option<String> {
     let end = bytes.iter().rposition(|&b| b != 0).map_or(0, |i| i + 1);
     let raw = &bytes[..end];
-    if raw.is_empty() || raw.len() > nectarlink_core::CLIP_MAX_BYTES {
+    if raw.is_empty() || raw.len() > noddy_core::CLIP_MAX_BYTES {
         return None;
     }
     let text = std::str::from_utf8(raw).ok()?;
@@ -568,7 +568,7 @@ pub(crate) fn encode_cf_rtf(rtf: &str) -> Vec<u8> {
 pub(crate) fn decode_cf_rtf(bytes: &[u8]) -> Option<String> {
     let end = bytes.iter().rposition(|&b| b != 0).map_or(0, |i| i + 1);
     let raw = &bytes[..end];
-    if raw.is_empty() || raw.len() > nectarlink_core::CLIP_MAX_BYTES {
+    if raw.is_empty() || raw.len() > noddy_core::CLIP_MAX_BYTES {
         return None;
     }
     let s = std::str::from_utf8(raw).ok()?.trim();
@@ -737,7 +737,7 @@ mod tests {
 
     #[test]
     fn cf_html_and_rtf_round_trip() {
-        let frag = "<p><b>Hello</b> <i>NectarLink</i> 🐝</p>";
+        let frag = "<p><b>Hello</b> <i>Noddy</i> 🐝</p>";
         let encoded = encode_cf_html(frag);
         assert_eq!(decode_cf_html(&encoded).as_deref(), Some(frag));
 

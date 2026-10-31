@@ -10,7 +10,7 @@ use std::{path::Path, pin::Pin};
 
 use cxx_qt::{CxxQtType, Threading};
 use cxx_qt_lib::{QByteArray, QHash, QHashPair_i32_QByteArray, QList, QModelIndex, QString, QVariant};
-use nectarlink_core::{DeviceId, Error, LinkState, TimelineEntry, TimelineKind, TimelineQuery};
+use noddy_core::{DeviceId, Error, LinkState, TimelineEntry, TimelineKind, TimelineQuery};
 use serde_json::json;
 
 use super::{Edit, diff};
@@ -253,7 +253,7 @@ impl qobject::TimelineModel {
         let mut has_more = false;
         let mut offset = 0u32;
         while offset < limit {
-            let chunk = (limit - offset).min(nectarlink_core::MAX_TIMELINE_PAGE_LIMIT);
+            let chunk = (limit - offset).min(noddy_core::MAX_TIMELINE_PAGE_LIMIT);
             let query = self.current_query(offset, chunk);
             let Ok(page) = node.timeline_page(&query) else { break };
             let fetched = page.entries.len() as u32;
@@ -658,7 +658,7 @@ fn describe_entry(
             let available = entry.clip_available;
             let mut raw_detail: Option<String> = None;
             let title = if !entry.title.is_empty() && entry.title != "Image clip" {
-                let (friendly, detail) = nectarlink_core::format_clip_display(&entry.title);
+                let (friendly, detail) = noddy_core::format_clip_display(&entry.title);
                 raw_detail = detail;
                 friendly
             } else if !clip_thumb.is_empty() || entry.detail == "image" {

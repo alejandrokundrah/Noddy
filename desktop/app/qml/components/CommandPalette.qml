@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink
+import app.noddy
 
 // Fast, keyboard-first Command Palette modal overlay (PLAN.md §3.9 / §3.11 P1).
 // Loaded lazily via a Loader in MainWindow.qml only while open, so it costs

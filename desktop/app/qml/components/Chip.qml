@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink
+import app.noddy
 
 // A small pill with optional icon. `selected` uses the indicator colors.
 Rectangle {

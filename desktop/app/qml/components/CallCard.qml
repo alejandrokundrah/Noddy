@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink
+import app.noddy
 
 // The call in progress on the phone: who, for how long, and its controls.
 // The call's audio stays on the phone; these change what the phone does.

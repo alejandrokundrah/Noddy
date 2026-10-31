@@ -8,14 +8,14 @@
   IgnorableNamespaces="uap uap10 desktop rescap">
 
   <Identity
-    Name="Nectarlink.Desktop"
-    Publisher="CN=The Nectarlink contributors"
+    Name="Noddy.Desktop"
+    Publisher="CN=The Noddy contributors"
     Version="0.0.1.0"
     ProcessorArchitecture="x64" />
 
   <Properties>
-    <DisplayName>Nectarlink</DisplayName>
-    <PublisherDisplayName>The Nectarlink contributors</PublisherDisplayName>
+    <DisplayName>Noddy</DisplayName>
+    <PublisherDisplayName>The Noddy contributors</PublisherDisplayName>
     <Logo>Assets\Square150x150Logo.png</Logo>
     <uap10:AllowExternalContent>true</uap10:AllowExternalContent>
   </Properties>
@@ -30,19 +30,19 @@
 
   <Applications>
     <Application
-      Id="Nectarlink"
-      Executable="nectarlink-desktop.exe"
+      Id="Noddy"
+      Executable="noddy-desktop.exe"
       uap10:TrustLevel="mediumIL"
       uap10:RuntimeBehavior="win32App">
       <uap:VisualElements
-        DisplayName="Nectarlink"
+        DisplayName="Noddy"
         Description="Your phone, on your PC"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
         BackgroundColor="transparent" />
       <Extensions>
         <uap:Extension Category="windows.shareTarget">
-          <uap:ShareTarget Description="Send to your phone with Nectarlink">
+          <uap:ShareTarget Description="Send to your phone with Noddy">
             <uap:SupportedFileTypes>
               <uap:SupportsAnyFileType />
             </uap:SupportedFileTypes>

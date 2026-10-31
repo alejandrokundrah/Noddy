@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtQuick.Effects
-import app.nectarlink
+import app.noddy
 
 // An image with rounded corners (a plain clip only cuts rectangles).
 Item {

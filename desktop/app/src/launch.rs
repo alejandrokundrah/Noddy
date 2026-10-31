@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! What another launch of NectarLink asks the running one to do: show its
+//! What another launch of Noddy asks the running one to do: show its
 //! window (Start menu, shortcuts), send files (Explorer's "Send to") or
 //! quit (the installer, before replacing or removing the app).
 //!
@@ -38,11 +38,11 @@ pub enum Request {
         #[serde(default)]
         text: Option<String>,
     },
-    /// Show or update a watched CLI task (`nectarlink notify-when`) on a paired phone.
+    /// Show or update a watched CLI task (`noddy notify-when`) on a paired phone.
     TaskNotify {
         #[serde(default)]
         device: Option<String>,
-        task: nectarlink_core::TaskNotify,
+        task: noddy_core::TaskNotify,
     },
     /// Run a taskbar Jump List task (`--task <action>`).
     Task { action: String },
@@ -122,7 +122,7 @@ mod tests {
         assert!(drain(data.path()).is_empty(), "nothing queued yet");
         let task = Request::TaskNotify {
             device: Some("Pixel".into()),
-            task: nectarlink_core::TaskNotify {
+            task: noddy_core::TaskNotify {
                 id: "t1".into(),
                 title: "cargo test".into(),
                 active: true,

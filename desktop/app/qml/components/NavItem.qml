@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink
+import app.noddy
 
 // A navigation rail destination: an icon in a pill indicator above a label.
 FocusScope {

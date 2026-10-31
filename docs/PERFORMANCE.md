@@ -1,6 +1,6 @@
-# NectarLink Performance Budgets & Measurements
+# Noddy Performance Budgets & Measurements
 
-This document records the release performance budgets, root-cause regression audits, and measured BEFORE/AFTER results across the Windows Desktop app (`nectarlink-desktop`), the Rust core engine (`nectarlink-core`), and the Android companion app (`app.nectarlink.android`).
+This document records the release performance budgets, root-cause regression audits, and measured BEFORE/AFTER results across the Windows Desktop app (`noddy-desktop`), the Rust core engine (`noddy-core`), and the Android companion app (`app.noddy.android`).
 
 ---
 
@@ -21,14 +21,14 @@ This document records the release performance budgets, root-cause regression aud
 | **4 GiB File Transfer + Pause/Resume + BLAKE3** | `< 180 s` in test | **`16.0 s`** transfer with two mid-stream pauses and `.part` offset resumes, then **`1.74 s`** full BLAKE3 verification (release build) | **PASS** |
 | **Android Cold Start (`MainActivity`)** | `< 1,000 ms` | **`479 ms to 750 ms`** (`TotalTime` via `am start -W`, down from `1,566 ms to 2,291 ms`) | **PASS** |
 | **Android Warm Start (`MainActivity`)** | `< 100 ms` | **`14 ms to 30 ms`** (`WaitTime` via `am start -W`, down from `81 ms to 91 ms`) | **PASS** |
-| **Android Memory (`dumpsys meminfo app.nectarlink`)** | `< 110 MB` PSS | **`75.66 MB to 86.48 MB` PSS (`228.0 MB to 236.8 MB` RSS)** (down from `115.9 MB to 123.5 MB` PSS) | **PASS** |
+| **Android Memory (`dumpsys meminfo app.noddy`)** | `< 110 MB` PSS | **`75.66 MB to 86.48 MB` PSS (`228.0 MB to 236.8 MB` RSS)** (down from `115.9 MB to 123.5 MB` PSS) | **PASS** |
 | **Android Idle Background Battery Impact (1 hr connected)** | `< 1.0% / hr` | **`0.18% / hr` est.** (`0.2% to 0.6%` idle CPU; event-driven callbacks; zero wake-lock leaks) | **PASS** |
 
 ---
 
 ## 2. Performance Pass: Before and After Measurements, and Root Causes Fixed
 
-### 2.1 Android (`app.nectarlink` on an Android emulator, physical phone not connected during this run)
+### 2.1 Android (`app.noddy` on an Android emulator, physical phone not connected during this run)
 
 | Metric | BEFORE (`ebe0012` post-redesign baseline) | AFTER (with all §1 & §2 fixes) | Improvement |
 | :--- | :--- | :--- | :--- |
@@ -49,14 +49,14 @@ This document records the release performance budgets, root-cause regression aud
 2. **Full-Screen `GlassBackdrop` Radial Gradient Overdraw (`MainActivity.kt`)**:
    - **Root Cause**: In Glass mode, `GlassBackdrop` drew two full-screen overlapping `Brush.radialGradient` shaders across the entire `1080×2400` viewport behind every frame (~2.0× full-screen fragment shader overdraw before any card rendered).
    - **Fix**: Removed `GlassBackdrop` so `Surface(color = MaterialTheme.colorScheme.background)` renders a clean single-pass background.
-3. **10 Parallel `animateColorAsState` Channels on `NectarlinkTheme` (`Theme.kt`)**:
+3. **10 Parallel `animateColorAsState` Channels on `NoddyTheme` (`Theme.kt`)**:
    - **Root Cause**: Every theme or artwork seed change ran 10 simultaneous `animateColorAsState` tween animations on `ColorScheme` roles, allocating a new `ColorScheme` and invalidating every `MaterialTheme.colorScheme` reader across the entire UI tree on every frame for `320 ms`.
    - **Fix**: Used `targetScheme` directly without per-frame `ColorScheme` allocation storms.
 4. **Multi-Pass `Modifier.liquidGlassCard` Overdraw & White Top Highlight (`Theme.kt`, `MainActivity.kt`)**:
    - **Root Cause**: `Modifier.liquidGlassCard` previously executed 3 separate draw passes per card (`drawRoundRect(baseColor)`, `drawRoundRect(topSheen)`, `drawRoundRect(topLeftSpecular)`) plus an asymmetric bright white top border (`innerRimBrush`), and `Modifier.glassModalBlur` applied a full-screen `RenderEffect.createBlurEffect(18.dp)` to the entire `LazyColumn` when a modal opened.
    - **Fix**: Simplified `Modifier.liquidGlassCard` to a single flat fill pass + a single subtle uniform 1dp hairline border (`outlineColor`), removed the bright white top rim from `liquidGlassCard` and `FloatingDockTabPill`, and made `Modifier.glassModalBlur` a no-op.
-5. **Cold-Start Main-Thread Binder IPC & JNI/Keystore Contention (`NectarlinkApplication.kt`, `Core.kt`, `SystemMonitors.kt`, `MainActivity.kt`)**:
-   - **Root Cause**: `NectarlinkApplication.onCreate()` previously triggered `core.start()` synchronously before `MainActivity.onCreate()`, causing JNA `libnectarlink_ffi.so` loading, Android Keystore IPC, SQLite initialization, and `BroadcastReceiver` / `TelephonyCallback` registrations on `Dispatchers.Main` to contend with first-frame rendering.
+5. **Cold-Start Main-Thread Binder IPC & JNI/Keystore Contention (`NoddyApplication.kt`, `Core.kt`, `SystemMonitors.kt`, `MainActivity.kt`)**:
+   - **Root Cause**: `NoddyApplication.onCreate()` previously triggered `core.start()` synchronously before `MainActivity.onCreate()`, causing JNA `libnoddy_ffi.so` loading, Android Keystore IPC, SQLite initialization, and `BroadcastReceiver` / `TelephonyCallback` registrations on `Dispatchers.Main` to contend with first-frame rendering.
    - **Fix**: Deferred `core.start()` via `Choreographer.getInstance().postFrameCallback` (with a `120 ms` headless fallback), deferred `SystemMonitors` receiver/observer startup by `48 ms`, made `WifiManager.MulticastLock` creation lazy, deferred runtime permission prompts via `window.decorView.post`, and snapped immediately out of `ScreenRoute.Starting` without a `200 ms` crossfade.
 6. **Bloom Theme `RenderNode` Outline Clipping & `ActivityResultLauncher` Churn During Scroll (`HomeScreen.kt`, `SettingsScreen.kt`, `MainActivity.kt`)**:
    - **Root Cause**: In `HomeScreen.kt`, outer card `Surface(shape = MaterialTheme.shapes.extraLarge, ...)` wrappers allocated hardware `RenderNode` outline clips as cards entered the viewport, and `PermissionsSetupCard` registered 4 `rememberLauncherForActivityResult` `DisposableEffect`s even when collapsed. In `SettingsScreen.kt`, the 5 Bloom color seed swatches used `Surface(shape = CircleShape)` + `Modifier.border(..., CircleShape)` (5 clipped `RenderNode`s) and `Modifier.animateItem` on every section.
@@ -64,7 +64,7 @@ This document records the release performance budgets, root-cause regression aud
 
 ---
 
-### 2.3 Persistent Send Queue Idle CPU Overhead (`nectarlink-desktop.exe`)
+### 2.3 Persistent Send Queue Idle CPU Overhead (`noddy-desktop.exe`)
 
 Measured over a 10-second steady-state window on 12 logical cores (`release` build, window open on `HomePage`):
 
@@ -75,7 +75,7 @@ Measured over a 10-second steady-state window on 12 logical cores (`release` bui
 
 ---
 
-### 2.2 Windows Desktop (`nectarlink-desktop.exe --data-dir <test-data-dir>`)
+### 2.2 Windows Desktop (`noddy-desktop.exe --data-dir <test-data-dir>`)
 
 | Metric | BEFORE (post-redesign baseline) | AFTER (with all §1 & §2 fixes) | Improvement |
 | :--- | :--- | :--- | :--- |
@@ -104,12 +104,12 @@ Measured over a 10-second steady-state window on 12 logical cores (`release` bui
 
 ---
 
-## 3. Scale Benchmark Measurements (`core/nectarlink-core/tests/scale_tests.rs`)
+## 3. Scale Benchmark Measurements (`core/noddy-core/tests/scale_tests.rs`)
 
 The scale benchmarks move gigabytes and hold timing limits, so they are opt-in. Measured with a release build on Windows 11 x64 on 2026-10-14:
 
 ```powershell
-cargo test -p nectarlink-core --release --test scale_tests -- --ignored --nocapture
+cargo test -p noddy-core --release --test scale_tests -- --ignored --nocapture
 ```
 
 1. **4 GiB file transfer with pause, resume and BLAKE3 (`scale_4gb_file_transfer_with_pause_resume_interruption_and_blake3`)**

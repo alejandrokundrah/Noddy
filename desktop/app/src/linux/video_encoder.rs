@@ -9,7 +9,7 @@ use std::{
 };
 
 unsafe extern "C" {
-    fn nectarlink_video_encoder_create(
+    fn noddy_video_encoder_create(
         hevc: bool,
         width: i32,
         height: i32,
@@ -18,14 +18,14 @@ unsafe extern "C" {
         error: *mut c_char,
         capacity: usize,
     ) -> *mut c_void;
-    fn nectarlink_video_encoder_destroy(encoder: *mut c_void);
-    fn nectarlink_video_encoder_next_device(
+    fn noddy_video_encoder_destroy(encoder: *mut c_void);
+    fn noddy_video_encoder_next_device(
         encoder: *mut c_void,
         error: *mut c_char,
         capacity: usize,
     ) -> bool;
-    fn nectarlink_video_encoder_backend(encoder: *const c_void) -> *const c_char;
-    fn nectarlink_video_encoder_send(
+    fn noddy_video_encoder_backend(encoder: *const c_void) -> *const c_char;
+    fn noddy_video_encoder_send(
         encoder: *mut c_void,
         bytes: *const u8,
         length: usize,
@@ -33,7 +33,7 @@ unsafe extern "C" {
         error: *mut c_char,
         capacity: usize,
     ) -> i32;
-    fn nectarlink_video_encoder_receive(
+    fn noddy_video_encoder_receive(
         encoder: *mut c_void,
         bytes: *mut *const u8,
         length: *mut usize,
@@ -41,8 +41,8 @@ unsafe extern "C" {
         error: *mut c_char,
         capacity: usize,
     ) -> i32;
-    fn nectarlink_video_encoder_request_keyframe(encoder: *mut c_void);
-    fn nectarlink_video_encoder_set_bitrate(encoder: *mut c_void, bitrate: i32) -> bool;
+    fn noddy_video_encoder_request_keyframe(encoder: *mut c_void);
+    fn noddy_video_encoder_set_bitrate(encoder: *mut c_void, bitrate: i32) -> bool;
 }
 
 pub(crate) struct Encoder {
@@ -61,7 +61,7 @@ impl Encoder {
         let mut error = [0 as c_char; 512];
         // SAFETY: the factory copies these settings and writes only within the error buffer.
         let native = unsafe {
-            nectarlink_video_encoder_create(
+            noddy_video_encoder_create(
                 hevc,
                 number(width)?,
                 number(height)?,
@@ -73,14 +73,14 @@ impl Encoder {
         };
         let native = NonNull::new(native).ok_or_else(|| error_message(&error))?;
         // SAFETY: the live encoder owns a NUL-terminated backend name.
-        let backend = unsafe { CStr::from_ptr(nectarlink_video_encoder_backend(native.as_ptr())) };
+        let backend = unsafe { CStr::from_ptr(noddy_video_encoder_backend(native.as_ptr())) };
         tracing::info!(codec, backend = %backend.to_string_lossy(), "Linux hardware encoder initialized");
         Ok(Self { native, last_output: Instant::now() })
     }
 
     pub(crate) fn request_keyframe(&self) -> bool {
         // SAFETY: encoder controls and frame submission run on the capture thread.
-        unsafe { nectarlink_video_encoder_request_keyframe(self.native.as_ptr()) };
+        unsafe { noddy_video_encoder_request_keyframe(self.native.as_ptr()) };
         true
     }
 
@@ -88,7 +88,7 @@ impl Encoder {
         let mut error = [0 as c_char; 512];
         // SAFETY: this capture thread owns the encoder and its packet storage.
         let switched = unsafe {
-            nectarlink_video_encoder_next_device(self.native.as_ptr(), error.as_mut_ptr(), error.len())
+            noddy_video_encoder_next_device(self.native.as_ptr(), error.as_mut_ptr(), error.len())
         };
         if switched {
             self.last_output = Instant::now();
@@ -101,7 +101,7 @@ impl Encoder {
     pub(crate) fn set_bitrate(&self, bitrate: u32) -> bool {
         let Ok(bitrate) = i32::try_from(bitrate) else { return false };
         // SAFETY: the pointer stays valid until this encoder is dropped.
-        unsafe { nectarlink_video_encoder_set_bitrate(self.native.as_ptr(), bitrate) }
+        unsafe { noddy_video_encoder_set_bitrate(self.native.as_ptr(), bitrate) }
     }
 
     pub(crate) fn encode(
@@ -118,7 +118,7 @@ impl Encoder {
         let mut error = [0 as c_char; 512];
         // SAFETY: input is borrowed only for this call; the native encoder copies it into an owned frame.
         let result = unsafe {
-            nectarlink_video_encoder_send(
+            noddy_video_encoder_send(
                 self.native.as_ptr(),
                 nv12.as_ptr(),
                 nv12.len(),
@@ -145,7 +145,7 @@ impl Encoder {
             let mut error = [0 as c_char; 512];
             // SAFETY: output pointers refer to locals and the native encoder remains live.
             let result = unsafe {
-                nectarlink_video_encoder_receive(
+                noddy_video_encoder_receive(
                     self.native.as_ptr(),
                     &mut bytes,
                     &mut length,
@@ -171,7 +171,7 @@ impl Encoder {
 impl Drop for Encoder {
     fn drop(&mut self) {
         // SAFETY: this is the sole owner; destruction releases codec, frames, packets, and device.
-        unsafe { nectarlink_video_encoder_destroy(self.native.as_ptr()) };
+        unsafe { noddy_video_encoder_destroy(self.native.as_ptr()) };
     }
 }
 

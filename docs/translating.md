@@ -1,6 +1,6 @@
-# Translating NectarLink
+# Translating Noddy
 
-NectarLink's Android and Windows apps can be translated into any language.
+Noddy's Android and Windows apps can be translated into any language.
 Simplified Chinese, German and Turkish are complete today.
 
 ## How to help
@@ -15,19 +15,19 @@ tools or Git needed.
   `values-de/strings.xml` or `values-pt-rBR/strings.xml`. Copy the entries
   from `values/strings.xml` and translate their text. Keep placeholders such as
   `%1$s` and `%2$d` exactly as they are; their order in the sentence can change.
-- Windows: `desktop/app/i18n/nectarlink_<language>.ts`, for example
-  `nectarlink_de.ts`. Start a new language by copying
-  `desktop/app/i18n/template/nectarlink.ts` (every string, none translated),
+- Windows: `desktop/app/i18n/noddy_<language>.ts`, for example
+  `noddy_de.ts`. Start a new language by copying
+  `desktop/app/i18n/template/noddy.ts` (every string, none translated),
   then fill in the `<translation>` elements with Qt Linguist or a text editor.
   Placeholders are `%1`, `%2` and so on.
 
 A few things that keep translations consistent:
 
 - Name each language in its own language in pickers ("Deutsch", "简体中文").
-- Keep the product name "NectarLink" as it is.
+- Keep the product name "Noddy" as it is.
 - Short UI labels stay short; the English text is already written to fit.
 - If a string's meaning isn't clear from its context, ask in the pull request
-  or on [Discussions](https://github.com/thtbee/nectarlink/discussions).
+  or on [Discussions](https://github.com/alejandrokundrah/Noddy/discussions).
 
 ## Partly translated languages
 
@@ -63,7 +63,7 @@ the generated header and every catalogue, the template included:
 
 ```bash
 cargo xtask strings
-lupdate desktop/app/qml desktop/app/i18n/rust_strings.h -ts desktop/app/i18n/nectarlink_*.ts desktop/app/i18n/template/nectarlink.ts
+lupdate desktop/app/qml desktop/app/i18n/rust_strings.h -ts desktop/app/i18n/noddy_*.ts desktop/app/i18n/template/noddy.ts
 ```
 
 New strings appear as unfinished in each catalogue, so translators see them.
@@ -73,17 +73,17 @@ the test above fails otherwise.
 ## Setting up Weblate (maintainers)
 
 [Hosted Weblate](https://hosted.weblate.org/) is free for open-source projects
-(the Libre plan). Create a project named NectarLink with the repository
-`https://github.com/thtbee/nectarlink.git`, branch `main`, and have Weblate
+(the Libre plan). Create a project named Noddy with the repository
+`https://github.com/alejandrokundrah/Noddy.git`, branch `main`, and have Weblate
 push to a fork and open pull requests rather than push to `main`. Then add
 two components:
 
 | Setting | Android app | Windows app |
 |---|---|---|
 | File format | Android String Resource | Qt Linguist translation file |
-| File mask | `android/app/src/main/res/values-*/strings.xml` | `desktop/app/i18n/nectarlink_*.ts` |
+| File mask | `android/app/src/main/res/values-*/strings.xml` | `desktop/app/i18n/noddy_*.ts` |
 | Monolingual base language file | `android/app/src/main/res/values/strings.xml` | (none: TS files are bilingual) |
-| Template for new translations | `android/app/src/main/res/values/strings.xml` | `desktop/app/i18n/template/nectarlink.ts` |
+| Template for new translations | `android/app/src/main/res/values/strings.xml` | `desktop/app/i18n/template/noddy.ts` |
 | Language code style | Android style | POSIX style using underscore (`zh_CN`) |
 | Edit base file | Off | Off |
 

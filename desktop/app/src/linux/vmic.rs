@@ -10,13 +10,13 @@ use std::os::unix::ffi::OsStrExt;
 use std::os::unix::fs::{DirBuilderExt, FileTypeExt, MetadataExt, OpenOptionsExt};
 use std::path::{Path, PathBuf};
 
-pub const SOURCE_NAME: &str = "NectarLink_Virtual_Mic";
-pub const DEFAULT_DESCRIPTION: &str = "NectarLink Phone Microphone";
-const FIFO_FILENAME: &str = "nectarlink-vmic.pcm";
+pub const SOURCE_NAME: &str = "Noddy_Virtual_Mic";
+pub const DEFAULT_DESCRIPTION: &str = "Noddy Phone Microphone";
+const FIFO_FILENAME: &str = "noddy-vmic.pcm";
 
 /// Returns a user-private path for the virtual microphone FIFO.
 ///
-/// Prefers `$XDG_RUNTIME_DIR/nectarlink-vmic.pcm` (which is mode `0700` and
+/// Prefers `$XDG_RUNTIME_DIR/noddy-vmic.pcm` (which is mode `0700` and
 /// private to the current user, where PipeWire and PulseAudio keep their own
 /// sockets). Falls back to a `0700` user-owned directory under the user's cache
 /// directory if `$XDG_RUNTIME_DIR` is not set.
@@ -27,7 +27,7 @@ pub fn default_fifo_path() -> PathBuf {
     // SAFETY: `geteuid` is always safe to call on Unix.
     let uid = unsafe { libc::geteuid() };
     let base = dirs::cache_dir().unwrap_or_else(std::env::temp_dir);
-    base.join(format!("nectarlink-{uid}")).join(FIFO_FILENAME)
+    base.join(format!("noddy-{uid}")).join(FIFO_FILENAME)
 }
 
 const MAX_PHONE_NAME_CHARS: usize = 64;
@@ -72,7 +72,7 @@ pub fn sanitize_phone_name(phone_name: &str) -> Option<String> {
 ///    inner single quotes so spaces in the phone's name are preserved.
 pub fn format_source_properties(phone_name: Option<&str>) -> String {
     let description = match phone_name.and_then(sanitize_phone_name) {
-        Some(name) => format!("{name} (NectarLink)"),
+        Some(name) => format!("{name} (Noddy)"),
         None => DEFAULT_DESCRIPTION.to_string(),
     };
     format!("source_properties=\"device.description='{description}'\"")
@@ -85,7 +85,7 @@ pub fn format_source_properties(phone_name: Option<&str>) -> String {
 pub fn format_source_properties_with_channels(phone_name: Option<&str>, channels: u8) -> String {
     let mode = if channels <= 1 { "Mono" } else { "Stereo" };
     let description = match phone_name.and_then(sanitize_phone_name) {
-        Some(name) => format!("{name} (NectarLink) {mode}"),
+        Some(name) => format!("{name} (Noddy) {mode}"),
         None => format!("{DEFAULT_DESCRIPTION} {mode}"),
     };
     format!("source_properties=\"device.description='{description}' device.profile.description='{mode}'\"")
@@ -187,8 +187,8 @@ pub fn mono_to_stereo_s16le(mono_pcm: &[u8]) -> Vec<u8> {
 }
 
 /// Extracts module IDs from `pactl list modules short` output that belong to a
-/// NectarLink `module-pipe-source` instance (including legacy `/tmp/nectarlink-vmic.pcm`
-/// or `NectarLink_Phone_Microphone` modules).
+/// Noddy `module-pipe-source` instance (including legacy `/tmp/noddy-vmic.pcm`
+/// or `Noddy_Phone_Microphone` modules).
 pub fn parse_stale_pipe_source_modules(pactl_short: &str) -> Vec<u32> {
     let mut ids = Vec::new();
     for line in pactl_short.lines() {
@@ -197,7 +197,7 @@ pub fn parse_stale_pipe_source_modules(pactl_short: &str) -> Vec<u32> {
             continue;
         }
         if (trimmed.contains(SOURCE_NAME)
-            || trimmed.contains("NectarLink_Phone_Microphone")
+            || trimmed.contains("Noddy_Phone_Microphone")
             || trimmed.contains(FIFO_FILENAME))
             && let Some(id_str) = trimmed.split_whitespace().next()
             && let Ok(id) = id_str.parse::<u32>()
@@ -208,8 +208,8 @@ pub fn parse_stale_pipe_source_modules(pactl_short: &str) -> Vec<u32> {
     ids
 }
 
-/// Unloads any leftover NectarLink `module-pipe-source` modules in
-/// PulseAudio / PipeWire and removes any legacy `/tmp/nectarlink-vmic.pcm` FIFO.
+/// Unloads any leftover Noddy `module-pipe-source` modules in
+/// PulseAudio / PipeWire and removes any legacy `/tmp/noddy-vmic.pcm` FIFO.
 pub fn cleanup_stale_sources() {
     if let Some(output) = super::run_cmd_timeout("pactl", &["list", "modules", "short"], PACTL_TIMEOUT)
         && output.status.success()
@@ -362,7 +362,7 @@ impl VirtualMic {
     }
 
     /// Creates a new `VirtualMic` controller labeled with `phone_name` (for example,
-    /// `"Pixel 9a (NectarLink)"`) and registers a 2-channel stereo `module-pipe-source`
+    /// `"Pixel 9a (Noddy)"`) and registers a 2-channel stereo `module-pipe-source`
     /// by default (upmixing mono phone audio to L+R).
     pub fn new_for_phone(rate: u32, input_channels: u8, phone_name: Option<&str>) -> Self {
         Self::new_for_phone_with_channels(rate, input_channels, 2, phone_name)
@@ -627,39 +627,39 @@ mod tests {
     fn format_source_properties_quotes_description_and_strips_unsafe_chars() {
         assert_eq!(
             format_source_properties(None),
-            "source_properties=\"device.description='NectarLink Phone Microphone'\""
+            "source_properties=\"device.description='Noddy Phone Microphone'\""
         );
         assert_eq!(
             format_source_properties(Some("   ")),
-            "source_properties=\"device.description='NectarLink Phone Microphone'\""
+            "source_properties=\"device.description='Noddy Phone Microphone'\""
         );
         assert_eq!(
             format_source_properties(Some("Pixel 9a")),
-            "source_properties=\"device.description='Pixel 9a (NectarLink)'\""
+            "source_properties=\"device.description='Pixel 9a (Noddy)'\""
         );
         assert_eq!(
             format_source_properties(Some("Samsung   S20   FE (Work)")),
-            "source_properties=\"device.description='Samsung S20 FE (Work) (NectarLink)'\""
+            "source_properties=\"device.description='Samsung S20 FE (Work) (Noddy)'\""
         );
         assert_eq!(
             format_source_properties(Some("Jochen's \"Phone\" \\ \n\t")),
-            "source_properties=\"device.description='Jochens Phone (NectarLink)'\""
+            "source_properties=\"device.description='Jochens Phone (Noddy)'\""
         );
         assert_eq!(
             format_source_properties(Some("Phone' file=/etc/passwd; $(id) `uname`")),
-            "source_properties=\"device.description='Phone fileetcpasswd (id) uname (NectarLink)'\""
+            "source_properties=\"device.description='Phone fileetcpasswd (id) uname (Noddy)'\""
         );
         assert_eq!(
             format_source_properties(Some("'\"\\=;$`{}")),
-            "source_properties=\"device.description='NectarLink Phone Microphone'\""
+            "source_properties=\"device.description='Noddy Phone Microphone'\""
         );
         let long_name = "A".repeat(120);
         let props = format_source_properties(Some(&long_name));
-        assert!(props.contains(&format!("'{} (NectarLink)'", "A".repeat(64))));
+        assert!(props.contains(&format!("'{} (Noddy)'", "A".repeat(64))));
 
         assert_eq!(
-            format_file_arg(Path::new("/run/user/1000/nectarlink-vmic.pcm")).unwrap(),
-            "file=\"/run/user/1000/nectarlink-vmic.pcm\""
+            format_file_arg(Path::new("/run/user/1000/noddy-vmic.pcm")).unwrap(),
+            "file=\"/run/user/1000/noddy-vmic.pcm\""
         );
         assert!(format_file_arg(Path::new("/tmp/bad\"quote.pcm")).is_err());
         assert!(format_file_arg(Path::new("/tmp/bad'quote.pcm")).is_err());
@@ -669,7 +669,7 @@ mod tests {
     #[test]
     fn default_fifo_path_never_uses_shared_tmp_root() {
         let path = default_fifo_path();
-        assert_eq!(path.file_name().and_then(|n| n.to_str()), Some("nectarlink-vmic.pcm"));
+        assert_eq!(path.file_name().and_then(|n| n.to_str()), Some("noddy-vmic.pcm"));
         assert_ne!(
             path.parent(),
             Some(Path::new("/tmp")),
@@ -679,11 +679,11 @@ mod tests {
     }
 
     #[test]
-    fn parse_stale_pipe_source_modules_identifies_nectarlink_modules_only() {
+    fn parse_stale_pipe_source_modules_identifies_noddy_modules_only() {
         let sample = "\
 25\tmodule-native-protocol-unix\t\n\
-536870913\tmodule-pipe-source\tsource_name=NectarLink_Virtual_Mic file=/tmp/nectarlink-vmic.pcm format=s16le rate=48000 channels=1 source_properties=device.description=NectarLink_Phone_Microphone\n\
-536870914\tmodule-pipe-source\tsource_name=NectarLink_Virtual_Mic file=\"/run/user/1000/nectarlink-vmic.pcm\" format=s16le rate=48000 channels=1 source_properties=\"device.description='IOSMOB5 (NectarLink)'\"\n\
+536870913\tmodule-pipe-source\tsource_name=Noddy_Virtual_Mic file=/tmp/noddy-vmic.pcm format=s16le rate=48000 channels=1 source_properties=device.description=Noddy_Phone_Microphone\n\
+536870914\tmodule-pipe-source\tsource_name=Noddy_Virtual_Mic file=\"/run/user/1000/noddy-vmic.pcm\" format=s16le rate=48000 channels=1 source_properties=\"device.description='IOSMOB5 (Noddy)'\"\n\
 536870915\tmodule-pipe-source\tsource_name=Other_Pipe file=/tmp/other.pcm\n";
         assert_eq!(parse_stale_pipe_source_modules(sample), vec![536870913, 536870914]);
     }
@@ -694,11 +694,11 @@ mod tests {
         assert_eq!(format_channel_map(2), "channel_map=front-left,front-right");
         assert_eq!(
             format_source_properties_with_channels(Some("IOSMOB5"), 1),
-            "source_properties=\"device.description='IOSMOB5 (NectarLink) Mono' device.profile.description='Mono'\""
+            "source_properties=\"device.description='IOSMOB5 (Noddy) Mono' device.profile.description='Mono'\""
         );
         assert_eq!(
             format_source_properties_with_channels(Some("IOSMOB5"), 2),
-            "source_properties=\"device.description='IOSMOB5 (NectarLink) Stereo' device.profile.description='Stereo'\""
+            "source_properties=\"device.description='IOSMOB5 (Noddy) Stereo' device.profile.description='Stereo'\""
         );
 
         let mut mono = Vec::new();

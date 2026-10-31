@@ -45,13 +45,13 @@ pub fn open_maps(address: &str) -> Result<(), String> {
     }
     for scheme in ["bingmaps", "ms-maps"] {
         if is_url_scheme_registered(scheme) {
-            let uri = format!("{scheme}:?where={}", nectarlink_core::clip_kind::percent_encode(trimmed));
+            let uri = format!("{scheme}:?where={}", noddy_core::clip_kind::percent_encode(trimmed));
             if open_url(&uri).is_ok() {
                 return Ok(());
             }
         }
     }
-    open_url(&nectarlink_core::maps_web_url(trimmed))
+    open_url(&noddy_core::maps_web_url(trimmed))
 }
 
 /// Returns `true` if `scheme` has an installed classic command handler or an
@@ -223,7 +223,7 @@ mod tests {
     #[test]
     fn url_scheme_registration_distinguishes_registered_and_unregistered_schemes() {
         assert!(is_url_scheme_registered("http"));
-        assert!(!is_url_scheme_registered("nectarlink-nonexistent-scheme"));
+        assert!(!is_url_scheme_registered("noddy-nonexistent-scheme"));
         assert!(!is_url_scheme_registered(""));
     }
 }

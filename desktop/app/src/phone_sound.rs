@@ -9,7 +9,7 @@ use std::{
     time::Duration,
 };
 
-use nectarlink_core::{
+use noddy_core::{
     DeviceId, Error, FeatureState, LinkState, MIRROR_SCREEN, MirrorAudioConfig, MirrorConfig, MirrorSink,
     MirrorStart,
 };
@@ -100,7 +100,7 @@ pub fn set_on(on: bool) {
             show_message(match e {
                 Error::Denied => tr!("PhoneSound", "Mirroring is turned off for this phone."),
                 Error::Unsupported => {
-                    tr!("PhoneSound", "Update NectarLink on %1 to play its sound here.", name)
+                    tr!("PhoneSound", "Update Noddy on %1 to play its sound here.", name)
                 }
                 Error::Offline | Error::NotPaired => tr!("PhoneSound", "The phone isn't connected."),
                 // The phone couldn't show its request (notifications off, say).
@@ -108,7 +108,7 @@ pub fn set_on(on: bool) {
                     tracing::warn!(error = %e, "the phone couldn't share its sound");
                     tr!(
                         "PhoneSound",
-                        "%1 couldn't ask to share its sound. Check that NectarLink can show notifications on the phone.",
+                        "%1 couldn't ask to share its sound. Check that Noddy can show notifications on the phone.",
                         name
                     )
                 }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink
+import app.noddy
 
 // A modal dialog over the window: a scrim and a card that springs in.
 // Escape or a click on the scrim closes it (unless `dismissable` is false).

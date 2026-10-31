@@ -74,7 +74,7 @@ fn reg_dword(root: HKEY, key: &str, value: &str) -> Option<u32> {
 }
 
 /// Windows' per-installation machine GUID. It stays the same across app reinstalls, so a
-/// hash of it lets phones recognise this PC after NectarLink is reinstalled.
+/// hash of it lets phones recognise this PC after Noddy is reinstalled.
 pub fn machine_guid() -> Option<String> {
     reg_string(HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Cryptography", "MachineGuid")
 }

@@ -1,4 +1,4 @@
-# `nectarlink-core` public interface (Phase 0 draft)
+# `noddy-core` public interface (Phase 0 draft)
 
 This is the boundary between the shared Rust core and the two apps. The
 desktop app calls it directly from Rust (and exposes it to QML through
@@ -136,5 +136,5 @@ logged without personal content.
 
 - `data_dir/identity.key`: the device key, encrypted with the platform key
   store.
-- `data_dir/nectarlink.db`: SQLite with the trust store, per-device settings
+- `data_dir/noddy.db`: SQLite with the trust store, per-device settings
   and caches. Schema migrations run in `Node::start`.

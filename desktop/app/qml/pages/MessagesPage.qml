@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtQuick.Dialogs
-import app.nectarlink
+import app.noddy
 
 // Messages: the phone's SMS and mirrored MessagingStyle chat conversations on
 // the left, the open one on the right, and a box to text, attach an MMS image,

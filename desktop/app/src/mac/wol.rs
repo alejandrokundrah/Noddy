@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! macOS Wake-on-LAN integration stubs.
 
-use nectarlink_core::PcWakeInfo;
+use noddy_core::PcWakeInfo;
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

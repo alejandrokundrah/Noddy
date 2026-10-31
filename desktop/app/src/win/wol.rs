@@ -6,7 +6,7 @@
 
 use std::net::Ipv4Addr;
 
-use nectarlink_core::{PcWakeInfo, format_mac, ipv4_broadcast, parse_mac};
+use noddy_core::{PcWakeInfo, format_mac, ipv4_broadcast, parse_mac};
 use windows::{
     Win32::{
         Foundation::ERROR_SUCCESS,

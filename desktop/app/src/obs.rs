@@ -58,7 +58,7 @@ pub fn run(command: &str, port: u16, password: Option<&str>) -> Result<(), Strin
 
     ws.write_json(&json!({
         "op": 6,
-        "d": { "requestType": request_type, "requestId": "nectarlink-deck", "requestData": request_data },
+        "d": { "requestType": request_type, "requestId": "noddy-deck", "requestData": request_data },
     }))?;
     let response = ws.read_json()?;
     let status = &response["d"]["requestStatus"];

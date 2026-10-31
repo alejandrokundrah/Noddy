@@ -15,7 +15,7 @@ use std::{
 };
 
 use data_encoding::BASE64;
-use nectarlink_core::{
+use noddy_core::{
     CLIP_MAX_IMAGE_BYTES, ClipKind, ClipSuggestion, ClipboardItemKind, DeviceId, Error, FeatureState,
     LinkState, Node, NodeEvent,
 };
@@ -314,7 +314,7 @@ pub fn send_now(device: DeviceId) {
             }
             Err(Error::TooLarge) => show_message(tr!("Clipboard", "That's too much text to send at once.")),
             Err(Error::Unsupported) if image => {
-                show_message(tr!("Clipboard", "Update NectarLink on %1 to send it images.", name))
+                show_message(tr!("Clipboard", "Update Noddy on %1 to send it images.", name))
             }
             Err(Error::Denied) => show_message(tr!("Clipboard", "The clipboard is turned off for %1.", name)),
             Err(e) => show_message(describe(&e)),
@@ -404,7 +404,7 @@ pub fn run_last_suggestion() {
             Ok(())
         }
         ClipKind::TrackingNumber => {
-            crate::win::shell::open_url(&nectarlink_core::tracking_search_url(&suggestion.target))
+            crate::win::shell::open_url(&noddy_core::tracking_search_url(&suggestion.target))
         }
         ClipKind::Email => crate::win::shell::open_mailto(&suggestion.target),
     };

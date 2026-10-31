@@ -17,7 +17,7 @@ use std::{
     time::SystemTime,
 };
 
-use nectarlink_core::{DeviceId, MediaAction};
+use noddy_core::{DeviceId, MediaAction};
 use windows::{
     Foundation::{TimeSpan, TypedEventHandler},
     Media::{
@@ -118,14 +118,14 @@ fn run(updates: mpsc::Receiver<Option<Shown>>) -> windows::core::Result<()> {
             cbSize: std::mem::size_of::<WNDCLASSEXW>() as u32,
             lpfnWndProc: Some(window_proc),
             hInstance: instance.into(),
-            lpszClassName: w!("Nectarlink.Media"),
+            lpszClassName: w!("Noddy.Media"),
             ..Default::default()
         };
         RegisterClassExW(&class);
         CreateWindowExW(
             WINDOW_EX_STYLE(0),
-            w!("Nectarlink.Media"),
-            w!("NectarLink media"),
+            w!("Noddy.Media"),
+            w!("Noddy media"),
             WS_OVERLAPPED,
             0,
             0,

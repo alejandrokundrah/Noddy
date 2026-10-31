@@ -232,7 +232,7 @@ mod tests {
         let xml_str = std::fs::read_to_string(&manifest_path).expect("read AppxManifest.xml");
         let doc = XmlDocument::new().unwrap();
         doc.LoadXml(&HSTRING::from(&xml_str)).expect("valid AppxManifest.xml");
-        assert!(xml_str.contains(r#"Name="Nectarlink.Desktop""#));
+        assert!(xml_str.contains(r#"Name="Noddy.Desktop""#));
         assert!(xml_str.contains("uap10:AllowExternalContent"));
         assert!(xml_str.contains(r#"Category="windows.shareTarget""#));
         for format in ["StorageItems", "WebLink", "Uri", "Text", "Bitmap"] {

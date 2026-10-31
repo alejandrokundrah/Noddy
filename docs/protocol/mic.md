@@ -9,7 +9,7 @@ dedicated bidirectional QUIC stream (`{ svc: "mic", op: "pcm", v: 1 }`).
 
 This is the streaming half of GitHub #7. The PC plays the sound into an
 output device; played into a virtual audio cable, the cable's other end is
-a microphone every app can pick. A virtual microphone of NectarLink's own
+a microphone every app can pick. A virtual microphone of Noddy's own
 needs an audio driver and is a separate step.
 
 ## 1. Capabilities and toggle

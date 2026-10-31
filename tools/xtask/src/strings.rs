@@ -141,7 +141,7 @@ fn render(strings: &BTreeMap<(String, String), String>) -> String {
          // Never compiled: lupdate reads it with the QML, so the text the app builds\n\
          // in Rust is translated like the rest (see desktop/app/src/i18n.rs).\n\
          \n\
-         static const char *const nectarlink_rust_strings[] = {\n",
+         static const char *const noddy_rust_strings[] = {\n",
     );
     for ((context, text), at) in strings {
         out.push_str(&format!("    QT_TRANSLATE_NOOP({}, {}), // {at}\n", c_string(context), c_string(text)));

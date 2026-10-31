@@ -96,7 +96,7 @@ subnet broadcast address and `255.255.255.255`, repeated a few times over
 
 ### 2.4 `task.notify` ("Ping me when it's done")
 
-Sent by a PC (`nectarlink notify-when <pid | -- command...>`) to report a
+Sent by a PC (`noddy notify-when <pid | -- command...>`) to report a
 watched process or command to a paired phone:
 
 - `id`: stable identifier for the task (`1..=64` ASCII graphic bytes).

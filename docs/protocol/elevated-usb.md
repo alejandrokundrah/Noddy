@@ -29,7 +29,7 @@ The phone sends `elevated.usb.start`. The PC:
    over USB, through that phone's own adb serial.
 2. Runs each grant in the phone's shell, waiting up to 10 seconds for each.
 3. Runs `CLASSPATH=<apk> app_process /system/bin
-   app.nectarlink.android.elevated.InputServer <token>` and waits up to 15
+   app.noddy.android.elevated.InputServer <token>` and waits up to 15
    seconds for its first line, `ready <port>`.
 4. Answers `elevated.usb.ready` with that port, or an error.
 
@@ -43,10 +43,10 @@ The PC runs nothing but the app's own helper and grants, and only words the
 shell reads as single words (letters, digits and `._/=~+-:`):
 
 - `apk`: a path under `/data/app/` ending in `/base.apk`, containing
-  `app.nectarlink`, without `..`, at most 512 bytes.
+  `app.noddy`, without `..`, at most 512 bytes.
 - `token`: 32 to 64 hexadecimal characters.
 - `grants`: at most 8, each one of:
-  - `pm grant app.nectarlink android.permission.<NAME>`
-  - `appops set app.nectarlink <OP> allow` (`OP` in capitals and `_`)
-  - `cmd notification allow_dnd app.nectarlink`
-  - `cmd notification allow_listener app.nectarlink/<component>`
+  - `pm grant app.noddy android.permission.<NAME>`
+  - `appops set app.noddy <OP> allow` (`OP` in capitals and `_`)
+  - `cmd notification allow_dnd app.noddy`
+  - `cmd notification allow_listener app.noddy/<component>`

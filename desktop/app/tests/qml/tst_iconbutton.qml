@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtTest
-import app.nectarlink
+import app.noddy
 
 // An IconButton's tooltip shows under its button, in the window's top
 // layer, wherever the button sits (it once showed at the window's top-left).

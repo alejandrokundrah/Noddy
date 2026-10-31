@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink
+import app.noddy
 
 // A full-width row with an icon, a title, an optional caption and a switch
 // (Phone as speaker, Play on phone). It fills in while on; `enabled: false`

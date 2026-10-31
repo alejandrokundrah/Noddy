@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink
+import app.noddy
 
 // Connection indicator: a dot with a soft halo when online (never green:
 // the theme's primary carries "connected").

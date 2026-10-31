@@ -1,6 +1,6 @@
-# NectarLink Technical Documentation
+# Noddy Technical Documentation
 
-This directory contains engineering documentation for contributors, security reviewers, and systems engineers working on NectarLink. It covers the multi-crate Rust workspace, the Windows Qt 6 + `cxx-qt` desktop application, the Android Jetpack Compose + UniFFI client, the QUIC + TLS 1.3 protocol, the SQLite persistence layer, and the performance verification suite.
+This directory contains engineering documentation for contributors, security reviewers, and systems engineers working on Noddy. It covers the multi-crate Rust workspace, the Windows Qt 6 + `cxx-qt` desktop application, the Android Jetpack Compose + UniFFI client, the QUIC + TLS 1.3 protocol, the SQLite persistence layer, and the performance verification suite.
 
 For end-user setup and feature guides, see [docs/guide/README.md](../guide/README.md).
 
@@ -10,8 +10,8 @@ For end-user setup and feature guides, see [docs/guide/README.md](../guide/READM
 |---|---|
 | [Architecture](architecture.md) | Crate layout, runtime topology, discovery and transport (`Lan`, `Usb`, `Relay`), Android elevated helper, Windows Media Foundation virtual camera, and perceptual OKLab color engine |
 | [Security Model](security-model.md) | Ed25519 device identity, OS key protection (Windows DPAPI tied to user account and Android Keystore AES-256-GCM), QR and 6-digit pairing protocols, `CapabilityMatrix`, consent gates, update checks, and localhost HTTP API isolation |
-| [Protocol Overview](protocol-overview.md) | `nectarlink/0` wire framing (LEB128 + CBOR), QUIC stream taxonomy, control handshake, resumable BLAKE3 file transfers, real-time media framing, and index of the 18 specification files in [`docs/protocol/`](../protocol/v0.md) |
-| [Storage and Retention](storage-and-retention.md) | SQLite schema v8 (`core/nectarlink-core/src/store.rs`), timeline and `MessagingStyle` conversation caches, persistent FIFO send queue (`send_queue`), and `KeyProtector`-encrypted clipboard history |
+| [Protocol Overview](protocol-overview.md) | `noddy/0` wire framing (LEB128 + CBOR), QUIC stream taxonomy, control handshake, resumable BLAKE3 file transfers, real-time media framing, and index of the 18 specification files in [`docs/protocol/`](../protocol/v0.md) |
+| [Storage and Retention](storage-and-retention.md) | SQLite schema v8 (`core/noddy-core/src/store.rs`), timeline and `MessagingStyle` conversation caches, persistent FIFO send queue (`send_queue`), and `KeyProtector`-encrypted clipboard history |
 | [Performance Budgets](performance-budgets.md) | Startup, memory, CPU, transport, and latency targets from [`docs/PERFORMANCE.md`](../PERFORMANCE.md), measured benchmarks, and key root-cause engineering optimizations |
 | [Building and Testing](building-and-testing.md) | Pinned toolchains (`Rust 1.97+`, `Qt 6.12`, `Android compileSdk 37 / minSdk 26`, `JDK 17+`), `cargo xtask` automation, PowerShell verification scripts, and test suites |
 | [Releasing](releasing.md) | Versioning, the tag-driven release workflow, Android and Windows signing, and how both apps update themselves |
@@ -20,18 +20,18 @@ For end-user setup and feature guides, see [docs/guide/README.md](../guide/READM
 ## Repository Map
 
 ```text
-nectarlink/
+noddy/
 ├── Cargo.toml                  Workspace manifest and shared dependency versions
 ├── rust-toolchain.toml         Pinned stable Rust toolchain (1.97+ MSRV, 2024 edition) and Android targets
 ├── core/
-│   ├── nectarlink-protocol/    Wire framing, CBOR envelopes, capability constants, SAS derivation
-│   ├── nectarlink-core/        QUIC node, ADB/USB tunnel, session engine, SQLite store, send queue, OKLab palette
-│   └── nectarlink-ffi/         UniFFI 0.32 bindings exposing nectarlink-core to Kotlin
-├── cli/                        Headless CLI (nectarlink-cli) for pairing, file transfer, notify-when, and testing
+│   ├── noddy-protocol/    Wire framing, CBOR envelopes, capability constants, SAS derivation
+│   ├── noddy-core/        QUIC node, ADB/USB tunnel, session engine, SQLite store, send queue, OKLab palette
+│   └── noddy-ffi/         UniFFI 0.32 bindings exposing noddy-core to Kotlin
+├── cli/                        Headless CLI (noddy-cli) for pairing, file transfer, notify-when, and testing
 ├── desktop/
 │   ├── app/                    Windows desktop app (Rust + cxx-qt 0.10 bridges + Qt 6.12 QML)
-│   ├── vcam/                   Windows Media Foundation virtual camera COM DLL (nectarlink_vcam.dll)
-│   └── installer/              NSIS installer script (nectarlink.nsi) and Windows Sparse Package manifest (AppxManifest.xml)
+│   ├── vcam/                   Windows Media Foundation virtual camera COM DLL (noddy_vcam.dll)
+│   └── installer/              NSIS installer script (noddy.nsi) and Windows Sparse Package manifest (AppxManifest.xml)
 ├── android/
 │   └── app/                    Android client (Kotlin, Jetpack Compose, foreground service, elevated helper)
 ├── tools/
@@ -48,7 +48,7 @@ nectarlink/
 
 ## Related Specification Directories
 
-- [`docs/protocol/`](../protocol/v0.md): Normative wire-level specifications for `nectarlink/0` and `nectarlink-pair/0`, plus per-capability message schemas.
+- [`docs/protocol/`](../protocol/v0.md): Normative wire-level specifications for `noddy/0` and `noddy-pair/0`, plus per-capability message schemas.
 - [`docs/adr/`](../adr/README.md): Architecture decision records covering the shared Rust core (`0002`), `iroh` QUIC transport (`0003`), CBOR wire framing (`0004`), the Windows Qt Quick UI stack (`0005`), Kotlin + Jetpack Compose on Android (`0006`), licensing (`0007`), and platform distribution (`0008`).
 - [`docs/architecture/`](../architecture/capabilities.md): Capability matrix reference and core Rust API design notes.
 - [`docs/design/`](../design/README.md): Visual design system tokens, typography, and motion guidelines.

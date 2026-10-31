@@ -6,7 +6,7 @@ use std::{pin::Pin, time::UNIX_EPOCH};
 
 use cxx_qt::{CxxQtType, Threading};
 use cxx_qt_lib::{QByteArray, QHash, QHashPair_i32_QByteArray, QList, QModelIndex, QString, QUrl, QVariant};
-use nectarlink_core::MediaAction;
+use noddy_core::MediaAction;
 
 use super::{Edit, diff};
 use crate::{
@@ -361,7 +361,7 @@ impl qobject::MediaList {
                         .set_phone_toggle(
                             device,
                             "volume".into(),
-                            nectarlink_core::PhoneToggleValue::Level(level),
+                            noddy_core::PhoneToggleValue::Level(level),
                         )
                         .await;
                 });
@@ -384,7 +384,7 @@ impl qobject::MediaList {
                         .set_phone_toggle(
                             device,
                             "volume".into(),
-                            nectarlink_core::PhoneToggleValue::Level(target),
+                            noddy_core::PhoneToggleValue::Level(target),
                         )
                         .await;
                 });
@@ -401,7 +401,7 @@ impl qobject::MediaList {
 mod tests {
     use std::path::PathBuf;
 
-    use nectarlink_core::{DeviceId, MediaPlayer};
+    use noddy_core::{DeviceId, MediaPlayer};
 
     use super::*;
 

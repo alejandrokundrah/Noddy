@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Continuity Camera coordinator for Windows: initiates "Take photo with phone"
 //! and "Scan document with phone" from the tray menu, global hotkeys, or the
-//! NectarLink UI, remembers the external foreground window (`HWND`) that was
+//! Noddy UI, remembers the external foreground window (`HWND`) that was
 //! active when the request started, places the captured image onto the Windows
 //! clipboard on arrival, and either restores focus + synthesizes `Ctrl+V` into
 //! the original target window or prompts the user if that window was closed.
@@ -15,7 +15,7 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use nectarlink_core::{CameraCaptureMode, DeviceId, Error, LinkState, NodeEvent};
+use noddy_core::{CameraCaptureMode, DeviceId, Error, LinkState, NodeEvent};
 
 use crate::{core_host, state::Changes};
 
@@ -66,7 +66,7 @@ enum DeliveryDecision {
     AutoPaste { hwnd: isize, toast: String },
     /// A target window was remembered when the request started, but is no longer
     /// alive/visible when the capture arrived. Do not blindly paste elsewhere;
-    /// ask the user in NectarLink.
+    /// ask the user in Noddy.
     PromptMissingTarget { title: String, body: String, target_name: String },
     /// No external target window was remembered when the request started.
     ClipboardOnly { toast: String },
@@ -97,7 +97,7 @@ fn decide_delivery_action(
         return DeliveryDecision::PromptMissingTarget {
             title: format!("{item_cap} ready on clipboard"),
             body: format!(
-                "“{target_name}” is no longer open, so NectarLink didn’t paste automatically. Switch to the window where you want your {item_lower} from {device_name} and click Paste into active window, or press Ctrl+V anywhere."
+                "“{target_name}” is no longer open, so Noddy didn’t paste automatically. Switch to the window where you want your {item_lower} from {device_name} and click Paste into active window, or press Ctrl+V anywhere."
             ),
             target_name,
         };
@@ -310,7 +310,7 @@ fn spawn_focus_and_paste(hwnd: isize) {
     });
 }
 
-/// Handles Continuity Camera events from `nectarlink_core`.
+/// Handles Continuity Camera events from `noddy_core`.
 pub fn on_event(event: &NodeEvent) {
     match event {
         NodeEvent::CameraCaptureReceived { device, request_id, mode, mime, data, .. } => {

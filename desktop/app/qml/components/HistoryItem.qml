@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink
+import app.noddy
 
 // A notification from the last day that's no longer on the phone: app,
 // when it arrived, title and text. Read-only.

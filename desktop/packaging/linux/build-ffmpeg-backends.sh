@@ -4,7 +4,7 @@
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-stage="$(mktemp -d -t nectarlink-ffmpeg-XXXXXX)"
+stage="$(mktemp -d -t noddy-ffmpeg-XXXXXX)"
 trap 'rm -rf "${stage}"' EXIT
 out="${FFMPEG_BACKEND_DIR:-${root}/target/release}"
 mkdir -p "${out}"
@@ -26,7 +26,7 @@ build_adapter() {
     )
     ${CXX:-c++} -std=c++17 -O2 -fPIC -shared -Wl,-Bsymbolic \
         -I"${stage}/ffmpeg-${version}" "${root}/desktop/app/cpp/linux_video_codec.cpp" -ldl \
-        -o "${out}/libnectarlink-video-ffmpeg${major}.so"
+        -o "${out}/libnoddy-video-ffmpeg${major}.so"
 }
 
 build_adapter 7.1.1 733984395e0dbbe5c046abda2dc49a5544e7e0e1e2366bba849222ae9e3a03b1

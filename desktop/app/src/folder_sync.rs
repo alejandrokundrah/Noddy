@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Folder Sync (§3.6 P2): one-way (Phone → PC) and two-way folder
-//! synchronization over the NectarLink storage service (`storage.list`,
+//! synchronization over the Noddy storage service (`storage.list`,
 //! `storage.read`, `storage.write`), with conflict-safe renaming so neither
 //! side's edits are ever lost.
 
@@ -12,7 +12,7 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use nectarlink_core::{DeviceId, Node};
+use noddy_core::{DeviceId, Node};
 use serde::{Deserialize, Serialize};
 
 use crate::{core_host, settings};
@@ -231,7 +231,7 @@ fn read_pc_entries_inner(dir: &Path, prefix: &str, depth: usize, out: &mut Vec<S
         let Ok(name) = item.file_name().into_string() else {
             continue;
         };
-        if name.starts_with('.') || name.ends_with(".nectarlink.part") || name.contains(" (conflict-") {
+        if name.starts_with('.') || name.ends_with(".noddy.part") || name.contains(" (conflict-") {
             continue;
         }
         let Ok(ft) = item.file_type() else {
@@ -278,7 +278,7 @@ fn join_phone_path(folder: &str, rel_path: &str) -> String {
 /// refuses `:`, reserved names such as `CON`, and trailing dots or spaces, and
 /// `C:x` would even resolve to a path on drive C outside the sync folder.
 fn storable_here(name: &str) -> bool {
-    !cfg!(windows) || nectarlink_core::storable_name(name) == name
+    !cfg!(windows) || noddy_core::storable_name(name) == name
 }
 
 async fn list_phone_entries(node: &Node, peer: DeviceId, base_folder: &str) -> Option<Vec<SyncEntry>> {
@@ -295,7 +295,7 @@ async fn list_phone_entries(node: &Node, peer: DeviceId, base_folder: &str) -> O
         };
         for entry in entries {
             if entry.name.starts_with('.')
-                || entry.name.ends_with(".nectarlink.part")
+                || entry.name.ends_with(".noddy.part")
                 || entry.name.contains(" (conflict-")
                 || !storable_here(&entry.name)
             {
@@ -319,10 +319,10 @@ async fn list_phone_entries(node: &Node, peer: DeviceId, base_folder: &str) -> O
 
 fn temp_part_path(dest: &Path) -> Option<PathBuf> {
     let file_name = dest.file_name()?.to_string_lossy();
-    Some(dest.with_file_name(format!(".{file_name}.nectarlink.part")))
+    Some(dest.with_file_name(format!(".{file_name}.noddy.part")))
 }
 
-/// Streams a chunked reader to a `.nectarlink.part` temporary file, verifies
+/// Streams a chunked reader to a `.noddy.part` temporary file, verifies
 /// that the byte count and BLAKE3 digest match the written file on disk, and
 /// atomically renames the temporary file to `dest`.
 #[cfg(test)]
@@ -690,7 +690,7 @@ mod tests {
         std::fs::create_dir_all(&sub).unwrap();
         std::fs::write(dir.path().join("root.txt"), b"root").unwrap();
         std::fs::write(sub.join("photo.jpg"), b"123456").unwrap();
-        std::fs::write(sub.join(".photo.jpg.nectarlink.part"), b"partial").unwrap();
+        std::fs::write(sub.join(".photo.jpg.noddy.part"), b"partial").unwrap();
 
         let entries = read_pc_entries(dir.path());
         let paths: Vec<&str> = entries.iter().map(|e| e.rel_path.as_str()).collect();
@@ -709,7 +709,7 @@ mod tests {
         assert_eq!(std::fs::read(&dest).unwrap(), payload);
         assert!(!temp_part_path(&dest).unwrap().exists());
 
-        // Truncated stream must fail and remove the `.nectarlink.part` file.
+        // Truncated stream must fail and remove the `.noddy.part` file.
         let bad_dest = dir.path().join("nested").join("truncated.mp4");
         let res = write_verified_part_file(&payload[..1024], payload.len() as u64, &bad_dest).await;
         assert!(res.is_err());

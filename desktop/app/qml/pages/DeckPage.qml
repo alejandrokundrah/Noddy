@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtQuick.Dialogs
-import app.nectarlink
+import app.noddy
 
 // Deck editor: configure pages of one-tap control tiles for paired phones,
 // preview live PC states (volume, mic mute, media), and test actions locally.

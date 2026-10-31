@@ -177,7 +177,7 @@ fn remove(path: &Path) -> std::io::Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use nectarlink_core::{DeviceId, Notification};
+    use noddy_core::{DeviceId, Notification};
 
     use super::*;
 

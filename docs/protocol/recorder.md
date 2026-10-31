@@ -15,7 +15,7 @@ added during recording.
 
 ## 2. Wire format
 
-Voice recordings travel on the `files` stream (`nectarlink/1/files`,
+Voice recordings travel on the `files` stream (`noddy/1/files`,
 `op: "send"`, `v: 1`) as a single-file `files.offer` with `recording: true`
 and optional `markers`:
 
@@ -69,7 +69,7 @@ transfers automatically once the PC reconnects.
 When a recording transfer (`recording: true`) completes on the PC:
 
 1. **Folder & naming:** Saved in the user's configured Recordings folder
-   (default `Documents\Nectarlink Recordings`) under the name the phone gave
+   (default `Documents\Noddy Recordings`) under the name the phone gave
    it, from when recording started (so one that waited for the PC keeps its
    time), or else the time it arrived: `Recording YYYY-MM-DD HH.MM.<ext>` (or `Recording YYYY-MM-DD HH.MM (2).<ext>`
    if that name is already taken; existing files are never overwritten).

@@ -9,7 +9,7 @@ The desktop app runs all day, is video-heavy (mirroring, one window per phone ap
 
 ## Decision
 
-Build the desktop UI in Qt Quick (QML) with all logic in Rust, bridged by cxx-qt through a single crate (`nectarlink-qt`). Mirrored video is decoded with Media Foundation into D3D11 textures shown directly in Qt's scene graph.
+Build the desktop UI in Qt Quick (QML) with all logic in Rust, bridged by cxx-qt through a single crate (`noddy-qt`). Mirrored video is decoded with Media Foundation into D3D11 textures shown directly in Qt's scene graph.
 
 ## Consequences
 

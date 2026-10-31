@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Logs go to `<data>\logs\nectarlink.log`, rotated at startup once large,
+//! Logs go to `<data>\logs\noddy.log`, rotated at startup once large,
 //! so a bug report can include them. Set `RUST_LOG` to change verbosity.
 
 use std::{
@@ -10,8 +10,8 @@ use std::{
 
 use tracing_subscriber::{EnvFilter, fmt, prelude::*};
 
-const FILE_NAME: &str = "nectarlink.log";
-const PREVIOUS_FILE_NAME: &str = "nectarlink.1.log";
+const FILE_NAME: &str = "noddy.log";
+const PREVIOUS_FILE_NAME: &str = "noddy.1.log";
 const ROTATE_AT_BYTES: u64 = 4 * 1024 * 1024;
 /// mDNS warns several times a second for every network adapter it can't
 /// reach (a disconnected VPN, Hyper-V's), which buried everything else.
@@ -28,7 +28,7 @@ pub fn init(data_dir: &Path) {
     let file_layer = match open_log_file(&logs_dir(data_dir)) {
         Ok(file) => Some(fmt::layer().with_ansi(false).with_writer(Mutex::new(file))),
         Err(e) => {
-            eprintln!("nectarlink: can't open the log file: {e}");
+            eprintln!("noddy: can't open the log file: {e}");
             None
         }
     };

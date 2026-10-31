@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink
+import app.noddy
 
 // The Connection Doctor: what stands between the phone and this PC, worst
 // first, each with a fix when one can be made from here.

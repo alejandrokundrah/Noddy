@@ -3,7 +3,7 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Dialogs
 import QtQuick.Shapes
-import app.nectarlink
+import app.noddy
 
 // Home: the paired phone at a glance (status, battery, power level) and
 // quick actions. Actions reflect the capability matrix: what isn't

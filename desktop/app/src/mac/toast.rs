@@ -7,7 +7,7 @@ use std::{
 };
 
 #[allow(dead_code)]
-pub const AUMID: &str = "com.thtbee.nectarlink";
+pub const AUMID: &str = "com.alejandrokundrah.noddy";
 pub const CALL_ANSWER: &str = "answer";
 pub const CALL_DECLINE: &str = "decline";
 pub const CALL_END: &str = "end";

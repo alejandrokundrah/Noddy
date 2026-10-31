@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink.spike
+import app.noddy.spike
 
 // Application root. Windows are created on demand and destroyed when closed,
 // so the always-running part (core + tray) carries no window or GPU cost.

@@ -15,12 +15,12 @@ val appVersionCode: Int = appVersion.substringBefore('-').split('.').map(String:
     .let { (major, minor, patch) -> major * 1_000_000 + minor * 1_000 + patch }
 
 android {
-    namespace = "app.nectarlink.android"
+    namespace = "app.noddy.android"
     compileSdk = 37
     ndkVersion = "30.0.16248370"
 
     defaultConfig {
-        applicationId = "app.nectarlink"
+        applicationId = "app.noddy"
         minSdk = 26
         targetSdk = 37
         versionCode = appVersionCode
@@ -42,18 +42,18 @@ android {
     }
 
     // Release builds are signed with the project's key when CI provides it
-    // (NECTARLINK_KEYSTORE: a .jks file; NECTARLINK_KEYSTORE_PASSWORD).
+    // (NODDY_KEYSTORE: a .jks file; NODDY_KEYSTORE_PASSWORD).
     // Without it, a local release build is signed with the debug key so it can be
     // installed over a debug build for testing. Never publish such a build: the
     // release workflow refuses to run without the key and verifies the signature.
-    val keystore = System.getenv("NECTARLINK_KEYSTORE")?.let(::file)?.takeIf { it.exists() }
+    val keystore = System.getenv("NODDY_KEYSTORE")?.let(::file)?.takeIf { it.exists() }
     signingConfigs {
         if (keystore != null) {
             create("release") {
                 storeFile = keystore
-                storePassword = System.getenv("NECTARLINK_KEYSTORE_PASSWORD")
-                keyAlias = "nectarlink"
-                keyPassword = System.getenv("NECTARLINK_KEYSTORE_PASSWORD")
+                storePassword = System.getenv("NODDY_KEYSTORE_PASSWORD")
+                keyAlias = "noddy"
+                keyPassword = System.getenv("NODDY_KEYSTORE_PASSWORD")
             }
         }
     }
@@ -83,15 +83,15 @@ composeCompiler {
     stabilityConfigurationFiles.add(project.layout.projectDirectory.file("compose_stability.conf"))
 }
 
-// ---- The Rust core (nectarlink-ffi) ----
+// ---- The Rust core (noddy-ffi) ----
 //
-// Built with cargo-ndk for the ABIs in `nectarlink.abis` (default: devices
+// Built with cargo-ndk for the ABIs in `noddy.abis` (default: devices
 // and the x86_64 emulator), then UniFFI generates the Kotlin bindings from
 // the built library. Both are registered as generated sources, so AGP runs
 // them when needed. Rust is always built in release: debug builds of the
 // core are large and slow.
 
-/** Builds the Rust core into `<outputDir>/<abi>/libnectarlink_ffi.so`. */
+/** Builds the Rust core into `<outputDir>/<abi>/libnoddy_ffi.so`. */
 abstract class CargoNdkBuild : DefaultTask() {
     @get:Inject abstract val exec: ExecOperations
     @get:Input abstract val abis: ListProperty<String>
@@ -110,7 +110,7 @@ abstract class CargoNdkBuild : DefaultTask() {
                 buildList {
                     addAll(listOf("cargo", "ndk", "--platform", "26", "-o", outputDir.get().asFile.path))
                     abis.get().forEach { addAll(listOf("-t", it)) }
-                    addAll(listOf("build", "--profile", "android", "--locked", "-p", "nectarlink-ffi"))
+                    addAll(listOf("build", "--profile", "android", "--locked", "-p", "noddy-ffi"))
                 },
             )
         }
@@ -129,7 +129,7 @@ abstract class UniffiBindgen : DefaultTask() {
         exec.exec {
             workingDir = workspace.get().asFile
             commandLine(
-                "cargo", "run", "--quiet", "--locked", "-p", "nectarlink-ffi", "--features", "bindgen",
+                "cargo", "run", "--quiet", "--locked", "-p", "noddy-ffi", "--features", "bindgen",
                 "--bin", "uniffi-bindgen", "--", "generate", "--library", library.get().asFile.path,
                 "--language", "kotlin", "--no-format", "--out-dir", outputDir.get().asFile.path,
             )
@@ -159,7 +159,7 @@ abstract class BundleFonts : DefaultTask() {
 
 val workspaceDir: Directory = rootProject.layout.projectDirectory.dir("..")
 val rustAbis: List<String> =
-    (findProperty("nectarlink.abis") as String?)?.split(",")?.map(String::trim) ?: listOf("arm64-v8a", "x86_64")
+    (findProperty("noddy.abis") as String?)?.split(",")?.map(String::trim) ?: listOf("arm64-v8a", "x86_64")
 
 androidComponents {
     onVariants { variant ->
@@ -174,7 +174,7 @@ androidComponents {
         }
         val bindgen = tasks.register<UniffiBindgen>("uniffiBindgen$suffix") {
             description = "Generates the Kotlin bindings for the Rust core."
-            library.set(cargo.flatMap { it.outputDir.file("${rustAbis.first()}/libnectarlink_ffi.so") })
+            library.set(cargo.flatMap { it.outputDir.file("${rustAbis.first()}/libnoddy_ffi.so") })
             workspace.set(workspaceDir)
         }
         val fonts = tasks.register<BundleFonts>("bundleFonts$suffix") {

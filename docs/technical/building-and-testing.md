@@ -1,6 +1,6 @@
 # Building and Testing
 
-This document covers the pinned toolchain versions, environment variables, build commands, and test suites required to build and verify NectarLink on Windows and Android.
+This document covers the pinned toolchain versions, environment variables, build commands, and test suites required to build and verify Noddy on Windows and Android.
 
 ## Pinned Toolchains
 
@@ -13,12 +13,12 @@ This document covers the pinned toolchain versions, environment variables, build
 | **JDK** | JDK `17` or newer (`21` supported) | `JAVA_HOME` |
 | **Android SDK** | Platform `37` (`compileSdk = 37`, `targetSdk = 37`, `minSdk = 26` / Android 8.0) | `%LOCALAPPDATA%\Android\Sdk` |
 | **Android NDK** | `30.0.16248370` (or side-by-side NDK configured in `android/app/build.gradle.kts`) | `%LOCALAPPDATA%\Android\Sdk\ndk` |
-| **`cargo-ndk`** | `>= 3.5` | Used by Gradle (`buildRustAndroid`) to cross-compile `libnectarlink_ffi.so` |
-| **NSIS** | NSIS `3.x` (`makensis.exe`) | Used by `scripts/package.ps1` (`desktop/installer/nectarlink.nsi`) to build the Windows setup installer |
+| **`cargo-ndk`** | `>= 3.5` | Used by Gradle (`buildRustAndroid`) to cross-compile `libnoddy_ffi.so` |
+| **NSIS** | NSIS `3.x` (`makensis.exe`) | Used by `scripts/package.ps1` (`desktop/installer/noddy.nsi`) to build the Windows setup installer |
 
 ## Environment Variables
 
-When building the Windows desktop client (`nectarlink-desktop`) or running workspace-wide `cargo` commands that compile `desktop/app`, ensure Qt's `bin` folder is on `PATH` or point `QMAKE` to its `qmake.exe`:
+When building the Windows desktop client (`noddy-desktop`) or running workspace-wide `cargo` commands that compile `desktop/app`, ensure Qt's `bin` folder is on `PATH` or point `QMAKE` to its `qmake.exe`:
 
 ```powershell
 $env:QMAKE = "C:\Qt\6.12.0\msvc2022_64\bin\qmake.exe"
@@ -37,40 +37,40 @@ Note: [`scripts/check.ps1`](../../scripts/check.ps1) and [`scripts/package.ps1`]
 
 ### 1. Core Rust Crates and Headless CLI
 
-The core crates (`nectarlink-protocol`, `nectarlink-core`, `nectarlink-ffi`, `nectarlink-cli`) do not depend on Qt and can be built on any machine with the Rust toolchain:
+The core crates (`noddy-protocol`, `noddy-core`, `noddy-ffi`, `noddy-cli`) do not depend on Qt and can be built on any machine with the Rust toolchain:
 
 ```powershell
-cargo build -p nectarlink-protocol -p nectarlink-core -p nectarlink-ffi -p nectarlink-cli
+cargo build -p noddy-protocol -p noddy-core -p noddy-ffi -p noddy-cli
 ```
 
 To run the headless CLI (`cli/`):
 
 ```powershell
-cargo run -p nectarlink-cli -- --help
+cargo run -p noddy-cli -- --help
 ```
 
-### 2. Windows Desktop Application (`nectarlink-desktop`)
+### 2. Windows Desktop Application (`noddy-desktop`)
 
 ```powershell
 # Debug build
-cargo build -p nectarlink-desktop
+cargo build -p noddy-desktop
 
 # Release build (LTO = thin, codegen-units = 1, opt-level = 3)
-cargo build --release -p nectarlink-desktop
+cargo build --release -p noddy-desktop
 ```
 
-The compiled executable is placed at `target/release/nectarlink-desktop.exe`.
+The compiled executable is placed at `target/release/noddy-desktop.exe`.
 
-### 3. Windows Virtual Camera DLL (`nectarlink-vcam`)
+### 3. Windows Virtual Camera DLL (`noddy-vcam`)
 
 ```powershell
-cargo build --release -p nectarlink-vcam
+cargo build --release -p noddy-vcam
 ```
 
-Produces `target/release/nectarlink_vcam.dll`. To register the COM virtual camera for testing with video conferencing apps, run in an elevated PowerShell prompt:
+Produces `target/release/noddy_vcam.dll`. To register the COM virtual camera for testing with video conferencing apps, run in an elevated PowerShell prompt:
 
 ```powershell
-regsvr32.exe target\release\nectarlink_vcam.dll
+regsvr32.exe target\release\noddy_vcam.dll
 ```
 
 ### 4. Design Tokens and Third-Party Notices (`cargo xtask`)
@@ -107,7 +107,7 @@ Pop-Location
 
 ### 6. Full Release Packaging (`scripts/package.ps1`)
 
-To stage the release desktop binary, `nectarlink_vcam.dll`, `windeployqt` Qt runtime DLLs and QML modules, `THIRD-PARTY-NOTICES.txt`, and Sparse Package manifest (`AppxManifest.xml`), and build the NSIS setup installer (`desktop/installer/nectarlink.nsi`):
+To stage the release desktop binary, `noddy_vcam.dll`, `windeployqt` Qt runtime DLLs and QML modules, `THIRD-PARTY-NOTICES.txt`, and Sparse Package manifest (`AppxManifest.xml`), and build the NSIS setup installer (`desktop/installer/noddy.nsi`):
 
 ```powershell
 # Full release build + staging + NSIS installer (default x64):
@@ -116,13 +116,13 @@ powershell -ExecutionPolicy Bypass -File scripts\package.ps1
 # Full release build + staging + NSIS installer for Windows 11 ARM64:
 powershell -ExecutionPolicy Bypass -File scripts\package.ps1 -Arch arm64
 
-# Stage files into target\package\Nectarlink\ without running makensis:
+# Stage files into target\package\Noddy\ without running makensis:
 powershell -ExecutionPolicy Bypass -File scripts\package.ps1 -StageOnly
 ```
 
 Artifacts are written to `target/package/`:
-- `target/package/Nectarlink/` (staged portable directory)
-- `target/package/Nectarlink-<version>-x64-setup.exe` or `Nectarlink-<version>-arm64-setup.exe` (NSIS installer when `makensis.exe` is installed)
+- `target/package/Noddy/` (staged portable directory)
+- `target/package/Noddy-<version>-x64-setup.exe` or `Noddy-<version>-arm64-setup.exe` (NSIS installer when `makensis.exe` is installed)
 
 ## Running the Test Suites
 
@@ -141,22 +141,22 @@ powershell -ExecutionPolicy Bypass -File scripts\check.ps1 -Android -Arm64
 
 ```powershell
 # Protocol framing, pairing SAS/QR proofs, and video packetization tests
-cargo test -p nectarlink-protocol
+cargo test -p noddy-protocol
 
 # Core unit tests (SQLite store v7, send_queue FIFO/TTL/replacement, ADB/USB tunnel, OKLab palette, clipboard vault)
-cargo test -p nectarlink-core --lib
+cargo test -p noddy-core --lib
 
 # End-to-end two-device QUIC integration tests (pairing, capabilities, transfers, pause/resume)
-cargo test -p nectarlink-core --test two_devices
+cargo test -p noddy-core --test two_devices
 
 # Scale benchmarks, opt-in (4 GiB transfer, 10,000 notifications, 5,000 timeline entries, encrypted clipboard history)
-cargo test -p nectarlink-core --release --test scale_tests -- --ignored
+cargo test -p noddy-core --release --test scale_tests -- --ignored
 
 # UniFFI binding round-trip tests
-cargo test -p nectarlink-ffi
+cargo test -p noddy-ffi
 
 # Desktop notification store, localhost HTTP API auth/CORS guards, and vcam shared memory tests
-cargo test -p nectarlink-desktop -p nectarlink-vcam
+cargo test -p noddy-desktop -p noddy-vcam
 ```
 
 ### Android Lint and Unit Tests

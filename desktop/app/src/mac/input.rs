@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! macOS activity detection and synthetic input stubs.
 
-use nectarlink_core::{ButtonAction, KeyMod, MouseButton, SlideAction, TouchAction};
+use noddy_core::{ButtonAction, KeyMod, MouseButton, SlideAction, TouchAction};
 
 pub fn move_relative(_dx: f32, _dy: f32) {}
 #[allow(dead_code)]

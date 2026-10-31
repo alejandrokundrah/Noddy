@@ -202,7 +202,7 @@ fn by_title(windows: Vec<Window>, title: &str) -> Option<Window> {
     }
     let mut matching = windows
         .into_iter()
-        .filter(|w| w.program != "nectarlink-desktop.exe" && w.title.to_lowercase().contains(&wanted));
+        .filter(|w| w.program != "noddy-desktop.exe" && w.title.to_lowercase().contains(&wanted));
     let found = matching.next()?;
     // Two windows with that title: can't tell which one plays.
     matching.next().is_none().then_some(found)
@@ -428,11 +428,11 @@ mod tests {
     }
 
     /// With a Chromium browser showing a page whose title has
-    /// `NECTARLINK_TEST_TAB` in it: reads its address and its video's place.
+    /// `NODDY_TEST_TAB` in it: reads its address and its video's place.
     #[test]
-    #[ignore = "needs a browser tab titled NECTARLINK_TEST_TAB"]
+    #[ignore = "needs a browser tab titled NODDY_TEST_TAB"]
     fn reads_a_real_browser() {
-        let wanted = std::env::var("NECTARLINK_TEST_TAB").expect("NECTARLINK_TEST_TAB");
+        let wanted = std::env::var("NODDY_TEST_TAB").expect("NODDY_TEST_TAB");
         // SAFETY: COM for this test's thread.
         let _ = unsafe {
             windows::Win32::System::Com::CoInitializeEx(

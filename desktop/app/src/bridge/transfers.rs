@@ -8,7 +8,7 @@ use cxx_qt::{CxxQtType, Threading};
 use cxx_qt_lib::{
     QByteArray, QHash, QHashPair_i32_QByteArray, QList, QModelIndex, QString, QStringList, QUrl, QVariant,
 };
-use nectarlink_core::{Direction, TransferFailure, TransferState};
+use noddy_core::{Direction, TransferFailure, TransferState};
 
 use super::{Edit, diff};
 use crate::{
@@ -407,7 +407,7 @@ impl qobject::TransferList {
 mod tests {
     use std::time::Instant;
 
-    use nectarlink_core::{DeviceId, Transfer};
+    use noddy_core::{DeviceId, Transfer};
 
     use super::*;
 

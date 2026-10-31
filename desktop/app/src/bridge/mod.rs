@@ -54,7 +54,7 @@ use std::{
 
 use cxx_qt::{CxxQtThread, Threading};
 use cxx_qt_lib::QString;
-use nectarlink_core::DeviceId;
+use noddy_core::DeviceId;
 
 use crate::state::Changes;
 

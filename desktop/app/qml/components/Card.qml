@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink
+import app.noddy
 
 // A content surface: filled in Bloom, honey-edged in Hive, frosted optical glass in Glass,
 // hairline-bordered in Graphite.

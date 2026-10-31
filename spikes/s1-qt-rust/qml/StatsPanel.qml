@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink.spike
+import app.noddy.spike
 
 // Live measurements for the S1 gate: frame rate, events per second,
 // memory and startup time.

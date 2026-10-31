@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! One NectarLink per user session and data folder. A second launch (from
+//! One Noddy per user session and data folder. A second launch (from
 //! the Start menu, a shortcut or Explorer's "Send to") leaves its request
 //! (`crate::launch`), wakes the running one with [`wake`] and exits.
 
@@ -46,8 +46,8 @@ fn names(data_dir: &Path) -> (HSTRING, HSTRING) {
     data_dir.to_string_lossy().to_lowercase().hash(&mut hasher);
     let tag = format!("{:016x}", hasher.finish());
     (
-        HSTRING::from(format!(r"Local\Nectarlink.Desktop.{tag}")),
-        HSTRING::from(format!(r"Local\Nectarlink.Desktop.Activate.{tag}")),
+        HSTRING::from(format!(r"Local\Noddy.Desktop.{tag}")),
+        HSTRING::from(format!(r"Local\Noddy.Desktop.Activate.{tag}")),
     )
 }
 

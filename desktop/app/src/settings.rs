@@ -279,7 +279,7 @@ pub fn set_obs_settings(port: u16, protected_password: Option<String>) {
 
 /// Encrypts an OBS password for storage (DPAPI on Windows, base64 for the file).
 pub fn protect_obs_password(password: &str) -> Option<String> {
-    let sealed = nectarlink_core::default_protector().protect(password.as_bytes()).ok()?;
+    let sealed = noddy_core::default_protector().protect(password.as_bytes()).ok()?;
     Some(data_encoding::BASE64.encode(&sealed))
 }
 
@@ -287,7 +287,7 @@ pub fn protect_obs_password(password: &str) -> Option<String> {
 pub fn obs_password() -> Option<String> {
     let stored = obs_settings().1?;
     let sealed = data_encoding::BASE64.decode(stored.as_bytes()).ok()?;
-    let plain = nectarlink_core::default_protector().unprotect(&sealed).ok()?;
+    let plain = noddy_core::default_protector().unprotect(&sealed).ok()?;
     String::from_utf8(plain).ok()
 }
 
@@ -364,7 +364,7 @@ pub struct Settings {
     /// reduced motion or battery saver whatever this says).
     #[serde(default = "default_true", alias = "comb_motion")]
     pub comb_motion: bool,
-    /// Closing the window keeps NectarLink running in the tray.
+    /// Closing the window keeps Noddy running in the tray.
     #[serde(default = "default_close_to_tray", alias = "close_to_tray")]
     pub close_to_tray: bool,
     /// Send what's copied on this PC to connected phones.
@@ -418,7 +418,7 @@ pub struct Settings {
     /// doesn't.
     #[serde(skip_serializing_if = "Option::is_none", alias = "start_with_windows")]
     pub start_with_windows: Option<bool>,
-    /// Where voice recordings from phones are saved (`None` = `Documents\Nectarlink Recordings`).
+    /// Where voice recordings from phones are saved (`None` = `Documents\Noddy Recordings`).
     #[serde(skip_serializing_if = "Option::is_none", alias = "recordings_folder")]
     pub recordings_folder: Option<PathBuf>,
     /// Output format for saved voice recordings (`m4a`, `mp3`, `wav`, or `flac`).
@@ -467,7 +467,7 @@ pub struct Settings {
     #[serde(default = "default_true", alias = "clipboard_auto_copy_received_files")]
     pub clipboard_auto_copy_received_files: bool,
     /// Open a single photo or document shared from the phone as soon as it
-    /// arrives. Off by default: it's saved in Downloads\Nectarlink either way.
+    /// arrives. Off by default: it's saved in Downloads\Noddy either way.
     #[serde(default, alias = "open_shared_files")]
     pub open_shared_files: bool,
     /// Send the PC's clipboard to the phone when control moves to it: the mouse

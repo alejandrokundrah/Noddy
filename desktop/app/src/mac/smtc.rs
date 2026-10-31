@@ -2,7 +2,7 @@
 //! macOS system media transport controls stubs.
 
 use crate::state::PlayerView;
-use nectarlink_core::{DeviceId, MediaAction};
+use noddy_core::{DeviceId, MediaAction};
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]

@@ -3,7 +3,7 @@
 //! its microphone and plays it into an output device. Played into a virtual
 //! audio cable (VB-Audio's CABLE Input, Voicemeeter), the cable's other end
 //! is a microphone every app can pick; played to the speakers, it's for
-//! listening in. A virtual microphone of NectarLink's own needs an audio
+//! listening in. A virtual microphone of Noddy's own needs an audio
 //! driver and is a later, separate step (GitHub #7).
 
 use crate::i18n::tr;
@@ -15,7 +15,7 @@ use std::{
     time::Duration,
 };
 
-use nectarlink_core::{AudioOutputDevice, DeviceId, Error, LinkState, MicSink, MirrorAudioConfig, NodeEvent};
+use noddy_core::{AudioOutputDevice, DeviceId, Error, LinkState, MicSink, MirrorAudioConfig, NodeEvent};
 
 use crate::{
     bridge::app::{describe, show_message},
@@ -132,13 +132,13 @@ const CABLES: &[&str] =
     &["cable input", "vb-audio", "voicemeeter input", "virtual cable", "virtual microphone"];
 
 #[cfg(target_os = "linux")]
-pub const VIRTUAL_MIC_ID: &str = "nectarlink:virtual_mic";
+pub const VIRTUAL_MIC_ID: &str = "noddy:virtual_mic";
 #[cfg(target_os = "linux")]
-pub const VIRTUAL_MIC_NAME: &str = "NectarLink Phone Mic (Virtual Microphone, Stereo)";
+pub const VIRTUAL_MIC_NAME: &str = "Noddy Phone Mic (Virtual Microphone, Stereo)";
 #[cfg(target_os = "linux")]
-pub const VIRTUAL_MIC_MONO_ID: &str = "nectarlink:virtual_mic_mono";
+pub const VIRTUAL_MIC_MONO_ID: &str = "noddy:virtual_mic_mono";
 #[cfg(target_os = "linux")]
-pub const VIRTUAL_MIC_MONO_NAME: &str = "NectarLink Phone Mic (Virtual Microphone, Mono)";
+pub const VIRTUAL_MIC_MONO_NAME: &str = "Noddy Phone Mic (Virtual Microphone, Mono)";
 
 /// The output to play into: the one chosen, while it's there; else a
 /// virtual audio cable, if there is one; else `None` (the default output).
@@ -218,7 +218,7 @@ pub fn phone() -> Option<(DeviceId, String)> {
     core_host::host().hub.read(|s| {
         let can = |id: &DeviceId| {
             s.matrices.get(id).and_then(|m| m.state("media.phone_mic"))
-                == Some(nectarlink_core::FeatureState::Available)
+                == Some(noddy_core::FeatureState::Available)
         };
         s.devices
             .iter()
@@ -249,7 +249,7 @@ pub fn start(phone: DeviceId) {
                 set_phase(Phase::Off);
                 show_message(match e {
                     Error::Unsupported => {
-                        tr!("PhoneMic", "Update NectarLink on %1 to use its microphone.", name)
+                        tr!("PhoneMic", "Update Noddy on %1 to use its microphone.", name)
                     }
                     Error::Denied => tr!("PhoneMic", "The microphone is turned off for this PC on %1.", name),
                     other => describe(&other),
@@ -289,7 +289,7 @@ fn after(phase: Phase, event: &NodeEvent) -> Phase {
     }
 }
 
-/// Where a phone's microphone goes: [`Platform::mic_sink`](nectarlink_core::Platform::mic_sink).
+/// Where a phone's microphone goes: [`Platform::mic_sink`](noddy_core::Platform::mic_sink).
 pub fn sink(peer: &DeviceId) -> Option<Arc<dyn MicSink>> {
     let sink = Arc::new(Sink {
         #[cfg(target_os = "linux")]
@@ -445,11 +445,11 @@ mod tests {
     #[test]
     fn virtual_microphone_is_recognized_as_preferred_cable() {
         let devices = [
-            device("nectarlink:virtual_mic", "NectarLink Phone Mic (Virtual Microphone)", false),
+            device("noddy:virtual_mic", "Noddy Phone Mic (Virtual Microphone)", false),
             device("spk", "Speakers", true),
         ];
-        assert!(is_cable("NectarLink Phone Mic (Virtual Microphone)"));
-        assert_eq!(preferred(&devices, None).as_deref(), Some("nectarlink:virtual_mic"));
+        assert!(is_cable("Noddy Phone Mic (Virtual Microphone)"));
+        assert_eq!(preferred(&devices, None).as_deref(), Some("noddy:virtual_mic"));
         assert_eq!(preferred(&devices, Some("spk")).as_deref(), Some("spk"));
     }
 }

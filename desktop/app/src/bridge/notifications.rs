@@ -7,7 +7,7 @@ use std::pin::Pin;
 
 use cxx_qt::{CxxQtType, Threading};
 use cxx_qt_lib::{QByteArray, QHash, QHashPair_i32_QByteArray, QList, QModelIndex, QString, QVariant};
-use nectarlink_core::DeviceId;
+use noddy_core::DeviceId;
 
 use super::{Edit, diff};
 use crate::{
@@ -634,7 +634,7 @@ impl qobject::NotificationList {
 
 #[cfg(test)]
 mod tests {
-    use nectarlink_core::{NodeEvent, Notification, NotificationAction};
+    use noddy_core::{NodeEvent, Notification, NotificationAction};
 
     use super::*;
 
@@ -658,7 +658,7 @@ mod tests {
                     silent: false,
                     icon: None,
                     image: None,
-                    live: Some(nectarlink_core::NotificationLive {
+                    live: Some(noddy_core::NotificationLive {
                         v: 1,
                         progress: Some(40),
                         max: Some(100),

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink
+import app.noddy
 
 // The rim of a Liquid Glass surface (shaders/glassrim.frag): a specular edge lit from the
 // top left with a softer reflection at the bottom right, and a faint inner glow that reads

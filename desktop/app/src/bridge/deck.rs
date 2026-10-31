@@ -8,7 +8,7 @@ use std::pin::Pin;
 
 use cxx_qt::Threading;
 use cxx_qt_lib::{QString, QUrl};
-use nectarlink_core::{DeckAction, KeyMod, deck_kinds};
+use noddy_core::{DeckAction, KeyMod, deck_kinds};
 use serde::Serialize;
 
 use super::prefs::qobject;

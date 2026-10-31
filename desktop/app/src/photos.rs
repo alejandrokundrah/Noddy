@@ -4,7 +4,7 @@
 //!   to open, save, or copy it.
 //! - The Photos gallery page: albums, paged items newest-first, on-demand
 //!   batched thumbnails cached on disk, in-app viewer, Save (to a chosen
-//!   folder or `Downloads\Nectarlink`), Copy to clipboard, and Open in the
+//!   folder or `Downloads\Noddy`), Copy to clipboard, and Open in the
 //!   Windows Photos app or default video player.
 
 use crate::i18n::tr;
@@ -15,7 +15,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use nectarlink_core::{
+use noddy_core::{
     DeviceId, Direction, Error, FeatureState, LinkState, NodeEvent, Photo, PhotoAlbum, PhotoItem, PhotoThumb,
     Transfer, TransferState,
 };
@@ -49,7 +49,7 @@ enum Intent {
     Copy { item_id: Option<String>, notify_ui: bool },
     /// Downloaded for the in-app viewer (moved into the gallery cache).
     View { device: DeviceId, item_id: String },
-    /// Saved from the gallery to `Downloads\Nectarlink` or a user-chosen folder.
+    /// Saved from the gallery to `Downloads\Noddy` or a user-chosen folder.
     GallerySave { ids: Vec<String>, folder: Option<PathBuf> },
 }
 
@@ -158,7 +158,7 @@ fn show(device: DeviceId, photo: &Photo) {
         key: format!("{device} {}", photo.id),
         title: if photo.screenshot { tr!("Photos", "New screenshot") } else { tr!("Photos", "New photo") },
         body: tr!("Photos", "From %1", name),
-        attribution: "NectarLink".into(),
+        attribution: "Noddy".into(),
         icon: None,
         image: preview,
         actions: vec![(ACTION_SAVE.into(), "Save".into()), (ACTION_COPY.into(), "Copy".into())],
@@ -371,7 +371,7 @@ fn deliver(transfer_id: &str, intent: Intent, saved: &[PathBuf]) {
                 }
                 None => {
                     final_paths.extend(saved.iter().cloned());
-                    r"Downloads\Nectarlink".to_owned()
+                    r"Downloads\Noddy".to_owned()
                 }
             };
             if let Some(node) = core_host::node() {
@@ -388,7 +388,7 @@ fn deliver(transfer_id: &str, intent: Intent, saved: &[PathBuf]) {
                     final_paths.iter().filter_map(|p| std::fs::metadata(p).ok().map(|m| m.len())).sum();
                 node.update_timeline_by_ref(
                     transfer_id,
-                    nectarlink_core::TimelineKind::Photo,
+                    noddy_core::TimelineKind::Photo,
                     &title,
                     &dest_label,
                     &target,
@@ -408,7 +408,7 @@ fn deliver(transfer_id: &str, intent: Intent, saved: &[PathBuf]) {
             match final_paths.as_slice() {
                 _ if not_moved > 0 => show_message(tr!(
                     "Photos",
-                    "%1 of %2 couldn't be moved to %3. They're in Downloads\\Nectarlink.",
+                    "%1 of %2 couldn't be moved to %3. They're in Downloads\\Noddy.",
                     not_moved,
                     final_paths.len(),
                     dest_label
@@ -484,7 +484,7 @@ fn copy_file_to_clipboard(path: &Path, remove_after: bool, notify_ui: bool) {
         Err(reason) => {
             tracing::warn!(reason, "can't copy a photo");
             if remove_after {
-                show_message(tr!("Photos", "The photo couldn't be copied. It's in Downloads\\Nectarlink."));
+                show_message(tr!("Photos", "The photo couldn't be copied. It's in Downloads\\Noddy."));
             } else {
                 show_message(tr!("Photos", "The photo couldn't be copied to the clipboard."));
             }
@@ -812,9 +812,9 @@ pub fn view() -> View {
                 .collect(),
         );
         #[cfg(windows)]
-        const DEFAULT_SAVE_FOLDER: &str = r"Downloads\Nectarlink";
+        const DEFAULT_SAVE_FOLDER: &str = r"Downloads\Noddy";
         #[cfg(not(windows))]
-        const DEFAULT_SAVE_FOLDER: &str = "Downloads/Nectarlink";
+        const DEFAULT_SAVE_FOLDER: &str = "Downloads/Noddy";
         let save_folder = s
             .save_folder
             .as_deref()
@@ -1225,11 +1225,11 @@ pub fn open_latest_photo(device: DeviceId) {
 
     // Check if the timeline already has a local saved photo for this phone while we also query the phone.
     let timeline_fallback = node
-        .timeline_page(&nectarlink_core::TimelineQuery {
-            kind: Some(nectarlink_core::TimelineKind::Photo),
+        .timeline_page(&noddy_core::TimelineQuery {
+            kind: Some(noddy_core::TimelineKind::Photo),
             device: Some(device),
             limit: 10,
-            ..nectarlink_core::TimelineQuery::default()
+            ..noddy_core::TimelineQuery::default()
         })
         .map(|p| p.entries)
         .unwrap_or_default()
@@ -1243,7 +1243,7 @@ pub fn open_latest_photo(device: DeviceId) {
     let online = core_host::host().hub.read(|s| {
         s.devices
             .iter()
-            .any(|d| d.id == device && matches!(d.link, nectarlink_core::LinkState::Online { .. }))
+            .any(|d| d.id == device && matches!(d.link, noddy_core::LinkState::Online { .. }))
     });
     if !online {
         if let Some(path) = timeline_fallback {
@@ -1330,14 +1330,14 @@ pub fn copy_item(id: String) {
 }
 
 /// Sets the preferred destination folder for saving gallery items (`None`
-/// resets to `Downloads\Nectarlink`).
+/// resets to `Downloads\Noddy`).
 pub fn set_save_folder(folder: Option<PathBuf>) {
     gallery_state(|s| s.save_folder = folder);
     gallery_changed();
 }
 
 /// Downloads and saves `ids` to `folder` (or the remembered `save_folder`, or
-/// default `Downloads\Nectarlink`).
+/// default `Downloads\Noddy`).
 pub fn save_items(ids: Vec<String>, folder: Option<PathBuf>) {
     let ids: Vec<String> = ids.into_iter().filter(|id| !id.is_empty()).collect();
     if ids.is_empty() {

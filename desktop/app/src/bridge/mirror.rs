@@ -7,7 +7,7 @@ use std::pin::Pin;
 
 use cxx_qt::Threading;
 use cxx_qt_lib::{QList, QString, QUrl, QVariant};
-use nectarlink_core::{FeatureState, MIRROR_SCREEN, MirrorInput};
+use noddy_core::{FeatureState, MIRROR_SCREEN, MirrorInput};
 
 use crate::{
     mirror::{self, Apps, Phase, Window},
@@ -101,7 +101,7 @@ pub mod qobject {
         #[qinvokable]
         #[cxx_name = "screenshotClipboard"]
         fn screenshot_clipboard(self: &Mirror, key: &QString);
-        /// Saves a screenshot of a mirror window to Downloads\Nectarlink.
+        /// Saves a screenshot of a mirror window to Downloads\Noddy.
         #[qinvokable]
         #[cxx_name = "screenshotFile"]
         fn screenshot_file(self: &Mirror, key: &QString);
@@ -306,7 +306,7 @@ impl qobject::Mirror {
 
     pub fn start_app(&self, device: &QString, pkg: &QString, label: &QString) {
         let pkg = String::from(pkg);
-        if let (Some(device), true) = (super::parse_device(device), nectarlink_core::is_package_name(&pkg)) {
+        if let (Some(device), true) = (super::parse_device(device), noddy_core::is_package_name(&pkg)) {
             mirror::start_app(device, pkg, String::from(label));
         }
     }
@@ -350,7 +350,7 @@ impl qobject::Mirror {
     }
 
     pub fn touch(&self, key: &QString, action: &QString, x: f64, y: f64) {
-        use nectarlink_core::TouchAction;
+        use noddy_core::TouchAction;
         let action = match String::from(action).as_str() {
             "down" => TouchAction::Down,
             "move" => TouchAction::Move,
@@ -378,7 +378,7 @@ impl qobject::Mirror {
 
     pub fn text(&self, key: &QString, text: &QString) {
         let text = String::from(text);
-        if !text.is_empty() && text.len() <= nectarlink_core::MIRROR_MAX_TEXT_BYTES {
+        if !text.is_empty() && text.len() <= noddy_core::MIRROR_MAX_TEXT_BYTES {
             self.send(key, MirrorInput::Text { text });
         }
     }
@@ -388,7 +388,7 @@ impl qobject::Mirror {
             // Long text goes in pieces, each a whole number of characters.
             let mut piece = String::new();
             for c in text.chars() {
-                if piece.len() + c.len_utf8() > nectarlink_core::MIRROR_MAX_TEXT_BYTES {
+                if piece.len() + c.len_utf8() > noddy_core::MIRROR_MAX_TEXT_BYTES {
                     self.send(key, MirrorInput::Text { text: std::mem::take(&mut piece) });
                 }
                 piece.push(c);

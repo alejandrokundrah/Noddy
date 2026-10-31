@@ -2,7 +2,7 @@
 import QtQuick
 import QtQuick.Window
 import QtQuick.Shapes
-import app.nectarlink
+import app.noddy
 
 // Dynamic Island-style floating pill anchored at the top-center of the primary
 // monitor (340×40px compact, expanding smoothly to 380×88px on hover or incoming call).
@@ -265,7 +265,7 @@ Window {
                 : base
         }
         if (mode === "notification")
-            return qsTr("Click to view in NectarLink")
+            return qsTr("Click to view in Noddy")
         if (mode === "waiting") {
             return DeviceList.count > 0
                 ? qsTr("Will send when %1 is back").arg(DeviceList.deviceNameAt(0))

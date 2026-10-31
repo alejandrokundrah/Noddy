@@ -26,7 +26,7 @@ const BACKOFF: [Duration; 5] = [
 ];
 
 fn user_agent() -> String {
-    format!("Nectarlink/{} (Linux)", env!("CARGO_PKG_VERSION"))
+    format!("Noddy/{} (Linux)", env!("CARGO_PKG_VERSION"))
 }
 
 fn validate_https(url: &str) -> Result<(), String> {
@@ -494,12 +494,12 @@ mod tests {
 
     #[test]
     fn curl_and_wget_args_enforce_https_redirects_and_end_of_options() {
-        let curl_args = curl_get_args("1025", "NectarLink/0.1", "https://example.com/feed.json");
+        let curl_args = curl_get_args("1025", "Noddy/0.1", "https://example.com/feed.json");
         assert!(curl_args.windows(2).any(|w| w[0] == "--proto" && w[1] == "=https"));
         assert!(curl_args.windows(2).any(|w| w[0] == "--proto-redir" && w[1] == "=https"));
         assert_eq!(&curl_args[curl_args.len() - 2..], ["--", "https://example.com/feed.json"]);
 
-        let wget_args = wget_get_args("NectarLink/0.1", "https://example.com/feed.json");
+        let wget_args = wget_get_args("Noddy/0.1", "https://example.com/feed.json");
         assert!(wget_args.iter().any(|a| a == "--https-only"));
         assert_eq!(&wget_args[wget_args.len() - 2..], ["--", "https://example.com/feed.json"]);
     }

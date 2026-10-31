@@ -175,7 +175,7 @@ fn device_friendly_name(device: &IMMDevice) -> Option<String> {
 
 /// Lists active audio render (output) endpoints on this PC, marking the current
 /// default console output (`is_default: true`) and sorting the default first.
-pub fn output_devices() -> Vec<nectarlink_core::AudioOutputDevice> {
+pub fn output_devices() -> Vec<noddy_core::AudioOutputDevice> {
     let _com = ComGuard::new();
     // SAFETY: Enumerates active render endpoints via `IMMDeviceEnumerator`.
     unsafe {
@@ -196,7 +196,7 @@ pub fn output_devices() -> Vec<nectarlink_core::AudioOutputDevice> {
             let Some(id) = device_id_string(&dev) else { continue };
             let name = device_friendly_name(&dev).unwrap_or_else(|| "Speakers".into());
             let is_default = default_id.as_deref() == Some(id.as_str());
-            out.push(nectarlink_core::AudioOutputDevice { id, name, is_default });
+            out.push(noddy_core::AudioOutputDevice { id, name, is_default });
         }
         out.sort_by(|a, b| b.is_default.cmp(&a.is_default).then_with(|| a.name.cmp(&b.name)));
         out

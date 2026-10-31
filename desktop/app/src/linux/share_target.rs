@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Linux Share Target / freedesktop MIME & URI-scheme handler (`nectarlink://`, `file://`, URLs).
+// Linux Share Target / freedesktop MIME & URI-scheme handler (`noddy://`, `file://`, URLs).
 
 #![allow(dead_code)]
 
@@ -27,7 +27,7 @@ impl SharedPayload {
 
 /// Register the Linux share target listener.
 ///
-/// On Linux, `.desktop` / `MimeType=x-scheme-handler/nectarlink;` invocations launch
+/// On Linux, `.desktop` / `MimeType=x-scheme-handler/noddy;` invocations launch
 /// a new process whose arguments are parsed via [`parse_targets`] and forwarded over
 /// the single-instance Unix domain socket (`single_instance.rs`) or persisted to
 /// `activated-share.json` and consumed by [`take_activated_share`].
@@ -45,7 +45,7 @@ pub fn take_activated_share(data_dir: &Path) -> Option<SharedPayload> {
 }
 
 /// Parse command-line targets (`%U` / `%F` from `.desktop` Exec lines, `file://` URIs,
-/// `http(s)://` / `nectarlink://` URLs, local paths, or plain text) into a [`SharedPayload`].
+/// `http(s)://` / `noddy://` URLs, local paths, or plain text) into a [`SharedPayload`].
 pub fn parse_targets(targets: &[String]) -> SharedPayload {
     let mut payload = SharedPayload::default();
     let mut text_parts = Vec::new();
@@ -101,7 +101,7 @@ fn is_url_target(s: &str) -> bool {
         || lower.starts_with("https://")
         || lower.starts_with("mailto:")
         || lower.starts_with("tel:")
-        || lower.starts_with("nectarlink:")
+        || lower.starts_with("noddy:")
         || (lower.starts_with("geo:") && s.len() > 4)
 }
 
@@ -182,11 +182,11 @@ mod tests {
     }
 
     #[test]
-    fn parse_targets_handles_nectarlink_scheme_and_local_paths() {
+    fn parse_targets_handles_noddy_scheme_and_local_paths() {
         let targets =
-            vec!["nectarlink://share?text=hello".to_string(), "/var/tmp/some-archive.tar.gz".to_string()];
+            vec!["noddy://share?text=hello".to_string(), "/var/tmp/some-archive.tar.gz".to_string()];
         let payload = parse_targets(&targets);
-        assert_eq!(payload.url.as_deref(), Some("nectarlink://share?text=hello"));
+        assert_eq!(payload.url.as_deref(), Some("noddy://share?text=hello"));
         assert_eq!(payload.files, vec![PathBuf::from("/var/tmp/some-archive.tar.gz")]);
     }
 
@@ -202,7 +202,7 @@ mod tests {
         let file_path = tmp.path().join("activated-share.json");
         let expected = SharedPayload {
             files: vec![PathBuf::from("/tmp/shared.txt")],
-            url: Some("https://nectarlink.dev".to_string()),
+            url: Some("https://noddy.dev".to_string()),
             text: Some("Hello from share".to_string()),
         };
         std::fs::write(&file_path, serde_json::to_vec(&expected).unwrap()).unwrap();

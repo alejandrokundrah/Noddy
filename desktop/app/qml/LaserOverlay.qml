@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtQuick.Window
-import app.nectarlink
+import app.noddy
 
 // Click-through, always-on-top laser pointer dot controlled by a paired phone
 // in presentation mode (docs/protocol/remote.md).

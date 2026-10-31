@@ -18,7 +18,7 @@
 #>
 param(
     [string]$QtRoot = "C:\Qt\6.12.0",
-    [string]$OutDir = (Join-Path $env:LOCALAPPDATA "Nectarlink\dev\qmake-arm64")
+    [string]$OutDir = (Join-Path $env:LOCALAPPDATA "Noddy\dev\qmake-arm64")
 )
 $ErrorActionPreference = "Stop"
 

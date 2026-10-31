@@ -10,7 +10,7 @@ use std::{
 
 use cxx_qt::{CxxQtType, Threading};
 use cxx_qt_lib::{QHash, QHashPair_QString_QVariant, QList, QString, QVariant};
-use nectarlink_core::{DeviceId, PairingFailure};
+use noddy_core::{DeviceId, PairingFailure};
 
 use crate::{
     core_host, qr,

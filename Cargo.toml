@@ -1,11 +1,11 @@
 [workspace]
 resolver = "3"
 members = [
-    "core/nectarlink-adb",
-    "core/nectarlink-protocol",
-    "core/nectarlink-core",
-    "core/nectarlink-cli",
-    "core/nectarlink-ffi",
+    "core/noddy-adb",
+    "core/noddy-protocol",
+    "core/noddy-core",
+    "core/noddy-cli",
+    "core/noddy-ffi",
     "desktop/app",
     "desktop/vcam",
     "tools/xtask",
@@ -16,8 +16,8 @@ members = [
 version = "0.1.4"
 edition = "2024"
 rust-version = "1.97"
-authors = ["The NectarLink contributors"]
-repository = "https://github.com/thtbee/nectarlink"
+authors = ["The Noddy contributors"]
+repository = "https://github.com/alejandrokundrah/Noddy"
 
 # Each release's name, from a bee's life (0.1 Pollen, …); the release
 # workflow puts it in the release's title.
@@ -25,10 +25,10 @@ repository = "https://github.com/thtbee/nectarlink"
 name = "Pollen"
 
 [workspace.dependencies]
-nectarlink-adb = { path = "core/nectarlink-adb", version = "0.1.4" }
-nectarlink-protocol = { path = "core/nectarlink-protocol", version = "0.1.4" }
-nectarlink-core = { path = "core/nectarlink-core", version = "0.1.4" }
-nectarlink-vcam = { path = "desktop/vcam", version = "0.1.4" }
+noddy-adb = { path = "core/noddy-adb", version = "0.1.4" }
+noddy-protocol = { path = "core/noddy-protocol", version = "0.1.4" }
+noddy-core = { path = "core/noddy-core", version = "0.1.4" }
+noddy-vcam = { path = "desktop/vcam", version = "0.1.4" }
 
 anyhow = "1"
 ciborium = "0.2"

@@ -3,7 +3,7 @@
 The capability matrix decides, for every feature and every paired device,
 whether the feature is **Available**, **Partial**, **Locked** or
 **Unsupported**, and what the user can do about it. Both apps render their UI
-from the matrix, computed by `nectarlink-core` (`features.rs`), so the phone
+from the matrix, computed by `noddy-core` (`features.rs`), so the phone
 and PC agree about what works.
 
 ## Inputs
@@ -150,7 +150,7 @@ Available. Everything else in the matrix is identical on both devices.
 | `media.play_on_phone` | desktop `media.stream`, phone `media.watch`, toggle `media` | None | Available |
 | `media.phone_mic` | phone `mic.stream`, desktop `mic.listen`, toggle `mic` | None | Available |
 
-The full registry is `FEATURES` in `core/nectarlink-core/src/features.rs`.
+The full registry is `FEATURES` in `core/noddy-core/src/features.rs`.
 
 ## UI contract
 

@@ -113,9 +113,9 @@ fn alarm_wav_path() -> Option<PathBuf> {
     use std::os::unix::fs::{DirBuilderExt, MetadataExt};
     let euid = unsafe { libc::geteuid() };
     let dir = if let Some(base) = dirs::runtime_dir().or_else(dirs::cache_dir).filter(|p| p.is_absolute()) {
-        base.join("nectarlink")
+        base.join("noddy")
     } else {
-        std::env::temp_dir().join(format!("nectarlink-{euid}"))
+        std::env::temp_dir().join(format!("noddy-{euid}"))
     };
     let _ = std::fs::DirBuilder::new().recursive(true).mode(0o700).create(&dir);
     let meta = std::fs::symlink_metadata(&dir).ok()?;
@@ -130,7 +130,7 @@ pub fn start_ringing() {
         return;
     }
     let my_gen = GENERATION.fetch_add(1, Ordering::SeqCst).wrapping_add(1);
-    let _ = thread::Builder::new().name("nectarlink-alarm".into()).spawn(move || {
+    let _ = thread::Builder::new().name("noddy-alarm".into()).spawn(move || {
         let Some(wav_path) = alarm_wav_path() else {
             if GENERATION.load(Ordering::SeqCst) == my_gen {
                 RINGING.store(false, Ordering::SeqCst);
@@ -238,7 +238,7 @@ pub fn stop_ringing() {
 /// reaps the player process so no zombie child is left behind.
 #[allow(dead_code)]
 pub fn play_chime() {
-    let _ = thread::Builder::new().name("nectarlink-chime".into()).spawn(|| {
+    let _ = thread::Builder::new().name("noddy-chime".into()).spawn(|| {
         if let Ok(mut child) = Command::new("canberra-gtk-play")
             .args(["-i", "message-new-instant"])
             .stdin(Stdio::null())

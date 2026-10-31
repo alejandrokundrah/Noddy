@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to NectarLink. Versions follow
+All notable changes to Noddy. Versions follow
 [semantic versioning](https://semver.org); before 1.0, a minor version may
 change things that need a step from you, and its notes say so.
 
@@ -16,41 +16,41 @@ change things that need a step from you, and its notes say so.
   headphones, with no mirror window. With Elevated it starts right away;
   otherwise the phone asks once, as for mirroring. The phone goes quiet
   meanwhile and its media volume comes back after
-  ([#94](https://github.com/thtbee/nectarlink/issues/94)).
+  ([#94](https://github.com/alejandrokundrah/Noddy/issues/94)).
 - **Sharing your PC's screen with the phone uses H.265** when both sides
   can, and H.264 otherwise. Thanks to [@AS8148](https://github.com/AS8148)
-  ([#66](https://github.com/thtbee/nectarlink/pull/66)).
+  ([#66](https://github.com/alejandrokundrah/Noddy/pull/66)).
 - **Hardware video for screen sharing on Linux.** With FFmpeg 6 to 9
   installed, sharing the PC's screen and showing a shared screen use the
   GPU (VAAPI, NVIDIA or Intel QSV) and fall back to software H.264 when it
   can't. Thanks to [@AS8148](https://github.com/AS8148)
-  ([#67](https://github.com/thtbee/nectarlink/pull/67)).
+  ([#67](https://github.com/alejandrokundrah/Noddy/pull/67)).
 - **Elevated over USB.** Plug the phone into the PC with USB debugging
   allowed and Elevated starts by itself, without setting up Wireless
-  debugging. It runs while the cable is in. The PC only starts NectarLink's
+  debugging. It runs while the cable is in. The PC only starts Noddy's
   own helper, on the phone that asked
-  ([#70](https://github.com/thtbee/nectarlink/issues/70)).
+  ([#70](https://github.com/alejandrokundrah/Noddy/issues/70)).
 - **Mirroring wakes the phone's screen.** With Elevated, starting mirroring
   from the PC turns the phone's screen on if it's off, so the phone can stay
   in a pocket; a locked phone shows its lock screen in the window
-  ([#82](https://github.com/thtbee/nectarlink/issues/82)).
+  ([#82](https://github.com/alejandrokundrah/Noddy/issues/82)).
 - **Watch the PC and move its pointer at once.** Control PC's Screen tab
   on the phone has a touchpad under the PC's screen (it hides in full
   screen). Thanks to [@waytoo-average](https://github.com/waytoo-average)
-  ([#104](https://github.com/thtbee/nectarlink/pull/104)).
+  ([#104](https://github.com/alejandrokundrah/Noddy/pull/104)).
 - **Call or text a copied number from the command palette.** Copy a phone
   number anywhere, open the palette with its shortcut, and Call and Text
   for that number are at the top
-  ([#83](https://github.com/thtbee/nectarlink/issues/83)).
+  ([#83](https://github.com/alejandrokundrah/Noddy/issues/83)).
 - **Battery alerts for phones that stop charging at 80%.** Settings has a
   **Full charge target**: at **80% (Protect battery)**, the PC tells you the
   phone is charged when it reaches 80% on the charger. Thanks to
   [@Armone0](https://github.com/Armone0)
-  ([#98](https://github.com/thtbee/nectarlink/pull/98)).
+  ([#98](https://github.com/alejandrokundrah/Noddy/pull/98)).
 - **Nicknames for your phones on the PC.** **Set nickname** on Home names a
   paired phone for this PC only; leave it blank to use the phone's own name.
   Thanks to [@Armone0](https://github.com/Armone0)
-  ([#98](https://github.com/thtbee/nectarlink/pull/98)).
+  ([#98](https://github.com/alejandrokundrah/Noddy/pull/98)).
 - **The PC app on Linux**, for Ubuntu 24.04 or newer, Debian 13, Fedora 40
   or newer and other distributions from 2024 on, as a `.deb`, an `.rpm`,
   an AppImage or a tarball. It does what the Windows app does: notifications with
@@ -61,15 +61,15 @@ change things that need a step from you, and its notes say so.
   and KDE, on Wayland and X11, and updates itself. A few features need a
   package or a permission first; the Connection Doctor says which. Thanks
   to Jochen Kirstätter for the port
-  ([#34](https://github.com/thtbee/nectarlink/pull/34),
-  [#38](https://github.com/thtbee/nectarlink/pull/38),
-  [#41](https://github.com/thtbee/nectarlink/pull/41),
-  [#42](https://github.com/thtbee/nectarlink/pull/42),
-  [#43](https://github.com/thtbee/nectarlink/pull/43),
-  [#44](https://github.com/thtbee/nectarlink/pull/44)).
-- **One command installs NectarLink on Linux** with everything it needs,
+  ([#34](https://github.com/alejandrokundrah/Noddy/pull/34),
+  [#38](https://github.com/alejandrokundrah/Noddy/pull/38),
+  [#41](https://github.com/alejandrokundrah/Noddy/pull/41),
+  [#42](https://github.com/alejandrokundrah/Noddy/pull/42),
+  [#43](https://github.com/alejandrokundrah/Noddy/pull/43),
+  [#44](https://github.com/alejandrokundrah/Noddy/pull/44)).
+- **One command installs Noddy on Linux** with everything it needs,
   showing each step:
-  `curl -fsSL https://github.com/thtbee/nectarlink/releases/latest/download/install.sh | sh`.
+  `curl -fsSL https://github.com/alejandrokundrah/Noddy/releases/latest/download/install.sh | sh`.
   It picks the package for your system, checks it against the release's
   sums, installs it with its dependencies, and sets up the phone as webcam,
   the phone as keyboard and mouse, and the firewall for your local network.
@@ -81,7 +81,7 @@ change things that need a step from you, and its notes say so.
   never sent), photos copied on the phone, and notifications. Screen
   mirroring, recordings, PC audio, phone storage and the virtual camera
   aren't there yet, and phones show them as unavailable. Thanks to
-  saivinay1805 ([#24](https://github.com/thtbee/nectarlink/pull/24)).
+  saivinay1805 ([#24](https://github.com/alejandrokundrah/Noddy/pull/24)).
 - **Play on phone.** A switch on Home, under Phone as speaker (and a button
   on the PC's media card), moves what plays on the PC to your phone. The
   switch waits, greyed out, until a video plays. Streaming services that protect their video
@@ -101,10 +101,10 @@ change things that need a step from you, and its notes say so.
 - **Phone as microphone.** In **Settings › Camera & Audio**, Start asks
   your phone for its microphone; tap Start there and the PC plays it into
   an output of your choice. With a virtual audio cable such as VB-CABLE
-  installed, NectarLink plays into it by itself, and its other end is a
+  installed, Noddy plays into it by itself, and its other end is a
   microphone Discord, Zoom, OBS or Teams can pick
-  ([#7](https://github.com/thtbee/nectarlink/issues/7)). A microphone of
-  NectarLink's own, without the cable, needs an audio driver and comes
+  ([#7](https://github.com/alejandrokundrah/Noddy/issues/7)). A microphone of
+  Noddy's own, without the cable, needs an audio driver and comes
   later. A volume slider sets how loud it plays, and the phone evens out a
   quiet voice where it can. The request also shows on the phone's Home,
   with Start and Not now, so it's seen with notifications off; Not now
@@ -117,7 +117,7 @@ has a Stop button. Choosing another
   for that PC. Thanks to Jochen Kirstätter for finding the gaps.
 - **Photo backup.** In **Settings › Files & Sync**, turn on Photo backup
   for a phone and new photos from every album are copied into a folder on
-  the PC (Pictures\NectarLink\<phone> unless you choose another), filed by
+  the PC (Pictures\Noddy\<phone> unless you choose another), filed by
   year and month, with videos if you want them. It only needs the phone's
   photos permission, copies one item at a time so a lost connection costs
   at most one file, and never deletes anything, on the PC or the phone.
@@ -125,30 +125,30 @@ has a Stop button. Choosing another
 - **Instant Hotspot joins the hotspot too.** In **Settings › Devices**,
   choose the phone's hotspot from the Wi-Fi networks this PC has saved.
   When Instant Hotspot on Home turns the phone's hotspot on, the PC joins
-  it by itself. Windows keeps the password; NectarLink never sees it.
+  it by itself. Windows keeps the password; Noddy never sees it.
 - **Turn off the background connection.** In the phone's **Settings ›
-  Background & battery**, or with **Turn off** on its notification. NectarLink
+  Background & battery**, or with **Turn off** on its notification. Noddy
   then connects only while the app is open, and the notification goes
   away. Mirroring, file transfers, the webcam and the mic still finish
   before it disconnects. Thanks to Abinanthan
-  ([#22](https://github.com/thtbee/nectarlink/pull/22)).
-- **Pair a phone with a tablet (or another phone).** In NectarLink's
+  ([#22](https://github.com/alejandrokundrah/Noddy/pull/22)).
+- **Pair a phone with a tablet (or another phone).** In Noddy's
   pairing screen, **Pair a phone or tablet instead** shows a code to scan
   from the other device. Once paired, each shows the other on Home with its
   battery, Ring, Send files and Send clipboard, and a phone's notifications
   show on the tablet; dismiss one there and it goes on the phone too.
 - **The Windows app follows the system language**, and speaks Simplified
   Chinese, by [@zzz1465720680](https://github.com/zzz1465720680)
-  ([#16](https://github.com/thtbee/nectarlink/pull/16),
-  [#17](https://github.com/thtbee/nectarlink/pull/17)), or the language
+  ([#16](https://github.com/alejandrokundrah/Noddy/pull/16),
+  [#17](https://github.com/alejandrokundrah/Noddy/pull/17)), or the language
   you pick in **Settings › General**. Its messages, errors and the
   Features guide are translated too, with the timeline's wording from
   [@zzz1465720680](https://github.com/zzz1465720680)
-  ([#18](https://github.com/thtbee/nectarlink/pull/18)).
+  ([#18](https://github.com/alejandrokundrah/Noddy/pull/18)).
 - **Disconnect from a device without unpairing it.** **Disconnect** on
   Home (**Stop reconnecting** while it isn't connected) keeps a phone or PC
   disconnected, even after a restart, until you tap **Reconnect**
-  ([#48](https://github.com/thtbee/nectarlink/issues/48)).
+  ([#48](https://github.com/alejandrokundrah/Noddy/issues/48)).
 - **The phone's volume buttons control your PC** while it plays music or
   video, in 4% steps, as with KDE Connect. When the phone plays something
   itself, or the PC is paused, they work on the phone as usual. Turn it off
@@ -157,18 +157,18 @@ has a Stop button. Choosing another
 ### Changed
 
 - **Windows 10 looks right.** The window no longer shows Windows 10's own
-  title bar over NectarLink's, Snap and resizing work, and the caption
+  title bar over Noddy's, Snap and resizing work, and the caption
   buttons show. Phone as webcam still needs Windows 11. Thanks to
   [@waytoo-average](https://github.com/waytoo-average)
-  ([#103](https://github.com/thtbee/nectarlink/pull/103)).
+  ([#103](https://github.com/alejandrokundrah/Noddy/pull/103)).
 - **Send to your phone from more Linux file managers.** Right-click files
   or folders in Nemo (Cinnamon) or Thunar (XFCE) as well as GNOME Files,
   Dolphin and Caja, and folders now work in all of them
-  ([#49](https://github.com/thtbee/nectarlink/issues/49)).
+  ([#49](https://github.com/alejandrokundrah/Noddy/issues/49)).
 - **Setup on Windows asks about the desktop shortcut.** Untick **Add a
   desktop shortcut** to skip it. Updates leave it as you had it, so one
   you deleted no longer comes back
-  ([#102](https://github.com/thtbee/nectarlink/issues/102)).
+  ([#102](https://github.com/alejandrokundrah/Noddy/issues/102)).
 - **Files received on Windows are marked as from another device,** the way
   a browser marks a download, so Windows checks a program with SmartScreen
   before it runs and Office opens documents in Protected View.
@@ -176,10 +176,10 @@ has a Stop button. Choosing another
   the phone checks the app in front every 15 seconds instead of several
   times a second, and checks again as soon as the screen turns on. By
   [@alexfoxtm](https://github.com/alexfoxtm)
-  ([#61](https://github.com/thtbee/nectarlink/pull/61)).
+  ([#61](https://github.com/alejandrokundrah/Noddy/pull/61)).
 - **The phone app starts about twice as fast right after an update.**
   Android compiles an app installed outside the Play Store only during
-  idle maintenance, often days later. With Elevated set up, NectarLink
+  idle maintenance, often days later. With Elevated set up, Noddy
   asks for that compile a couple of minutes after each update.
 - **Mirroring and control from the PC use less CPU.** Each mirrored frame
   takes about 14% less work to draw, and permission checks for every
@@ -196,7 +196,7 @@ has a Stop button. Choosing another
 - **The PC's window opens where you left it.** It comes back on the same
   monitor, at the same size and place, and maximized if it was. If that
   monitor is gone or smaller, it fits the window on screen. Thanks to
-  Jochen Kirstätter ([#26](https://github.com/thtbee/nectarlink/issues/26)).
+  Jochen Kirstätter ([#26](https://github.com/alejandrokundrah/Noddy/issues/26)).
 
 ### Fixed
 
@@ -205,7 +205,7 @@ has a Stop button. Choosing another
   dropped in the mirror window and in Type on phone. Ctrl+C, Ctrl+X and
   Ctrl+A now copy, cut and select all on the phone, too; what you copy
   there reaches the PC with the clipboard
-  ([#107](https://github.com/thtbee/nectarlink/issues/107)).
+  ([#107](https://github.com/alejandrokundrah/Noddy/issues/107)).
 - **A big phone folder showed only part of its files** in File Explorer (a
   camera folder of thousands of photos, say). Folders now come in pages, so
   every file shows, and listing one no longer holds up the connection.
@@ -216,79 +216,79 @@ has a Stop button. Choosing another
   Elevated, the PC's keys reach the phone through a virtual keyboard that
   stayed connected, so Android hid the on-screen keyboard in every app. It
   now goes away 10 seconds after the last key from the PC
-  ([#93](https://github.com/thtbee/nectarlink/issues/93)).
+  ([#93](https://github.com/alejandrokundrah/Noddy/issues/93)).
 - **Renaming the phone reached the PC only after the app restarted.** It
-  now shows on the PC right away ([#87](https://github.com/thtbee/nectarlink/issues/87)).
+  now shows on the PC right away ([#87](https://github.com/alejandrokundrah/Noddy/issues/87)).
 - **The phone's folder in File Explorer said the network was unavailable**
   when the phone had turned it away. It now says access is denied, and a
-  notification on the PC says what to turn on ([#88](https://github.com/thtbee/nectarlink/issues/88)).
+  notification on the PC says what to turn on ([#88](https://github.com/alejandrokundrah/Noddy/issues/88)).
 - **The phone rang twice during a call** while Phone as speaker was on:
   the PC's ringtone was played on the phone as well.
-- **NectarLink never appeared in the Windows Share sheet,** even with
+- **Noddy never appeared in the Windows Share sheet,** even with
   Developer Mode on, because its package didn't register. It does now,
   and if Windows refuses it, `sparse-package.log` in the install folder
-  says why ([#84](https://github.com/thtbee/nectarlink/issues/84)).
+  says why ([#84](https://github.com/alejandrokundrah/Noddy/issues/84)).
 - **The Calls page showed "PC call audio connected"** on Windows, sometimes
   with a headset's name. Windows doesn't let apps carry a phone call's
   audio, so the panel is gone there; call audio stays on the phone
-  ([#86](https://github.com/thtbee/nectarlink/issues/86)).
+  ([#86](https://github.com/alejandrokundrah/Noddy/issues/86)).
 - **A Phone Status widget was listed for the Widgets board** but never
   showed anything. It's removed until a working one is built
-  ([#85](https://github.com/thtbee/nectarlink/issues/85)).
+  ([#85](https://github.com/alejandrokundrah/Noddy/issues/85)).
 - **Find my phone could ring too quietly to hear** when the alarm volume
   was low. It now rings at full alarm volume and puts your volume back
   afterwards, even if the app is closed mid-ring. Do Not Disturb still
   decides whether it sounds. By [@alexfoxtm](https://github.com/alexfoxtm)
-  ([#56](https://github.com/thtbee/nectarlink/issues/56),
-  [#58](https://github.com/thtbee/nectarlink/pull/58)).
+  ([#56](https://github.com/alejandrokundrah/Noddy/issues/56),
+  [#58](https://github.com/alejandrokundrah/Noddy/pull/58)).
 - **Call controls on the PC went to the wrong call** when a second call
   came in during one: hanging up or holding from the PC acted on the
   waiting call. They now stay on the call in progress. By
   [@alexfoxtm](https://github.com/alexfoxtm)
-  ([#59](https://github.com/thtbee/nectarlink/pull/59)).
+  ([#59](https://github.com/alejandrokundrah/Noddy/pull/59)).
 - **A resumed transfer showed as paused** on the sending side until the
   other device answered.
 - **Wake when PC is nearby** never found the PC: the Windows app didn't
   start its Bluetooth beacon, and the phone looked for the wrong bytes in
   it. Both are fixed, and the Linux app broadcasts the beacon too
-  ([#47](https://github.com/thtbee/nectarlink/issues/47)).
+  ([#47](https://github.com/alejandrokundrah/Noddy/issues/47)).
 - **Typing on the PC from the phone lost letters** when voice typing
   rewrote what it had typed: the PC turned away the burst of backspaces
   as too fast. The PC now takes typing at full speed, and the phone
   resends anything an older PC turns away
-  ([#52](https://github.com/thtbee/nectarlink/issues/52)).
+  ([#52](https://github.com/alejandrokundrah/Noddy/issues/52)).
 - **Phone as webcam never showed up in other apps.** Windows couldn't
-  start NectarLink's camera, though Settings said it was ready. It now
-  appears as **NectarLink Webcam** in Zoom, Teams, OBS, the Camera app
+  start Noddy's camera, though Settings said it was ready. It now
+  appears as **Noddy Webcam** in Zoom, Teams, OBS, the Camera app
   and others. Frames also stay on the graphics card on the way, and the
   phone sends H.265 when the PC can decode it, with H.264 otherwise.
   Thanks to [@AS8148](https://github.com/AS8148)
-  ([#51](https://github.com/thtbee/nectarlink/pull/51)).
+  ([#51](https://github.com/alejandrokundrah/Noddy/pull/51)).
 - **A file being sent from the PC showed up twice on Home**, once under
   Waiting to send with a bar that kept flickering, and again under
   Transfers. Each file now has one row with one smooth bar that shows
   the percent, sizes, speed and time left.
-- With NectarLink in two profiles on one phone (a work profile, or a
+- With Noddy in two profiles on one phone (a work profile, or a
   cloned app), only one of them could connect over USB, and the PC kept
   offering to pair the other. Each profile now connects over USB, and the
   phone's name says which one it is, such as "Pixel 9a (Work)"
-  ([#25](https://github.com/thtbee/nectarlink/issues/25)).
+  ([#25](https://github.com/alejandrokundrah/Noddy/issues/25)).
 - Plugging the phone in while it's connected over Wi-Fi moves the
   connection to USB sooner, and reconnecting after the phone restarts no
   longer tries a stale USB address first. PC audio sent to the phone
   drops a moment of sound under load rather than holding up everything
   else. Thanks to Jochen Kirstätter
-  ([#23](https://github.com/thtbee/nectarlink/pull/23)).
+  ([#23](https://github.com/alejandrokundrah/Noddy/pull/23)).
 - Copying text on the phone that also carried a link to a file sent the
   wrong thing to the PC, or treated it as an image. The text now comes
   through as text, and files that aren't images aren't sent as images.
   Thanks to Jochen Kirstätter
-  ([#27](https://github.com/thtbee/nectarlink/issues/27)).
+  ([#27](https://github.com/alejandrokundrah/Noddy/issues/27)).
 - The Timeline showed thumbnails only for photos saved from the phone,
   and some of those came out empty. Images you send or receive now get
   one too, files without one get an icon for their type, and Copy works
   for them. Thanks to Jochen Kirstätter
-  ([#28](https://github.com/thtbee/nectarlink/issues/28)).
+  ([#28](https://github.com/alejandrokundrah/Noddy/issues/28)).
 - Turning on LocalSend closed the Windows app.
 - Play on phone froze on the phone when the player's window was
   minimized, and showed the whole screen when it couldn't find the
@@ -308,8 +308,8 @@ has a Stop button. Choosing another
 - The PC's log filled with network adapter warnings and kept only a few
   hours.
 - From an audit by [@kunal4060](https://github.com/kunal4060)
-  ([#72](https://github.com/thtbee/nectarlink/pull/72) to
-  [#79](https://github.com/thtbee/nectarlink/pull/79)):
+  ([#72](https://github.com/alejandrokundrah/Noddy/pull/72) to
+  [#79](https://github.com/alejandrokundrah/Noddy/pull/79)):
   - **Text typed in one conversation could be sent in another**: the
     message box kept it when you switched. Each conversation now keeps its
     own draft.
@@ -356,23 +356,23 @@ and the fixes for what people ran into in the first days after launch.
 
 | Download | For | Needs |
 |---|---|---|
-| [Nectarlink-0.1.4-x64-setup.exe](https://github.com/thtbee/nectarlink/releases/download/v0.1.4/Nectarlink-0.1.4-x64-setup.exe) | Windows | Windows 11, 64-bit (Windows 10 works, without Phone as webcam) |
-| [Nectarlink-0.1.4-android.apk](https://github.com/thtbee/nectarlink/releases/download/v0.1.4/Nectarlink-0.1.4-android.apk) | Android | Android 8.0 or newer |
+| [Noddy-0.1.4-x64-setup.exe](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.4/Noddy-0.1.4-x64-setup.exe) | Windows | Windows 11, 64-bit (Windows 10 works, without Phone as webcam) |
+| [Noddy-0.1.4-android.apk](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.4/Noddy-0.1.4-android.apk) | Android | Android 8.0 or newer |
 
-Both are listed with their SHA-256 hashes in [SHA256SUMS.txt](https://github.com/thtbee/nectarlink/releases/download/v0.1.4/SHA256SUMS.txt).
+Both are listed with their SHA-256 hashes in [SHA256SUMS.txt](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.4/SHA256SUMS.txt).
 Installed copies update themselves.
 
 ### New
 
 - **Pause for banking apps.** Many banking apps won't open while Developer
   options, debugging or an accessibility service is on. Choose them in
-  **Settings › Control from your PC**: while one is open, NectarLink turns
+  **Settings › Control from your PC**: while one is open, Noddy turns
   those off, and turns back on exactly what was on when you leave, even after
   a crash or a restart. A shortcut can pause first for apps that check as
   they open.
 - **Simplified Chinese** for the Android app, by
   [@zzz1465720680](https://github.com/zzz1465720680)
-  ([#13](https://github.com/thtbee/nectarlink/pull/13)). It follows the
+  ([#13](https://github.com/alejandrokundrah/Noddy/pull/13)). It follows the
   phone's language.
 - **Turn the phone's screen off from an app window**, as screen mirroring
   could: the phone stays awake with its screen dark, and the apps keep
@@ -386,12 +386,12 @@ Installed copies update themselves.
   troubleshooting explain what to do when Play Protect blocks the APK with
   no **Install anyway** button, as it now does in India and many other
   countries, by [@eren-998](https://github.com/eren-998)
-  ([#11](https://github.com/thtbee/nectarlink/pull/11)). The README points
+  ([#11](https://github.com/alejandrokundrah/Noddy/pull/11)). The README points
   there from the downloads.
 
 ### Changed
 
-- **Root is only used when you choose it.** On a rooted phone, NectarLink
+- **Root is only used when you choose it.** On a rooted phone, Noddy
   asked for root every time it started and ran its Elevated helper as root.
   Now nothing asks for root unless you pick **Use root**, and the helper runs
   as the shell user either way.
@@ -404,7 +404,7 @@ Installed copies update themselves.
   identity. The two took the PC from each other every few seconds: windows
   and mirroring dropped or couldn't start, and the PC showed the phone
   connecting over and over. It now starts once.
-- **Windows 10.** NectarLink and its installer start on Windows 10. They
+- **Windows 10.** Noddy and its installer start on Windows 10. They
   failed right away with "Entry Point Not Found" because the Windows 11-only
   virtual camera was required at startup. On Windows 10, everything works
   except Phone as webcam, which needs Windows 11.
@@ -432,7 +432,7 @@ Installed copies update themselves.
   frame in about 47 ms, over the 33 ms a frame has at 30 fps, so frames were
   dropped. It now decodes on the GPU when there is one and converts on several
   cores, about 19 ms a frame
-  ([#6](https://github.com/thtbee/nectarlink/issues/6)).
+  ([#6](https://github.com/alejandrokundrah/Noddy/issues/6)).
 - **Webcam resolution.** The resolution buttons on the PC and the phone
   follow what's actually streaming, whichever side changed it; held upright,
   the phone's showed none selected. 4K is offered only when the camera in
@@ -443,7 +443,7 @@ Installed copies update themselves.
     languages work while you control the phone. Only plain key presses got
     through before.
   - **Win+V** pastes. Windows marks an item picked from clipboard history as
-    one for clipboard watchers to skip, and NectarLink skipped it even when
+    one for clipboard watchers to skip, and Noddy skipped it even when
     you asked to paste it.
   - Pasting is instant instead of typing out a letter at a time, and a pasted
     line break no longer presses Enter, which sent chat messages early.
@@ -469,7 +469,7 @@ Installed copies update themselves.
   force stop it, or when Phone as webcam's preview comes back (the same fix
   covers the QR scanner and Continuity Camera).
 - Android: changing the theme in Settings no longer jumps back to Home
-  ([#8](https://github.com/thtbee/nectarlink/issues/8)).
+  ([#8](https://github.com/alejandrokundrah/Noddy/issues/8)).
 - Android: on Hive, the category chips at the top of Settings and the
   Home/Settings bar are solid, so the honeycomb and the list no longer show
   through them.
@@ -483,8 +483,8 @@ Installed copies update themselves.
 
 To [@zzz1465720680](https://github.com/zzz1465720680) for the Simplified
 Chinese translation and the reports in
-[#6](https://github.com/thtbee/nectarlink/issues/6) and
-[#8](https://github.com/thtbee/nectarlink/issues/8),
+[#6](https://github.com/alejandrokundrah/Noddy/issues/6) and
+[#8](https://github.com/alejandrokundrah/Noddy/issues/8),
 [@eren-998](https://github.com/eren-998) for the Play Protect guide,
 [@jochenkirstaetter](https://github.com/jochenkirstaetter) for testing on a
 Pixel and the Linux port in progress, and everyone who reported problems on
@@ -499,12 +499,12 @@ slow or unsteady connections and show how far they are.
 
 | Download | For | Needs |
 |---|---|---|
-| [Nectarlink-0.1.3-x64-setup.exe](https://github.com/thtbee/nectarlink/releases/download/v0.1.3/Nectarlink-0.1.3-x64-setup.exe) | Windows | Windows 11, 64-bit |
-| [Nectarlink-0.1.3-android.apk](https://github.com/thtbee/nectarlink/releases/download/v0.1.3/Nectarlink-0.1.3-android.apk) | Android | Android 8.0 or newer |
+| [Noddy-0.1.3-x64-setup.exe](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.3/Noddy-0.1.3-x64-setup.exe) | Windows | Windows 11, 64-bit |
+| [Noddy-0.1.3-android.apk](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.3/Noddy-0.1.3-android.apk) | Android | Android 8.0 or newer |
 
-Both are listed with their SHA-256 hashes in [SHA256SUMS.txt](https://github.com/thtbee/nectarlink/releases/download/v0.1.3/SHA256SUMS.txt).
+Both are listed with their SHA-256 hashes in [SHA256SUMS.txt](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.3/SHA256SUMS.txt).
 Installed copies update themselves. If **Update** in 0.1.2 or earlier closes
-NectarLink and nothing happens, install this version from the link above
+Noddy and nothing happens, install this version from the link above
 once; updates after it work from the app.
 
 ### New
@@ -527,13 +527,13 @@ once; updates after it work from the app.
 
 ### Fixed
 
-- **Updating the Windows app.** Clicking **Update** closed NectarLink right
+- **Updating the Windows app.** Clicking **Update** closed Noddy right
   away, and the download that followed in the background could time out on a
   slow connection to GitHub's download server. The update then failed with no
-  sign of it, and NectarLink reopened only minutes later. Now NectarLink stays
+  sign of it, and Noddy reopened only minutes later. Now Noddy stays
   open while it downloads, shows the progress in **Settings › Connection &
   About**, resumes a download that was cut off, and closes only once the
-  update is downloaded and checked. If an update doesn't install, NectarLink
+  update is downloaded and checked. If an update doesn't install, Noddy
   reopens and says so.
 - Slow responses from GitHub no longer fail update checks or downloads: the
   Windows app waits longer and tries again.
@@ -555,25 +555,25 @@ an update or a restart.
 
 | Download | For | Needs |
 |---|---|---|
-| [Nectarlink-0.1.2-x64-setup.exe](https://github.com/thtbee/nectarlink/releases/download/v0.1.2/Nectarlink-0.1.2-x64-setup.exe) | Windows | Windows 11, 64-bit |
-| [Nectarlink-0.1.2-android.apk](https://github.com/thtbee/nectarlink/releases/download/v0.1.2/Nectarlink-0.1.2-android.apk) | Android | Android 8.0 or newer |
+| [Noddy-0.1.2-x64-setup.exe](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.2/Noddy-0.1.2-x64-setup.exe) | Windows | Windows 11, 64-bit |
+| [Noddy-0.1.2-android.apk](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.2/Noddy-0.1.2-android.apk) | Android | Android 8.0 or newer |
 
-Both are listed with their SHA-256 hashes in [SHA256SUMS.txt](https://github.com/thtbee/nectarlink/releases/download/v0.1.2/SHA256SUMS.txt).
+Both are listed with their SHA-256 hashes in [SHA256SUMS.txt](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.2/SHA256SUMS.txt).
 Installed copies update themselves.
 
 ### Fixed
 
 - **The phone reconnects after an update or a restart.** Android closes an
-  app while it updates, and nothing brought NectarLink's connection back until
+  app while it updates, and nothing brought Noddy's connection back until
   the app was opened again, so the PC showed the phone as gone. The connection
   now comes back on its own, after an update and after the phone restarts. A
   notification says the update is done; tapping it opens the app.
 - **Check for updates in the phone's Settings shows what it found**: that
-  NectarLink is up to date, or the update with its **Update** button and
+  Noddy is up to date, or the update with its **Update** button and
   progress, or why it couldn't check. Before, the button greyed out and nothing
   appeared.
 - **Allowing installs continues the update.** When Android first asks to let
-  NectarLink install updates, coming back from that screen now carries on with
+  Noddy install updates, coming back from that screen now carries on with
   the update instead of staying on **Allow**.
 - **Phone downloads resume.** A dropped or changed connection no longer fails
   the update: the download waits for the network and continues where it
@@ -583,7 +583,7 @@ Installed copies update themselves.
   leaves the update ready to install instead of reporting an error.
 - **The PC app comes to the front after updating.** It reopened behind other
   windows; now it comes forward and a notification says it's updated. The same
-  fix brings the window forward when NectarLink is opened while already
+  fix brings the window forward when Noddy is opened while already
   running.
 
 ## 0.1.1 (2026-10-15)
@@ -595,21 +595,21 @@ back permissions, and Graphite as the phone's default look.
 
 | Download | For | Needs |
 |---|---|---|
-| [Nectarlink-0.1.1-x64-setup.exe](https://github.com/thtbee/nectarlink/releases/download/v0.1.1/Nectarlink-0.1.1-x64-setup.exe) | Windows | Windows 11, 64-bit |
-| [Nectarlink-0.1.1-android.apk](https://github.com/thtbee/nectarlink/releases/download/v0.1.1/Nectarlink-0.1.1-android.apk) | Android | Android 8.0 or newer |
+| [Noddy-0.1.1-x64-setup.exe](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.1/Noddy-0.1.1-x64-setup.exe) | Windows | Windows 11, 64-bit |
+| [Noddy-0.1.1-android.apk](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.1/Noddy-0.1.1-android.apk) | Android | Android 8.0 or newer |
 
-Both are listed with their SHA-256 hashes in [SHA256SUMS.txt](https://github.com/thtbee/nectarlink/releases/download/v0.1.1/SHA256SUMS.txt).
+Both are listed with their SHA-256 hashes in [SHA256SUMS.txt](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.1/SHA256SUMS.txt).
 Installed copies update themselves.
 
 ### Changed
 
-- **Sharing from the phone sends right away.** Choosing NectarLink in the
+- **Sharing from the phone sends right away.** Choosing Noddy in the
   Android share sheet starts the transfer immediately, with no Flick to send
   card or Undo countdown. With more than one PC connected, you pick one first.
   Progress shows in a notification with a **Cancel** button, followed by a
   **Sent to** confirmation that clears itself.
 - **Files shared from the phone no longer open on the PC by themselves.** A
-  shared photo or document is saved to `Downloads\Nectarlink` and announced in
+  shared photo or document is saved to `Downloads\Noddy` and announced in
   a notification. To have it open in its default app as it arrives, turn on
   **Settings › Files & Sync › Open files shared from the phone** (off by
   default).
@@ -633,8 +633,8 @@ Installed copies update themselves.
 
 ## 0.1.0 "Pollen" (2026-10-14)
 
-The first public release of NectarLink: the Windows app, the Android app and
-the `nectarlink` command-line client. NectarLink connects an Android phone and
+The first public release of Noddy: the Windows app, the Android app and
+the `noddy` command-line client. Noddy connects an Android phone and
 a Windows 11 PC directly over your network or a USB cable, end-to-end
 encrypted, with no account and no cloud service.
 
@@ -642,10 +642,10 @@ encrypted, with no account and no cloud service.
 
 | Download | For | Needs |
 |---|---|---|
-| [Nectarlink-0.1.0-x64-setup.exe](https://github.com/thtbee/nectarlink/releases/download/v0.1.0/Nectarlink-0.1.0-x64-setup.exe) | Windows | Windows 11, 64-bit |
-| [Nectarlink-0.1.0-android.apk](https://github.com/thtbee/nectarlink/releases/download/v0.1.0/Nectarlink-0.1.0-android.apk) | Android | Android 8.0 or newer |
+| [Noddy-0.1.0-x64-setup.exe](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.0/Noddy-0.1.0-x64-setup.exe) | Windows | Windows 11, 64-bit |
+| [Noddy-0.1.0-android.apk](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.0/Noddy-0.1.0-android.apk) | Android | Android 8.0 or newer |
 
-Both are listed with their SHA-256 hashes in [SHA256SUMS.txt](https://github.com/thtbee/nectarlink/releases/download/v0.1.0/SHA256SUMS.txt).
+Both are listed with their SHA-256 hashes in [SHA256SUMS.txt](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.0/SHA256SUMS.txt).
 
 The Android app is signed with the project's release key. The Windows
 installer isn't code-signed yet, so SmartScreen asks once: choose **More
@@ -656,7 +656,7 @@ info**, then **Run anyway**.
 - **Installer.** A setup window of its own, light or dark to match Windows.
   One click installs, with one administrator prompt. Setup adds the Windows
   Firewall rule for local connections, Start menu and desktop shortcuts,
-  **Send to** in File Explorer and the update task, and starts NectarLink
+  **Send to** in File Explorer and the update task, and starts Noddy
   with Windows. **What this installs** on the
   first screen lists all of it. The last screen shows a QR code that opens the
   Android app's download page.
@@ -670,7 +670,7 @@ info**, then **Run anyway**.
 - **Features Guide** in both apps: every feature, whether it works with your
   paired phone right now, what would enable it, and a **Show me** button that
   goes to its control.
-- **Pairing** by QR code (from the NectarLink app or any camera app), by
+- **Pairing** by QR code (from the Noddy app or any camera app), by
   picking a nearby device and comparing a 6-digit code, or automatically over
   a USB cable. Pairing links opened from other apps ask before pairing.
 - **Power levels** on Android:
@@ -768,7 +768,7 @@ info**, then **Run anyway**.
 
 ### Camera and sound
 
-- **Phone as a webcam** through the NectarLink Webcam virtual camera, in
+- **Phone as a webcam** through the Noddy Webcam virtual camera, in
   Zoom, Teams, Meet, OBS and the Camera app, at up to 4K where the phone
   supports it, with lens and zoom controls.
 - **Continuity Camera**: take a photo or scan a document with the phone, with
@@ -803,7 +803,7 @@ info**, then **Run anyway**.
 - **Nectar Island**: an optional pill at the top of the screen for calls,
   transfers, media, timers and alerts.
 - The system tray and a taskbar Jump List.
-- Automations: trigger-action rules, and `nectarlink notify-when` for an
+- Automations: trigger-action rules, and `noddy notify-when` for an
   alert on the phone when a long task finishes.
 - An opt-in local HTTP API on `127.0.0.1` with a bearer token, and a PowerToys
   Command Palette extension.
@@ -818,7 +818,7 @@ info**, then **Run anyway**.
 
 ### Command-line client
 
-`nectarlink` pairs (`pair`, `join`, `nearby`), lists and unpairs devices,
+`noddy` pairs (`pair`, `join`, `nearby`), lists and unpairs devices,
 shows what works with a device (`caps`) and what it may do (`toggle`,
 `toggles`), sends files and clipboard content, rings a device, controls
 media, acts on notifications, and can stand in for a phone (`--as-phone`) for
@@ -827,7 +827,7 @@ testing. It builds on Windows and Linux.
 ### Privacy and security
 
 - Local-first: devices connect directly over the local network or USB.
-  Nothing passes through a NectarLink server, and there is no account.
+  Nothing passes through a Noddy server, and there is no account.
 - Every connection is QUIC with TLS 1.3, authenticated with Ed25519 device
   keys exchanged at pairing. Keys are protected by Windows DPAPI and the
   Android Keystore.
@@ -867,4 +867,4 @@ testing. It builds on Windows and Linux.
 - Windows adds its own copy button to some code notifications, so a popup can
   show two.
 
-See [Known limitations](https://github.com/thtbee/nectarlink/blob/main/docs/guide/known-limitations.md) for the details.
+See [Known limitations](https://github.com/alejandrokundrah/Noddy/blob/main/docs/guide/known-limitations.md) for the details.

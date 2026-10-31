@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtQuick.Effects
-import app.nectarlink
+import app.noddy
 
 // One file transfer: direction, name, progress, speed and time left, and
 // what can be done with it (cancel while it runs; open or show what arrived).

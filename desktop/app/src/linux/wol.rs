@@ -5,7 +5,7 @@ use std::net::Ipv4Addr;
 use std::path::Path;
 use std::process::Command;
 
-use nectarlink_core::PcWakeInfo;
+use noddy_core::PcWakeInfo;
 
 const ARPHRD_ETHER: &str = "1";
 const SIOCETHTOOL: libc::c_ulong = 0x8946;

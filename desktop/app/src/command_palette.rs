@@ -12,7 +12,7 @@
 use crate::i18n::tr;
 use std::{collections::HashSet, path::PathBuf, sync::Mutex, time::Instant};
 
-use nectarlink_core::{ClipboardItemKind, DeviceId, LinkState, PhoneToggleValue, TimelineKind};
+use noddy_core::{ClipboardItemKind, DeviceId, LinkState, PhoneToggleValue, TimelineKind};
 use serde_json::{Value, json};
 
 use crate::{
@@ -403,7 +403,7 @@ fn open_voice_recordings(device: DeviceId) {
         core_host::host().hub.read(|s| s.name_of(&device)).unwrap_or_else(|| "your phone".into());
     show_message(tr!(
         "CommandPalette",
-        "Opened Recordings folder. Start a voice note in NectarLink on %1 to send it here.",
+        "Opened Recordings folder. Start a voice note in Noddy on %1 to send it here.",
         phone_name
     ));
 }
@@ -605,19 +605,19 @@ fn build_candidates() -> Vec<PaletteCandidate> {
     });
     let (link_title, link_sub, link_badge, link_keywords) = match crate::links::handoff_from_clipboard() {
         Some(h) => match h.kind {
-            nectarlink_core::HandoffKind::MapLocation => (
+            noddy_core::HandoffKind::MapLocation => (
                 tr!("CommandPalette", "Open copied location in Maps on phone"),
                 h.label,
                 tr!("CommandPalette", "Handoff · Map"),
                 "open copied link map location address directions geo handoff phone".to_owned(),
             ),
-            nectarlink_core::HandoffKind::VideoLink => (
+            noddy_core::HandoffKind::VideoLink => (
                 tr!("CommandPalette", "Continue copied video on phone"),
                 h.label,
                 tr!("CommandPalette", "Handoff · Video"),
                 "open copied link video youtube timestamp watch continue handoff phone".to_owned(),
             ),
-            nectarlink_core::HandoffKind::WebLink => (
+            noddy_core::HandoffKind::WebLink => (
                 tr!("CommandPalette", "Open copied link on phone"),
                 h.label,
                 "Handoff".to_owned(),
@@ -689,7 +689,7 @@ fn build_candidates() -> Vec<PaletteCandidate> {
             },
             subtitle: tr!(
                 "CommandPalette",
-                "Stream %1's camera into the NectarLink virtual webcam",
+                "Stream %1's camera into the Noddy virtual webcam",
                 dev_name
             ),
             category: "Actions".into(),
@@ -1104,9 +1104,9 @@ fn build_candidates() -> Vec<PaletteCandidate> {
         }
 
         let timeline_entries = node
-            .timeline_page(&nectarlink_core::TimelineQuery {
+            .timeline_page(&noddy_core::TimelineQuery {
                 limit: 20,
-                ..nectarlink_core::TimelineQuery::default()
+                ..noddy_core::TimelineQuery::default()
             })
             .map(|p| p.entries)
             .unwrap_or_default();
@@ -1156,8 +1156,8 @@ fn build_candidates() -> Vec<PaletteCandidate> {
 /// list: copy a number anywhere, open the palette with its shortcut, press
 /// Enter (#83). Nothing when the clipboard holds no number or no phone is paired.
 fn clipboard_number_candidates(candidates: &[PaletteCandidate], clip: &str) -> Vec<PaletteCandidate> {
-    let Some(number) = nectarlink_core::classify_clip(clip)
-        .filter(|s| s.kind == nectarlink_core::ClipKind::PhoneNumber)
+    let Some(number) = noddy_core::classify_clip(clip)
+        .filter(|s| s.kind == noddy_core::ClipKind::PhoneNumber)
         .map(|s| s.target)
     else {
         return Vec::new();

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtQuick.Shapes
-import app.nectarlink
+import app.noddy
 
 // A QR code from Pairing.qrPath: vector modules on a white tile with the
 // quiet zone scanners need. Always dark on light, in every theme, so it

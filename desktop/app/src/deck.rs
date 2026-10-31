@@ -12,7 +12,7 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use nectarlink_core::{
+use noddy_core::{
     DeckAction, DeckConfig, DeckPageConfig, DeckState, DeckTileConfig, DeviceId, KeyMod, deck_colors,
     deck_icons, deck_kinds,
 };
@@ -47,9 +47,9 @@ fn sample_live_state() -> DeckState {
     let playing = MEDIA_PLAYING.load(Ordering::Relaxed);
     let mut output_devices = win::audio::output_devices();
     if crate::pc_audio_stream::is_enabled() {
-        output_devices.push(nectarlink_core::AudioOutputDevice {
-            id: "nectarlink:phone_speaker".to_owned(),
-            name: "Phone speaker (NectarLink)".to_owned(),
+        output_devices.push(noddy_core::AudioOutputDevice {
+            id: "noddy:phone_speaker".to_owned(),
+            name: "Phone speaker (Noddy)".to_owned(),
             is_default: false,
         });
     }
@@ -188,7 +188,7 @@ pub async fn refresh_live_state() {
 }
 
 /// Called by `crate::media::local_changed` when the PC's SMTC media sessions change.
-pub fn on_local_media_changed(players: &[nectarlink_core::MediaPlayer]) {
+pub fn on_local_media_changed(players: &[noddy_core::MediaPlayer]) {
     HAS_MEDIA_SESSION.store(!players.is_empty(), Ordering::Relaxed);
     let playing = players.iter().any(|p| p.playing);
     MEDIA_PLAYING.store(playing, Ordering::Relaxed);
@@ -245,10 +245,10 @@ pub fn handle_press(_peer: &DeviceId, tile_id: &str) -> Result<(), String> {
 /// (`Platform::set_pc_audio`).
 pub fn handle_set_audio(peer: &DeviceId, volume: Option<u8>, muted: Option<bool>) -> Result<(), String> {
     if let Some(level) = volume {
-        if level == nectarlink_core::deck::PHONE_SPEAKER_OFF
-            || level == nectarlink_core::deck::PHONE_SPEAKER_ON
+        if level == noddy_core::deck::PHONE_SPEAKER_OFF
+            || level == noddy_core::deck::PHONE_SPEAKER_ON
         {
-            let on = level == nectarlink_core::deck::PHONE_SPEAKER_ON;
+            let on = level == noddy_core::deck::PHONE_SPEAKER_ON;
             crate::pc_audio_stream::set_target(on.then_some(*peer));
             crate::pc_audio_stream::set_enabled(on);
             let dir = &core_host::host().data_dir;
@@ -381,7 +381,7 @@ pub fn add_page(name: &str) -> String {
     let page_name = if trimmed.is_empty() { "New Page" } else { trimmed };
     let mut created_id = String::new();
     commit_config(|cfg| {
-        if cfg.pages.len() >= nectarlink_core::MAX_DECK_PAGES {
+        if cfg.pages.len() >= noddy_core::MAX_DECK_PAGES {
             return;
         }
         let ids: Vec<String> = cfg.pages.iter().map(|p| p.id.clone()).collect();
@@ -572,7 +572,7 @@ pub fn save_tile(
             return;
         };
         if tile_id.is_empty() {
-            if page.tiles.len() >= nectarlink_core::MAX_DECK_TILES_PER_PAGE {
+            if page.tiles.len() >= noddy_core::MAX_DECK_TILES_PER_PAGE {
                 err = Some(tr!("Deck", "This page already has the maximum number of tiles (24)."));
                 return;
             }

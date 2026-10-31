@@ -20,18 +20,18 @@ if (-not $Setup) {
     if ($match) { $Setup = $match.FullName }
 }
 if (-not $Setup -or -not (Test-Path $Setup)) { throw "no setup installer found to test under target\package" }
-$dir = Join-Path $env:ProgramFiles 'Nectarlink'
-$exe = Join-Path $dir 'nectarlink-desktop.exe'
-$uninstallKey = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Nectarlink'
-$shortcut = Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs\Nectarlink.lnk'
-$desktopShortcut = Join-Path $env:PUBLIC 'Desktop\NectarLink.lnk'
-$data = if ($env:RUNNER_TEMP) { Join-Path $env:RUNNER_TEMP 'nectarlink-smoke' } else { Join-Path $env:TEMP 'nectarlink-smoke' }
+$dir = Join-Path $env:ProgramFiles 'Noddy'
+$exe = Join-Path $dir 'noddy-desktop.exe'
+$uninstallKey = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Noddy'
+$shortcut = Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs\Noddy.lnk'
+$desktopShortcut = Join-Path $env:PUBLIC 'Desktop\Noddy.lnk'
+$data = if ($env:RUNNER_TEMP) { Join-Path $env:RUNNER_TEMP 'noddy-smoke' } else { Join-Path $env:TEMP 'noddy-smoke' }
 
 function Check($what, [bool]$ok) {
     if (-not $ok) { throw "FAILED: $what" }
     Write-Host "ok: $what"
 }
-function FirewallRule { (netsh advfirewall firewall show rule name=Nectarlink) -match 'Nectarlink' }
+function FirewallRule { (netsh advfirewall firewall show rule name=Noddy) -match 'Noddy' }
 # Whether an allow entry for `$sid` grants every bit of `$rights`.
 function Test-TaskRights($sd, [string]$sid, [int]$rights) {
     [bool]($sd.DiscretionaryAcl | Where-Object {
@@ -51,7 +51,7 @@ function Test-OthersMayWrite($sd) {
 function UpdateTask {
     $scheduler = New-Object -ComObject Schedule.Service
     $scheduler.Connect()
-    try { $scheduler.GetFolder('\').GetTask('Nectarlink Update') } catch { $null }
+    try { $scheduler.GetFolder('\').GetTask('Noddy Update') } catch { $null }
 }
 
 Write-Host "Installing $Setup"

@@ -2,16 +2,16 @@
 //! Phone as Speaker / Headphones for PC Audio (§3.8 P2): captures Windows
 //! system audio via WASAPI loopback (`AUDCLNT_STREAMFLAGS_LOOPBACK`), converts
 //! 32-bit float stereo samples to 16-bit signed little-endian PCM, and streams
-//! them to connected phones over NectarLink's low-latency audio stream.
+//! them to connected phones over Noddy's low-latency audio stream.
 
 /// Where the PC's sound goes: only to the phone that asked for it, waiting
 /// while it's away (never to another phone, which may be someone else's), or
 /// to the first online phone when the PC itself turned the speaker on.
 #[cfg_attr(not(any(windows, target_os = "linux")), allow(dead_code))]
 fn pick_target(
-    wanted: Option<nectarlink_core::DeviceId>,
-    online: &[nectarlink_core::DeviceId],
-) -> Option<nectarlink_core::DeviceId> {
+    wanted: Option<noddy_core::DeviceId>,
+    online: &[noddy_core::DeviceId],
+) -> Option<noddy_core::DeviceId> {
     match wanted {
         Some(phone) => online.contains(&phone).then_some(phone),
         None => online.first().copied(),
@@ -21,7 +21,7 @@ fn pick_target(
 #[cfg(test)]
 mod tests {
     use super::pick_target;
-    use nectarlink_core::DeviceId;
+    use noddy_core::DeviceId;
 
     #[test]
     fn sound_never_moves_to_a_phone_that_did_not_ask() {
@@ -62,15 +62,15 @@ mod imp {
     static WORKER_RUNNING: AtomicBool = AtomicBool::new(false);
     /// The phone that last turned "Phone speaker" on. Audio goes only there; when
     /// the PC turned it on, to the first phone that is online.
-    static TARGET: std::sync::Mutex<Option<nectarlink_core::DeviceId>> = std::sync::Mutex::new(None);
+    static TARGET: std::sync::Mutex<Option<noddy_core::DeviceId>> = std::sync::Mutex::new(None);
 
     /// The phone the sound goes to first, if one asked.
-    pub fn target() -> Option<nectarlink_core::DeviceId> {
+    pub fn target() -> Option<noddy_core::DeviceId> {
         *TARGET.lock().unwrap_or_else(|e| e.into_inner())
     }
 
     /// Records which phone asked to be the speaker.
-    pub fn set_target(phone: Option<nectarlink_core::DeviceId>) {
+    pub fn set_target(phone: Option<noddy_core::DeviceId>) {
         *TARGET.lock().unwrap_or_else(|e| e.into_inner()) = phone;
     }
 
@@ -245,7 +245,7 @@ mod imp {
             return;
         }
         std::thread::Builder::new()
-            .name("nectarlink-pc-audio-loopback".into())
+            .name("noddy-pc-audio-loopback".into())
             .spawn(|| {
                 run_loopback_worker();
                 WORKER_RUNNING.store(false, Ordering::SeqCst);
@@ -322,7 +322,7 @@ mod imp {
             .paired_devices()
             .unwrap_or_default()
             .into_iter()
-            .filter(|d| matches!(d.link, nectarlink_core::LinkState::Online { .. }))
+            .filter(|d| matches!(d.link, noddy_core::LinkState::Online { .. }))
             .map(|d| d.id)
             .collect();
         let wanted = *TARGET.lock().unwrap_or_else(|e| e.into_inner());
@@ -437,7 +437,7 @@ mod imp {
             .paired_devices()
             .unwrap_or_default()
             .into_iter()
-            .filter(|d| matches!(d.link, nectarlink_core::LinkState::Online { .. }))
+            .filter(|d| matches!(d.link, noddy_core::LinkState::Online { .. }))
             .map(|d| d.id)
             .collect();
         let wanted = *TARGET.lock().unwrap_or_else(|e| e.into_inner());
@@ -644,11 +644,11 @@ mod imp {
 mod imp {
     #![allow(dead_code)]
 
-    pub fn target() -> Option<nectarlink_core::DeviceId> {
+    pub fn target() -> Option<noddy_core::DeviceId> {
         None
     }
 
-    pub fn set_target(_phone: Option<nectarlink_core::DeviceId>) {}
+    pub fn set_target(_phone: Option<noddy_core::DeviceId>) {}
 
     pub fn is_enabled() -> bool {
         false

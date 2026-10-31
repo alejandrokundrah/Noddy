@@ -1,6 +1,6 @@
 [package]
-name = "nectarlink-ptrun"
-description = "PowerToys Run & Command Palette extension helper for NectarLink"
+name = "noddy-ptrun"
+description = "PowerToys Run & Command Palette extension helper for Noddy"
 version = "0.0.1"
 edition = "2024"
 license = "GPL-3.0-or-later"
@@ -9,7 +9,7 @@ publish = false
 [workspace]
 
 [[bin]]
-name = "nectarlink-ptrun"
+name = "noddy-ptrun"
 path = "src/main.rs"
 
 [dependencies]

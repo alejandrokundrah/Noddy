@@ -76,7 +76,7 @@ PNG arrived; Android as a content URI from the app's own provider.
 - **No echoes.** A device does not send text it just received with
   `clip.set`.
 - **Smart clipboard context chips (local only).** When a text clip arrives via
-  `clip.set` and is not a one-time code (`otp::is_otp_clip`), `nectarlink-core`
+  `clip.set` and is not a one-time code (`otp::is_otp_clip`), `noddy-core`
   classifies it locally (`clip_kind::classify_clip`) into at most one suggestion
   (`WebLink` → `"Open"`, `StreetAddress` → `"Open in Maps"`, `PhoneNumber` →
   `"Call"`, `TrackingNumber` → `"Track"`, `Email` → `"Email"`). Both apps offer

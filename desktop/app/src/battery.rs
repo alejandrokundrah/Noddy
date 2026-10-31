@@ -11,7 +11,7 @@ use std::{
     },
 };
 
-use nectarlink_core::{Battery, DeviceId, NodeEvent};
+use noddy_core::{Battery, DeviceId, NodeEvent};
 
 use crate::{
     core_host,
@@ -107,7 +107,7 @@ pub fn on_event(event: &NodeEvent) {
         key: device.to_string(),
         title,
         body,
-        attribution: "NectarLink".into(),
+        attribution: "Noddy".into(),
         icon: None,
         image: None,
         actions: Vec::new(),

@@ -1,6 +1,6 @@
-# Contributing to NectarLink
+# Contributing to Noddy
 
-Thank you for helping with NectarLink. The project is young, so the codebase
+Thank you for helping with Noddy. The project is young, so the codebase
 and these guidelines still change often.
 
 ## Before you start
@@ -13,7 +13,7 @@ and these guidelines still change often.
 
 ## Sign your commits (DCO)
 
-NectarLink uses the [Developer Certificate of Origin](DCO.txt) instead of a
+Noddy uses the [Developer Certificate of Origin](DCO.txt) instead of a
 CLA. By signing off, you certify that you wrote the change or otherwise have
 the right to submit it under the project's licenses.
 
@@ -66,7 +66,7 @@ These come from the plan and will grow into a full style guide:
   Rust, string resources on Android. After changing text on Windows, run
   `cargo xtask strings`, then `lupdate` over every catalogue and the
   template, as [docs/translating.md](docs/translating.md) shows. That page
-  also covers translating NectarLink into a new language.
+  also covers translating Noddy into a new language.
 - **Accessibility is not optional.** Labels for screen readers and full
   keyboard navigation from day one.
 - Format with `cargo fmt` and keep `cargo clippy` clean. Android code follows
@@ -75,10 +75,10 @@ These come from the plan and will grow into a full style guide:
 ## Questions and ideas
 
 Questions, ideas that need talking through, and "how do I…" belong in
-[Discussions](https://github.com/thtbee/nectarlink/discussions), not issues.
+[Discussions](https://github.com/alejandrokundrah/Noddy/discussions), not issues.
 
 ## Reporting bugs
 
 Open an issue with your Windows build, phone model, Android version, and the
-NectarLink versions on both sides. Security problems go through
+Noddy versions on both sides. Security problems go through
 [SECURITY.md](SECURITY.md) instead, never a public issue.

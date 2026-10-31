@@ -222,8 +222,8 @@ pub fn fix_firewall(exe: &Path) -> windows::core::Result<bool> {
     let clean_exe = raw_exe.strip_prefix(r"\\?\").unwrap_or(&raw_exe);
     let script = format!(
         "/c netsh advfirewall firewall delete rule name=all dir=in program=\"{clean_exe}\" & \
-         netsh advfirewall firewall delete rule name=\"Nectarlink\" dir=in & \
-         netsh advfirewall firewall add rule name=\"Nectarlink\" dir=in action=allow program=\"{clean_exe}\" \
+         netsh advfirewall firewall delete rule name=\"Noddy\" dir=in & \
+         netsh advfirewall firewall add rule name=\"Noddy\" dir=in action=allow program=\"{clean_exe}\" \
          enable=yes profile=any"
     );
     let parameters = HSTRING::from(script);
@@ -257,7 +257,7 @@ pub fn fix_firewall(exe: &Path) -> windows::core::Result<bool> {
 }
 
 /// Opens Windows Defender Firewall's Control Panel / settings page so the user
-/// can inspect or toggle NectarLink directly.
+/// can inspect or toggle Noddy directly.
 pub fn open_firewall_settings() -> bool {
     let mut info = SHELLEXECUTEINFOW {
         cbSize: std::mem::size_of::<SHELLEXECUTEINFOW>() as u32,

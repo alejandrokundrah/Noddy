@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <resources>
-    <string name="app_name">NectarLink</string>
+    <string name="app_name">Noddy</string>
 
     <!-- Pairing -->
     <string name="pair_title">Bilgisayarla eşleştir</string>
     <string name="pair_show_title">Telefon veya tablet eşleştir</string>
-    <string name="pair_show_hint">Diğer telefonunuzda veya tabletinizde NectarLink\'i açın, Eşleştir\'e dokunun ve bu kodu tarayın.</string>
+    <string name="pair_show_hint">Diğer telefonunuzda veya tabletinizde Noddy\'i açın, Eşleştir\'e dokunun ve bu kodu tarayın.</string>
     <string name="pair_show_qr_desc">Başka bir telefon veya tablet için eşleştirme kodu</string>
     <string name="action_show_code">Bunun yerine telefon veya tablet eşleştir</string>
-    <string name="pair_scan_hint">Bilgisayarınızda NectarLink\'i açın. Kamerayı gösterdiği koda tutun. Başka bir telefon veya tablet kodunu Telefon veya tablet eşleştir bölümünde gösterir.</string>
+    <string name="pair_scan_hint">Bilgisayarınızda Noddy\'i açın. Kamerayı gösterdiği koda tutun. Başka bir telefon veya tablet kodunu Telefon veya tablet eşleştir bölümünde gösterir.</string>
     <string name="pair_nearby_title">Yakındakiyle eşleştir</string>
-    <string name="pair_nearby_hint">Bilgisayarınızda NectarLink\'i açın ve eşleştirme ekranını açık tutun. Bilgisayarınız burada görünür.</string>
+    <string name="pair_nearby_hint">Bilgisayarınızda Noddy\'i açın ve eşleştirme ekranını açık tutun. Bilgisayarınız burada görünür.</string>
     <string name="pair_looking">Bilgisayarlar aranıyor…</string>
     <string name="pair_joining">Eşleştiriliyor…</string>
     <string name="pair_connecting">Bağlanılıyor: %1$s…</string>
@@ -25,9 +25,9 @@
     <string name="pair_failed_declined">Eşleştirme cihazlardan birinde reddedildi.</string>
     <string name="pair_failed_expired">Kodun süresi doldu. Bilgisayarınızda yeni bir kod gösterin.</string>
     <string name="pair_failed_unreachable">Bilgisayara ulaşılamadı. İkisinin de aynı ağda olduğundan emin olun.</string>
-    <string name="pair_failed_other">Bu bir NectarLink eşleştirme kodu değil veya bir sorun oluştu.</string>
+    <string name="pair_failed_other">Bu bir Noddy eşleştirme kodu değil veya bir sorun oluştu.</string>
     <string name="your_pc">bilgisayarınız</string>
-    <string name="camera_permission_needed">NectarLink\'in eşleştirme kodunu taramak için kameraya ihtiyacı var. Hiçbir şey kaydedilmez.</string>
+    <string name="camera_permission_needed">Noddy\'in eşleştirme kodunu taramak için kameraya ihtiyacı var. Hiçbir şey kaydedilmez.</string>
 
     <!-- Home -->
     <string name="home_title">Ana Sayfa</string>
@@ -62,7 +62,7 @@
     <string name="settings_notifications">Bildirimler</string>
     <string name="notifications_title">Bildirimleri bilgisayarınızda göster</string>
     <string name="notifications_on">Açık. Bildirimler eşleştirilmiş bilgisayarlarınızda görünür; oradan yanıtlayabilir ve kapatabilirsiniz.</string>
-    <string name="notifications_off">NectarLink\'in bu telefonun bildirimlerini bilgisayarınızda göstermesi için bildirim erişimine ihtiyacı var.</string>
+    <string name="notifications_off">Noddy\'in bu telefonun bildirimlerini bilgisayarınızda göstermesi için bildirim erişimine ihtiyacı var.</string>
     <string name="notifications_restricted">Anahtar gri mi görünüyor? Uygulama bilgileri\'ni açın, ⋮ simgesine dokunun, “Kısıtlanmış ayarlara izin ver”i seçin ve tekrar deneyin.</string>
     <string name="action_allow">İzin ver</string>
     <string name="clip_share_label">Bilgisayara gönder</string>
@@ -76,12 +76,12 @@
     <string name="media_previous">Önceki</string>
     <string name="action_send_files">Dosya gönder</string>
     <string name="action_send_folder">Klasör gönder</string>
-    <string name="input_service_label">NectarLink: bilgisayarınızdan kontrol</string>
+    <string name="input_service_label">Noddy: bilgisayarınızdan kontrol</string>
     <string name="input_service_description">Ekranını eşleştirilmiş bir bilgisayarla paylaşırken bilgisayarınızın fare ve klavyesinin bu telefonda dokunmasına, kaydırmasına ve yazmasına olanak tanır. Başka hiçbir şeyi okumaz.</string>
     <string name="settings_control">Bilgisayarınızdan kontrol</string>
     <string name="control_title">Bilgisayarınızın fare ve klavyesini kullanın</string>
     <string name="control_on">Açık: ekranınız bilgisayarınızda gösterilirken oradan dokunabilir, kaydırabilir ve yazabilirsiniz.</string>
-    <string name="control_off">Bu ekranı gösterirken bilgisayarınızdan dokunun, kaydırın ve yazın. Erişilebilirlik bölümünde NectarLink\'i açın.</string>
+    <string name="control_off">Bu ekranı gösterirken bilgisayarınızdan dokunun, kaydırın ve yazın. Erişilebilirlik bölümünde Noddy\'i açın.</string>
     <string name="dnd_access_title">Rahatsız Etmeyin ve sessiz mod</string>
     <string name="dnd_access_on">Açık: bilgisayarınız Rahatsız Etmeyin modunu açıp kapatabilir ve zili sessize alabilir.</string>
     <string name="dnd_access_off">Bilgisayarınızın Rahatsız Etmeyin modunu açıp kapatmasına ve zili sessize almasına izin verin.</string>
@@ -89,7 +89,7 @@
     <string name="write_settings_on">Açık: bilgisayarınız bu telefonun ekran parlaklığını ayarlayabilir.</string>
     <string name="write_settings_off">Bilgisayarınızın bu telefonun ekran parlaklığını ayarlamasına izin verin.</string>
     <string name="local_network_title">Bu ağda bilgisayarınıza ulaşın</string>
-    <string name="local_network_text">Android, bir uygulama ağınızdaki cihazlarla iletişim kurmadan önce izin ister. NectarLink\'in bilgisayarınıza ulaşmak için bu izne ihtiyacı var.</string>
+    <string name="local_network_text">Android, bir uygulama ağınızdaki cihazlarla iletişim kurmadan önce izin ister. Noddy\'in bilgisayarınıza ulaşmak için bu izne ihtiyacı var.</string>
     <string name="channel_elevated">Kablosuz hata ayıklama kurulumu</string>
     <string name="elevated_title">Gerçek dokunma ve tuşlar (Kablosuz hata ayıklama)</string>
     <string name="elevated_not_set_up">Bilgisayarınızdan gerçek zamanlı dokunma, tüm tuşlar ve aramalarda sessize alma, bekletme ve tuş takımı. Android\'in kendi Kablosuz hata ayıklama özelliğini kullanır.</string>
@@ -97,18 +97,18 @@
     <string name="elevated_starting">Başlatılıyor…</string>
     <string name="elevated_running">Açık: bilgisayarınızın faresi ve klavyesi gerçek bir dokunmatik ekran ve klavye gibi çalışır.</string>
     <string name="elevated_failed">Başlatılamadı. Kablosuz hata ayıklamanın açık olduğunu kontrol edip tekrar deneyin.</string>
-    <string name="elevated_not_paired">Telefon NectarLink\'in eşleştirmesini unuttu. Yeniden kurun.</string>
+    <string name="elevated_not_paired">Telefon Noddy\'in eşleştirmesini unuttu. Yeniden kurun.</string>
     <string name="elevated_set_up">Kur</string>
     <string name="elevated_use_root">Root kullan</string>
     <string name="elevated_root_hint">Bu telefon root\'lu, bu yüzden Yükseltilmiş mod bunun yerine root üzerinden başlayabilir: eşleştirme gerekmez ve yeniden başlatmadan sonra veya Wi-Fi dışındayken kendiliğinden geri gelir. Kablosuz hata ayıklamadakiyle aynı izinleri alır.</string>
     <string name="elevated_running_root">Açık, root üzerinden: bilgisayarınızın faresi ve klavyesi gerçek bir dokunmatik ekran ve klavye gibi çalışır.</string>
-    <string name="elevated_root_failed">Root izni verilmedi veya root yöneticiniz NectarLink\'in yardımcısını shell kullanıcısı olarak başlatamıyor. Bunun yerine Kablosuz hata ayıklama ile kurabilirsiniz.</string>
+    <string name="elevated_root_failed">Root izni verilmedi veya root yöneticiniz Noddy\'in yardımcısını shell kullanıcısı olarak başlatamıyor. Bunun yerine Kablosuz hata ayıklama ile kurabilirsiniz.</string>
     <string name="elevated_turn_off">Kapat</string>
     <string name="elevated_try_again">Tekrar dene</string>
     <string name="elevated_steps_title">Kablosuz hata ayıklamayı ayarlayın</string>
-    <string name="elevated_steps">Android\'in hassas olarak gizlediği bildirimlerdeki tek kullanımlık kodlar da bilgisayarınıza ulaşır.\n\n1. Geliştirici seçeneklerini açın: Ayarlar › Telefon hakkında bölümünde Derleme numarası\'na 7 kez dokunun.\n2. Geliştirici seçenekleri\'nde Kablosuz hata ayıklamayı açın (Wi-Fi\'da), içine girin ve Eşleme kodu ile cihazı eşle\'ye dokunun.\n3. Kodu kapatmadan 6 haneli kodu NectarLink\'in bildirimine yazın.</string>
+    <string name="elevated_steps">Android\'in hassas olarak gizlediği bildirimlerdeki tek kullanımlık kodlar da bilgisayarınıza ulaşır.\n\n1. Geliştirici seçeneklerini açın: Ayarlar › Telefon hakkında bölümünde Derleme numarası\'na 7 kez dokunun.\n2. Geliştirici seçenekleri\'nde Kablosuz hata ayıklamayı açın (Wi-Fi\'da), içine girin ve Eşleme kodu ile cihazı eşle\'ye dokunun.\n3. Kodu kapatmadan 6 haneli kodu Noddy\'in bildirimine yazın.</string>
     <string name="elevated_open_developer">Geliştirici seçeneklerini aç</string>
-    <string name="elevated_pair_title">NectarLink\'i Kablosuz hata ayıklama ile eşleştirin</string>
+    <string name="elevated_pair_title">Noddy\'i Kablosuz hata ayıklama ile eşleştirin</string>
     <string name="elevated_pair_text">Kablosuz hata ayıklama bölümünde Eşleme kodu ile cihazı eşle\'ye dokunun, ardından kodu buraya yazın.</string>
     <string name="elevated_pair_action">Kodu gir</string>
     <string name="elevated_pair_hint">6 haneli eşleştirme kodu</string>
@@ -154,7 +154,7 @@
     <string name="transfer_pause">Duraklat</string>
     <string name="transfer_resume">Sürdür</string>
     <string name="transfer_paused_progress">Duraklatıldı · %1$s / %2$s</string>
-    <string name="transfer_received_from">Kaynak: %1$s · Download/Nectarlink klasöründe</string>
+    <string name="transfer_received_from">Kaynak: %1$s · Download/Noddy klasöründe</string>
     <string name="transfer_sent_to">%1$s cihazına gönderildi</string>
     <string name="transfer_cancelled">İptal edildi</string>
     <string name="transfer_denied">%1$s bu telefondan dosya kabul etmiyor.</string>
@@ -175,7 +175,7 @@
     <string name="clip_empty">Panoda metin veya görüntü yok.</string>
     <string name="clip_image_too_large">Bu görüntü gönderilemeyecek kadar büyük.</string>
     <string name="clip_image_unreadable">Bu görüntü okunamıyor.</string>
-    <string name="clip_image_unsupported">Görüntü göndermek için %1$s cihazındaki NectarLink\'i güncelleyin.</string>
+    <string name="clip_image_unsupported">Görüntü göndermek için %1$s cihazındaki Noddy\'i güncelleyin.</string>
     <string name="clip_nothing_shared">Gönderilecek metin yok.</string>
     <string name="clipboard_history_title">Pano geçmişi</string>
     <string name="clipboard_history_subtitle">Bilgisayarlarınızla paylaşılan son 50 öğe, bu telefonda şifreli olarak saklanır.</string>
@@ -203,20 +203,20 @@
     <string name="clip_action_track">Takip et</string>
     <string name="clip_action_email">E-posta gönder</string>
     <string name="background_title">Arka planda ulaşılabilir kalın</string>
-    <string name="background_text">Android pil tasarrufu için NectarLink\'i duraklatıyor, bu yüzden bilgisayarınız ona ulaşamıyor. Arka planda çalışmasına izin verin.</string>
+    <string name="background_text">Android pil tasarrufu için Noddy\'i duraklatıyor, bu yüzden bilgisayarınız ona ulaşamıyor. Arka planda çalışmasına izin verin.</string>
     <string name="background_on">Arka planda bağlı kalmasına izin verildi</string>
     <string name="settings_background_title">Arka plan ve pil</string>
     <string name="settings_run_in_background">Arka planda çalıştır</string>
-    <string name="settings_run_in_background_hint">Bu telefonu bilgisayarınızdan ulaşılabilir tutar. Kapalıyken NectarLink yalnızca açıkken bağlanır ve bildirim kaybolur.</string>
+    <string name="settings_run_in_background_hint">Bu telefonu bilgisayarınızdan ulaşılabilir tutar. Kapalıyken Noddy yalnızca açıkken bağlanır ve bildirim kaybolur.</string>
     <string name="home_background_off_title">Arka plan bağlantısı kapalı</string>
-    <string name="home_background_off_text">NectarLink yalnızca uygulama açıkken bağlanır. Bu telefonu bilgisayarınızdan ulaşılabilir tutmak için açın.</string>
+    <string name="home_background_off_text">Noddy yalnızca uygulama açıkken bağlanır. Bu telefonu bilgisayarınızdan ulaşılabilir tutmak için açın.</string>
     <string name="battery_open_oem_settings">Pil ayarları</string>
-    <string name="battery_guide_samsung">Samsung\'da: Uygulama bilgileri › Pil › Kısıtlanmamış\'ı seçin ve Cihaz bakımı › Pil › Arka plan kullanım sınırları bölümünde NectarLink\'in asla uyku moduna alınmadığından emin olun.</string>
-    <string name="battery_guide_xiaomi">Xiaomi / HyperOS / MIUI\'de: NectarLink için Otomatik başlat\'ı açın ve Uygulama bilgileri › Pil tasarrufu bölümünde Kısıtlama yok\'u seçin.</string>
+    <string name="battery_guide_samsung">Samsung\'da: Uygulama bilgileri › Pil › Kısıtlanmamış\'ı seçin ve Cihaz bakımı › Pil › Arka plan kullanım sınırları bölümünde Noddy\'in asla uyku moduna alınmadığından emin olun.</string>
+    <string name="battery_guide_xiaomi">Xiaomi / HyperOS / MIUI\'de: Noddy için Otomatik başlat\'ı açın ve Uygulama bilgileri › Pil tasarrufu bölümünde Kısıtlama yok\'u seçin.</string>
     <string name="battery_guide_oneplus">OnePlus / OxygenOS\'ta: Uygulama bilgileri › Pil kullanımı bölümünü açın, Arka plan etkinliğine izin ver ve Otomatik başlatmaya izin ver seçeneklerini açın.</string>
     <string name="battery_guide_oppo_realme">Oppo / Realme\'de: Uygulama bilgileri › Pil kullanımı bölümünü açın, Arka plan etkinliğine izin ver ve Otomatik başlatmaya izin ver seçeneklerini açın.</string>
     <string name="battery_guide_vivo">Vivo / Funtouch / OriginOS\'ta: Uygulama bilgileri › Pil bölümünü açın, Kısıtlanmamış\'ı (Yüksek arka plan güç kullanımı) seçin ve Otomatik başlat\'a izin verin.</string>
-    <string name="battery_guide_huawei">Huawei / Honor\'da: Uygulama başlatma\'yı (Telefon Yöneticisi) açın, NectarLink için Otomatik olarak yönet\'i kapatın ve Otomatik başlatma, İkincil başlatma ve Arka planda çalıştır seçeneklerini açık tutun.</string>
+    <string name="battery_guide_huawei">Huawei / Honor\'da: Uygulama başlatma\'yı (Telefon Yöneticisi) açın, Noddy için Otomatik olarak yönet\'i kapatın ve Otomatik başlatma, İkincil başlatma ve Arka planda çalıştır seçeneklerini açık tutun.</string>
     <string name="battery_guide_pixel">Pixel\'de: Uygulama bilgileri › Uygulama pil kullanımı bölümünü açın, Arka plan kullanımına izin ver\'e dokunun ve Kısıtlanmamış\'ı seçin.</string>
     <string name="action_manage">Yönet</string>
     <string name="action_app_info">Uygulama bilgileri</string>
@@ -232,10 +232,10 @@
     <string name="mode_system">Sistem</string>
     <string name="mode_light">Açık</string>
     <string name="mode_dark">Koyu</string>
-    <string name="about_version">NectarLink %1$s</string>
+    <string name="about_version">Noddy %1$s</string>
     <string name="unpair_title">%1$s eşleştirmesi kaldırılsın mı?</string>
     <string name="unpair_text">İki cihaz da birbirini unutur. İstediğiniz zaman yeniden eşleştirebilirsiniz.</string>
-    <string name="core_failed">NectarLink başlatılamadı: %1$s</string>
+    <string name="core_failed">Noddy başlatılamadı: %1$s</string>
 
     <!-- Actions -->
     <string name="action_pair">Eşleştir</string>
@@ -257,21 +257,21 @@
     <string name="action_pair_new">Başka bir bilgisayar eşleştir</string>
     <string name="action_refresh">Yenile</string>
     <string name="action_update">Güncelle</string>
-    <string name="update_title">NectarLink %1$s kullanılabilir</string>
+    <string name="update_title">Noddy %1$s kullanılabilir</string>
     <string name="update_text">En son iyileştirmeleri ve düzeltmeleri edinin.</string>
     <string name="update_downloading">İndiriliyor…</string>
     <string name="update_downloading_progress">İndiriliyor · %1$s / %2$s</string>
     <string name="update_waiting_network">Bağlantı bekleniyor. İndirme kaldığı yerden devam eder.</string>
     <string name="update_installing">Kuruluyor. Android onaylamanızı isteyebilir.</string>
-    <string name="update_not_allowed">NectarLink\'in güncellemelerini kurmasına izin verin. Geri döndüğünüzde güncelleme devam eder.</string>
+    <string name="update_not_allowed">Noddy\'in güncellemelerini kurmasına izin verin. Geri döndüğünüzde güncelleme devam eder.</string>
     <string name="update_damaged">İndirilen dosya bozuk olduğu için kurulmadı. Tekrar deneyin.</string>
     <string name="update_offline">Güncelleme indirilemedi. İnternete bağlandığınızda tekrar deneyin.</string>
     <string name="update_install_failed">Android güncellemeyi kurmadı. Tekrar deneyin.</string>
     <string name="update_whats_new">Yenilikler</string>
     <string name="update_check">Güncellemeleri denetle</string>
     <string name="update_checking">Güncellemeler denetleniyor…</string>
-    <string name="update_up_to_date_version">NectarLink %1$s güncel.</string>
-    <string name="update_current_version">NectarLink %1$s sürümü yüklü.</string>
+    <string name="update_up_to_date_version">Noddy %1$s güncel.</string>
+    <string name="update_current_version">Noddy %1$s sürümü yüklü.</string>
     <string name="update_check_failed">Güncellemeler denetlenemedi. İnternet bağlantınızı kontrol edin.</string>
     <string name="action_lock_pc">Bilgisayarı kilitle</string>
     <string name="action_sleep_pc">Uyut</string>
@@ -354,11 +354,11 @@
     <string name="remote_dictate_no_recognizer">Bu telefonda konuşma tanıma yüklü değil.</string>
     <string name="remote_dictate_no_speech">Hiçbir şey algılanmadı. Tekrar denemek için Dikte et\'e dokunun veya basılı tutun.</string>
     <string name="remote_dictate_error">Konuşma tanıma tamamlanamadı. Tekrar denemek için Dikte et\'e dokunun veya basılı tutun.</string>
-    <string name="remote_dictate_permission_needed">NectarLink\'in %1$s cihazına dikte edebilmesi için mikrofon erişimine ihtiyacı var.</string>
+    <string name="remote_dictate_permission_needed">Noddy\'in %1$s cihazına dikte edebilmesi için mikrofon erişimine ihtiyacı var.</string>
     <string name="remote_denied_title">%1$s üzerinde kontrole izin verin</string>
-    <string name="remote_denied_text">%1$s üzerinde, NectarLink\'in sorduğu pencerede veya Ayarlar › Cihazlar bölümünde bu telefondan kontrole izin verin.</string>
+    <string name="remote_denied_text">%1$s üzerinde, Noddy\'in sorduğu pencerede veya Ayarlar › Cihazlar bölümünde bu telefondan kontrole izin verin.</string>
     <string name="remote_offline_text">%1$s şu anda bağlı değil.</string>
-    <string name="remote_unsupported_text">Bu telefondan kontrol etmek için %1$s cihazındaki NectarLink\'i güncelleyin.</string>
+    <string name="remote_unsupported_text">Bu telefondan kontrol etmek için %1$s cihazındaki Noddy\'i güncelleyin.</string>
     <string name="remote_slide_next">Sonraki slayt</string>
     <string name="remote_slide_prev">Önceki</string>
     <string name="remote_slide_start">Gösteriyi başlat</string>
@@ -399,7 +399,7 @@
     <string name="recorder_notification_recording">%1$s için kaydediliyor</string>
     <string name="recorder_notification_paused">Kayıt duraklatıldı (%1$s)</string>
     <string name="recorder_permission_title">Mikrofon erişimine izin verin</string>
-    <string name="recorder_permission_text">NectarLink mikrofonu yalnızca %1$s cihazına göndermek üzere sesli not kaydederken kullanır.</string>
+    <string name="recorder_permission_text">Noddy mikrofonu yalnızca %1$s cihazına göndermek üzere sesli not kaydederken kullanır.</string>
     <string name="recorder_allow_mic">Mikrofona izin ver</string>
     <string name="recorder_offline_hint">Kayıtlar bu telefona kaydedilir ve %1$s bağlandığında otomatik olarak gönderilir.</string>
     <string name="recorder_status_ready">%1$s için kayda hazır</string>
@@ -431,9 +431,9 @@
     <string name="deck_muted">Sessiz</string>
     <string name="deck_live">Canlı</string>
     <string name="deck_volume_percent">%%%1$d</string>
-    <string name="deck_empty_page">Bu sayfada henüz kutucuk yok. %1$s üzerindeki NectarLink\'ten kutucuk ekleyin.</string>
+    <string name="deck_empty_page">Bu sayfada henüz kutucuk yok. %1$s üzerindeki Noddy\'ten kutucuk ekleyin.</string>
     <string name="deck_commands_denied_title">%1$s üzerinde komutlara izin verin</string>
-    <string name="deck_commands_denied_text">Bu telefondan kabuk komutları çalıştırmak için %1$s üzerinde NectarLink › Ayarlar › Cihazlar bölümünde bu telefon için “Deck kabuk komutlarını çalıştır” seçeneğini açın.</string>
+    <string name="deck_commands_denied_text">Bu telefondan kabuk komutları çalıştırmak için %1$s üzerinde Noddy › Ayarlar › Cihazlar bölümünde bu telefon için “Deck kabuk komutlarını çalıştır” seçeneğini açın.</string>
     <string name="deck_hint">Kutucukları %1$s üzerindeki Deck\'ten özelleştirin</string>
     <string name="pc_audio_volume">Ses düzeyi</string>
     <string name="pc_audio_mute">Sesi kapat</string>
@@ -473,7 +473,7 @@
     <string name="webcam_request_title">%1$s kameranızı kullanmak istiyor</string>
     <string name="webcam_request_text">Web kamerası kontrollerini açıp aktarımı başlatmak için dokunun.</string>
     <string name="webcam_permission_title">Kamera erişimine izin verin</string>
-    <string name="webcam_permission_text">NectarLink kamerayı yalnızca %1$s cihazına web kamerası olarak görüntü aktarırken kullanır.</string>
+    <string name="webcam_permission_text">Noddy kamerayı yalnızca %1$s cihazına web kamerası olarak görüntü aktarırken kullanır.</string>
     <string name="webcam_allow_camera">Kameraya izin ver</string>
     <string name="webcam_status_connecting">Kamera %1$s cihazına bağlanıyor…</string>
     <string name="webcam_status_ready">%1$s cihazına aktarmaya hazır</string>
@@ -670,7 +670,7 @@
     <string name="widget_pc_title">Bilgisayar hızlı işlemleri</string>
     <string name="widget_pc_description">Eşleştirilmiş bilgisayarınız için bağlantı durumu, Panoyu gönder, Bilgisayarı çaldır, Bilgisayarı kilitle ve Uyandır.</string>
     <string name="widget_pc_no_pc">Eşleştirilmiş bilgisayar yok</string>
-    <string name="widget_pc_tap_to_pair">NectarLink\'i açıp bir bilgisayar eşleştirmek için dokunun</string>
+    <string name="widget_pc_tap_to_pair">Noddy\'i açıp bir bilgisayar eşleştirmek için dokunun</string>
     <string name="widget_pc_connected">Bağlı</string>
     <string name="widget_pc_offline">Çevrimdışı</string>
     <string name="widget_pc_waking">Uyandırılıyor…</string>
@@ -683,8 +683,8 @@
 
     <!-- Companion Device Manager proximity wake -->
     <string name="companion_wake_title">Bilgisayar yakındayken uyandır (Companion Device)</string>
-    <string name="companion_wake_on">İlişkilendirildi · bilgisayarınız yakındayken Android NectarLink\'i uyandırır</string>
-    <string name="companion_wake_off">BLE işareti menzile girdiğinde Android\'in NectarLink\'i uyandırması için bilgisayarınızı ilişkilendirin</string>
+    <string name="companion_wake_on">İlişkilendirildi · bilgisayarınız yakındayken Android Noddy\'i uyandırır</string>
+    <string name="companion_wake_off">BLE işareti menzile girdiğinde Android\'in Noddy\'i uyandırması için bilgisayarınızı ilişkilendirin</string>
     <string name="companion_wake_associate">İlişkilendir</string>
 
     <!-- Flick to Send sheet -->
@@ -701,9 +701,9 @@
     <string name="pc_files_downloading">İndiriliyor: %1$s…</string>
     <string name="pc_files_saved">%1$s, İndirilenler klasörüne kaydedildi</string>
     <string name="pc_files_failed">%1$s indirilemedi</string>
-    <string name="pc_files_not_shared">%1$s üzerindeki NectarLink Ayarları\'nda “Bilgisayarınız cebinizde” seçeneğini açın.</string>
+    <string name="pc_files_not_shared">%1$s üzerindeki Noddy Ayarları\'nda “Bilgisayarınız cebinizde” seçeneğini açın.</string>
     <string name="pc_files_offline">%1$s bağlı değil.</string>
-    <string name="pc_files_update">Dosyalarına göz atmak için %1$s üzerindeki NectarLink\'i güncelleyin.</string>
+    <string name="pc_files_update">Dosyalarına göz atmak için %1$s üzerindeki Noddy\'i güncelleyin.</string>
     <string name="pc_files_not_found">Bu klasör artık %1$s üzerinde değil.</string>
     <string name="pc_files_error">Bu klasör %1$s üzerinde listelenemedi. Tekrar deneyin.</string>
     <string name="pc_files_folder_downloads">İndirilenler</string>
@@ -719,7 +719,7 @@
     <string name="mirror_allow_pc_control">Bilgisayar faresiyle kontrole izin ver</string>
     <string name="action_open_controls">Kontroller</string>
     <string name="remote_input_requested_title">Bilgisayarınız bu telefonu kontrol etmeye çalıştı</string>
-    <string name="remote_input_requested_text">Bilgisayarınızın fare ve klavyesini bu telefonda kullanmak için Erişilebilirlik bölümünde “NectarLink: bilgisayarınızdan kontrol” seçeneğini açın.</string>
+    <string name="remote_input_requested_text">Bilgisayarınızın fare ve klavyesini bu telefonda kullanmak için Erişilebilirlik bölümünde “Noddy: bilgisayarınızdan kontrol” seçeneğini açın.</string>
     <string name="permissions_setup_title">İzinler ve kurulum (%1$d kaldı)</string>
     <string name="permissions_setup_subtitle">Bildirimler, aramalar, mesajlar, fotoğraflar ve arka plan erişimi</string>
     <string name="clipboard_preview_hidden">••••••••••••</string>
@@ -808,10 +808,10 @@
 
     <string name="walkthrough_perm_access_title">Yardımcı</string>
     <string name="walkthrough_perm_access_does">Yansıtılan telefon ekranınızı bilgisayarınızdan fare ve klavyeyle kontrol edin.</string>
-    <string name="walkthrough_perm_access_requires">Android, NectarLink Erişilebilirlik hizmetini veya Yükseltilmiş modu gerektirir.</string>
+    <string name="walkthrough_perm_access_requires">Android, Noddy Erişilebilirlik hizmetini veya Yükseltilmiş modu gerektirir.</string>
 
     <string name="walkthrough_pair_title">Bilgisayarınızla eşleştirin</string>
-    <string name="walkthrough_pair_subtitle">Bilgisayarınızda NectarLink\'i açın. QR kodunu tarayın veya aşağıdan bilgisayarınızı seçin.</string>
+    <string name="walkthrough_pair_subtitle">Bilgisayarınızda Noddy\'i açın. QR kodunu tarayın veya aşağıdan bilgisayarınızı seçin.</string>
     <string name="walkthrough_pair_ready_title">Eşleştirilmiş bilgisayar</string>
     <string name="walkthrough_pair_badge_paired">Eşleştirildi</string>
     <string name="walkthrough_pair_device_online">%1$s · Bağlı</string>
@@ -850,7 +850,7 @@
     <string name="walkthrough_power_elevated_step3">3. Kablosuz hata ayıklamayı açın, Eşleme kodu ile cihazı eşle\'ye dokunun ve 6 haneli kodu bildirime girin.</string>
 
     <string name="walkthrough_done_title">Kurulum tamamlandı</string>
-    <string name="walkthrough_done_subtitle">NectarLink hazır. Bu rehberi istediğiniz zaman Ayarlar › Hakkında bölümünden yeniden açabilirsiniz.</string>
+    <string name="walkthrough_done_subtitle">Noddy hazır. Bu rehberi istediğiniz zaman Ayarlar › Hakkında bölümünden yeniden açabilirsiniz.</string>
     <string name="walkthrough_done_summary_heading">Kurulumunuz</string>
     <string name="walkthrough_done_paired_label">Eşleştirilmiş bilgisayar</string>
     <string name="walkthrough_done_no_pc">Henüz yok · istediğiniz zaman Ana Sayfa\'dan eşleştirin</string>
@@ -862,7 +862,7 @@
     <string name="walkthrough_done_no_permissions">Henüz izin verilmedi</string>
     <string name="walkthrough_done_try_heading">İlk önce deneyin</string>
     <string name="walkthrough_done_try_1">1. Metin kopyalayın ve bilgisayarınızda yapıştırmak için Panoyu gönder kutucuğuna dokunun.</string>
-    <string name="walkthrough_done_try_2">2. Android Paylaş menüsünden herhangi bir dosya veya bağlantıyı NectarLink\'e paylaşın.</string>
+    <string name="walkthrough_done_try_2">2. Android Paylaş menüsünden herhangi bir dosya veya bağlantıyı Noddy\'e paylaşın.</string>
 
     <!-- Features Guide Chrome -->
     <string name="guide_back">Geri</string>
@@ -924,12 +924,12 @@
     <string name="guide_notif_summary">Telefon bildirimlerini bilgisayarınızda görün, kapatın veya doğrudan yanıtlayın.</string>
     <string name="guide_notif_where">Ayarlar › İzinler › Bildirimler</string>
     <string name="guide_notif_needs">Bildirim erişimi, bilgisayar için Bildirimler anahtarı açık</string>
-    <string name="guide_notif_need_1">NectarLink için Android Bildirim erişimi etkin.</string>
+    <string name="guide_notif_need_1">Noddy için Android Bildirim erişimi etkin.</string>
     <string name="guide_notif_need_2">Android 13 ve üzerinde, uygulama dosyadan kurulduysa Uygulama bilgileri\'nde Kısıtlanmış ayarlara izin ver etkin.</string>
     <string name="guide_notif_need_3">Bilgisayar eşleştirilmiş ve çevrimiçi.</string>
     <string name="guide_notif_phone_1">Ayarlar › İzinler › Bildirimler\'i açın ve İzin ver\'e dokunun.</string>
-    <string name="guide_notif_phone_2">Android Bildirim erişimi bölümünde NectarLink\'i açın.</string>
-    <string name="guide_notif_pc_1">Telefon bildirimlerini bilgisayarın bildirim merkezinde veya NectarLink penceresinde görüntüleyin.</string>
+    <string name="guide_notif_phone_2">Android Bildirim erişimi bölümünde Noddy\'i açın.</string>
+    <string name="guide_notif_pc_1">Telefon bildirimlerini bilgisayarın bildirim merkezinde veya Noddy penceresinde görüntüleyin.</string>
     <string name="guide_notif_pc_2">Kartta bir yanıt yazıp Gönder\'e basın veya her iki cihazda da temizlemek için kapatın.</string>
     <string name="guide_notif_opt_1">İzin ver / Yönet: Android Bildirim erişimi ayarlarını açar.</string>
     <string name="guide_notif_opt_2">Bilgisayar başına Bildirimler anahtarı: Eşleştirilmiş bir bilgisayarın bildirim alıp almayacağını belirler.</string>
@@ -988,7 +988,7 @@
     <string name="guide_clip_needs">Eşleştirilmiş bilgisayar; telefondan bilgisayara otomatik arka plan eşitlemesi için Yükseltilmiş mod</string>
     <string name="guide_clip_need_1">Bilgisayardan telefona pano eşitleme ve Panoyu gönder kutucuğu ek kurulum olmadan çalışır.</string>
     <string name="guide_clip_need_2">Yükseltilmiş mod, telefondan bilgisayara otomatik pano eşitlemeyi ekler.</string>
-    <string name="guide_clip_phone_1">Telefonunuzda metin veya görüntü kopyalayın, ardından NectarLink\'i açın veya Panoyu gönder kutucuğuna dokunun.</string>
+    <string name="guide_clip_phone_1">Telefonunuzda metin veya görüntü kopyalayın, ardından Noddy\'i açın veya Panoyu gönder kutucuğuna dokunun.</string>
     <string name="guide_clip_phone_2">Son öğeleri görüntülemek, sabitlemek, kopyalamak veya silmek için Ana Sayfa\'da Pano geçmişi\'ne dokunun.</string>
     <string name="guide_clip_pc_1">Telefonunuzun panosuna göndermek için bilgisayarınızda metin veya görüntü kopyalayın.</string>
     <string name="guide_clip_opt_1">Göster / Gizle: Ana Sayfa\'daki son pano önizlemesini gizler veya gösterir.</string>
@@ -1020,10 +1020,10 @@
     <string name="guide_files_need_1">Eşleştirilmiş bilgisayar (çevrimdışıyken dosyalar Gönderim kuyruğunda en fazla 7 gün bekler).</string>
     <string name="guide_files_phone_1">Ana Sayfa\'da eşleştirilmiş bilgisayar kartınızdaki Dosya gönder veya Klasör gönder\'e dokunun.</string>
     <string name="guide_files_phone_2">Ana Sayfa\'daki Aktarımlar kartından etkin aktarımları duraklatın, sürdürün veya iptal edin.</string>
-    <string name="guide_files_pc_1">Dosyaları bilgisayarınızdaki NectarLink penceresine veya ekranın üst kenarındaki Island\'a sürükleyin.</string>
+    <string name="guide_files_pc_1">Dosyaları bilgisayarınızdaki Noddy penceresine veya ekranın üst kenarındaki Island\'a sürükleyin.</string>
     <string name="guide_files_opt_1">Dosya gönder / Klasör gönder: Tek tek dosyaları veya klasör ağaçlarının tamamını aktarır.</string>
     <string name="guide_files_opt_2">Duraklat / Sürdür: Yarıda kalan aktarımları, tamamlanmış baytları yeniden göndermeden sürdürür.</string>
-    <string name="guide_files_privacy">Dosyalar QUIC TLS 1.3 üzerinden BLAKE3 bütünlük doğrulamasıyla Download/Nectarlink klasörüne aktarılır.</string>
+    <string name="guide_files_privacy">Dosyalar QUIC TLS 1.3 üzerinden BLAKE3 bütünlük doğrulamasıyla Download/Noddy klasörüne aktarılır.</string>
     <string name="guide_files_limits">Tek seferde en fazla 5.000 dosya.</string>
 
     <!-- 8. Send queue -->
@@ -1045,7 +1045,7 @@
     <string name="guide_share_where">Android Paylaş menüsü › Bilgisayara gönder</string>
     <string name="guide_share_needs">Eşleştirilmiş bilgisayar</string>
     <string name="guide_share_ext_1">1. Telefonunuzdaki herhangi bir tarayıcı, galeri veya belge uygulamasında Paylaş\'a dokunun.</string>
-    <string name="guide_share_ext_2">2. NectarLink\'i seçin (Bilgisayara gönder veya Bilgisayarda aç).</string>
+    <string name="guide_share_ext_2">2. Noddy\'i seçin (Bilgisayara gönder veya Bilgisayarda aç).</string>
     <string name="guide_share_need_1">En az bir eşleştirilmiş bilgisayar.</string>
     <string name="guide_share_phone_1">Android Paylaş menüsünden herhangi bir bağlantı veya dosyayı paylaşın ve hedef bilgisayarınızı seçin.</string>
     <string name="guide_share_pc_1">Bağlantılar bilgisayarınızın varsayılan tarayıcısında açılır; dosyalar İndirilenler\'e kaydedilir.</string>
@@ -1062,7 +1062,7 @@
     <string name="guide_storage_need_2">Ayarlar › Cihazlar bölümünde bilgisayar için Bu telefonun depolama alanına Dosya Gezgini\'nden göz at etkin.</string>
     <string name="guide_storage_phone_1">Ayarlar › İzinler › Fotoğraflar ve videolar bölümünde Tüm dosyalara erişim izni verin veya klasör seçin.</string>
     <string name="guide_storage_phone_2">Ayarlar › Cihazlar bölümünde bilgisayarınız için depolama anahtarını açın.</string>
-    <string name="guide_storage_pc_1">Telefon depolama alanınızı bilgisayarınızda NectarLink\'ten veya Windows Dosya Gezgini\'nden açın.</string>
+    <string name="guide_storage_pc_1">Telefon depolama alanınızı bilgisayarınızda Noddy\'ten veya Windows Dosya Gezgini\'nden açın.</string>
     <string name="guide_storage_opt_1">Tüm dosyalara erişim / Yalnızca seçili klasörler: Tüm depolamayı veya yalnızca seçilen SAF klasörlerini paylaşın.</string>
     <string name="guide_storage_privacy">Depolamaya göz atma, siz açana kadar her bilgisayar için varsayılan olarak kapalıdır.</string>
     <string name="guide_storage_limits">Android, /Android/data içindeki özel uygulama dizinlerine erişimi engeller.</string>
@@ -1074,7 +1074,7 @@
     <string name="guide_pc_files_needs">Depolama paylaşımı etkin, çevrimiçi eşleştirilmiş bilgisayar</string>
     <string name="guide_pc_files_need_1">Klasörlerini paylaşan (Bilgisayarınız cebinizde) çevrimiçi eşleştirilmiş bilgisayar.</string>
     <string name="guide_pc_files_phone_1">Ana Sayfa\'da eşleştirilmiş bilgisayar kartınızdaki Bilgisayar dosyalarına göz at\'a dokunun ve indirmek için herhangi bir dosyaya dokunun.</string>
-    <string name="guide_pc_files_pc_1">Bilgisayarınızdaki NectarLink Ayarları\'nda Bilgisayarınız cebinizde seçeneğini açın.</string>
+    <string name="guide_pc_files_pc_1">Bilgisayarınızdaki Noddy Ayarları\'nda Bilgisayarınız cebinizde seçeneğini açın.</string>
     <string name="guide_pc_files_opt_1">Bilgisayar dosyalarına göz at paneli: Bilgisayar klasörlerinde gezinin ve dosyaları İndirilenler\'e indirin.</string>
     <string name="guide_pc_files_privacy">İndirilen dosyalar yerel olarak telefonunuzun İndirilenler klasörüne kaydedilir.</string>
     <string name="guide_pc_files_limits">Eşleştirilmiş bilgisayarın çevrimiçi olması gerekir.</string>
@@ -1149,7 +1149,7 @@
     <string name="guide_webcam_needs">Kamera izni, çevrimiçi eşleştirilmiş bilgisayar</string>
     <string name="guide_webcam_need_1">Android\'de Kamera izni ve çevrimiçi eşleştirilmiş bilgisayar.</string>
     <string name="guide_webcam_phone_1">Ana Sayfa\'da eşleştirilmiş bilgisayar kartınızdaki Web kamerası\'na dokunun, çözünürlüğü ve lensi seçin, ardından Web kamerasını başlat\'a dokunun.</string>
-    <string name="guide_webcam_pc_1">Canlı kamera akışını bilgisayarınızdaki NectarLink\'te görüntüleyin veya kaydedin.</string>
+    <string name="guide_webcam_pc_1">Canlı kamera akışını bilgisayarınızdaki Noddy\'te görüntüleyin veya kaydedin.</string>
     <string name="guide_webcam_opt_1">Kamerayı çevir / Fener / Yakınlaştırma / Çözünürlük (720p, 1080p, 4K): Canlı kamera kontrolleri.</string>
     <string name="guide_webcam_privacy">Asla sessizce başlamaz; aktarım sırasında sürekli bir bildirim gösterir.</string>
     <string name="guide_webcam_limits">1080p 60 fps ve 4K, donanım kodlayıcı desteği ve hızlı Wi-Fi veya USB gerektirir.</string>
@@ -1161,7 +1161,7 @@
     <string name="guide_continuity_needs">Kamera izni, çevrimiçi eşleştirilmiş bilgisayar</string>
     <string name="guide_continuity_need_1">Android\'de Kamera izni ve çevrimiçi eşleştirilmiş bilgisayar.</string>
     <string name="guide_continuity_phone_1">İstek bildirimine veya şeride dokunun, fotoğraf çekin veya belge köşelerini ayarlayın, ardından Gönder\'e dokunun.</string>
-    <string name="guide_continuity_pc_1">Bilgisayarınızdaki NectarLink\'ten Fotoğraf çek veya Belge tara\'yı başlatın.</string>
+    <string name="guide_continuity_pc_1">Bilgisayarınızdaki Noddy\'ten Fotoğraf çek veya Belge tara\'yı başlatın.</string>
     <string name="guide_continuity_opt_1">Köşeleri ayarla / Belgeyi iyileştir: Taramalar için perspektif kırpma ve kontrast iyileştirme.</string>
     <string name="guide_continuity_privacy">Çekimler yalnızca Fotoğrafı kullan veya Taramayı gönder\'e dokunduğunuzda gönderilir.</string>
     <string name="guide_continuity_limits">Kamera istekleri yanıtlanmazsa 2 dakika sonra sona erer.</string>
@@ -1197,7 +1197,7 @@
     <string name="guide_assist_summary">Bilgisayarınızın fare ve klavyesinin, Erişilebilirlik hizmetini kullanarak bu telefonda dokunmasına, kaydırmasına ve yazmasına izin verin.</string>
     <string name="guide_assist_where">Ayarlar › İzinler › Bilgisayarınızdan kontrol › Bilgisayarınızın fare ve klavyesini kullanın</string>
     <string name="guide_assist_needs">Erişilebilirlik hizmeti etkin</string>
-    <string name="guide_assist_need_1">Android Ayarları\'nda NectarLink Erişilebilirlik hizmeti etkin.</string>
+    <string name="guide_assist_need_1">Android Ayarları\'nda Noddy Erişilebilirlik hizmeti etkin.</string>
     <string name="guide_assist_phone_1">Ayarlar › İzinler › Bilgisayarınızdan kontrol\'ü açın ve Bilgisayarınızın fare ve klavyesini kullanın altında İzin ver\'e dokunun.</string>
     <string name="guide_assist_pc_1">Bilgisayarınızdaki telefon yansıtma penceresinde tıklayın, sürükleyin, kaydırın ve yazın.</string>
     <string name="guide_assist_opt_1">Yazmayı durdur: Bilgisayardan uzaktan klavye yazmayı Ana Sayfa\'daki şeritten sonlandırır.</string>
@@ -1224,7 +1224,7 @@
     <string name="guide_deck_needs">Çevrimiçi eşleştirilmiş bilgisayar</string>
     <string name="guide_deck_need_1">Çevrimiçi eşleştirilmiş bilgisayar.</string>
     <string name="guide_deck_phone_1">Ana Sayfa\'da eşleştirilmiş bilgisayar kartınızdaki Deck\'e dokunun ve eylemini tetiklemek için herhangi bir kutucuğa dokunun.</string>
-    <string name="guide_deck_pc_1">Deck sayfalarını ve kutucuklarını bilgisayarınızdaki NectarLink\'te özelleştirin.</string>
+    <string name="guide_deck_pc_1">Deck sayfalarını ve kutucuklarını bilgisayarınızdaki Noddy\'te özelleştirin.</string>
     <string name="guide_deck_opt_1">Tam ekran: Deck ızgarasını telefon ekranınızın tamamına yayar.</string>
     <string name="guide_deck_privacy">Deck düzenleri ve sistem istatistikleri telefonunuz ile eşleştirilmiş bilgisayarınız arasında kalır.</string>
     <string name="guide_deck_limits">Kabuk komutu kutucukları, bilgisayarınızda bu telefon için Deck kabuk komutlarını çalıştır seçeneğinin açık olmasını gerektirir.</string>
@@ -1246,7 +1246,7 @@
     <string name="guide_wake_summary">Uyku modundaki eşleştirilmiş bir bilgisayarı yerel ağınız üzerinden Wake-on-LAN ile uyandırın.</string>
     <string name="guide_wake_where">Ana Sayfa › Eşleştirilmiş bilgisayar kartı › Uyandır</string>
     <string name="guide_wake_needs">BIOS\'ta ve ağ bağdaştırıcısında Wake-on-LAN etkin, eşleştirilmiş bilgisayar</string>
-    <string name="guide_wake_need_1">NectarLink\'in MAC adresini öğrenebilmesi için en az bir kez yerel ağ üzerinden bağlanmış eşleştirilmiş bilgisayar.</string>
+    <string name="guide_wake_need_1">Noddy\'in MAC adresini öğrenebilmesi için en az bir kez yerel ağ üzerinden bağlanmış eşleştirilmiş bilgisayar.</string>
     <string name="guide_wake_need_2">Windows ağ bağdaştırıcısı ayarlarında ve BIOS/UEFI\'de Wake-on-LAN etkin.</string>
     <string name="guide_wake_phone_1">Eşleştirilmiş bilgisayarınız Ana Sayfa\'da çevrimdışı göründüğünde kartındaki Uyandır\'a dokunun.</string>
     <string name="guide_wake_pc_1">Aygıt Yöneticisi › Ağ bağdaştırıcıları › Güç Yönetimi bölümünde Wake-on-LAN paketiyle uyandırmayı etkinleştirin.</string>
@@ -1263,7 +1263,7 @@
     <string name="guide_quick_need_2">Rahatsız Etmeyin ve sessiz mod, Rahatsız Etmeyin erişimi gerektirir.</string>
     <string name="guide_quick_need_3">Telefon parlaklığı kontrolü, Ekran parlaklığı izni veya Yükseltilmiş mod gerektirir.</string>
     <string name="guide_quick_phone_1">Ana Sayfa\'daki eşleştirilmiş bilgisayar kartınızda Bilgisayarı çaldır, Bilgisayarı kilitle ve Uyut\'u kullanın veya bilgisayar hızlı eylemler widget\'ını ekleyin.</string>
-    <string name="guide_quick_pc_1">Telefonun Rahatsız Etmeyin, zil, el feneri, ses düzeyi ve parlaklık ayarlarını bilgisayarınızdaki NectarLink\'ten açıp kapatın.</string>
+    <string name="guide_quick_pc_1">Telefonun Rahatsız Etmeyin, zil, el feneri, ses düzeyi ve parlaklık ayarlarını bilgisayarınızdaki Noddy\'ten açıp kapatın.</string>
     <string name="guide_quick_opt_1">Rahatsız Etmeyin / Ekran parlaklığı: Ayarlar › İzinler › Bilgisayarınızdan kontrol bölümünden izin verin.</string>
     <string name="guide_quick_privacy">Komutların kimliği her cihaz için TLS 1.3 üzerinden doğrulanır.</string>
     <string name="guide_quick_limits">Bilgisayarı kilitleme ve uyutma, bilgisayardaki Ayarlar › Cihazlar bölümünden her telefon için ayrı ayrı açılıp kapatılabilir.</string>
@@ -1291,7 +1291,7 @@
     <string name="guide_doctor_phone_1">Ayarlar › İzinler › Arka plan ve pil\'i açın ve kısıtlanmamış pil kullanımına izin verin.</string>
     <string name="guide_doctor_phone_2">Telefonunuzun üreticisi arka plan uygulamalarını kısıtlıyorsa üreticiye özel pil rehberini izleyin.</string>
     <string name="guide_doctor_pc_1">Aktarım gecikmesini, bağlantı noktalarını ve bağlantı sağlığını incelemek için bilgisayarınızda Bağlantı Doktoru\'nu açın.</string>
-    <string name="guide_doctor_opt_1">Bilgisayar yakındayken uyandır: Bilgisayarınızı ilişkilendirir; böylece BLE menzilindeyken Android NectarLink\'i uyandırır.</string>
+    <string name="guide_doctor_opt_1">Bilgisayar yakındayken uyandır: Bilgisayarınızı ilişkilendirir; böylece BLE menzilindeyken Android Noddy\'i uyandırır.</string>
     <string name="guide_doctor_privacy">Tanılama işlemleri telefonunuz ile eşleştirilmiş bilgisayarınız arasında yerel olarak çalışır.</string>
     <string name="guide_doctor_limits">Bazı telefon üreticilerinin pil tasarrufu ayarları Kısıtlanmamış olarak ayarlanmalıdır.</string>
     <string name="pair_link_title">%1$s ile eşleştirilsin mi?</string>
@@ -1301,18 +1301,18 @@
     <string name="pair_link_unknown_pc">bu cihaz</string>
     <string name="data_clear_failed">Geçmişin bir kısmı temizlenemedi. Tekrar deneyin.</string>
     <string name="channel_updates">Güncellemeler</string>
-    <string name="update_ready_title">NectarLink %1$s hazır</string>
+    <string name="update_ready_title">Noddy %1$s hazır</string>
     <string name="update_ready_text">Güncellemeyi kurmak için dokunun.</string>
-    <string name="update_done_title">NectarLink %1$s sürümüne güncellendi</string>
+    <string name="update_done_title">Noddy %1$s sürümüne güncellendi</string>
     <string name="update_done_text">Açmak için dokunun. Bilgisayarlarınız kendiliğinden yeniden bağlanır.</string>
     <string name="update_auto_title">Güncellemeleri otomatik kur</string>
     <string name="update_auto_text">GitHub\'daki yeni sürümler arka planda kurulur.</string>
 
     <string name="home_guide_title">Rehber</string>
     <string name="home_whats_new_guide">Yenilikler: Özellik rehberi</string>
-    <string name="home_guide_card_body">Tüm NectarLink özelliklerini keşfedin, izinleri canlı olarak kontrol edin veya herhangi bir kontrole doğrudan gitmek için Göster\'e dokunun.</string>
+    <string name="home_guide_card_body">Tüm Noddy özelliklerini keşfedin, izinleri canlı olarak kontrol edin veya herhangi bir kontrole doğrudan gitmek için Göster\'e dokunun.</string>
     <string name="home_no_pc_paired">Henüz eşleştirilmiş bilgisayar yok</string>
-    <string name="home_no_pc_body">QR kodu veya yerel keşifle eşleştirmek için Windows ya da Linux bilgisayarınızda NectarLink\'i açın veya kurulum rehberini yeniden açın.</string>
+    <string name="home_no_pc_body">QR kodu veya yerel keşifle eşleştirmek için Windows ya da Linux bilgisayarınızda Noddy\'i açın veya kurulum rehberini yeniden açın.</string>
     <string name="home_background_clipboard_title">Arka planda pano ve tam kontrol</string>
     <string name="home_background_clipboard_body">Panoyu arka planda eşitleyin ve Kablosuz hata ayıklama ile dokunmatik kontrolü etkinleştirin.</string>
     <string name="home_section_screen">Ekran, Kamera ve Giriş</string>
@@ -1345,25 +1345,25 @@
 
     <!-- Pause for banking apps -->
     <string name="banking_title">Bankacılık uygulamaları için duraklat</string>
-    <string name="banking_text">Bazı bankacılık uygulamaları Geliştirici seçenekleri, hata ayıklama veya bir erişilebilirlik hizmeti açıkken açılmaz. Bu uygulamaları burada seçin: NectarLink, onlar açıkken bu ayarları kapatır ve çıktığınızda yeniden açar.</string>
+    <string name="banking_text">Bazı bankacılık uygulamaları Geliştirici seçenekleri, hata ayıklama veya bir erişilebilirlik hizmeti açıkken açılmaz. Bu uygulamaları burada seçin: Noddy, onlar açıkken bu ayarları kapatır ve çıktığınızda yeniden açar.</string>
     <plurals name="banking_chosen">
         <item quantity="one">%1$d uygulama seçildi</item>
         <item quantity="other">%1$d uygulama seçildi</item>
     </plurals>
-    <string name="banking_needs_elevated">NectarLink\'in bu ayarları değiştirebilmesi için Yükseltilmiş modun bir kez kurulması gerekir.</string>
-    <string name="banking_needs_usage">NectarLink\'in bir bankacılık uygulamasının ne zaman açık olduğunu görebilmesi için kullanım erişimine izin verin.</string>
+    <string name="banking_needs_elevated">Noddy\'in bu ayarları değiştirebilmesi için Yükseltilmiş modun bir kez kurulması gerekir.</string>
+    <string name="banking_needs_usage">Noddy\'in bir bankacılık uygulamasının ne zaman açık olduğunu görebilmesi için kullanım erişimine izin verin.</string>
     <string name="banking_paused_now">Şu anda bir bankacılık uygulaması için duraklatıldı.</string>
     <string name="banking_choose">Uygulamaları seç</string>
     <string name="banking_pick_title">Bankacılık uygulamaları</string>
     <string name="banking_search">Uygulamalarda ara</string>
     <string name="banking_shortcut">Kısayol ekle</string>
-    <string name="banking_shortcut_hint">Bir uygulama hâlâ açılmıyorsa onu kısayolundan açın: NectarLink önce duraklar, sonra uygulamayı açar.</string>
+    <string name="banking_shortcut_hint">Bir uygulama hâlâ açılmıyorsa onu kısayolundan açın: Noddy önce duraklar, sonra uygulamayı açar.</string>
     <string name="banking_channel">Bankacılık uygulamaları için duraklat</string>
     <string name="banking_paused_title">Bir bankacılık uygulaması için duraklatıldı</string>
-    <string name="banking_paused_text">Geliştirici seçenekleri, hata ayıklama ve NectarLink\'in erişilebilirlik hizmeti, uygulamadan çıkana kadar kapalı.</string>
+    <string name="banking_paused_text">Geliştirici seçenekleri, hata ayıklama ve Noddy\'in erişilebilirlik hizmeti, uygulamadan çıkana kadar kapalı.</string>
     <string name="banking_turn_back_on">Yeniden aç</string>
     <string name="action_done">Bitti</string>
-    <!-- The phone's name as PCs see it when NectarLink runs in another Android profile: "Pixel 9a (Work)". -->
+    <!-- The phone's name as PCs see it when Noddy runs in another Android profile: "Pixel 9a (Work)". -->
     <string name="device_name_in_profile">%1$s (%2$s)</string>
     <string name="profile_work">İş</string>
     <string name="profile_other">İkinci profil</string>

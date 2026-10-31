@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma Singleton
 import QtQuick
-import app.nectarlink
+import app.noddy
 
 // The active theme: Bloom (Material You, seed presets, the default), Hive
 // (honey on charcoal or wax), Glass, or Graphite (paper and slate), light

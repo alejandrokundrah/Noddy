@@ -2,7 +2,7 @@
 //! Phone notifications as Windows toasts, with the app's icon, its actions
 //! and an inline reply field.
 //!
-//! NectarLink isn't a packaged app, so it registers an AppUserModelID under
+//! Noddy isn't a packaged app, so it registers an AppUserModelID under
 //! HKCU (display name and icon) and gives the process that ID. Toasts are
 //! driven from one thread with COM initialized; clicks, replies and
 //! dismissals come back through per-toast handlers while the app runs.
@@ -36,7 +36,7 @@ use windows::{
 };
 
 /// The app's AppUserModelID: toasts are grouped and attributed by it.
-pub const AUMID: &str = "Nectarlink.Desktop";
+pub const AUMID: &str = "Noddy.Desktop";
 
 /// What the user did with a toast.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -217,7 +217,7 @@ fn register(icon: &Path) -> windows::core::Result<()> {
         }
         .ok()
     };
-    let result = set("DisplayName", "NectarLink").and_then(|()| set("IconUri", &icon.to_string_lossy()));
+    let result = set("DisplayName", "Noddy").and_then(|()| set("IconUri", &icon.to_string_lossy()));
     // SAFETY: the key was opened above.
     unsafe {
         let _ = RegCloseKey(key);

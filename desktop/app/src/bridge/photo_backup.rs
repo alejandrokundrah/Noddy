@@ -8,7 +8,7 @@ use std::{path::PathBuf, pin::Pin};
 
 use cxx_qt::Threading;
 use cxx_qt_lib::{QString, QUrl};
-use nectarlink_core::{DeviceKind, LinkState};
+use noddy_core::{DeviceKind, LinkState};
 
 use crate::{
     core_host,

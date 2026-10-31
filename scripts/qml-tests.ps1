@@ -5,7 +5,7 @@
 
 .DESCRIPTION
   Puts the app's shared components and its Theme, Tokens and Icons
-  singletons in a QML module named app.nectarlink under target/qml-tests,
+  singletons in a QML module named app.noddy under target/qml-tests,
   with the stubs in desktop/app/tests/qml/stubs standing in for the Rust
   singletons they read, and runs qmltestrunner over the tests, off screen.
   Needs Qt (qmake on PATH, or QT_ROOT_DIR / -QtRoot).
@@ -29,7 +29,7 @@ if (-not (Test-Path $runner)) { throw "qmltestrunner not found under $QtRoot; pa
 $qml = Join-Path $repo 'desktop\app\qml'
 $tests = Join-Path $repo 'desktop\app\tests\qml'
 $imports = Join-Path $repo 'target\qml-tests'
-$module = Join-Path $imports 'app\nectarlink'
+$module = Join-Path $imports 'app\noddy'
 if (Test-Path $imports) { Remove-Item -Recurse -Force $imports }
 New-Item -ItemType Directory -Force $module | Out-Null
 
@@ -40,7 +40,7 @@ $components | Copy-Item -Destination $module
 $stubs = Get-ChildItem (Join-Path $tests 'stubs') -Filter *.qml
 $stubs | Copy-Item -Destination $module
 
-$lines = @('module app.nectarlink')
+$lines = @('module app.noddy')
 foreach ($name in $singletons + @($stubs | ForEach-Object BaseName)) {
     $lines += "singleton $name 1.0 $name.qml"
 }

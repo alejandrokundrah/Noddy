@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! NectarLink for Windows.
+//! Noddy for Windows.
 //!
-//! One process: Rust runs the core (`nectarlink-core`) and OS integration,
+//! One process: Rust runs the core (`noddy-core`) and OS integration,
 //! Qt Quick draws the UI. Windows are created when opened and destroyed when
 //! closed; the app keeps running in the tray (docs/PLAN.md §5).
 
@@ -79,7 +79,7 @@ use std::{
 #[cfg(not(target_os = "linux"))]
 use cxx_qt_lib::QGuiApplication;
 use cxx_qt_lib::{QQmlApplicationEngine, QString, QUrl};
-use nectarlink_core::{
+use noddy_core::{
     MediaAction, MediaError, MirrorInput, MirrorStart, Platform, PowerAction, StorageEntry, StorageError,
     StorageReadFile, StorageWriteDone,
 };
@@ -115,7 +115,7 @@ impl Platform for DesktopPlatform {
     fn power(&self, action: PowerAction) -> Result<(), String> {
         links::power(action)
     }
-    fn open_link(&self, _from: &nectarlink_core::DeviceId, url: &str) -> Result<(), String> {
+    fn open_link(&self, _from: &noddy_core::DeviceId, url: &str) -> Result<(), String> {
         links::open_here(url)
     }
     fn media_command(
@@ -128,61 +128,61 @@ impl Platform for DesktopPlatform {
     }
     fn mirror_requested(
         &self,
-        peer: &nectarlink_core::DeviceId,
+        peer: &noddy_core::DeviceId,
         options: &MirrorStart,
     ) -> Result<(), String> {
-        if options.session != nectarlink_core::MIRROR_SCREEN {
+        if options.session != noddy_core::MIRROR_SCREEN {
             return Err("unsupported mirror session on PC".into());
         }
         pc_mirror::start(*peer, options.clone());
         Ok(())
     }
-    fn mirror_stop_requested(&self, peer: &nectarlink_core::DeviceId, session: u32) {
-        if session == nectarlink_core::MIRROR_SCREEN {
+    fn mirror_stop_requested(&self, peer: &noddy_core::DeviceId, session: u32) {
+        if session == noddy_core::MIRROR_SCREEN {
             pc_mirror::stop_for(peer);
         }
     }
-    fn mirror_keyframe_requested(&self, peer: &nectarlink_core::DeviceId, session: u32) {
-        if session == nectarlink_core::MIRROR_SCREEN {
+    fn mirror_keyframe_requested(&self, peer: &noddy_core::DeviceId, session: u32) {
+        if session == noddy_core::MIRROR_SCREEN {
             pc_mirror::request_keyframe(peer);
         }
     }
-    fn mirror_input(&self, peer: &nectarlink_core::DeviceId, session: u32, input: MirrorInput) {
+    fn mirror_input(&self, peer: &noddy_core::DeviceId, session: u32, input: MirrorInput) {
         pc_mirror::handle_input(peer, session, input);
     }
     fn mirror_sink(
         &self,
-        peer: &nectarlink_core::DeviceId,
+        peer: &noddy_core::DeviceId,
         session: u32,
-    ) -> Option<std::sync::Arc<dyn nectarlink_core::MirrorSink>> {
+    ) -> Option<std::sync::Arc<dyn noddy_core::MirrorSink>> {
         mirror::sink(peer, session)
     }
     fn mic_sink(
         &self,
-        peer: &nectarlink_core::DeviceId,
-    ) -> Option<std::sync::Arc<dyn nectarlink_core::MicSink>> {
+        peer: &noddy_core::DeviceId,
+    ) -> Option<std::sync::Arc<dyn noddy_core::MicSink>> {
         phone_mic::sink(peer)
     }
     fn webcam_sink(
         &self,
-        peer: &nectarlink_core::DeviceId,
-    ) -> Option<std::sync::Arc<dyn nectarlink_core::WebcamSink>> {
+        peer: &noddy_core::DeviceId,
+    ) -> Option<std::sync::Arc<dyn noddy_core::WebcamSink>> {
         webcam::sink(peer)
     }
     fn remote_input(
         &self,
-        peer: &nectarlink_core::DeviceId,
-        input: nectarlink_core::RemoteInput,
+        peer: &noddy_core::DeviceId,
+        input: noddy_core::RemoteInput,
     ) -> Result<(), String> {
         remote::handle_input(peer, input);
         Ok(())
     }
-    fn deck_press(&self, peer: &nectarlink_core::DeviceId, tile: &str) -> Result<(), String> {
+    fn deck_press(&self, peer: &noddy_core::DeviceId, tile: &str) -> Result<(), String> {
         deck::handle_press(peer, tile)
     }
     fn set_pc_audio(
         &self,
-        peer: &nectarlink_core::DeviceId,
+        peer: &noddy_core::DeviceId,
         volume: Option<u8>,
         muted: Option<bool>,
     ) -> Result<(), String> {
@@ -216,7 +216,7 @@ impl Platform for DesktopPlatform {
 /// Command-line options (also used by shortcuts and autostart).
 #[derive(Debug, Default)]
 struct Options {
-    /// Where to keep data (default: %LOCALAPPDATA%\Nectarlink).
+    /// Where to keep data (default: %LOCALAPPDATA%\Noddy).
     data_dir: Option<PathBuf>,
     /// Start in the tray without opening the window (autostart).
     minimized: bool,
@@ -233,9 +233,9 @@ struct Options {
     /// Quit the running app and undo what it set up in Windows (the
     /// uninstaller). Data is kept.
     uninstall: bool,
-    /// Elevated helper: register `nectarlink_vcam.dll` in `HKLM` and exit.
+    /// Elevated helper: register `noddy_vcam.dll` in `HKLM` and exit.
     register_vcam: bool,
-    /// Elevated helper: unregister `nectarlink_vcam.dll` from `HKLM` and exit.
+    /// Elevated helper: unregister `noddy_vcam.dll` from `HKLM` and exit.
     unregister_vcam: bool,
     /// Out-of-process Windows 11 Widget Board COM server (`--widget-provider`).
     widget_provider: bool,
@@ -359,7 +359,7 @@ fn parse_options_from<I: IntoIterator<Item = std::ffi::OsString>>(iter: I) -> Op
         // Sending doesn't need the window.
         options.minimized = true;
     } else if share_targets.is_empty() && !paths.is_empty() {
-        // Desktop entry `Exec=nectarlink-desktop %U` passes URLs or dropped files
+        // Desktop entry `Exec=noddy-desktop %U` passes URLs or dropped files
         // as positional arguments without `--share`.
         share_targets = paths.into_iter().map(|p| p.to_string_lossy().into_owned()).collect();
     }
@@ -377,7 +377,7 @@ fn parse_options_from<I: IntoIterator<Item = std::ffi::OsString>>(iter: I) -> Op
 }
 
 fn default_data_dir() -> PathBuf {
-    dirs::data_local_dir().unwrap_or_else(std::env::temp_dir).join("Nectarlink")
+    dirs::data_local_dir().unwrap_or_else(std::env::temp_dir).join("Noddy")
 }
 
 /// Network changes come in bursts; tell the core once things settle.
@@ -399,10 +399,10 @@ fn watch_network() {
     });
 }
 
-/// Phone notifications as Windows toasts, sent by "NectarLink" with the
+/// Phone notifications as Windows toasts, sent by "Noddy" with the
 /// app's icon (written as a PNG, which Windows needs as a file).
 fn start_toasts() {
-    let icon = core_host::host().data_dir.join("cache").join("nectarlink.png");
+    let icon = core_host::host().data_dir.join("cache").join("noddy.png");
     win::toast::start(icon, notifications::on_toast);
 }
 
@@ -436,7 +436,7 @@ fn run_setup_window(mode: setup::Mode) -> ExitCode {
             Ok(true) => return ExitCode::SUCCESS,
             Ok(false) => {}
             Err(e) => {
-                eprintln!("nectarlink: {e}");
+                eprintln!("noddy: {e}");
                 return ExitCode::FAILURE;
             }
         }
@@ -448,7 +448,7 @@ fn run_setup_window(mode: setup::Mode) -> ExitCode {
     #[cfg(not(target_os = "linux"))]
     let mut app = QGuiApplication::new();
     if let Some(mut app) = app.as_mut() {
-        app.as_mut().set_application_name(&QString::from("NectarLink Setup"));
+        app.as_mut().set_application_name(&QString::from("Noddy Setup"));
         app.as_mut().set_application_version(&QString::from(env!("CARGO_PKG_VERSION")));
     }
     // Before any QML loads, so every string is right on the first pass.
@@ -460,7 +460,7 @@ fn run_setup_window(mode: setup::Mode) -> ExitCode {
     bridge::native::ffi::apply_app_icon();
     let mut engine = QQmlApplicationEngine::new();
     if let Some(engine) = engine.as_mut() {
-        engine.load(&QUrl::from("qrc:/qt/qml/app/nectarlink/qml/setup/SetupWindow.qml"));
+        engine.load(&QUrl::from("qrc:/qt/qml/app/noddy/qml/setup/SetupWindow.qml"));
     }
     let code = app.as_mut().map_or(1, |app| app.exec());
     drop(engine);
@@ -471,7 +471,7 @@ fn run_setup_window(mode: setup::Mode) -> ExitCode {
 fn main() -> ExitCode {
     let options = parse_options();
     if options.version {
-        println!("nectarlink-desktop {}", env!("CARGO_PKG_VERSION"));
+        println!("noddy-desktop {}", env!("CARGO_PKG_VERSION"));
         return ExitCode::SUCCESS;
     }
     if let Some(installer) = options.setup.clone().filter(|p| !p.as_os_str().is_empty()) {
@@ -492,7 +492,7 @@ fn main() -> ExitCode {
         return match win::vcam::register_hklm() {
             Ok(()) => ExitCode::SUCCESS,
             Err(e) => {
-                eprintln!("nectarlink: register-vcam failed: {e}");
+                eprintln!("noddy: register-vcam failed: {e}");
                 ExitCode::FAILURE
             }
         };
@@ -501,19 +501,19 @@ fn main() -> ExitCode {
         return match win::vcam::unregister_hklm() {
             Ok(()) => ExitCode::SUCCESS,
             Err(e) => {
-                eprintln!("nectarlink: unregister-vcam failed: {e}");
+                eprintln!("noddy: unregister-vcam failed: {e}");
                 ExitCode::FAILURE
             }
         };
     }
     // The check starts the whole app, so never on the user's own data.
     if options.ui_check && options.data_dir.is_none() {
-        eprintln!("nectarlink: --ui-check needs --data-dir");
+        eprintln!("noddy: --ui-check needs --data-dir");
         return ExitCode::FAILURE;
     }
     let data_dir = options.data_dir.clone().unwrap_or_else(default_data_dir);
     if let Err(e) = std::fs::create_dir_all(&data_dir) {
-        eprintln!("nectarlink: can't create {}: {e}", data_dir.display());
+        eprintln!("noddy: can't create {}: {e}", data_dir.display());
         return ExitCode::FAILURE;
     }
     logging::init(&data_dir);
@@ -660,7 +660,7 @@ fn main() -> ExitCode {
     #[cfg(not(target_os = "linux"))]
     let mut app = QGuiApplication::new();
     if let Some(mut app) = app.as_mut() {
-        app.as_mut().set_application_name(&QString::from("Nectarlink"));
+        app.as_mut().set_application_name(&QString::from("Noddy"));
         app.as_mut().set_application_version(&QString::from(env!("CARGO_PKG_VERSION")));
     }
     // Before any QML loads, so every string is right on the first pass.
@@ -690,7 +690,7 @@ fn main() -> ExitCode {
     let mut engine = QQmlApplicationEngine::new();
     if let Some(mut engine) = engine.as_mut() {
         bridge::native::ffi::register_qml_app_engine(engine.as_mut());
-        engine.load(&QUrl::from("qrc:/qt/qml/app/nectarlink/qml/App.qml"));
+        engine.load(&QUrl::from("qrc:/qt/qml/app/noddy/qml/App.qml"));
     }
     if options.ui_check {
         std::thread::spawn(|| {
@@ -715,10 +715,10 @@ fn main() -> ExitCode {
     if options.ui_check {
         let problems = bridge::native::ffi::qml_problem_count();
         if problems > 0 {
-            eprintln!("nectarlink: --ui-check: {problems} QML warning(s) or error(s), see above");
+            eprintln!("noddy: --ui-check: {problems} QML warning(s) or error(s), see above");
             return ExitCode::FAILURE;
         }
-        eprintln!("nectarlink: --ui-check: no QML warnings");
+        eprintln!("noddy: --ui-check: no QML warnings");
     }
     ExitCode::from(u8::try_from(code).unwrap_or(1))
 }
@@ -732,11 +732,11 @@ mod tests {
     #[test]
     fn parse_options_recognizes_share_flag() {
         let opts = parse_options_from(
-            ["--data-dir", r"C:\Temp\nectarlink-test", "--share", r"C:\photo.jpg", "https://example.com"]
+            ["--data-dir", r"C:\Temp\noddy-test", "--share", r"C:\photo.jpg", "https://example.com"]
                 .into_iter()
                 .map(OsString::from),
         );
-        assert_eq!(opts.data_dir, Some(PathBuf::from(r"C:\Temp\nectarlink-test")));
+        assert_eq!(opts.data_dir, Some(PathBuf::from(r"C:\Temp\noddy-test")));
         assert!(opts.minimized);
         assert_eq!(
             opts.share,
@@ -751,27 +751,27 @@ mod tests {
     #[test]
     fn parse_options_recognizes_ui_check_flag() {
         let opts = parse_options_from(
-            ["--ui-check", "--data-dir", r"C:\Temp\nectarlink-test"].into_iter().map(OsString::from),
+            ["--ui-check", "--data-dir", r"C:\Temp\noddy-test"].into_iter().map(OsString::from),
         );
         assert!(opts.ui_check);
         assert!(!opts.minimized);
-        assert_eq!(opts.data_dir, Some(PathBuf::from(r"C:\Temp\nectarlink-test")));
+        assert_eq!(opts.data_dir, Some(PathBuf::from(r"C:\Temp\noddy-test")));
         assert!(!parse_options_from(["--minimized"].into_iter().map(OsString::from)).ui_check);
     }
 
     #[test]
     fn parse_options_recognizes_task_flag() {
         let find_opts = parse_options_from(
-            ["--data-dir", r"C:\Temp\nectarlink-test", "--task", "find-phone"]
+            ["--data-dir", r"C:\Temp\noddy-test", "--task", "find-phone"]
                 .into_iter()
                 .map(OsString::from),
         );
-        assert_eq!(find_opts.data_dir, Some(PathBuf::from(r"C:\Temp\nectarlink-test")));
+        assert_eq!(find_opts.data_dir, Some(PathBuf::from(r"C:\Temp\noddy-test")));
         assert_eq!(find_opts.task.as_deref(), Some("find-phone"));
         assert!(find_opts.minimized);
 
         let timeline_opts = parse_options_from(
-            ["--data-dir", r"C:\Temp\nectarlink-test", "--task", "open-timeline"]
+            ["--data-dir", r"C:\Temp\noddy-test", "--task", "open-timeline"]
                 .into_iter()
                 .map(OsString::from),
         );
@@ -782,9 +782,9 @@ mod tests {
     #[test]
     fn parse_options_recognizes_widget_provider_flag() {
         let opts = parse_options_from(
-            ["--data-dir", r"C:\Temp\nectarlink-test", "--widget-provider"].into_iter().map(OsString::from),
+            ["--data-dir", r"C:\Temp\noddy-test", "--widget-provider"].into_iter().map(OsString::from),
         );
-        assert_eq!(opts.data_dir, Some(PathBuf::from(r"C:\Temp\nectarlink-test")));
+        assert_eq!(opts.data_dir, Some(PathBuf::from(r"C:\Temp\noddy-test")));
         assert!(opts.widget_provider);
     }
 

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink
+import app.noddy
 
 // A settings-style row: optional icon, title and description, and a
 // trailing control placed in `trailing`.

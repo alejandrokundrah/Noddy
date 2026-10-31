@@ -139,8 +139,8 @@ jobs:
           echo "APPIMAGE_RUNTIME=/tmp/runtime-x86_64" >> "$GITHUB_ENV"
       - name: Validate desktop entry and AppStream metadata
         run: |
-          desktop-file-validate desktop/packaging/linux/nectarlink.desktop
-          appstreamcli validate --no-net desktop/packaging/linux/org.nectarlink.desktop.metainfo.xml
+          desktop-file-validate desktop/packaging/linux/noddy.desktop
+          appstreamcli validate --no-net desktop/packaging/linux/org.noddy.desktop.metainfo.xml
       - name: Check the install script
         run: shellcheck -s sh desktop/packaging/linux/install.sh
       - name: Cache FFmpeg source archives
@@ -153,7 +153,7 @@ jobs:
           APPIMAGE_EXTRACT_AND_RUN: "1"
           FFMPEG_SOURCE_CACHE: ${{ runner.temp }}/ffmpeg-sources
         run: |
-          cargo build --release -p nectarlink-desktop
+          cargo build --release -p noddy-desktop
           bash ./desktop/packaging/linux/build-ffmpeg-backends.sh
           ./desktop/packaging/linux/build-deb.sh
           ./desktop/packaging/linux/build-rpm.sh
@@ -164,15 +164,15 @@ jobs:
         env:
           APPIMAGE_EXTRACT_AND_RUN: "1"
         run: |
-          dpkg-deb -c dist/*.deb > /tmp/nectarlink-deb-files
-          rpm -qlp dist/*.rpm > /tmp/nectarlink-rpm-files
-          tar -tzf dist/*.tar.gz > /tmp/nectarlink-tar-files
-          (cd /tmp && "$GITHUB_WORKSPACE"/dist/*.AppImage --appimage-extract 'usr/bin/libnectarlink-video-ffmpeg*.so')
+          dpkg-deb -c dist/*.deb > /tmp/noddy-deb-files
+          rpm -qlp dist/*.rpm > /tmp/noddy-rpm-files
+          tar -tzf dist/*.tar.gz > /tmp/noddy-tar-files
+          (cd /tmp && "$GITHUB_WORKSPACE"/dist/*.AppImage --appimage-extract 'usr/bin/libnoddy-video-ffmpeg*.so')
           for major in 7 8 9; do
-            adapter="libnectarlink-video-ffmpeg${major}.so"
-            grep -F "$adapter" /tmp/nectarlink-deb-files
-            grep -F "$adapter" /tmp/nectarlink-rpm-files
-            grep -F "$adapter" /tmp/nectarlink-tar-files
+            adapter="libnoddy-video-ffmpeg${major}.so"
+            grep -F "$adapter" /tmp/noddy-deb-files
+            grep -F "$adapter" /tmp/noddy-rpm-files
+            grep -F "$adapter" /tmp/noddy-tar-files
             test -f "/tmp/squashfs-root/usr/bin/$adapter"
           done
       - name: Check that each package starts
@@ -182,28 +182,28 @@ jobs:
           docker run --rm -v "$PWD/dist:/dist:ro" ubuntu:24.04 bash -euc '
             apt-get update -qq
             DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends /dist/*.deb >/dev/null
-            nectarlink-desktop --version'
+            noddy-desktop --version'
           docker run --rm -v "$PWD/dist:/dist:ro" fedora:40 bash -euc '
             dnf install -y -q --nogpgcheck /dist/*.rpm >/dev/null
-            nectarlink-desktop --version'
+            noddy-desktop --version'
           APPIMAGE_EXTRACT_AND_RUN=1 ./dist/*.AppImage --version
           mkdir -p /tmp/tarball && tar -xzf dist/*.tar.gz -C /tmp/tarball
-          /tmp/tarball/*/nectarlink-desktop --version
+          /tmp/tarball/*/noddy-desktop --version
       - name: Check that install.sh installs and removes each package
         # The one-line install, from these files instead of GitHub: the .deb on
         # Ubuntu, the .rpm on Fedora, and the tarball in a home folder.
         run: |
           (cd dist && sha256sum *.deb *.rpm *.tar.gz > SHA256SUMS.txt)
           for image in ubuntu:24.04 fedora:40; do
-            docker run --rm -v "$PWD/dist:/dist:ro" -e NECTARLINK_ASSETS_DIR=/dist "$image" sh -euc '
+            docker run --rm -v "$PWD/dist:/dist:ro" -e NODDY_ASSETS_DIR=/dist "$image" sh -euc '
               sh /dist/install.sh
-              nectarlink-desktop --version
+              noddy-desktop --version
               sh /dist/install.sh --uninstall
-              ! command -v nectarlink-desktop'
+              ! command -v noddy-desktop'
           done
           docker run --rm -v "$PWD/dist:/dist:ro" ubuntu:24.04 sh -euc '
             useradd -m user
-            su user -c "NECTARLINK_ASSETS_DIR=/dist sh /dist/install.sh && ~/.local/bin/nectarlink-desktop --version"'
+            su user -c "NODDY_ASSETS_DIR=/dist sh /dist/install.sh && ~/.local/bin/noddy-desktop --version"'
           rm dist/SHA256SUMS.txt
       - uses: actions/upload-artifact@v7
         with:
@@ -245,16 +245,16 @@ jobs:
       - name: Build
         working-directory: android
         env:
-          NECTARLINK_KEYSTORE: ${{ runner.temp }}/release.jks
-          NECTARLINK_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          NODDY_KEYSTORE: ${{ runner.temp }}/release.jks
+          NODDY_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         # Phones: 64-bit ARM, and 32-bit ARM for older ones.
-        run: ./gradlew --no-daemon assembleRelease -Pnectarlink.abis=arm64-v8a,armeabi-v7a
+        run: ./gradlew --no-daemon assembleRelease -Pnoddy.abis=arm64-v8a,armeabi-v7a
       - name: Check the signature, and name the app
         run: |
           apk=android/app/build/outputs/apk/release/app-release.apk
           "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --print-certs "$apk"
           mkdir -p out
-          cp "$apk" "out/Nectarlink-${GITHUB_REF_NAME#v}-android.apk"
+          cp "$apk" "out/Noddy-${GITHUB_REF_NAME#v}-android.apk"
       - name: Forget the key
         if: always()
         run: rm -f "$RUNNER_TEMP/release.jks"
@@ -285,7 +285,7 @@ jobs:
         run: |
           # The release's name, if Cargo.toml gives one ([workspace.metadata.release]).
           name=$(awk '/^\[workspace.metadata.release\]/{f=1;next} /^\[/{f=0} f && /^name = /{print $3}' source/Cargo.toml | tr -d '"')
-          title="NectarLink ${GITHUB_REF_NAME#v}${name:+ $name}"
+          title="Noddy ${GITHUB_REF_NAME#v}${name:+ $name}"
           cd files
           sha256sum *.exe *.deb *.rpm *.AppImage *.tar.gz *.apk install.sh > SHA256SUMS.txt
           cat SHA256SUMS.txt

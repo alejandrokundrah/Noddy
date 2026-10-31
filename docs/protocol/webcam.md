@@ -11,7 +11,7 @@ travel on a dedicated bidirectional QUIC stream (`{ svc: "webcam", op: "video", 
 | `camera.stream` | Phone | Streams a camera for webcam use (when `CAMERA` permission is granted) |
 | `camera.virtual` | PC | Receives and decodes a phone's webcam stream |
 | `camera.virtual.hevc` | PC | Also accepts H.265/HEVC webcam video; absence means H.264 only |
-| `addon.vcam` | PC | The Windows virtual camera COM add-on is registered in `HKLM`, so apps (Teams, Meet, Zoom, Windows Camera) see `"NectarLink - <Phone name>"` |
+| `addon.vcam` | PC | The Windows virtual camera COM add-on is registered in `HKLM`, so apps (Teams, Meet, Zoom, Windows Camera) see `"Noddy - <Phone name>"` |
 
 Both devices have a `webcam` per-device toggle (on by default). When turned off
 for a peer, `webcam.start` is refused with `denied` (`4`), incoming `webcam`
@@ -79,7 +79,7 @@ The phone opens a bidirectional stream to the PC and writes the stream header:
 { t: "stream", svc: "webcam", op: "video", v: 1 }
 ```
 
-Followed by a sequence of framed video packets (`core/nectarlink-protocol/src/video.rs`):
+Followed by a sequence of framed video packets (`core/noddy-protocol/src/video.rs`):
 
 ```
 [kind: u8][timestamp_us: u64 big-endian][length: u32 big-endian][payload: length bytes]

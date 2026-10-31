@@ -20,7 +20,7 @@ use std::{
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
-use nectarlink_core::{DeviceId, Error, LinkState, NodeEvent, PhotoItem, Transfer, TransferState};
+use noddy_core::{DeviceId, Error, LinkState, NodeEvent, PhotoItem, Transfer, TransferState};
 use serde::{Deserialize, Serialize};
 use tokio::sync::Notify;
 
@@ -53,7 +53,7 @@ const GIVE_UP_AFTER: Duration = Duration::from_secs(30 * 60);
 #[serde(default, rename_all = "camelCase")]
 pub struct DeviceBackup {
     pub enabled: bool,
-    /// Where files go; `None` means the default (Pictures\NectarLink\<phone>).
+    /// Where files go; `None` means the default (Pictures\Noddy\<phone>).
     pub folder: Option<PathBuf>,
     pub videos: bool,
     /// Items backed up, by the phone's ID, with their size.
@@ -236,7 +236,7 @@ pub fn default_folder(phone_name: &str) -> PathBuf {
     let pictures = dirs::picture_dir()
         .or_else(|| dirs::home_dir().map(|h| h.join("Pictures")))
         .unwrap_or_else(|| PathBuf::from("."));
-    pictures.join("NectarLink").join(folder_name(phone_name))
+    pictures.join("Noddy").join(folder_name(phone_name))
 }
 
 /// A phone's name as a folder name: nothing Windows refuses in one.
@@ -313,11 +313,11 @@ pub fn claims(t: &Transfer) -> bool {
     let s = state();
     s.filing.contains(&t.id)
         || s.devices.get(&t.device).is_some_and(|b| b.pending.contains_key(&t.id))
-        || (s.asking.contains(&t.device) && t.direction == nectarlink_core::Direction::Incoming)
+        || (s.asking.contains(&t.device) && t.direction == noddy_core::Direction::Incoming)
 }
 
 fn on_transfer(t: &Transfer) {
-    if t.direction != nectarlink_core::Direction::Incoming {
+    if t.direction != noddy_core::Direction::Incoming {
         return;
     }
     let finished =
@@ -545,7 +545,7 @@ pub fn start() {
 }
 
 /// One pass for one phone: find what's new, then copy it, one item at a time.
-async fn run(node: &nectarlink_core::Node, device: DeviceId) {
+async fn run(node: &noddy_core::Node, device: DeviceId) {
     let online = core_host::host()
         .hub
         .read(|s| s.devices.iter().any(|d| d.id == device && matches!(d.link, LinkState::Online { .. })));
@@ -617,7 +617,7 @@ async fn run(node: &nectarlink_core::Node, device: DeviceId) {
 }
 
 /// Asks for one item and waits until it's filed, or stops making progress.
-async fn copy_one(node: &nectarlink_core::Node, device: DeviceId, item: &PhotoItem) -> Result<(), Error> {
+async fn copy_one(node: &noddy_core::Node, device: DeviceId, item: &PhotoItem) -> Result<(), Error> {
     let name = core_host::host().hub.read(|s| s.name_of(&device)).unwrap_or_default();
     let folder =
         state().devices.get(&device).map(|b| folder_of(b, &name)).unwrap_or_else(|| default_folder(&name));
@@ -720,7 +720,7 @@ fn stopped(device: DeviceId, e: &Error) {
             Activity::Problem(tr!("PhotoBackup", "Photos are turned off for this PC on %1.", name))
         }
         Error::Unsupported => {
-            Activity::Problem(tr!("PhotoBackup", "Update NectarLink on %1 to back up its photos.", name))
+            Activity::Problem(tr!("PhotoBackup", "Update Noddy on %1 to back up its photos.", name))
         }
         Error::Io(io) if io.kind() == std::io::ErrorKind::StorageFull => {
             Activity::Problem(tr!("PhotoBackup", "The backup folder's drive is full."))

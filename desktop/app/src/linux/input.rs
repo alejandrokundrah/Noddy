@@ -19,7 +19,7 @@ use std::{
     sync::{Mutex, OnceLock},
 };
 
-use nectarlink_core::{ButtonAction, KeyMod, MouseButton, PowerAction, SlideAction, TouchAction};
+use noddy_core::{ButtonAction, KeyMod, MouseButton, PowerAction, SlideAction, TouchAction};
 
 // ---- Linux `/dev/uinput` kernel ABI constants ----
 const EV_SYN: u16 = 0x00;
@@ -124,7 +124,7 @@ impl UinputDevice {
                 name: [0u8; 80],
                 ff_effects_max: 0,
             };
-            let dev_name = b"NectarLink Virtual Input";
+            let dev_name = b"Noddy Virtual Input";
             setup.name[..dev_name.len()].copy_from_slice(dev_name);
 
             if libc::ioctl(fd, UI_DEV_SETUP, &setup) < 0 || libc::ioctl(fd, UI_DEV_CREATE) < 0 {
@@ -328,8 +328,8 @@ impl RemoteDesktopPortal {
         let mut iter = zbus::blocking::MessageIterator::for_match_rule(rule, &conn, None).ok()?;
 
         let pid = std::process::id();
-        let session_token = format!("nectarlink_rd_sess_{pid}");
-        let create_token = format!("nectarlink_rd_create_{pid}");
+        let session_token = format!("noddy_rd_sess_{pid}");
+        let create_token = format!("noddy_rd_create_{pid}");
 
         let mut create_opts: HashMap<&str, zbus::zvariant::Value<'_>> = HashMap::new();
         create_opts.insert("handle_token", zbus::zvariant::Value::from(create_token));
@@ -352,7 +352,7 @@ impl RemoteDesktopPortal {
         let session_path = zbus::zvariant::OwnedObjectPath::try_from(session_str).ok()?;
 
         // SelectDevices: types = 3 (1 = KEYBOARD | 2 = POINTER).
-        let select_token = format!("nectarlink_rd_select_{pid}");
+        let select_token = format!("noddy_rd_select_{pid}");
         let mut select_opts: HashMap<&str, zbus::zvariant::Value<'_>> = HashMap::new();
         select_opts.insert("handle_token", zbus::zvariant::Value::from(select_token));
         select_opts.insert("types", zbus::zvariant::Value::U32(3));
@@ -371,7 +371,7 @@ impl RemoteDesktopPortal {
         Self::wait_portal_response(&mut iter, select_req_path.as_deref())?;
 
         // Start session.
-        let start_token = format!("nectarlink_rd_start_{pid}");
+        let start_token = format!("noddy_rd_start_{pid}");
         let mut start_opts: HashMap<&str, zbus::zvariant::Value<'_>> = HashMap::new();
         start_opts.insert("handle_token", zbus::zvariant::Value::from(start_token));
 

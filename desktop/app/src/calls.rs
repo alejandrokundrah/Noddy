@@ -15,7 +15,7 @@ use std::{
     },
 };
 
-use nectarlink_core::{
+use noddy_core::{
     CallCommand, CallLogEntry, CallState, Contact, DeviceId, Error, FeatureState, LinkState, NodeEvent,
 };
 use serde_json::{Value, json};
@@ -313,7 +313,7 @@ fn show_ringing(device: DeviceId, call: &CallState, silenced: bool) {
         key: key(device, &call.id),
         title: caller(call),
         body,
-        attribution: "NectarLink".into(),
+        attribution: "Noddy".into(),
         icon: call.photo.as_deref().and_then(|photo| save_photo(device, &call.id, photo)),
         image: None,
         actions,
@@ -349,7 +349,7 @@ fn show_in_progress(device: DeviceId, call: &CallState) {
         key: format!("{ACTIVE}{}", key(device, &call.id)),
         title: tr!("Calls", "On a call with %1", caller(call)),
         body: format!("On {}", phone_name(device)),
-        attribution: "NectarLink".into(),
+        attribution: "Noddy".into(),
         icon: None,
         image: None,
         actions,
@@ -378,7 +378,7 @@ fn show_missed(device: DeviceId, call: &CallState) {
         key: format!("missed {}", key(device, &call.id)),
         title: tr!("Calls", "Missed call from %1", caller(call)),
         body: format!("On {}", phone_name(device)),
-        attribution: "NectarLink".into(),
+        attribution: "Noddy".into(),
         icon: None,
         image: None,
         actions: Vec::new(),
@@ -813,7 +813,7 @@ pub fn dial_problem(error: &Error) -> &'static str {
     match error {
         Error::Denied => "Calls are turned off for this phone.",
         Error::Unsupported => {
-            "The phone doesn't place calls for this PC. Allow it in the NectarLink app on the phone."
+            "The phone doesn't place calls for this PC. Allow it in the Noddy app on the phone."
         }
         Error::Offline | Error::NotPaired | Error::Timeout => "The phone isn't connected.",
         _ => "The phone couldn't place that call.",
@@ -993,7 +993,7 @@ mod tests {
 
     #[test]
     fn call_log_and_contacts_view_matches_numbers_and_formats_json() {
-        use nectarlink_core::ContactNumber;
+        use noddy_core::ContactNumber;
 
         page_state(|s| {
             *s = PageState {

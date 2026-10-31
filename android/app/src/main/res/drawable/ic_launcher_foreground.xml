@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
-<!-- Adaptive icon foreground: the Waggle Dance mark (assets/brand/icon.svg),
+<!-- Adaptive icon foreground: the Waggle Dance mark (assets/noddy/icon.svg),
      two loops for the phone and the PC around a drop of nectar, scaled to
      stay inside the 66dp safe zone of the 108dp canvas. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"

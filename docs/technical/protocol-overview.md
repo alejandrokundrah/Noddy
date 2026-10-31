@@ -1,6 +1,6 @@
 # Protocol Overview
 
-The NectarLink wire protocol (`nectarlink/0`) runs over a single mutually authenticated QUIC + TLS 1.3 connection per peer (`iroh` `1.3`). It multiplexes control messages, request/response RPCs, bulk file streams, real-time media streams, and unreliable low-latency datagrams without head-of-line blocking between independent features.
+The Noddy wire protocol (`noddy/0`) runs over a single mutually authenticated QUIC + TLS 1.3 connection per peer (`iroh` `1.3`). It multiplexes control messages, request/response RPCs, bulk file streams, real-time media streams, and unreliable low-latency datagrams without head-of-line blocking between independent features.
 
 ## Specification Index (`docs/protocol/`)
 
@@ -8,7 +8,7 @@ All 18 normative specification files live in [`docs/protocol/`](../protocol/v0.m
 
 | Specification | Capability IDs | Summary |
 |---|---|---|
-| [`v0.md`](../protocol/v0.md) | `msg.v0` (core) | Transport parameters, ALPNs (`nectarlink/0`, `nectarlink-pair/0`), LEB128 + CBOR envelope framing, `hello` / `hello.update` handshake, pairing flows, error codes |
+| [`v0.md`](../protocol/v0.md) | `msg.v0` (core) | Transport parameters, ALPNs (`noddy/0`, `noddy-pair/0`), LEB128 + CBOR envelope framing, `hello` / `hello.update` handshake, pairing flows, error codes |
 | [`capabilities.md`](../protocol/capabilities.md) | All capabilities | Registry of capability namespaces, stream types, and version negotiation rules |
 | [`actions.md`](../protocol/actions.md) | `actions.v0`, `commands.v0` | Find My Phone/PC ring, lock screen, shutdown/sleep/restart, open URL, user-defined command execution, and task completion notifications |
 | [`calls.md`](../protocol/calls.md) | `calls.v0` | Live call state events (`ringing`, `active`, `ended`), answer/hangup/decline controls, and call log synchronization |
@@ -25,9 +25,9 @@ All 18 normative specification files live in [`docs/protocol/`](../protocol/v0.m
 | [`sms.md`](../protocol/sms.md) | `sms.v0` | SMS/MMS thread list (`sms.threads`), message history (`sms.messages`), outbound sending (`sms.send`), SIM selection, and incoming message events (`sms.received`) |
 | [`storage.md`](../protocol/storage.md) | `storage.v0` | Remote directory listing (`storage.list`), file download (`storage.read`), upload (`storage.write`), rename/move (`storage.rename`), mkdir (`storage.mkdir`), and delete (`storage.delete`) |
 | [`toggles.md`](../protocol/toggles.md) | `toggles.v0` | Live phone status telemetry (battery, Wi-Fi, Bluetooth, DND, ringer mode, flashlight, hotspot, cellular signal) and quick-toggle actions |
-| [`webcam.md`](../protocol/webcam.md) | `webcam.v0` | Phone-as-webcam video streaming into the Windows Media Foundation virtual camera (`nectarlink_vcam.dll`) with camera switching, resolution/FPS selection, and torch control |
+| [`webcam.md`](../protocol/webcam.md) | `webcam.v0` | Phone-as-webcam video streaming into the Windows Media Foundation virtual camera (`noddy_vcam.dll`) with camera switching, resolution/FPS selection, and torch control |
 
-## Wire Framing (`core/nectarlink-protocol/src/frame.rs`)
+## Wire Framing (`core/noddy-protocol/src/frame.rs`)
 
 All framed streams (the session control stream and per-service RPC headers) use unsigned LEB128 length-prefixed CBOR (`RFC 8949`):
 
@@ -53,7 +53,7 @@ Unknown fields in `b` are ignored by serde deserializers so minor revisions can 
 
 ## QUIC Stream and Datagram Taxonomy
 
-A `nectarlink/0` session uses four distinct QUIC transport primitives:
+A `noddy/0` session uses four distinct QUIC transport primitives:
 
 | Primitive | Direction | Framing | Typical Consumers |
 |---|---|---|---|
@@ -76,7 +76,7 @@ A `nectarlink/0` session uses four distinct QUIC transport primitives:
 
 ## Resumable File Transfers (`files.v0`)
 
-Implemented in `core/nectarlink-core/src/transfer.rs` and specified in [`docs/protocol/files.md`](../protocol/files.md).
+Implemented in `core/noddy-core/src/transfer.rs` and specified in [`docs/protocol/files.md`](../protocol/files.md).
 
 ```text
 Sender                                                  Receiver
@@ -111,7 +111,7 @@ Streams remaining 73,400,320 raw bytes ─────────────�
 
 ## Real-Time Media Framing (`mirror.v0` & `webcam.v0`)
 
-Implemented in `core/nectarlink-protocol/src/video.rs` and specified in [`docs/protocol/mirror.md`](../protocol/mirror.md) and [`docs/protocol/webcam.md`](../protocol/webcam.md).
+Implemented in `core/noddy-protocol/src/video.rs` and specified in [`docs/protocol/mirror.md`](../protocol/mirror.md) and [`docs/protocol/webcam.md`](../protocol/webcam.md).
 
 ### Video Stream Packet Format
 

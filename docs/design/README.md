@@ -16,8 +16,7 @@ Open the HTML files in a browser and switch themes and Material You seeds at the
 - **Bloom** is the default theme: the "Bloom Expressive" direction (C), refined to be minimal,
   soothing and professional. Material You tonal color roles, seeded from the phone's wallpaper
   (Honey is the brand default seed). Light and dark.
-- **Graphite** is a second, built-in theme, translated from the maintainer's Graphite project
-  (github.com/thtbee/graphite): archival paper (`#F5F2EB`) and obsidian slate (`#0D0D0E`),
+- **Graphite** is a second, built-in theme: archival paper (`#F5F2EB`) and obsidian slate (`#0D0D0E`),
   ink-black controls, hairline rules, faint drafting grid and paper grain, monospace uppercase
   annotations, crop marks, Instrument Serif display type and a rare handwritten margin note.
   Monochrome by design (Material You off). Variants: Paper and Slate.

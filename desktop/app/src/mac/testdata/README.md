@@ -6,7 +6,7 @@ SHA-256: 8013c4ec0b809193701da4f9fca1d701601508f06776adf8f70bbe35cc823b45.
 
 Generated with FFmpeg/libx264 baseline, yuv420p, no B frames, repeated headers,
 AUD, BT.709 limited-range metadata; filter_units removes the SEI NAL. The encoder
-is a development tool and is not bundled with NectarLink. Offline reference decode
+is a development tool and is not bundled with Noddy. Offline reference decode
 produced one 4096-byte BGRA frame with first pixel [0, 0, 252, 255].
 
 Generation command:

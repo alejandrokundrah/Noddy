@@ -1,6 +1,6 @@
 # Releasing
 
-How a version of NectarLink gets from `main` to people's devices, and how the
+How a version of Noddy gets from `main` to people's devices, and how the
 apps update themselves afterwards.
 
 ## What a release is
@@ -9,9 +9,9 @@ A GitHub release with four files:
 
 | File | Built by |
 |---|---|
-| `Nectarlink-<version>-x64-setup.exe` | The `windows` job: `scripts/package.ps1`, then `scripts/smoke-installer.ps1` installs and uninstalls it |
-| `Nectarlink-<version>-arm64-setup.exe` | The `windows-arm64` job: cross-compiled and packaged via `scripts/package.ps1 -Arch arm64` |
-| `Nectarlink-<version>-android.apk` | The `android` job: a release build for 64-bit and 32-bit ARM, signed with the release key and checked with `apksigner verify` |
+| `Noddy-<version>-x64-setup.exe` | The `windows` job: `scripts/package.ps1`, then `scripts/smoke-installer.ps1` installs and uninstalls it |
+| `Noddy-<version>-arm64-setup.exe` | The `windows-arm64` job: cross-compiled and packaged via `scripts/package.ps1 -Arch arm64` |
+| `Noddy-<version>-android.apk` | The `android` job: a release build for 64-bit and 32-bit ARM, signed with the release key and checked with `apksigner verify` |
 | `SHA256SUMS.txt` | The `publish` job, over all installers and APKs |
 
 Each app's updater needs its own file and `SHA256SUMS.txt`: it only
@@ -40,16 +40,16 @@ Each Windows updater picks the installer for its own architecture.
 
 **Android.** Release builds are signed with the key in the
 `ANDROID_KEYSTORE` (base64 of the `.jks`) and `ANDROID_KEYSTORE_PASSWORD`
-repository secrets; the key's alias is `nectarlink`. Android only installs an
+repository secrets; the key's alias is `noddy`. Android only installs an
 update signed with the same key as the installed app, so:
 
 - Keep an offline backup of the keystore and its password. If the key is
   lost, no existing install can ever be updated again; everyone would have to
   uninstall and reinstall.
 - Builds signed with the debug key (local `assembleRelease` without
-  `NECTARLINK_KEYSTORE`) can't update to or from official releases.
-- To sign locally: set `NECTARLINK_KEYSTORE` to the `.jks` path and
-  `NECTARLINK_KEYSTORE_PASSWORD`, then `./gradlew assembleRelease`.
+  `NODDY_KEYSTORE`) can't update to or from official releases.
+- To sign locally: set `NODDY_KEYSTORE` to the `.jks` path and
+  `NODDY_KEYSTORE_PASSWORD`, then `./gradlew assembleRelease`.
 
 **Windows.** The installer and the app aren't Authenticode-signed yet, so
 SmartScreen warns on first download until the files build reputation. Options
@@ -63,15 +63,15 @@ Signing. Either plugs in after `package.ps1` builds the installer, before
 - **Windows** (`desktop/app/src/updater.rs`): checks the latest release 30
   seconds after start and daily. With **Install updates automatically** on,
   it waits until nobody has used the PC for 10 minutes and nothing is in
-  progress, then starts the **Nectarlink Update** task that the installer
-  registers (`desktop/installer/nectarlink.nsi`). The task runs as SYSTEM,
+  progress, then starts the **Noddy Update** task that the installer
+  registers (`desktop/installer/noddy.nsi`). The task runs as SYSTEM,
   downloads and checks the installer itself, and runs it silently; a hidden
   relauncher reopens the app afterwards. The task logs to `update.log` in the
   install folder. Details and the security reasoning:
   [security model](security-model.md#automatic-updates-and-release-verification).
 - **Android** (`update/AppUpdater.kt`): checks daily from the connection
   service and when the app opens, and installs through `PackageInstaller`.
-  Android 12 and later skip the confirmation once NectarLink installed the
+  Android 12 and later skip the confirmation once Noddy installed the
   running version itself; the first update after a manual install asks once.
 
 ## Testing an update before publishing

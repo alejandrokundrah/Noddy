@@ -33,9 +33,9 @@ confidence-threshold = 0.9
 # The apps themselves are GPL; nothing else may be, so a GPL dependency can
 # never end up in the MPL core by accident.
 exceptions = [
-    { crate = "nectarlink-cli", allow = ["GPL-3.0-or-later"] },
-    { crate = "nectarlink-desktop", allow = ["GPL-3.0-or-later"] },
-    { crate = "nectarlink-vcam", allow = ["GPL-3.0-or-later"] },
+    { crate = "noddy-cli", allow = ["GPL-3.0-or-later"] },
+    { crate = "noddy-desktop", allow = ["GPL-3.0-or-later"] },
+    { crate = "noddy-vcam", allow = ["GPL-3.0-or-later"] },
     { crate = "xtask", allow = ["GPL-3.0-or-later"] },
     { crate = "s1-qt-rust", allow = ["GPL-3.0-or-later"] },
 ]

@@ -1,10 +1,10 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Installs NectarLink on Linux, with everything it needs, and shows each step
+# Installs Noddy on Linux, with everything it needs, and shows each step
 # as it goes:
 #
-#   curl -fsSL https://github.com/thtbee/nectarlink/releases/latest/download/install.sh | sh
+#   curl -fsSL https://github.com/alejandrokundrah/Noddy/releases/latest/download/install.sh | sh
 #
 # It picks the package that fits this system (.deb with apt, .rpm with dnf
 # or zypper, the tarball elsewhere), checks it against the release's
@@ -14,28 +14,28 @@
 # firewall, for your local network only.
 #
 # Options, after `sh -s --` when piped:
-#   --uninstall        Remove NectarLink and the system settings this added
+#   --uninstall        Remove Noddy and the system settings this added
 #   --no-extras        Install the app only
 #   --version X.Y.Z    Install that release instead of the latest
 #   --package KIND     deb, rpm or tarball, instead of the one that fits
 #   --help             Show this
 #
-# NECTARLINK_ASSETS_DIR=/path takes the release files from a folder instead
+# NODDY_ASSETS_DIR=/path takes the release files from a folder instead
 # of GitHub (for testing).
 
 # Everything is in functions, called on the last line: piped into sh, the
 # whole script has arrived before anything runs.
 
-REPO="thtbee/nectarlink"
+REPO="alejandrokundrah/Noddy"
 DATA_PORT=7718
 MDNS_PORT=5353
 LOCALSEND_PORT=53317
 MIN_GLIBC="2.39"
-WEBCAM_NAME="NectarLink Webcam"
-VCAM_MODULES_CONF="/etc/modules-load.d/nectarlink-vcam.conf"
-VCAM_MODPROBE_CONF="/etc/modprobe.d/nectarlink-vcam.conf"
-UINPUT_RULE="/etc/udev/rules.d/70-nectarlink-uinput.rules"
-UINPUT_MODULES_CONF="/etc/modules-load.d/nectarlink-uinput.conf"
+WEBCAM_NAME="Noddy Webcam"
+VCAM_MODULES_CONF="/etc/modules-load.d/noddy-vcam.conf"
+VCAM_MODPROBE_CONF="/etc/modprobe.d/noddy-vcam.conf"
+UINPUT_RULE="/etc/udev/rules.d/70-noddy-uinput.rules"
+UINPUT_MODULES_CONF="/etc/modules-load.d/noddy-uinput.conf"
 PRIVATE_NETS="192.168.0.0/16 10.0.0.0/8 172.16.0.0/12"
 
 STEP=0
@@ -64,7 +64,7 @@ good() { printf '      %s%s%s\n' "$GREEN" "$1" "$RESET"; }
 note() { printf '      %s%s%s\n' "$YELLOW" "$1" "$RESET"; }
 
 fail() {
-    printf '\n%sCould not install NectarLink:%s %s\n' "$RED" "$RESET" "$1" >&2
+    printf '\n%sCould not install Noddy:%s %s\n' "$RED" "$RESET" "$1" >&2
     [ -n "${2:-}" ] && printf '%s\n' "$2" >&2
     exit 1
 }
@@ -103,13 +103,13 @@ admin() {
 
 usage() {
     cat <<EOF
-Installs NectarLink on Linux, with everything it needs.
+Installs Noddy on Linux, with everything it needs.
 
   curl -fsSL https://github.com/$REPO/releases/latest/download/install.sh | sh
   curl -fsSL https://github.com/$REPO/releases/latest/download/install.sh | sh -s -- [options]
 
 Options:
-  --uninstall        Remove NectarLink and the system settings this added
+  --uninstall        Remove Noddy and the system settings this added
   --no-extras        Install the app only (no webcam, keyboard or firewall setup)
   --version X.Y.Z    Install that release instead of the latest
   --package KIND     deb, rpm or tarball, instead of the one that fits
@@ -165,7 +165,7 @@ find_admin() {
     fi
 }
 
-# The user NectarLink runs as: whoever ran this, also through sudo.
+# The user Noddy runs as: whoever ran this, also through sudo.
 find_user() {
     TARGET_USER="$(id -un)"
     TARGET_HOME="$HOME"
@@ -182,8 +182,8 @@ check_system() {
     ARCH="$(uname -m)"
     case "$ARCH" in
         x86_64|amd64) ARCH="x86_64"; DEB_ARCH="amd64" ;;
-        aarch64|arm64) fail "NectarLink for Linux is built for 64-bit Intel and AMD PCs so far, not ARM." ;;
-        *) fail "NectarLink for Linux needs a 64-bit Intel or AMD PC (this is $ARCH)." ;;
+        aarch64|arm64) fail "Noddy for Linux is built for 64-bit Intel and AMD PCs so far, not ARM." ;;
+        *) fail "Noddy for Linux needs a 64-bit Intel or AMD PC (this is $ARCH)." ;;
     esac
 
     OS_NAME="Linux"
@@ -193,8 +193,8 @@ check_system() {
     fi
 
     GLIBC="$(getconf GNU_LIBC_VERSION 2>/dev/null | awk '{print $2}')"
-    [ -n "$GLIBC" ] || fail "NectarLink needs glibc, and this system uses another C library (such as musl on Alpine)."
-    version_at_least "$GLIBC" "$MIN_GLIBC" || fail "this system is too old for NectarLink (glibc $GLIBC; it needs $MIN_GLIBC or newer)." \
+    [ -n "$GLIBC" ] || fail "Noddy needs glibc, and this system uses another C library (such as musl on Alpine)."
+    version_at_least "$GLIBC" "$MIN_GLIBC" || fail "this system is too old for Noddy (glibc $GLIBC; it needs $MIN_GLIBC or newer)." \
         "It runs on Ubuntu 24.04 or newer, Debian 13, Fedora 40 or newer, and other distributions from 2024 on."
 
     good "$OS_NAME, $ARCH, glibc $GLIBC"
@@ -212,7 +212,7 @@ check_system() {
     find_user
     if [ "$HAVE_ADMIN" -eq 0 ]; then
         if [ "$PACKAGE" != "tarball" ]; then
-            note "Neither sudo nor doas is here, so NectarLink goes into your home folder instead."
+            note "Neither sudo nor doas is here, so Noddy goes into your home folder instead."
             PACKAGE="tarball"
         fi
         if [ "$EXTRAS" -eq 1 ]; then
@@ -229,20 +229,20 @@ check_system() {
         say "Some steps need administrator rights; $SUDO may ask for your password."
         # Asked once, up front, rather than in the middle of a step. sudo
         # reads the password from the terminal, not from the piped script.
-        "$SUDO" true || fail "administrator rights are needed to install NectarLink."
+        "$SUDO" true || fail "administrator rights are needed to install Noddy."
     fi
 }
 
 # Fetches $1 to file $2.
 fetch() {
-    if [ -n "${NECTARLINK_ASSETS_DIR:-}" ]; then
-        cp "$NECTARLINK_ASSETS_DIR/${1##*/}" "$2"
+    if [ -n "${NODDY_ASSETS_DIR:-}" ]; then
+        cp "$NODDY_ASSETS_DIR/${1##*/}" "$2"
     elif has curl; then
         curl -fsSL --retry 3 -o "$2" "$1"
     elif has wget; then
         wget -q -O "$2" "$1"
     else
-        fail "this needs curl or wget to download NectarLink." "Install one of them and run this again."
+        fail "this needs curl or wget to download Noddy." "Install one of them and run this again."
     fi
 }
 
@@ -250,10 +250,10 @@ find_release() {
     step "Finding the release"
     if [ -n "$WANT_VERSION" ]; then
         VERSION="$WANT_VERSION"
-    elif [ -n "${NECTARLINK_ASSETS_DIR:-}" ]; then
-        for f in "$NECTARLINK_ASSETS_DIR"/Nectarlink-*-linux-x86_64.tar.gz; do
+    elif [ -n "${NODDY_ASSETS_DIR:-}" ]; then
+        for f in "$NODDY_ASSETS_DIR"/Noddy-*-linux-x86_64.tar.gz; do
             [ -f "$f" ] || continue
-            VERSION="${f##*/Nectarlink-}"
+            VERSION="${f##*/Noddy-}"
             VERSION="${VERSION%-linux-x86_64.tar.gz}"
         done
     else
@@ -264,11 +264,11 @@ find_release() {
     [ -n "$VERSION" ] || fail "couldn't tell which version is the latest."
     BASE_URL="https://github.com/$REPO/releases/download/v$VERSION"
     case "$PACKAGE" in
-        deb) ASSET="nectarlink_${VERSION}_${DEB_ARCH}.deb" ;;
-        rpm) ASSET="nectarlink-${VERSION}-1.${ARCH}.rpm" ;;
-        tarball) ASSET="Nectarlink-${VERSION}-linux-${ARCH}.tar.gz" ;;
+        deb) ASSET="noddy_${VERSION}_${DEB_ARCH}.deb" ;;
+        rpm) ASSET="noddy-${VERSION}-1.${ARCH}.rpm" ;;
+        tarball) ASSET="Noddy-${VERSION}-linux-${ARCH}.tar.gz" ;;
     esac
-    good "NectarLink $VERSION"
+    good "Noddy $VERSION"
 }
 
 download() {
@@ -293,14 +293,14 @@ download() {
 install_tarball_dependencies() {
     if has pacman; then
         admin pacman -S --needed --noconfirm libglvnd libx11 libxcb libxkbcommon wayland fontconfig freetype2 dbus \
-            || note "Some libraries didn't install; NectarLink may not start until they do."
+            || note "Some libraries didn't install; Noddy may not start until they do."
     else
         say "Make sure OpenGL, X11 or Wayland, fontconfig, freetype and D-Bus libraries are installed."
     fi
 }
 
 install_app() {
-    step "Installing NectarLink"
+    step "Installing Noddy"
     case "$PACKAGE" in
         deb)
             admin env DEBIAN_FRONTEND=noninteractive apt-get update || note "Couldn't refresh the package lists; trying with what's there."
@@ -319,17 +319,17 @@ install_app() {
             run tar -xzf "$WORK/$ASSET" -C "$WORK" || fail "couldn't unpack $ASSET."
             if [ "$HAVE_ADMIN" -eq 1 ]; then
                 install_tarball_dependencies
-                admin "$WORK/Nectarlink-$VERSION-linux-$ARCH/install.sh" || fail "the tarball's installer failed." "The messages above say why."
+                admin "$WORK/Noddy-$VERSION-linux-$ARCH/install.sh" || fail "the tarball's installer failed." "The messages above say why."
             else
-                run "$WORK/Nectarlink-$VERSION-linux-$ARCH/install.sh" || fail "the tarball's installer failed." "The messages above say why."
+                run "$WORK/Noddy-$VERSION-linux-$ARCH/install.sh" || fail "the tarball's installer failed." "The messages above say why."
                 case ":$PATH:" in
                     *":$HOME/.local/bin:"*) ;;
-                    *) note "Add ~/.local/bin to your PATH to start it with nectarlink-desktop from a terminal." ;;
+                    *) note "Add ~/.local/bin to your PATH to start it with noddy-desktop from a terminal." ;;
                 esac
             fi
             ;;
     esac
-    good "NectarLink $VERSION is installed, with its entry in your app menu"
+    good "Noddy $VERSION is installed, with its entry in your app menu"
 }
 
 # Whether the kernel can load modules here (not in most containers).
@@ -345,7 +345,7 @@ setup_webcam() {
         return 0
     fi
     if ! modinfo v4l2loopback >/dev/null 2>&1; then
-        say "Installing the v4l2loopback driver, which gives apps the NectarLink Webcam"
+        say "Installing the v4l2loopback driver, which gives apps the Noddy Webcam"
         if has apt-get; then
             admin env DEBIAN_FRONTEND=noninteractive apt-get install -y "linux-headers-$(uname -r)" \
                 || note "No kernel headers for $(uname -r); the driver may not build."
@@ -374,7 +374,7 @@ setup_webcam() {
         return 0
     fi
     if admin modprobe v4l2loopback exclusive_caps=1 "card_label=$WEBCAM_NAME"; then
-        good "Ready: apps list the NectarLink Webcam"
+        good "Ready: apps list the Noddy Webcam"
     elif has mokutil && mokutil --sb-state 2>/dev/null | grep -q enabled; then
         note "Secure Boot blocks the new driver until its key is enrolled. Run:"
         note "  sudo mokutil --import /var/lib/dkms/mok.pub"
@@ -444,7 +444,7 @@ firewall_kind() {
 # Tells the app the firewall was opened (it can't read the rules itself).
 remember_firewall() {
     [ -n "$TARGET_HOME" ] || return 0
-    dir="${XDG_DATA_HOME:-$TARGET_HOME/.local/share}/Nectarlink"
+    dir="${XDG_DATA_HOME:-$TARGET_HOME/.local/share}/Noddy"
     if [ "$(id -u)" -eq 0 ] && [ "$TARGET_USER" != "root" ]; then
         su -s /bin/sh "$TARGET_USER" -c "mkdir -p '$dir' && printf '$DATA_PORT\n' > '$dir/firewall_verified'" 2>/dev/null || true
     elif [ "$(id -u)" -ne 0 ]; then
@@ -457,20 +457,20 @@ setup_firewall() {
     if [ "$EXTRAS" -eq 0 ]; then say "Skipped."; return 0; fi
     case "$(firewall_kind)" in
         ufw)
-            say "Opening NectarLink's ports to your local network only"
+            say "Opening Noddy's ports to your local network only"
             ufw_rules "" | while IFS= read -r rule; do
                 # IPv6 rules fail where ufw has IPv6 turned off; that's fine.
                 # shellcheck disable=SC2086
                 admin $rule || case "$rule" in *fe80::*) ;; *) exit 1 ;; esac
-            done || { note "Some rules didn't apply; NectarLink's Settings can fix this later."; return 0; }
+            done || { note "Some rules didn't apply; Noddy's Settings can fix this later."; return 0; }
             remember_firewall
             good "Ready: phones on your network can reach this PC"
             ;;
         firewalld)
-            say "Opening NectarLink's ports to your local network only"
+            say "Opening Noddy's ports to your local network only"
             firewalld_rules add > "$WORK/firewalld.sh"
             echo "firewall-cmd --reload" >> "$WORK/firewalld.sh"
-            admin sh -e "$WORK/firewalld.sh" || { note "Some rules didn't apply; NectarLink's Settings can fix this later."; return 0; }
+            admin sh -e "$WORK/firewalld.sh" || { note "Some rules didn't apply; Noddy's Settings can fix this later."; return 0; }
             remember_firewall
             good "Ready: phones on your network can reach this PC"
             ;;
@@ -481,8 +481,8 @@ setup_firewall() {
 }
 
 finish() {
-    printf '\n%sNectarLink %s is ready.%s\n' "$BOLD" "$VERSION" "$RESET"
-    echo "Open it from your app menu, or run nectarlink-desktop. Then install the"
+    printf '\n%sNoddy %s is ready.%s\n' "$BOLD" "$VERSION" "$RESET"
+    echo "Open it from your app menu, or run noddy-desktop. Then install the"
     echo "Android app and pair: https://github.com/$REPO#get-started"
     echo "It updates itself from now on. If it was already open, quit and open it again."
 }
@@ -491,31 +491,31 @@ uninstall() {
     STEPS=3
     find_admin
     find_user
-    step "Removing NectarLink"
+    step "Removing Noddy"
     removed=0
-    if has dpkg && dpkg -s nectarlink >/dev/null 2>&1; then
-        admin env DEBIAN_FRONTEND=noninteractive apt-get remove -y nectarlink && removed=1
+    if has dpkg && dpkg -s noddy >/dev/null 2>&1; then
+        admin env DEBIAN_FRONTEND=noninteractive apt-get remove -y noddy && removed=1
     fi
-    if has rpm && rpm -q --quiet nectarlink 2>/dev/null; then
-        if has dnf; then admin dnf remove -y nectarlink && removed=1
-        elif has zypper; then admin zypper --non-interactive remove nectarlink && removed=1
-        else admin rpm -e nectarlink && removed=1
+    if has rpm && rpm -q --quiet noddy 2>/dev/null; then
+        if has dnf; then admin dnf remove -y noddy && removed=1
+        elif has zypper; then admin zypper --non-interactive remove noddy && removed=1
+        else admin rpm -e noddy && removed=1
         fi
     fi
-    if [ -d /opt/nectarlink ]; then
-        admin rm -rf /opt/nectarlink /usr/local/bin/nectarlink-desktop /usr/share/applications/nectarlink.desktop \
-            /usr/share/metainfo/org.nectarlink.desktop.metainfo.xml /usr/share/icons/hicolor/scalable/apps/nectarlink.svg \
-            /usr/share/icons/hicolor/512x512/apps/nectarlink.png && removed=1
+    if [ -d /opt/noddy ]; then
+        admin rm -rf /opt/noddy /usr/local/bin/noddy-desktop /usr/share/applications/noddy.desktop \
+            /usr/share/metainfo/org.noddy.desktop.metainfo.xml /usr/share/icons/hicolor/scalable/apps/noddy.svg \
+            /usr/share/icons/hicolor/512x512/apps/noddy.png && removed=1
     fi
     user_share="${XDG_DATA_HOME:-$TARGET_HOME/.local/share}"
-    if [ -d "$user_share/nectarlink-app" ]; then
-        run rm -rf "$user_share/nectarlink-app" "$TARGET_HOME/.local/bin/nectarlink-desktop" \
-            "$user_share/metainfo/org.nectarlink.desktop.metainfo.xml" && removed=1
+    if [ -d "$user_share/noddy-app" ]; then
+        run rm -rf "$user_share/noddy-app" "$TARGET_HOME/.local/bin/noddy-desktop" \
+            "$user_share/metainfo/org.noddy.desktop.metainfo.xml" && removed=1
     fi
     # The menu entry and icon the app keeps for itself, and starting with the computer.
-    run rm -f "$user_share/applications/nectarlink.desktop" "$user_share/icons/hicolor/256x256/apps/nectarlink.png" \
-        "$user_share/icons/hicolor/512x512/apps/nectarlink.png" "$user_share/icons/hicolor/scalable/apps/nectarlink.svg" \
-        "${XDG_CONFIG_HOME:-$TARGET_HOME/.config}/autostart/nectarlink.desktop"
+    run rm -f "$user_share/applications/noddy.desktop" "$user_share/icons/hicolor/256x256/apps/noddy.png" \
+        "$user_share/icons/hicolor/512x512/apps/noddy.png" "$user_share/icons/hicolor/scalable/apps/noddy.svg" \
+        "${XDG_CONFIG_HOME:-$TARGET_HOME/.config}/autostart/noddy.desktop"
     if [ "$removed" -eq 1 ]; then good "The app is removed"; else say "The app wasn't installed by a package or the tarball."; fi
 
     step "Removing the system settings"
@@ -534,19 +534,19 @@ uninstall() {
                 # shellcheck disable=SC2086
                 admin $rule || true
             done
-            good "NectarLink's ports are closed again"
+            good "Noddy's ports are closed again"
             ;;
         firewalld)
             firewalld_rules remove | sed 's/$/ || true/' > "$WORK/firewalld.sh"
             echo "firewall-cmd --reload" >> "$WORK/firewalld.sh"
             admin sh "$WORK/firewalld.sh" || true
-            good "NectarLink's ports are closed again"
+            good "Noddy's ports are closed again"
             ;;
         *) say "No firewall is on." ;;
     esac
 
-    printf '\n%sNectarLink is removed.%s\n' "$BOLD" "$RESET"
-    echo "Your settings and paired devices are still in ${user_share}/Nectarlink;"
+    printf '\n%sNoddy is removed.%s\n' "$BOLD" "$RESET"
+    echo "Your settings and paired devices are still in ${user_share}/Noddy;"
     echo "delete that folder to remove them too."
 }
 
@@ -555,17 +555,17 @@ main() {
     PATH="$PATH:/usr/sbin:/sbin"
     setup_output
     parse_args "$@"
-    WORK="$(mktemp -d "${TMPDIR:-/tmp}/nectarlink-install.XXXXXX")" || fail "couldn't create a temporary folder."
+    WORK="$(mktemp -d "${TMPDIR:-/tmp}/noddy-install.XXXXXX")" || fail "couldn't create a temporary folder."
     trap 'rm -rf "$WORK"' EXIT
     trap 'exit 130' INT TERM
 
     if [ "$UNINSTALL" -eq 1 ]; then
-        printf '%sNectarLink uninstaller%s\n' "$BOLD" "$RESET"
+        printf '%sNoddy uninstaller%s\n' "$BOLD" "$RESET"
         uninstall
         return 0
     fi
 
-    printf '%sNectarLink installer%s\n' "$BOLD" "$RESET"
+    printf '%sNoddy installer%s\n' "$BOLD" "$RESET"
     check_system
     find_release
     download

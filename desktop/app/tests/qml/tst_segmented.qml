@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtTest
-import app.nectarlink
+import app.noddy
 
 // A Segmented follows its value and its options as they change, as the
 // webcam's resolution choice does when the phone's camera can't do 4K.

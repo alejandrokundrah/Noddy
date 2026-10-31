@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! macOS media session integration stubs.
 
-use nectarlink_core::{MediaAction, MediaError, MediaPlayer};
+use noddy_core::{MediaAction, MediaError, MediaPlayer};
 
 pub fn start(_on_change: impl Fn(Vec<MediaPlayer>) + Send + Sync + 'static) {}
 

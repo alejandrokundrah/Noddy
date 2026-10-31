@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink
+import app.noddy
 
 // A short message at the bottom of the window that hides itself, with an
 // optional context action chip (e.g. "Open", "Call", "Track").

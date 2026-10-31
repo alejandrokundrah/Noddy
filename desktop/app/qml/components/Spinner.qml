@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtQuick.Shapes
-import app.nectarlink
+import app.noddy
 
 // An indeterminate progress ring. Pulses instead of spinning when the
 // user asked for reduced motion.

@@ -104,8 +104,8 @@ pub fn toggle_mic_mute() -> Result<bool, String> {
     Ok(next)
 }
 
-pub fn output_devices() -> Vec<nectarlink_core::AudioOutputDevice> {
-    vec![nectarlink_core::AudioOutputDevice {
+pub fn output_devices() -> Vec<noddy_core::AudioOutputDevice> {
+    vec![noddy_core::AudioOutputDevice {
         id: "default".into(),
         name: "Default macOS Output".into(),
         is_default: true,

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtTest
-import app.nectarlink
+import app.noddy
 
 // A transfer shows one bar with its percent, sizes, speed and time left, and
 // folds the bar away once it's done.

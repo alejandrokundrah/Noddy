@@ -23,7 +23,7 @@ use serde_json::{Map, Value};
 
 const TOKENS: &str = "docs/design/tokens.json";
 const QML_OUT: &str = "desktop/app/qml/Tokens.qml";
-const KOTLIN_OUT: &str = "android/app/src/main/kotlin/app/nectarlink/android/ui/theme/Tokens.kt";
+const KOTLIN_OUT: &str = "android/app/src/main/kotlin/app/noddy/android/ui/theme/Tokens.kt";
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -290,7 +290,7 @@ fn render_kotlin(tokens: &Value) -> Result<String> {
     let mut out: Vec<String> = vec![
         "// SPDX-License-Identifier: GPL-3.0-or-later".into(),
         "// Generated from docs/design/tokens.json by `cargo xtask tokens`. Do not edit.".into(),
-        "package app.nectarlink.android.ui.theme".into(),
+        "package app.noddy.android.ui.theme".into(),
         String::new(),
         "import androidx.compose.runtime.Immutable".into(),
         "import androidx.compose.ui.graphics.Color".into(),

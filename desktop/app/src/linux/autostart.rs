@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! XDG autostart management (`~/.config/autostart/nectarlink.desktop`) on Linux.
+//! XDG autostart management (`~/.config/autostart/noddy.desktop`) on Linux.
 
 use std::{
     fs, io,
     path::{Path, PathBuf},
 };
 
-const DESKTOP_FILE_NAME: &str = "nectarlink.desktop";
+const DESKTOP_FILE_NAME: &str = "noddy.desktop";
 
 /// Escapes a single argument for placement inside double quotes (`"..."`) on a
 /// FreeDesktop `.desktop` `Exec=` line (`\`, `"`, `` ` ``, `$`, and literal `%`).
@@ -62,10 +62,10 @@ fn render_desktop_entry(exe: &Path) -> String {
     format!(
         "[Desktop Entry]\n\
          Type=Application\n\
-         Name=NectarLink\n\
+         Name=Noddy\n\
          Comment=Link your Android phone and PC\n\
          Exec={cmd}\n\
-         Icon=nectarlink\n\
+         Icon=noddy\n\
          Terminal=false\n\
          Categories=Utility;Network;\n\
          StartupNotify=false\n\
@@ -133,13 +133,13 @@ pub fn is_installed_location(exe: &Path) -> bool {
     }
     exe.starts_with("/usr")
         || exe.starts_with("/opt")
-        || s.contains("/.local/share/nectarlink-app/")
+        || s.contains("/.local/share/noddy-app/")
         || s.contains("/.local/bin/")
         || dirs::data_local_dir()
-            .is_some_and(|d| exe.starts_with(&d) || exe.starts_with(d.join("nectarlink-app")))
+            .is_some_and(|d| exe.starts_with(&d) || exe.starts_with(d.join("noddy-app")))
         || dirs::executable_dir().is_some_and(|d| exe.starts_with(d))
         || dirs::home_dir().is_some_and(|h| {
-            exe.starts_with(h.join(".local/share/nectarlink-app"))
+            exe.starts_with(h.join(".local/share/noddy-app"))
                 || exe.starts_with(h.join(".local/bin"))
                 || exe.starts_with(h.join(".local/share"))
         })
@@ -158,14 +158,14 @@ mod tests {
     #[test]
     fn writes_and_removes_xdg_autostart_desktop_file() {
         let dir = tempfile::tempdir().unwrap();
-        let exe = Path::new("/usr/bin/nectarlink-desktop");
+        let exe = Path::new("/usr/bin/noddy-desktop");
 
         assert!(!is_enabled_in(dir.path()));
         set_in(dir.path(), true, exe).unwrap();
         assert!(is_enabled_in(dir.path()));
 
         let desktop = fs::read_to_string(autostart_file_path_in(dir.path())).unwrap();
-        assert!(desktop.contains("Exec=\"/usr/bin/nectarlink-desktop\" --minimized"));
+        assert!(desktop.contains("Exec=\"/usr/bin/noddy-desktop\" --minimized"));
 
         set_in(dir.path(), false, exe).unwrap();
         assert!(!is_enabled_in(dir.path()));
@@ -175,26 +175,26 @@ mod tests {
 
     #[test]
     fn detects_installed_vs_build_paths() {
-        assert!(is_installed(Path::new("/usr/bin/nectarlink-desktop")));
-        assert!(is_installed(Path::new("/usr/local/bin/nectarlink-desktop")));
-        assert!(is_installed(Path::new("/opt/nectarlink/nectarlink-desktop")));
+        assert!(is_installed(Path::new("/usr/bin/noddy-desktop")));
+        assert!(is_installed(Path::new("/usr/local/bin/noddy-desktop")));
+        assert!(is_installed(Path::new("/opt/noddy/noddy-desktop")));
         assert!(is_installed_location(Path::new(
-            "/home/user/.local/share/nectarlink-app/nectarlink-desktop"
+            "/home/user/.local/share/noddy-app/noddy-desktop"
         )));
-        assert!(is_installed_location(Path::new("/home/user/.local/bin/nectarlink-desktop")));
-        assert!(!is_installed(Path::new("/home/user/repo/target/debug/nectarlink-desktop")));
-        assert!(!is_installed(Path::new("/home/user/repo/target/release/nectarlink-desktop")));
+        assert!(is_installed_location(Path::new("/home/user/.local/bin/noddy-desktop")));
+        assert!(!is_installed(Path::new("/home/user/repo/target/debug/noddy-desktop")));
+        assert!(!is_installed(Path::new("/home/user/repo/target/release/noddy-desktop")));
     }
 
     #[test]
     fn launchers_run_the_appimage_not_its_mount() {
         let dir = tempfile::tempdir().unwrap();
-        let appimage = dir.path().join("Nectarlink-0.1.5-x86_64.AppImage");
+        let appimage = dir.path().join("Noddy-0.1.5-x86_64.AppImage");
         fs::write(&appimage, b"").unwrap();
-        let mounted = Path::new("/tmp/.mount_NectarAbc123/usr/bin/nectarlink-desktop");
+        let mounted = Path::new("/tmp/.mount_NectarAbc123/usr/bin/noddy-desktop");
         assert_eq!(launcher_from(mounted, Some(appimage.clone())), appimage);
         // Not from an AppImage, or one that isn't there: the program itself.
-        let exe = Path::new("/usr/lib/nectarlink/nectarlink-desktop");
+        let exe = Path::new("/usr/lib/noddy/noddy-desktop");
         assert_eq!(launcher_from(exe, None), exe);
         assert_eq!(launcher_from(exe, Some(dir.path().join("gone.AppImage"))), exe);
         assert_eq!(launcher_from(exe, Some(PathBuf::from("relative.AppImage"))), exe);
@@ -202,10 +202,10 @@ mod tests {
 
     #[test]
     fn command_escapes_desktop_entry_special_characters() {
-        let exe = Path::new("/opt/my \"quoted\" $dir`1`\\bin%20/nectarlink-desktop");
+        let exe = Path::new("/opt/my \"quoted\" $dir`1`\\bin%20/noddy-desktop");
         assert_eq!(
             command(exe),
-            r#""/opt/my \"quoted\" \$dir\`1\`\\bin%%20/nectarlink-desktop" --minimized"#
+            r#""/opt/my \"quoted\" \$dir\`1\`\\bin%%20/noddy-desktop" --minimized"#
         );
     }
 }

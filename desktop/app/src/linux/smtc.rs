@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! What plays on a phone, exported to Linux desktop media controls (MPRIS2
-//! D-Bus service `org.mpris.MediaPlayer2.nectarlink` on `/org/mpris/MediaPlayer2`
+//! D-Bus service `org.mpris.MediaPlayer2.noddy` on `/org/mpris/MediaPlayer2`
 //! and atomic JSON state snapshot).
 //!
 //! Mirrors the public API of `win::smtc`: [`start`] registers the command
@@ -13,7 +13,7 @@ use std::path::PathBuf;
 use std::sync::{Mutex, MutexGuard, OnceLock, mpsc};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use nectarlink_core::{DeviceId, MediaAction};
+use noddy_core::{DeviceId, MediaAction};
 use serde::{Deserialize, Serialize};
 use zbus::zvariant::{ObjectPath, OwnedValue, Str, Value};
 
@@ -100,7 +100,7 @@ fn current_export_state() -> MprisExportState {
 pub(crate) fn build_mpris_metadata_map(state: &MprisExportState) -> HashMap<String, OwnedValue> {
     let mut map = HashMap::new();
     let track_path = if state.enabled {
-        "/org/nectarlink/MediaPlayer2/Track/current"
+        "/org/noddy/MediaPlayer2/Track/current"
     } else {
         "/org/mpris/MediaPlayer2/TrackList/NoTrack"
     };
@@ -179,12 +179,12 @@ impl MprisRoot {
 
     #[zbus(property)]
     fn identity(&self) -> String {
-        "NectarLink".to_owned()
+        "Noddy".to_owned()
     }
 
     #[zbus(property)]
     fn desktop_entry(&self) -> String {
-        "nectarlink".to_owned()
+        "noddy".to_owned()
     }
 
     #[zbus(property)]
@@ -304,7 +304,7 @@ impl MprisPlayer {
 
 fn init_mpris_dbus_service() -> Option<zbus::blocking::Connection> {
     let builder = zbus::blocking::connection::Builder::session().ok()?;
-    let builder = builder.name("org.mpris.MediaPlayer2.nectarlink").ok()?;
+    let builder = builder.name("org.mpris.MediaPlayer2.noddy").ok()?;
     let builder = builder.serve_at("/org/mpris/MediaPlayer2", MprisRoot).ok()?;
     let builder = builder.serve_at("/org/mpris/MediaPlayer2", MprisPlayer).ok()?;
     builder.build().ok()
@@ -364,7 +364,7 @@ pub fn show(current: Option<Shown>) {
 pub(crate) fn build_export_state(shown: Option<&Shown>) -> MprisExportState {
     let Some(shown) = shown else {
         return MprisExportState {
-            bus_name: "org.mpris.MediaPlayer2.nectarlink".to_owned(),
+            bus_name: "org.mpris.MediaPlayer2.noddy".to_owned(),
             enabled: false,
             device_id: None,
             device_name: None,
@@ -403,7 +403,7 @@ pub(crate) fn build_export_state(shown: Option<&Shown>) -> MprisExportState {
     });
 
     MprisExportState {
-        bus_name: "org.mpris.MediaPlayer2.nectarlink".to_owned(),
+        bus_name: "org.mpris.MediaPlayer2.noddy".to_owned(),
         enabled: true,
         device_id: Some(shown.device.to_string()),
         device_name: Some(shown.device_name.clone()),
@@ -425,10 +425,10 @@ pub(crate) fn build_export_state(shown: Option<&Shown>) -> MprisExportState {
 
 fn mpris_state_path() -> Option<PathBuf> {
     if let Some(base) = dirs::runtime_dir().or_else(dirs::cache_dir).filter(|p| p.is_absolute()) {
-        Some(base.join("nectarlink").join("mpris-state.json"))
+        Some(base.join("noddy").join("mpris-state.json"))
     } else {
         let uid = unsafe { libc::geteuid() };
-        Some(std::env::temp_dir().join(format!("nectarlink-{uid}")).join("mpris-state.json"))
+        Some(std::env::temp_dir().join(format!("noddy-{uid}")).join("mpris-state.json"))
     }
 }
 
@@ -521,7 +521,7 @@ pub fn handle_mpris_seek_offset(offset_us: i64) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nectarlink_core::MediaPlayer;
+    use noddy_core::MediaPlayer;
     use std::sync::Arc;
 
     static TEST_LOCK: Mutex<()> = Mutex::new(());

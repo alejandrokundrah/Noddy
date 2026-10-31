@@ -7,7 +7,7 @@
 //! to sleep.
 
 use crate::i18n::tr;
-use nectarlink_core::{
+use noddy_core::{
     ClipKind, DeviceId, Error, FeatureState, HandoffKind, HandoffLink, LinkState, PowerAction,
     address_to_geo_uri, classify_clip, extract_handoff_link, format_video_timestamp, geo_to_maps_https,
     with_video_timestamp,
@@ -104,7 +104,7 @@ fn notice(title: &str, body: &str) {
         key: "notice".into(),
         title: title.into(),
         body: body.into(),
-        attribution: "NectarLink".into(),
+        attribution: "Noddy".into(),
         icon: None,
         image: None,
         actions: Vec::new(),
@@ -195,7 +195,7 @@ fn send(phone: DeviceId, name: String, handoff: HandoffLink) {
                 }
             }
             Err(Error::Unsupported) => {
-                notice(&tr!("Links", "Couldn't send it"), &tr!("Links", "Update NectarLink on %1.", name))
+                notice(&tr!("Links", "Couldn't send it"), &tr!("Links", "Update Noddy on %1.", name))
             }
             Err(e) => notice(&tr!("Links", "Couldn't send it"), &describe(&e)),
         }

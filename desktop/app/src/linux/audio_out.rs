@@ -218,7 +218,7 @@ impl Player {
         let dev_owned = device_id.map(str::to_owned);
         let mut child_cell = Some(initial_child);
 
-        let handle = thread::Builder::new().name("nectarlink-audio-out".into()).spawn(move || {
+        let handle = thread::Builder::new().name("noddy-audio-out".into()).spawn(move || {
             let mut jitter = Jitter::new(clean_rate, clean_channels);
             let frame_bytes = jitter.frame_bytes;
             let frames_per_tick = ((clean_rate as usize) / 100).max(1);

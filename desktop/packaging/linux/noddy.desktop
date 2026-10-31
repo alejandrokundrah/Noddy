@@ -1,0 +1,35 @@
+[Desktop Entry]
+Type=Application
+Version=1.5
+Name=Noddy
+GenericName=Phone Link
+Comment=Connect your Android phone and Linux PC over LAN
+Exec=noddy-desktop %U
+Icon=noddy
+Terminal=false
+Categories=Network;FileTransfer;Telephony;
+Keywords=android;phone;sync;clipboard;notifications;files;mirror;sms;calls;
+StartupNotify=true
+StartupWMClass=noddy
+MimeType=x-scheme-handler/noddy;x-scheme-handler/tel;x-scheme-handler/sms;x-scheme-handler/smsto;x-scheme-handler/mms;x-scheme-handler/mmsto;x-scheme-handler/geo;
+Actions=send-files;send-clipboard;find-phone;take-photo;open-timeline;
+
+[Desktop Action send-files]
+Name=Send files to phone
+Exec=noddy-desktop --task send-files
+
+[Desktop Action send-clipboard]
+Name=Send clipboard to phone
+Exec=noddy-desktop --task send-clipboard
+
+[Desktop Action find-phone]
+Name=Find my phone
+Exec=noddy-desktop --task find-phone
+
+[Desktop Action take-photo]
+Name=Take photo with phone
+Exec=noddy-desktop --task take-photo
+
+[Desktop Action open-timeline]
+Name=Open Timeline
+Exec=noddy-desktop --task open-timeline

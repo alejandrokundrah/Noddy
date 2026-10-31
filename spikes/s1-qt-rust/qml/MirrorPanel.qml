@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtQuick.Effects
-import app.nectarlink.spike
+import app.noddy.spike
 
 // Screen-mirroring preview: frames rendered on the GPU by the Rust producer,
 // shown with rounded corners the way the mirror window is in the mockups.

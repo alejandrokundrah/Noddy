@@ -6,7 +6,7 @@ use std::pin::Pin;
 
 use cxx_qt::{CxxQtType, Threading};
 use cxx_qt_lib::{QByteArray, QHash, QHashPair_i32_QByteArray, QList, QModelIndex, QString, QVariant};
-use nectarlink_core::{ConnectionPath, DeviceKind, LinkState, PowerLevel};
+use noddy_core::{ConnectionPath, DeviceKind, LinkState, PowerLevel};
 
 use super::{Edit, diff};
 use crate::{
@@ -315,7 +315,7 @@ impl qobject::DeviceList {
 
 #[cfg(test)]
 mod tests {
-    use nectarlink_core::{DeviceId, DeviceInfo};
+    use noddy_core::{DeviceId, DeviceInfo};
 
     use super::*;
 
@@ -344,7 +344,7 @@ mod tests {
     fn roles_cover_the_device() {
         let mut d = device(5, "Pixel");
         d.link = LinkState::Online { path: ConnectionPath::Lan, rtt_ms: 7 };
-        d.battery = Some(nectarlink_core::Battery {
+        d.battery = Some(noddy_core::Battery {
             level: 64,
             charging: true,
             plugged: Some("usb".into()),
@@ -354,7 +354,7 @@ mod tests {
             wifi_bars: Some(3),
         });
         d.info.accent = Some(0xFF8A5100);
-        d.info.screen = Some(nectarlink_core::ScreenShape {
+        d.info.screen = Some(noddy_core::ScreenShape {
             v: 1,
             aspect: 0.45,
             corners: None,

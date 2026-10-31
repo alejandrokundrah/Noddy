@@ -1,6 +1,6 @@
 [package]
-name = "nectarlink-desktop"
-description = "NectarLink for Windows: the desktop app"
+name = "noddy-desktop"
+description = "Noddy for Windows: the desktop app"
 version.workspace = true
 edition.workspace = true
 # Above the workspace minimum: material-colors needs Rust 1.97.
@@ -11,7 +11,7 @@ license = "GPL-3.0-or-later"
 publish = false
 
 [[bin]]
-name = "nectarlink-desktop"
+name = "noddy-desktop"
 path = "src/main.rs"
 
 [dependencies]
@@ -24,8 +24,8 @@ data-encoding.workspace = true
 dirs.workspace = true
 hostname.workspace = true
 material-colors.workspace = true
-nectarlink-core.workspace = true
-nectarlink-vcam.workspace = true
+noddy-core.workspace = true
+noddy-vcam.workspace = true
 qrcode.workspace = true
 serde.workspace = true
 serde_json.workspace = true

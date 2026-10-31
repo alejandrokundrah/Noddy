@@ -60,7 +60,7 @@ mod tests {
 
     #[test]
     fn path_matches_the_code() {
-        let text = "nectarlink://pair?v=0&id=ybndrfg8ejkmcpqxot1uwisza345h769ybndrfg8ejkmcpqx&s=abcdefghijklmnopqrstuvwxyz";
+        let text = "noddy://pair?v=0&id=ybndrfg8ejkmcpqxot1uwisza345h769ybndrfg8ejkmcpqx&s=abcdefghijklmnopqrstuvwxyz";
         let qr = encode(text).unwrap();
         let code = QrCode::with_error_correction_level(text.as_bytes(), EcLevel::M).unwrap();
         let expected: Vec<bool> = code.to_colors().into_iter().map(|c| c == Color::Dark).collect();

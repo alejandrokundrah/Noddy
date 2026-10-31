@@ -3,13 +3,13 @@
 //
 // `crate::send_to` reconciles per-device `<Name>.lnk` files in `send_to_dir()`.
 // On Linux we store those canonical `.lnk` metadata files inside
-// `~/.local/share/nectarlink/send-to/` and mirror them into the file managers'
+// `~/.local/share/noddy/send-to/` and mirror them into the file managers'
 // right-click menus:
-//   1. GNOME Files (Nautilus): `~/.local/share/nautilus/scripts/Send to <Name> (NectarLink)`
-//   2. KDE Dolphin (KIO ServiceMenus): `~/.local/share/kio/servicemenus/nectarlink-send-<id>.desktop`
+//   1. GNOME Files (Nautilus): `~/.local/share/nautilus/scripts/Send to <Name> (Noddy)`
+//   2. KDE Dolphin (KIO ServiceMenus): `~/.local/share/kio/servicemenus/noddy-send-<id>.desktop`
 //   3. MATE Caja (with caja-actions; File Manager Actions):
-//      `~/.local/share/file-manager/actions/nectarlink-send-<id>.desktop`
-//   4. Cinnamon Nemo: `~/.local/share/nemo/actions/nectarlink-send-<id>.nemo_action`
+//      `~/.local/share/file-manager/actions/noddy-send-<id>.desktop`
+//   4. Cinnamon Nemo: `~/.local/share/nemo/actions/noddy-send-<id>.nemo_action`
 //   5. XFCE Thunar: our `<action>` entries in `~/.config/Thunar/uca.xml`, next to
 //      the user's own custom actions (only when Thunar's folder exists).
 
@@ -93,14 +93,14 @@ pub fn write(path: &Path, shortcut: &Shortcut) -> Result<()> {
     let content = format!(
         "[Desktop Entry]\n\
          Type=Application\n\
-         Name=NectarLink\n\
+         Name=Noddy\n\
          Comment={desc}\n\
          Exec=\"{exec_target}\" {args}\n\
-         Icon=nectarlink\n\
+         Icon=noddy\n\
          Terminal=false\n\
-         X-NectarLink-Target={raw_target}\n\
-         X-NectarLink-Args={args}\n\
-         X-NectarLink-Comment={desc}\n",
+         X-Noddy-Target={raw_target}\n\
+         X-Noddy-Args={args}\n\
+         X-Noddy-Comment={desc}\n",
     );
     write_file_nofollow(path, &content, 0o644)?;
 
@@ -117,7 +117,7 @@ pub fn write(path: &Path, shortcut: &Shortcut) -> Result<()> {
 pub fn target(path: &Path) -> Option<PathBuf> {
     let text = std::fs::read_to_string(path).ok()?;
     for line in text.lines() {
-        if let Some(rest) = line.strip_prefix("X-NectarLink-Target=") {
+        if let Some(rest) = line.strip_prefix("X-Noddy-Target=") {
             let trimmed = rest.trim();
             if !trimmed.is_empty() {
                 return Some(PathBuf::from(trimmed));
@@ -131,7 +131,7 @@ pub fn target(path: &Path) -> Option<PathBuf> {
 pub fn arguments(path: &Path) -> Option<String> {
     let text = std::fs::read_to_string(path).ok()?;
     for line in text.lines() {
-        if let Some(rest) = line.strip_prefix("X-NectarLink-Args=") {
+        if let Some(rest) = line.strip_prefix("X-Noddy-Args=") {
             return Some(rest.to_string());
         }
     }
@@ -145,11 +145,11 @@ fn read_shortcut(path: &Path) -> Option<Shortcut> {
     let mut args = None;
     let mut comment = String::new();
     for line in text.lines() {
-        if let Some(rest) = line.strip_prefix("X-NectarLink-Target=") {
+        if let Some(rest) = line.strip_prefix("X-Noddy-Target=") {
             target = Some(PathBuf::from(rest));
-        } else if let Some(rest) = line.strip_prefix("X-NectarLink-Args=") {
+        } else if let Some(rest) = line.strip_prefix("X-Noddy-Args=") {
             args = Some(rest.to_string());
-        } else if let Some(rest) = line.strip_prefix("X-NectarLink-Comment=") {
+        } else if let Some(rest) = line.strip_prefix("X-Noddy-Comment=") {
             comment = rest.to_string();
         }
     }
@@ -162,22 +162,22 @@ pub fn startup_dir() -> Option<PathBuf> {
     Some(base.join("autostart"))
 }
 
-/// Resolve the user's canonical SendTo directory (`~/.local/share/nectarlink/send-to`).
+/// Resolve the user's canonical SendTo directory (`~/.local/share/noddy/send-to`).
 /// Ensures the directory exists so `send_to::reconcile` can enumerate it cleanly.
 pub fn send_to_dir() -> Option<PathBuf> {
-    let dir = xdg_data_home()?.join("nectarlink/send-to");
+    let dir = xdg_data_home()?.join("noddy/send-to");
     let _ = std::fs::create_dir_all(&dir);
     Some(dir)
 }
 
-/// Resolve the user's Recent items directory (`~/.local/share/nectarlink/recent`).
+/// Resolve the user's Recent items directory (`~/.local/share/noddy/recent`).
 pub fn recent_dir() -> Option<PathBuf> {
-    let dir = xdg_data_home()?.join("nectarlink/recent");
+    let dir = xdg_data_home()?.join("noddy/recent");
     let _ = std::fs::create_dir_all(&dir);
     Some(dir)
 }
 
-/// Synchronize all NectarLink `.lnk` entries in `send_to_dir` into the user's
+/// Synchronize all Noddy `.lnk` entries in `send_to_dir` into the user's
 /// file-manager context menus (see the top of this file).
 pub fn sync_file_manager_menus(send_to_dir: &Path) -> Result<()> {
     let Some(data_home) = xdg_data_home() else {
@@ -191,7 +191,7 @@ pub fn sync_file_manager_menus(send_to_dir: &Path) -> Result<()> {
     Ok(())
 }
 
-/// Remove all NectarLink file-manager context menu entries.
+/// Remove all Noddy file-manager context menu entries.
 pub fn remove_all_file_manager_menus() -> Result<()> {
     let Some(data_home) = xdg_data_home() else {
         return Ok(());
@@ -251,15 +251,15 @@ fn format_menu_label(path: &Path) -> String {
     let stem = cleaned.replace("..", "").trim().to_string();
     let stem = if stem.is_empty() { "Phone" } else { stem.as_str() };
     let with_prefix = if stem.starts_with("Send to ") { stem.to_string() } else { format!("Send to {stem}") };
-    if with_prefix.ends_with("(NectarLink)") || with_prefix.contains("(NectarLink ") {
+    if with_prefix.ends_with("(Noddy)") || with_prefix.contains("(Noddy ") {
         with_prefix
     } else {
-        format!("{with_prefix} (NectarLink)")
+        format!("{with_prefix} (Noddy)")
     }
 }
 
 /// Write the Nautilus, KDE Dolphin, Caja and Nemo entries under `root_data_dir`
-/// (e.g. `~/.local/share`) and prune stale NectarLink entries.
+/// (e.g. `~/.local/share`) and prune stale Noddy entries.
 pub fn write_file_manager_integrations(
     root_data_dir: &Path,
     shortcuts: &[(PathBuf, Shortcut)],
@@ -283,7 +283,7 @@ pub fn write_file_manager_integrations(
     for (lnk_path, sc) in shortcuts {
         let label = format_menu_label(lnk_path);
         let dev_id = extract_device_id(&sc.arguments);
-        let desktop_filename = format!("nectarlink-send-{dev_id}.desktop");
+        let desktop_filename = format!("noddy-send-{dev_id}.desktop");
 
         desired_nautilus.insert(label.clone());
         desired_desktop.insert(desktop_filename.clone());
@@ -297,7 +297,7 @@ pub fn write_file_manager_integrations(
         let nautilus_path = nautilus_dir.join(&label);
         let script = format!(
             "#!/usr/bin/env sh\n\
-             # Generated by NectarLink: {comment}\n\
+             # Generated by Noddy: {comment}\n\
              if [ -n \"${{NAUTILUS_SCRIPT_SELECTED_FILE_PATHS:-}}\" ]; then\n\
                  IFS='\n'\n\
                  set -f\n\
@@ -314,12 +314,12 @@ pub fn write_file_manager_integrations(
             "[Desktop Entry]\n\
              Type=Service\n\
              MimeType=all/all;\n\
-             Actions=NectarLinkSend_{dev_id};\n\
+             Actions=NoddySend_{dev_id};\n\
              X-KDE-Priority=TopLevel\n\
              \n\
-             [Desktop Action NectarLinkSend_{dev_id}]\n\
+             [Desktop Action NoddySend_{dev_id}]\n\
              Name={label}\n\
-             Icon=nectarlink\n\
+             Icon=noddy\n\
              Exec=\"{exec_target}\" {args} %F\n"
         );
         write_file_nofollow(&kio_path, &kio_content, 0o755)?;
@@ -331,7 +331,7 @@ pub fn write_file_manager_integrations(
              Type=Action\n\
              Name={label}\n\
              Tooltip={comment}\n\
-             Icon=nectarlink\n\
+             Icon=noddy\n\
              Profiles=profile-zero;\n\
              \n\
              [X-Action-Profile profile-zero]\n\
@@ -342,7 +342,7 @@ pub fn write_file_manager_integrations(
         write_file_nofollow(&action_path, &action_content, 0o644)?;
 
         // 4. Nemo. Its Name takes %-codes, so the phone's name loses any '%'.
-        let nemo_filename = format!("nectarlink-send-{dev_id}.nemo_action");
+        let nemo_filename = format!("noddy-send-{dev_id}.nemo_action");
         desired_nemo.insert(nemo_filename.clone());
         let nemo_label = label.replace('%', "");
         let nemo_content = format!(
@@ -350,7 +350,7 @@ pub fn write_file_manager_integrations(
              Name={nemo_label}\n\
              Comment={comment}\n\
              Exec=\"{exec_target}\" {args} %F\n\
-             Icon-Name=nectarlink\n\
+             Icon-Name=noddy\n\
              Selection=notnone\n\
              Extensions=any;\n\
              Quote=double\n"
@@ -358,13 +358,13 @@ pub fn write_file_manager_integrations(
         write_file_nofollow(&nemo_dir.join(&nemo_filename), &nemo_content, 0o644)?;
     }
 
-    // Prune stale Nautilus scripts generated by NectarLink
+    // Prune stale Nautilus scripts generated by Noddy
     if let Ok(rd) = std::fs::read_dir(&nautilus_dir) {
         for entry in rd.flatten() {
             let p = entry.path();
             if let Some(name) = p.file_name().and_then(|s| s.to_str()) {
-                let is_nectarlink = name.ends_with("(NectarLink)") || name.contains("(NectarLink ");
-                if is_nectarlink && !desired_nautilus.contains(name) {
+                let is_noddy = name.ends_with("(Noddy)") || name.contains("(Noddy ");
+                if is_noddy && !desired_nautilus.contains(name) {
                     let _ = std::fs::remove_file(&p);
                 }
             }
@@ -376,7 +376,7 @@ pub fn write_file_manager_integrations(
         for entry in rd.flatten() {
             let p = entry.path();
             if let Some(name) = p.file_name().and_then(|s| s.to_str())
-                && name.starts_with("nectarlink-")
+                && name.starts_with("noddy-")
                 && name.ends_with(".nemo_action")
                 && !desired_nemo.contains(name)
             {
@@ -385,13 +385,13 @@ pub fn write_file_manager_integrations(
         }
     }
 
-    // Prune stale KDE ServiceMenus and File Manager Actions prefixed with `nectarlink-`
+    // Prune stale KDE ServiceMenus and File Manager Actions prefixed with `noddy-`
     for dir in [&kio_dir, &actions_dir] {
         if let Ok(rd) = std::fs::read_dir(dir) {
             for entry in rd.flatten() {
                 let p = entry.path();
                 if let Some(name) = p.file_name().and_then(|s| s.to_str())
-                    && name.starts_with("nectarlink-")
+                    && name.starts_with("noddy-")
                     && name.ends_with(".desktop")
                     && !desired_desktop.contains(name)
                 {
@@ -405,8 +405,8 @@ pub fn write_file_manager_integrations(
 }
 
 /// Thunar keeps every custom action in one file, `<config>/Thunar/uca.xml`,
-/// with the user's own. Replaces NectarLink's entries there (`unique-id`
-/// `nectarlink-send-…`) with `shortcuts`, keeping everything else as it was.
+/// with the user's own. Replaces Noddy's entries there (`unique-id`
+/// `noddy-send-…`) with `shortcuts`, keeping everything else as it was.
 /// Nothing is created for a PC without Thunar, and a file that doesn't look
 /// like Thunar's is left alone.
 pub fn write_thunar_actions(config_dir: &Path, shortcuts: &[(PathBuf, Shortcut)]) -> Result<()> {
@@ -433,19 +433,19 @@ pub fn write_thunar_actions(config_dir: &Path, shortcuts: &[(PathBuf, Shortcut)]
         return Ok(());
     }
     // Written beside it and renamed over it, so Thunar never reads half a file.
-    let temp = thunar_dir.join(".uca.xml.nectarlink");
+    let temp = thunar_dir.join(".uca.xml.noddy");
     write_file_nofollow(&temp, &updated, 0o644)?;
     std::fs::rename(&temp, &path)
 }
 
-/// `uca` without NectarLink's actions, plus one for each of `shortcuts`;
+/// `uca` without Noddy's actions, plus one for each of `shortcuts`;
 /// `None` when it has no closing `</actions>` to put them before.
 fn thunar_uca_with(uca: &str, shortcuts: &[(PathBuf, Shortcut)]) -> Option<String> {
     let mut kept = String::with_capacity(uca.len());
     let mut rest = uca;
     while let Some(start) = rest.find("<action>") {
         let end = start + rest[start..].find("</action>")? + "</action>".len();
-        if rest[start..end].contains("<unique-id>nectarlink-send-") {
+        if rest[start..end].contains("<unique-id>noddy-send-") {
             // Dropped with the indentation before it and the line break after it.
             kept.push_str(rest[..start].trim_end_matches([' ', '\t']));
             rest = rest[end..].strip_prefix('\n').unwrap_or(&rest[end..]);
@@ -469,10 +469,10 @@ fn thunar_uca_with(uca: &str, shortcuts: &[(PathBuf, Shortcut)]) -> Option<Strin
         let comment = xml_escape(&sanitize_single_line(&sc.description));
         ours.push_str(&format!(
             "<action>\n\
-             \t<icon>nectarlink</icon>\n\
+             \t<icon>noddy</icon>\n\
              \t<name>{label}</name>\n\
              \t<submenu></submenu>\n\
-             \t<unique-id>nectarlink-send-{dev_id}</unique-id>\n\
+             \t<unique-id>noddy-send-{dev_id}</unique-id>\n\
              \t<command>{command}</command>\n\
              \t<description>{comment}</description>\n\
              \t<range></range>\n\
@@ -522,18 +522,18 @@ mod tests {
     #[test]
     fn file_manager_integrations_create_and_prune_entries() {
         let tmp = tempfile::tempdir().expect("tempdir");
-        let send_to = tmp.path().join("nectarlink/send-to");
+        let send_to = tmp.path().join("noddy/send-to");
         std::fs::create_dir_all(&send_to).unwrap();
 
         let lnk1 = send_to.join("Pixel 9.lnk");
         let sc1 = Shortcut {
-            target: PathBuf::from("/opt/user's bin/nectarlink-desktop"),
+            target: PathBuf::from("/opt/user's bin/noddy-desktop"),
             arguments: "--send-to pixel9".to_string(),
             description: "Send to Pixel 9".to_string(),
         };
-        let lnk2 = send_to.join("Galaxy S25 (NectarLink).lnk");
+        let lnk2 = send_to.join("Galaxy S25 (Noddy).lnk");
         let sc2 = Shortcut {
-            target: PathBuf::from("/usr/bin/nectarlink-desktop"),
+            target: PathBuf::from("/usr/bin/noddy-desktop"),
             arguments: "--send-to s25".to_string(),
             description: "Send to Galaxy S25".to_string(),
         };
@@ -541,11 +541,11 @@ mod tests {
         write_file_manager_integrations(tmp.path(), &[(lnk1.clone(), sc1.clone()), (lnk2.clone(), sc2)])
             .expect("write integrations");
 
-        let nautilus_p1 = tmp.path().join("nautilus/scripts/Send to Pixel 9 (NectarLink)");
-        let nautilus_p2 = tmp.path().join("nautilus/scripts/Send to Galaxy S25 (NectarLink)");
-        let kio_p1 = tmp.path().join("kio/servicemenus/nectarlink-send-pixel9.desktop");
-        let kio_p2 = tmp.path().join("kio/servicemenus/nectarlink-send-s25.desktop");
-        let act_p1 = tmp.path().join("file-manager/actions/nectarlink-send-pixel9.desktop");
+        let nautilus_p1 = tmp.path().join("nautilus/scripts/Send to Pixel 9 (Noddy)");
+        let nautilus_p2 = tmp.path().join("nautilus/scripts/Send to Galaxy S25 (Noddy)");
+        let kio_p1 = tmp.path().join("kio/servicemenus/noddy-send-pixel9.desktop");
+        let kio_p2 = tmp.path().join("kio/servicemenus/noddy-send-s25.desktop");
+        let act_p1 = tmp.path().join("file-manager/actions/noddy-send-pixel9.desktop");
 
         assert!(nautilus_p1.exists());
         assert!(nautilus_p2.exists());
@@ -563,10 +563,10 @@ mod tests {
         }
 
         let nautilus_text = std::fs::read_to_string(&nautilus_p1).unwrap();
-        assert!(nautilus_text.contains("exec '/opt/user'\\''s bin/nectarlink-desktop' --send-to pixel9"));
+        assert!(nautilus_text.contains("exec '/opt/user'\\''s bin/noddy-desktop' --send-to pixel9"));
 
         let kio_text = std::fs::read_to_string(&kio_p1).unwrap();
-        assert!(kio_text.contains("Exec=\"/opt/user's bin/nectarlink-desktop\" --send-to pixel9 %F"));
+        assert!(kio_text.contains("Exec=\"/opt/user's bin/noddy-desktop\" --send-to pixel9 %F"));
 
         // Now prune Galaxy S25 and verify its files are removed while Pixel 9 remains.
         write_file_manager_integrations(tmp.path(), &[(lnk1, sc1)]).expect("prune integrations");
@@ -586,17 +586,17 @@ mod tests {
     fn nemo_actions_are_written_and_pruned() {
         let tmp = tempfile::tempdir().unwrap();
         let sc = Shortcut {
-            target: PathBuf::from("/usr/bin/nectarlink-desktop"),
+            target: PathBuf::from("/usr/bin/noddy-desktop"),
             arguments: "--send-to pixel9".to_string(),
             description: "Send to Pixel 9".to_string(),
         };
         let lnk = tmp.path().join("100% Pixel.lnk");
         write_file_manager_integrations(tmp.path(), &[(lnk, sc)]).unwrap();
-        let nemo = tmp.path().join("nemo/actions/nectarlink-send-pixel9.nemo_action");
+        let nemo = tmp.path().join("nemo/actions/noddy-send-pixel9.nemo_action");
         let text = std::fs::read_to_string(&nemo).unwrap();
         assert!(text.starts_with("[Nemo Action]\n"));
-        assert!(text.contains("\nName=Send to 100 Pixel (NectarLink)\n"), "{text}");
-        assert!(text.contains("\nExec=\"/usr/bin/nectarlink-desktop\" --send-to pixel9 %F\n"));
+        assert!(text.contains("\nName=Send to 100 Pixel (Noddy)\n"), "{text}");
+        assert!(text.contains("\nExec=\"/usr/bin/noddy-desktop\" --send-to pixel9 %F\n"));
         assert!(text.contains("\nExtensions=any;\n"));
         write_file_manager_integrations(tmp.path(), &[]).unwrap();
         assert!(!nemo.exists());
@@ -606,7 +606,7 @@ mod tests {
     fn thunar_actions_keep_the_users_own() {
         let tmp = tempfile::tempdir().unwrap();
         let sc = Shortcut {
-            target: PathBuf::from("/opt/user's bin/nectarlink-desktop"),
+            target: PathBuf::from("/opt/user's bin/noddy-desktop"),
             arguments: "--send-to pixel9".to_string(),
             description: "Send to Pixel & co".to_string(),
         };
@@ -625,10 +625,10 @@ mod tests {
         write_thunar_actions(tmp.path(), &[(lnk.clone(), sc.clone())]).unwrap();
         let text = std::fs::read_to_string(&uca).unwrap();
         assert!(text.contains("<name>Open Terminal Here</name>"));
-        assert!(text.contains("<name>Send to Pixel &lt;9&gt; (NectarLink)</name>"), "{text}");
-        assert!(text.contains("<unique-id>nectarlink-send-pixel9</unique-id>"));
+        assert!(text.contains("<name>Send to Pixel &lt;9&gt; (Noddy)</name>"), "{text}");
+        assert!(text.contains("<unique-id>noddy-send-pixel9</unique-id>"));
         assert!(text.contains(
-            "<command>&apos;/opt/user&apos;\\&apos;&apos;s bin/nectarlink-desktop&apos; --send-to pixel9 %F</command>"
+            "<command>&apos;/opt/user&apos;\\&apos;&apos;s bin/noddy-desktop&apos; --send-to pixel9 %F</command>"
         ));
         assert!(text.contains("<description>Send to Pixel &amp; co</description>"));
         assert!(text.trim_end().ends_with("</actions>"));

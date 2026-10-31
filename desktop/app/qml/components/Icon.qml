@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtQuick.Shapes
-import app.nectarlink
+import app.noddy
 
 // A stroke icon from Icons (an SVG path on a 24×24 grid).
 Item {

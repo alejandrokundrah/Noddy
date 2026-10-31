@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `nectarlink_vcam`: Windows 11 Media Foundation virtual camera media source
+//! `noddy_vcam`: Windows 11 Media Foundation virtual camera media source
 //! COM DLL and shared-memory frame transport (`docs/protocol/webcam.md`).
 
 #![allow(linker_messages)]
@@ -30,13 +30,13 @@ pub use shm::{
 #[cfg(windows)]
 pub use source::{SAMPLE_DURATION_100NS, VcamClassFactory, VcamMediaSource, VcamMediaStream};
 
-/// CLSID of the NectarLink Virtual Camera Media Foundation media source:
+/// CLSID of the Noddy Virtual Camera Media Foundation media source:
 /// `{8E6C3B74-5D4A-4B9E-9A12-7C8F1E2D3A40}`.
 #[cfg(windows)]
-pub const CLSID_NECTARLINK_VCAM: GUID = GUID::from_u128(0x8e6c3b74_5d4a_4b9e_9a12_7c8f1e2d3a40);
+pub const CLSID_NODDY_VCAM: GUID = GUID::from_u128(0x8e6c3b74_5d4a_4b9e_9a12_7c8f1e2d3a40);
 
 /// Standard COM DLL entry point returning an `IClassFactory` for
-/// [`CLSID_NECTARLINK_VCAM`].
+/// [`CLSID_NODDY_VCAM`].
 ///
 /// # Safety
 /// `rclsid`, `riid`, and `ppv` must be valid pointers as specified by COM.
@@ -56,7 +56,7 @@ pub unsafe extern "system" fn DllGetClassObject(
         return E_INVALIDARG;
     }
     let clsid = unsafe { *rclsid };
-    if clsid != CLSID_NECTARLINK_VCAM {
+    if clsid != CLSID_NODDY_VCAM {
         return CLASS_E_CLASSNOTAVAILABLE;
     }
     let _ = unsafe { MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET) };
@@ -113,7 +113,7 @@ mod tests {
     fn dll_get_class_object_activates_media_source_in_process() {
         unsafe {
             let mut raw = std::ptr::null_mut();
-            let hr = DllGetClassObject(&CLSID_NECTARLINK_VCAM, &IClassFactory::IID, &mut raw);
+            let hr = DllGetClassObject(&CLSID_NODDY_VCAM, &IClassFactory::IID, &mut raw);
             assert_eq!(hr, S_OK);
             assert!(!raw.is_null());
             let factory: IClassFactory = IClassFactory::from_raw(raw);
@@ -135,7 +135,7 @@ mod tests {
     fn media_source_delivers_placeholder_and_live_shared_memory_samples() {
         unsafe {
             let _ = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
-            let map_name = format!("Local\\NectarlinkVcamSrcTest_{}", std::process::id());
+            let map_name = format!("Local\\NoddyVcamSrcTest_{}", std::process::id());
             let writer = SharedFrameMapping::open_or_create(&map_name).unwrap();
             writer.set_idle("Pixel 8");
 
@@ -297,7 +297,7 @@ mod tests {
 
     #[test]
     fn shared_memory_mirror_and_aspect_fit_round_trip() {
-        let map_name = format!("Local\\NectarlinkVcamShmTest_{}", std::process::id());
+        let map_name = format!("Local\\NoddyVcamShmTest_{}", std::process::id());
         let writer = SharedFrameMapping::open_or_create(&map_name).unwrap();
         let reader = SharedFrameMapping::open_or_create(&map_name).unwrap();
 

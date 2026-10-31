@@ -8,7 +8,7 @@ use std::process::{Command, Stdio};
 use std::sync::{OnceLock, mpsc};
 use std::time::Duration;
 
-use nectarlink_core::AudioOutputDevice;
+use noddy_core::AudioOutputDevice;
 
 static WATCH_STARTED: OnceLock<()> = OnceLock::new();
 

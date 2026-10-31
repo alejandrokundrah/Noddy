@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.noddy.desktop</id>
+  <name>Noddy</name>
+  <summary>Connect your Android phone and Linux PC over LAN</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <developer id="io.github.alejandrokundrah">
+    <name>alejandrokundrah</name>
+  </developer>
+  <description>
+    <p>
+      Noddy links your Android phone and Linux desktop over your local network with end-to-end encryption.
+    </p>
+    <ul>
+      <li>Sync clipboard text and images bidirectionally</li>
+      <li>Mirror phone notifications and reply inline from your desktop</li>
+      <li>Send and receive files, folders, and browsable phone storage via FUSE</li>
+      <li>Stream phone screen, camera, and audio with low latency</li>
+      <li>Read and send SMS/MMS messages and manage phone calls</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">noddy.desktop</launchable>
+  <url type="homepage">https://github.com/alejandrokundrah/Noddy</url>
+  <url type="bugtracker">https://github.com/alejandrokundrah/Noddy/issues</url>
+  <provides>
+    <binary>noddy-desktop</binary>
+    <mediatype>x-scheme-handler/noddy</mediatype>
+    <mediatype>x-scheme-handler/tel</mediatype>
+    <mediatype>x-scheme-handler/sms</mediatype>
+    <mediatype>x-scheme-handler/smsto</mediatype>
+    <mediatype>x-scheme-handler/mms</mediatype>
+    <mediatype>x-scheme-handler/mmsto</mediatype>
+  </provides>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="0.1.4" date="2026-10-17" />
+  </releases>
+</component>

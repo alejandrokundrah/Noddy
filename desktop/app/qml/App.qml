@@ -2,10 +2,10 @@
 import QtQuick
 import QtQml
 import QtQml.Models
-import app.nectarlink
+import app.noddy
 
 // Application root. The main window exists only while it's open: closing it
-// destroys it (freeing its GPU resources) and NectarLink keeps running in
+// destroys it (freeing its GPU resources) and Noddy keeps running in
 // the tray. A tray click, a second launch or a ringing request reopens it.
 QtObject {
     id: app
@@ -13,7 +13,7 @@ QtObject {
     readonly property var mainWindow: mainLoader.item
     readonly property Loader mainLoader: Loader {
         active: false
-        source: "qrc:/qt/qml/app/nectarlink/qml/MainWindow.qml"
+        source: "qrc:/qt/qml/app/noddy/qml/MainWindow.qml"
         onLoaded: {
             item.closeRequested.connect(app.onMainClosed)
             item.restoreAndBringToFront()
@@ -21,7 +21,7 @@ QtObject {
     }
     readonly property Loader laserLoader: Loader {
         active: AppController.laserActive
-        source: active ? "qrc:/qt/qml/app/nectarlink/qml/LaserOverlay.qml" : ""
+        source: active ? "qrc:/qt/qml/app/noddy/qml/LaserOverlay.qml" : ""
     }
     property var islandWindow: null
     readonly property Component islandWindowComponent: Component {

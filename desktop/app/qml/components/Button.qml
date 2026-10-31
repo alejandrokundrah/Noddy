@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink
+import app.noddy
 
 // A pill button. Variants: "fill" (primary action), "tonal", "outline",
 // "text". Sizes: "md" (40 px) and "sm" (32 px). Works with mouse, touch and

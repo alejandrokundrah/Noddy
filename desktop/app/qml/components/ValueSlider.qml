@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
-import app.nectarlink
+import app.noddy
 
 // A slider for a whole number between `from` and `to`, in steps of `step`.
 // It shows `value` and reports where the user moves it with `moved`; the

@@ -53,28 +53,28 @@ impl NativePicture {
 }
 
 unsafe extern "C" {
-    fn nectarlink_video_decoder_create(hevc: bool, error: *mut c_char, capacity: usize) -> *mut c_void;
-    fn nectarlink_video_decoder_destroy(decoder: *mut c_void);
-    fn nectarlink_video_decoder_next_device(
+    fn noddy_video_decoder_create(hevc: bool, error: *mut c_char, capacity: usize) -> *mut c_void;
+    fn noddy_video_decoder_destroy(decoder: *mut c_void);
+    fn noddy_video_decoder_next_device(
         decoder: *mut c_void,
         error: *mut c_char,
         capacity: usize,
     ) -> bool;
-    fn nectarlink_video_decoder_backend(decoder: *const c_void) -> *const c_char;
-    fn nectarlink_video_decoder_send(
+    fn noddy_video_decoder_backend(decoder: *const c_void) -> *const c_char;
+    fn noddy_video_decoder_send(
         decoder: *mut c_void,
         bytes: *const u8,
         length: usize,
         error: *mut c_char,
         capacity: usize,
     ) -> i32;
-    fn nectarlink_video_decoder_receive(
+    fn noddy_video_decoder_receive(
         decoder: *mut c_void,
         frame: *mut NativePicture,
         error: *mut c_char,
         capacity: usize,
     ) -> i32;
-    fn nectarlink_video_decoder_flush(decoder: *mut c_void);
+    fn noddy_video_decoder_flush(decoder: *mut c_void);
 }
 
 pub(crate) struct Decoder(NonNull<c_void>);
@@ -82,7 +82,7 @@ pub(crate) struct Decoder(NonNull<c_void>);
 impl Decoder {
     pub(crate) fn on_gpu(&self) -> bool {
         // SAFETY: the decoder owns a NUL-terminated backend name until it is dropped.
-        let backend = unsafe { CStr::from_ptr(nectarlink_video_decoder_backend(self.0.as_ptr())) };
+        let backend = unsafe { CStr::from_ptr(noddy_video_decoder_backend(self.0.as_ptr())) };
         backend != c"software" && backend != c"unavailable"
     }
 
@@ -94,10 +94,10 @@ impl Decoder {
         };
         let mut error = [0 as c_char; 512];
         // SAFETY: the factory writes only within the supplied error buffer.
-        let pointer = unsafe { nectarlink_video_decoder_create(hevc, error.as_mut_ptr(), error.len()) };
+        let pointer = unsafe { noddy_video_decoder_create(hevc, error.as_mut_ptr(), error.len()) };
         let pointer = NonNull::new(pointer).ok_or_else(|| native_error(&error))?;
         // SAFETY: the live decoder owns a NUL-terminated hardware device name.
-        let backend = unsafe { CStr::from_ptr(nectarlink_video_decoder_backend(pointer.as_ptr())) };
+        let backend = unsafe { CStr::from_ptr(noddy_video_decoder_backend(pointer.as_ptr())) };
         tracing::info!(codec, backend = %backend.to_string_lossy(), "Linux video decoder initialized");
         Ok(Self(pointer))
     }
@@ -108,7 +108,7 @@ impl Decoder {
         let mut error = [0 as c_char; 512];
         // SAFETY: the compressed data is copied by the native decoder before this call returns.
         let result = unsafe {
-            nectarlink_video_decoder_send(
+            noddy_video_decoder_send(
                 self.0.as_ptr(),
                 bytes.as_ptr(),
                 bytes.len(),
@@ -127,10 +127,10 @@ impl Decoder {
         let mut error = [0 as c_char; 512];
         // SAFETY: this worker owns the decoder; no native picture pointers escape receive().
         let switched =
-            unsafe { nectarlink_video_decoder_next_device(self.0.as_ptr(), error.as_mut_ptr(), error.len()) };
+            unsafe { noddy_video_decoder_next_device(self.0.as_ptr(), error.as_mut_ptr(), error.len()) };
         if switched {
             // SAFETY: a successful switch leaves a live decoder with a NUL-terminated backend name.
-            let backend = unsafe { CStr::from_ptr(nectarlink_video_decoder_backend(self.0.as_ptr())) };
+            let backend = unsafe { CStr::from_ptr(noddy_video_decoder_backend(self.0.as_ptr())) };
             tracing::info!(backend = %backend.to_string_lossy(), "Video decoder switched");
         } else {
             tracing::debug!(error = %native_error(&error), "Video decoding options exhausted");
@@ -144,7 +144,7 @@ impl Decoder {
             let mut error = [0 as c_char; 512];
             // SAFETY: the output structures live through the call; native planes remain borrowed until receive is called again.
             let result = unsafe {
-                nectarlink_video_decoder_receive(self.0.as_ptr(), &mut frame, error.as_mut_ptr(), error.len())
+                noddy_video_decoder_receive(self.0.as_ptr(), &mut frame, error.as_mut_ptr(), error.len())
             };
             match result {
                 0 => return Ok(()),
@@ -159,14 +159,14 @@ impl Decoder {
 
     pub(crate) fn flush(&mut self) {
         // SAFETY: this worker owns the decoder and no borrowed planes escape receive().
-        unsafe { nectarlink_video_decoder_flush(self.0.as_ptr()) };
+        unsafe { noddy_video_decoder_flush(self.0.as_ptr()) };
     }
 }
 
 impl Drop for Decoder {
     fn drop(&mut self) {
         // SAFETY: this is the sole owner of the native decoder.
-        unsafe { nectarlink_video_decoder_destroy(self.0.as_ptr()) };
+        unsafe { noddy_video_decoder_destroy(self.0.as_ptr()) };
     }
 }
 

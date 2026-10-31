@@ -250,7 +250,7 @@ pub(crate) fn parse_system_dark_sources(
 /// Runs `f` outside any active Tokio runtime context so `zbus::blocking` calls
 /// (which use `zbus`'s internal Tokio `Runtime::block_on` when compiled with
 /// the `tokio` feature) never panic with "Cannot start a runtime from within a
-/// runtime" when invoked from a `nectarlink-core` worker thread.
+/// runtime" when invoked from a `noddy-core` worker thread.
 pub(crate) fn non_tokio<T: Send>(f: impl FnOnce() -> T + Send) -> T {
     if tokio::runtime::Handle::try_current().is_ok() {
         std::thread::scope(|s| match s.spawn(f).join() {
@@ -537,6 +537,6 @@ mod tests {
     fn free_space_queries_existing_directory() {
         let temp = std::env::temp_dir();
         assert!(free_space(&temp).is_some());
-        assert!(free_space(std::path::Path::new("/nonexistent/nectarlink/path/xyz")).is_none());
+        assert!(free_space(std::path::Path::new("/nonexistent/noddy/path/xyz")).is_none());
     }
 }

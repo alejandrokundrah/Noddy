@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Shared-memory frame transport between `nectarlink-desktop.exe` and
-//! `nectarlink_vcam.dll`, plus placeholder frame rendering and RGB32/NV12
+//! Shared-memory frame transport between `noddy-desktop.exe` and
+//! `noddy_vcam.dll`, plus placeholder frame rendering and RGB32/NV12
 //! conversion.
 
 use std::sync::{
@@ -30,13 +30,13 @@ use windows::{
 /// inside Windows' Frame Server service, in another session than the app, so
 /// it has to be in the global namespace: the service creates it (only
 /// services may create global objects) and the signed-in user's app opens it.
-pub const DEFAULT_MAPPING_NAME: &str = "Global\\NectarlinkVcamFrame_v2";
+pub const DEFAULT_MAPPING_NAME: &str = "Global\\NoddyVcamFrame_v2";
 /// The same mapping in the caller's own session, when the global one can't be
 /// created (the media source running in-process, as in tests).
-pub const LOCAL_MAPPING_NAME: &str = "Local\\NectarlinkVcamFrame_v2";
+pub const LOCAL_MAPPING_NAME: &str = "Local\\NoddyVcamFrame_v2";
 /// Wide-string mapping name for local v2 virtual camera frame transport.
 #[cfg(windows)]
-pub const MAPPING_NAME: PCWSTR = w!("Local\\NectarlinkVirtualCamera_v2");
+pub const MAPPING_NAME: PCWSTR = w!("Local\\NoddyVirtualCamera_v2");
 
 /// Who may use the global mapping: the system, the Frame Server's
 /// LocalService account and administrators fully, signed-in (interactive)
@@ -125,7 +125,7 @@ fn unix_shm_path(name: &str) -> std::path::PathBuf {
         .collect();
     // SAFETY: `geteuid` has no preconditions and is always safe to call on POSIX.
     let uid = unsafe { libc::geteuid() };
-    let file_name = format!("nectarlink_shm_{uid}_{sanitized}");
+    let file_name = format!("noddy_shm_{uid}_{sanitized}");
     if let Some(runtime_dir) = std::env::var_os("XDG_RUNTIME_DIR").map(std::path::PathBuf::from)
         && let Ok(meta) = std::fs::symlink_metadata(&runtime_dir)
         && meta.is_dir()
@@ -765,7 +765,7 @@ pub fn bgrx_to_nv12(bgrx: &[u8], width: u32, height: u32, nv12: &mut [u8]) {
 
 const FIGTREE_TTF: &[u8] = include_bytes!("../../../assets/fonts/Figtree.ttf");
 
-/// Honey primary (`docs/design/tokens.json`) and white ink for the NectarLink mark.
+/// Honey primary (`docs/design/tokens.json`) and white ink for the Noddy mark.
 const MARK_BG_BGR: [u8; 3] = [0x00, 0x51, 0x8A];
 const MARK_INK_BGR: [u8; 3] = [0xFF, 0xFF, 0xFF];
 const MARK_HEXAGON: [(f32, f32); 6] =
@@ -785,7 +785,7 @@ struct CachedPlaceholderCard {
 
 static PLACEHOLDER_CACHE: std::sync::Mutex<Option<CachedPlaceholderCard>> = std::sync::Mutex::new(None);
 
-/// Renders a clean, calm placeholder frame with the NectarLink mark and
+/// Renders a clean, calm placeholder frame with the Noddy mark and
 /// `"Start the webcam on <phone>"` in anti-aliased Figtree into `bgrx` (`width * height * 4`).
 pub fn render_placeholder_bgrx(bgrx: &mut [u8], width: u32, height: u32, phone_name: &str) {
     let w = width as usize;
@@ -837,7 +837,7 @@ fn build_placeholder_card(width: u32, height: u32, phone_name: &str) -> CachedPl
     } else {
         format!("Start the webcam on {phone_name}")
     };
-    let caption = "NectarLink Camera";
+    let caption = "Noddy Camera";
 
     let font = TrueTypeFont::parse(FIGTREE_TTF);
     let head_px = (22.0 * scale).clamp(12.0, 38.0);
@@ -1099,7 +1099,7 @@ mod tests {
 
     #[test]
     fn a_busy_writer_keeps_the_last_complete_live_frame() {
-        let name = format!(r"Local\NectarlinkVcamReadCache_{}_busy", std::process::id());
+        let name = format!(r"Local\NoddyVcamReadCache_{}_busy", std::process::id());
         let mapping = SharedFrameMapping::open_or_create(&name).unwrap();
         let first = vec![42u8; 160 * 120 * 4];
         let second = vec![99u8; 160 * 120 * 4];
@@ -1132,7 +1132,7 @@ mod tests {
 
     #[test]
     fn busy_reads_do_not_reuse_a_frame_at_different_dimensions() {
-        let name = format!(r"Local\NectarlinkVcamReadCache_{}_resize", std::process::id());
+        let name = format!(r"Local\NoddyVcamReadCache_{}_resize", std::process::id());
         let mapping = SharedFrameMapping::open_or_create(&name).unwrap();
         mapping.write_frame("Pixel", 160, 120, 123, &vec![42u8; 160 * 120 * 4], false);
         let mut output = vec![0u8; 160 * 120 * 4];
@@ -1145,7 +1145,7 @@ mod tests {
     #[test]
     fn the_camera_always_gets_a_mapping_and_the_app_finds_it() {
         // Use a private mapping so this test cannot overwrite an active webcam.
-        let name = format!(r"Local\NectarlinkVcamMappingTest_{}", std::process::id());
+        let name = format!(r"Local\NoddyVcamMappingTest_{}", std::process::id());
         let camera = SharedFrameMapping::for_camera(&name).unwrap();
         camera.set_idle("Pixel 9");
         let app = SharedFrameMapping::open_existing(&name).unwrap();
@@ -1154,7 +1154,7 @@ mod tests {
 
     #[test]
     fn opening_a_missing_mapping_fails() {
-        let name = format!(r"Local\NectarlinkVcamMissing_{}", std::process::id());
+        let name = format!(r"Local\NoddyVcamMissing_{}", std::process::id());
         assert!(SharedFrameMapping::open_existing(&name).is_err());
     }
 
@@ -1171,7 +1171,7 @@ mod tests {
             .0
             .iter()
             .any(|px| px[0] == 0x00 && px[1] == 0x51 && px[2] == 0x8A && px[3] == 0xFF);
-        assert!(has_honey_mark, "placeholder should include the NectarLink honey mark");
+        assert!(has_honey_mark, "placeholder should include the Noddy honey mark");
         let has_text_ink =
             frame.as_chunks::<4>().0.iter().any(|px| px[0] > 0xD0 && px[1] > 0xD0 && px[2] > 0xD0);
         assert!(has_text_ink, "placeholder should include bright headline text ink");
@@ -1191,13 +1191,13 @@ mod tests {
     #[allow(unsafe_code)]
     fn unix_shm_enforces_owner_only_permissions_and_uid_scope() {
         use std::os::unix::fs::MetadataExt;
-        let name = format!(r"Local\NectarlinkVcamPermTest_{}", std::process::id());
+        let name = format!(r"Local\NoddyVcamPermTest_{}", std::process::id());
         let path = unix_shm_path(&name);
         let uid = unsafe { libc::geteuid() };
         assert!(
             path.file_name()
                 .and_then(|s| s.to_str())
-                .is_some_and(|s| s.starts_with(&format!("nectarlink_shm_{uid}_")))
+                .is_some_and(|s| s.starts_with(&format!("noddy_shm_{uid}_")))
         );
         let _mapping = SharedFrameMapping::open_or_create(&name).expect("create mapping");
         let meta = std::fs::symlink_metadata(&path).expect("shm file metadata");

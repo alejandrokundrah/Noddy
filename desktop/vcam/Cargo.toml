@@ -1,6 +1,6 @@
 [package]
-name = "nectarlink-vcam"
-description = "NectarLink virtual camera Media Foundation media source (Windows 11)"
+name = "noddy-vcam"
+description = "Noddy virtual camera Media Foundation media source (Windows 11)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -10,7 +10,7 @@ license = "GPL-3.0-or-later"
 publish = false
 
 [lib]
-name = "nectarlink_vcam"
+name = "noddy_vcam"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]

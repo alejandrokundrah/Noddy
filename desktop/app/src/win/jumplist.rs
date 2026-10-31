@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Windows Taskbar Jump List: quick user tasks when right-clicking the
-//! NectarLink icon on the taskbar or Start menu (`ICustomDestinationList`).
+//! Noddy icon on the taskbar or Start menu (`ICustomDestinationList`).
 
 use std::path::Path;
 
@@ -20,7 +20,7 @@ use windows::{
 
 use super::with_com;
 
-/// The command-line flag Jump List tasks pass back to NectarLink.
+/// The command-line flag Jump List tasks pass back to Noddy.
 pub const ARG: &str = "--task";
 
 /// The 5 user tasks shown in the Windows Taskbar Jump List: `(action, title, description)`.
@@ -108,10 +108,10 @@ mod tests {
     #[test]
     fn task_arguments_preserve_custom_data_dir() {
         assert_eq!(build_task_arguments("send-files", None), "--task send-files");
-        let custom = Path::new(r"C:\Temp\nectarlink-test");
+        let custom = Path::new(r"C:\Temp\noddy-test");
         assert_eq!(
             build_task_arguments("find-phone", Some(custom)),
-            r#"--data-dir "C:\Temp\nectarlink-test" --task find-phone"#
+            r#"--data-dir "C:\Temp\noddy-test" --task find-phone"#
         );
         assert_eq!(TASKS.len(), 5);
     }

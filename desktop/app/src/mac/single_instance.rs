@@ -22,7 +22,7 @@ pub enum Instance {
 
 pub fn acquire(data_dir: &Path) -> Result<Instance, String> {
     let _ = std::fs::create_dir_all(data_dir);
-    let sock_path = data_dir.join("nectarlink.sock");
+    let sock_path = data_dir.join("noddy.sock");
 
     match UnixListener::bind(&sock_path) {
         Ok(listener) => {
@@ -46,7 +46,7 @@ pub fn acquire(data_dir: &Path) -> Result<Instance, String> {
 }
 
 pub fn wake(data_dir: &Path) {
-    let sock_path = data_dir.join("nectarlink.sock");
+    let sock_path = data_dir.join("noddy.sock");
     if let Ok(mut stream) = UnixStream::connect(&sock_path) {
         let _ = stream.write_all(b"wake\n");
     }

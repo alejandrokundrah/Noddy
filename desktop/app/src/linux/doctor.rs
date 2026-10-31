@@ -547,8 +547,8 @@ pub fn linux_checks() -> Vec<(String, String, bool, String, Option<&'static str>
         check(
             "linux-appindicator",
             session_dbus_has_owner("org.kde.StatusNotifierWatcher"),
-            tr!("Doctor", "NectarLink is in the top bar"),
-            tr!("Doctor", "NectarLink can't show its icon in the top bar"),
+            tr!("Doctor", "Noddy is in the top bar"),
+            tr!("Doctor", "Noddy can't show its icon in the top bar"),
             tr!(
                 "Doctor",
                 "GNOME shows app icons there only with the AppIndicator extension. Install it (gnome-shell-extension-appindicator) and turn it on in Extensions."

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtQuick.Shapes
-import app.nectarlink
+import app.noddy
 
 // Minimize, maximize/restore and close, drawn like Windows 11's own on Windows
 // (Segoe Fluent Icons, or Segoe MDL2 Assets on Windows 10) and with crisp vector strokes on Linux where that font

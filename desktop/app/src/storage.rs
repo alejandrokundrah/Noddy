@@ -2,7 +2,7 @@
 //! Phone storage in File Explorer (`docs/protocol/storage.md`, `PLAN.md` §3.6).
 //!
 //! Registers a Windows Cloud Files (`cfapi`) sync root per paired phone under
-//! `%USERPROFILE%\Nectarlink\<Phone name>` when the phone's `storage` toggle is
+//! `%USERPROFILE%\Noddy\<Phone name>` when the phone's `storage` toggle is
 //! enabled. Placeholders are populated on demand when folders are opened
 //! (`CF_CALLBACK_TYPE_FETCH_PLACEHOLDERS`) and hydrated on open via ranged
 //! reads (`CF_CALLBACK_TYPE_FETCH_DATA`). Renames, deletes, and new or modified
@@ -26,9 +26,9 @@ mod imp {
         time::Duration,
     };
 
-    use nectarlink_core::{DeviceId, NodeEvent};
+    use noddy_core::{DeviceId, NodeEvent};
     #[cfg(windows)]
-    use nectarlink_core::{LinkState, StorageEntry};
+    use noddy_core::{LinkState, StorageEntry};
     #[cfg(windows)]
     use windows::{
         Security::Cryptography::{BinaryStringEncoding, CryptographicBuffer},
@@ -83,9 +83,9 @@ mod imp {
     use crate::state::{Changes, CoreStatus};
     use crate::{core_host, win};
 
-    /// Provider prefix for sync root IDs (`NectarLink!<device_id>`).
+    /// Provider prefix for sync root IDs (`Noddy!<device_id>`).
     #[cfg(windows)]
-    const PROVIDER_PREFIX: &str = "Nectarlink!";
+    const PROVIDER_PREFIX: &str = "Noddy!";
 
     /// Difference between Windows FILETIME epoch (1601-01-01) and Unix epoch
     /// (1970-01-01) in 100-nanosecond intervals.
@@ -258,7 +258,7 @@ mod imp {
         win::storage::shutdown();
     }
 
-    /// Unregisters all `NectarLink!*` sync roots from Windows (`--uninstall`).
+    /// Unregisters all `Noddy!*` sync roots from Windows (`--uninstall`).
     #[cfg(windows)]
     pub fn unregister_all() {
         shutdown();
@@ -295,7 +295,7 @@ mod imp {
         win::storage::unregister_all();
     }
 
-    /// Returns the local sync root path for a paired phone (`%USERPROFILE%\Nectarlink\<Phone name>`).
+    /// Returns the local sync root path for a paired phone (`%USERPROFILE%\Noddy\<Phone name>`).
     pub fn sync_root_path_for(device: DeviceId) -> Option<PathBuf> {
         #[cfg(windows)]
         if let Some(active) = get_active_root(&device) {
@@ -311,7 +311,7 @@ mod imp {
         Some(base_sync_dir()?.join(folders.remove(&device)?))
     }
 
-    /// Each phone's folder under `Nectarlink`: its name, or its name and
+    /// Each phone's folder under `Noddy`: its name, or its name and
     /// short ID when another paired phone has the same name, so two phones
     /// of the same model never share one folder (or remove each other's).
     pub fn folder_names<'a>(
@@ -347,7 +347,7 @@ mod imp {
     }
 
     pub(crate) fn base_sync_dir() -> Option<PathBuf> {
-        dirs::home_dir().map(|h| h.join("Nectarlink"))
+        dirs::home_dir().map(|h| h.join("Noddy"))
     }
 
     #[cfg(windows)]
@@ -774,12 +774,12 @@ mod imp {
 
     /// What Explorer is told when the phone couldn't list or read something.
     /// A refusal (storage access off, or no All files access) isn't a network
-    /// problem: it's "access denied", and NectarLink says what to turn on.
+    /// problem: it's "access denied", and Noddy says what to turn on.
     #[cfg(windows)]
-    fn failure_status(device: DeviceId, error: &nectarlink_core::Error) -> NTSTATUS {
+    fn failure_status(device: DeviceId, error: &noddy_core::Error) -> NTSTATUS {
         match error {
-            nectarlink_core::Error::Denied | nectarlink_core::Error::Unsupported => {
-                explain_refusal(device, matches!(error, nectarlink_core::Error::Unsupported));
+            noddy_core::Error::Denied | noddy_core::Error::Unsupported => {
+                explain_refusal(device, matches!(error, noddy_core::Error::Unsupported));
                 STATUS_ACCESS_DENIED
             }
             _ => STATUS_CLOUD_NETWORK_UNAVAILABLE,
@@ -802,11 +802,11 @@ mod imp {
         }
         let name = core_host::host().hub.read(|s| s.name_of(&device)).unwrap_or_else(|| "your phone".into());
         let body = if no_all_files_access {
-            tr!("Storage", "On the phone, allow All files access for NectarLink.")
+            tr!("Storage", "On the phone, allow All files access for Noddy.")
         } else {
             tr!(
                 "Storage",
-                "On the phone, turn on Browse this phone's storage in File Explorer in NectarLink."
+                "On the phone, turn on Browse this phone's storage in File Explorer in Noddy."
             )
         };
         crate::win::toast::show(crate::win::toast::Toast {
@@ -814,7 +814,7 @@ mod imp {
             key: format!("storage-refused-{device}"),
             title: tr!("Storage", "%1's files aren't shared with this PC", name),
             body,
-            attribution: "NectarLink".into(),
+            attribution: "Noddy".into(),
             icon: None,
             image: None,
             actions: Vec::new(),
@@ -1079,8 +1079,8 @@ mod imp {
                 Some(new_rel) if !old_rel.is_empty() && !new_rel.is_empty() => {
                     match node.storage_rename(root.device, &old_rel, &new_rel).await {
                         Ok(()) => STATUS_SUCCESS,
-                        Err(nectarlink_core::Error::Offline) => STATUS_CLOUD_NETWORK_UNAVAILABLE,
-                        Err(nectarlink_core::Error::Denied) => STATUS_ACCESS_DENIED,
+                        Err(noddy_core::Error::Offline) => STATUS_CLOUD_NETWORK_UNAVAILABLE,
+                        Err(noddy_core::Error::Denied) => STATUS_ACCESS_DENIED,
                         Err(_) => STATUS_CLOUD_UNSUCCESSFUL,
                     }
                 }
@@ -1129,10 +1129,10 @@ mod imp {
             };
             let status = match node.storage_delete(root.device, &rel_path, true).await {
                 Ok(()) => STATUS_SUCCESS,
-                Err(nectarlink_core::Error::Offline) => STATUS_CLOUD_NETWORK_UNAVAILABLE,
-                Err(nectarlink_core::Error::Denied) => STATUS_ACCESS_DENIED,
+                Err(noddy_core::Error::Offline) => STATUS_CLOUD_NETWORK_UNAVAILABLE,
+                Err(noddy_core::Error::Denied) => STATUS_ACCESS_DENIED,
                 // Already gone from the phone: deleted, as asked.
-                Err(nectarlink_core::Error::NotFound) => STATUS_SUCCESS,
+                Err(noddy_core::Error::NotFound) => STATUS_SUCCESS,
                 Err(_) => STATUS_CLOUD_UNSUCCESSFUL,
             };
             ack_delete(connection_key, transfer_key, request_key, status);
@@ -1176,7 +1176,7 @@ mod imp {
         for entry in entries {
             // Windows can't show a name it can't store (`:`, `CON`, a trailing
             // dot), and `C:x` would even join to a path outside the folder.
-            if nectarlink_core::storable_name(&entry.name) != entry.name {
+            if noddy_core::storable_name(&entry.name) != entry.name {
                 continue;
             }
             let child_path = local_dir.join(&entry.name);
@@ -1477,30 +1477,30 @@ mod imp {
 
         #[test]
         fn normalizes_relative_paths_and_sanitizes_folder_names() {
-            let root = Path::new(r"C:\Users\alice\Nectarlink\Pixel 9");
+            let root = Path::new(r"C:\Users\alice\Noddy\Pixel 9");
             assert_eq!(relative_path_under_root(root, root), Some(String::new()));
             assert_eq!(
                 relative_path_under_root(
                     root,
-                    Path::new(r"C:\Users\alice\Nectarlink\Pixel 9\DCIM\Camera\a.jpg")
+                    Path::new(r"C:\Users\alice\Noddy\Pixel 9\DCIM\Camera\a.jpg")
                 ),
                 Some("DCIM/Camera/a.jpg".into())
             );
             assert_eq!(
-                relative_path_under_root(root, Path::new(r"C:\Users\alice\Nectarlink\Pixel 9 Pro\DCIM")),
+                relative_path_under_root(root, Path::new(r"C:\Users\alice\Noddy\Pixel 9 Pro\DCIM")),
                 None
             );
             // "İ" lowercases to two characters: the path still splits in the right place.
-            let turkish = Path::new(r"C:\Users\alice\Nectarlink\İpek's Phone");
+            let turkish = Path::new(r"C:\Users\alice\Noddy\İpek's Phone");
             assert_eq!(
                 relative_path_under_root(
                     turkish,
-                    Path::new(r"C:\Users\alice\Nectarlink\İpek's Phone\DCIM\a.jpg")
+                    Path::new(r"C:\Users\alice\Noddy\İpek's Phone\DCIM\a.jpg")
                 ),
                 Some("DCIM/a.jpg".into())
             );
             assert_eq!(
-                relative_path_under_root(root, Path::new(r"c:\users\ALICE\nectarlink\pixel 9\Download")),
+                relative_path_under_root(root, Path::new(r"c:\users\ALICE\noddy\pixel 9\Download")),
                 Some("Download".into())
             );
 
@@ -1526,7 +1526,7 @@ mod imp {
 mod imp {
     #![allow(dead_code)]
 
-    use nectarlink_core::{DeviceId, NodeEvent};
+    use noddy_core::{DeviceId, NodeEvent};
     use std::path::{Path, PathBuf};
 
     pub fn start() {}

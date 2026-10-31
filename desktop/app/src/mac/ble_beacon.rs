@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! macOS BLE beacon stubs.
 
-use nectarlink_core::DeviceId;
+use noddy_core::DeviceId;
 
 pub fn start(_device_id: DeviceId) {}
 pub fn stop() {}
