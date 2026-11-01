@@ -401,6 +401,7 @@ fn this_device() -> DeviceInfo {
         model: None,
         accent: None,
         screen: None,
+        wallpaper: None,
         install_id: crate::win::machine_guid().as_deref().and_then(noddy_core::install_id_from),
     }
 }

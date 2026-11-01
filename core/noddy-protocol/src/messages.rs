@@ -339,11 +339,22 @@ pub struct DeviceInfo {
     /// Optional measured front-display geometry for phones/tablets.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub screen: Option<ScreenShape>,
+    /// Optional small JPEG of the device's wallpaper, shown in the phone preview.
+    #[serde(default, skip_serializing_if = "Option::is_none", with = "serde_bytes")]
+    pub wallpaper: Option<Vec<u8>>,
     /// Identifies the physical device across app reinstalls (a new identity key each
     /// time), so a re-paired device replaces its old entry instead of appearing twice.
     /// A salted hash, never the raw platform ID; see `install_id_from`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub install_id: Option<String>,
+}
+
+/// A wallpaper thumbnail, at most, in bytes.
+pub const MAX_WALLPAPER_BYTES: usize = 64 * 1024;
+
+/// Whether `bytes` look like a JPEG small enough to keep.
+pub fn is_valid_wallpaper(bytes: &[u8]) -> bool {
+    bytes.len() <= MAX_WALLPAPER_BYTES && bytes.len() > 4 && bytes.starts_with(&[0xFF, 0xD8, 0xFF])
 }
 
 /// A device's name or model, at most, in characters.
@@ -370,6 +381,7 @@ impl DeviceInfo {
         self.model =
             self.model.map(|m| clean_device_text(&m, MAX_DEVICE_NAME_CHARS)).filter(|m| !m.is_empty());
         self.screen = self.screen.and_then(ScreenShape::sanitized);
+        self.wallpaper = self.wallpaper.filter(|w| is_valid_wallpaper(w));
         self.install_id = self.install_id.filter(|id| is_valid_install_id(id));
         self
     }
@@ -4369,6 +4381,7 @@ mod tests {
             model: Some("Google Pixel 9".into()),
             accent: None,
             screen: None,
+            wallpaper: None,
             install_id: None,
         }
     }

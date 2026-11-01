@@ -31,6 +31,7 @@ fn make_config(dir: &TempDir, name: &str, kind: DeviceKind) -> NodeConfig {
             model: None,
             accent: None,
             screen: None,
+            wallpaper: None,
             install_id: None,
         },
         "0.1.0-scale",

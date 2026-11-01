@@ -9,8 +9,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.graphics.Path
 import android.graphics.PathMeasure
+import android.graphics.drawable.BitmapDrawable
 import android.hardware.display.DisplayManager
 import android.net.ConnectivityManager
 import android.net.LinkProperties
@@ -145,8 +147,55 @@ fun deviceInfo(context: Context): DeviceInfo {
         model = modelName(Build.MANUFACTURER, Build.MODEL),
         accent = materialYouAccent(context),
         screen = measureScreenShape(context),
+        wallpaper = wallpaperThumbnail(context),
         installId = installId(context),
     )
+}
+
+private const val WALLPAPER_MAX_SIDE = 480
+private const val WALLPAPER_MAX_BYTES = 56 * 1024
+private val wallpaperLock = Any()
+private var wallpaperCache: Pair<Int, ByteArray?>? = null
+
+/**
+ * A small JPEG copy of the phone's wallpaper for the PC's phone preview, or null when the
+ * wallpaper can't be read (no access, live wallpaper). Only a thumbnail leaves the phone;
+ * it is re-encoded only when the wallpaper changes.
+ */
+fun wallpaperThumbnail(context: Context): ByteArray? = synchronized(wallpaperLock) {
+    runCatching {
+        val manager = WallpaperManager.getInstance(context)
+        val id = manager.getWallpaperId(WallpaperManager.FLAG_SYSTEM)
+        wallpaperCache?.takeIf { it.first == id }?.let { return@runCatching it.second }
+        val source = ((manager.drawable ?: manager.peekDrawable()) as? BitmapDrawable)?.bitmap
+            ?.copy(Bitmap.Config.ARGB_8888, false)
+        val jpeg = source?.let { bitmap ->
+            val scale = WALLPAPER_MAX_SIDE.toFloat() / maxOf(bitmap.width, bitmap.height)
+            val small = if (scale < 1f) {
+                Bitmap.createScaledBitmap(
+                    bitmap,
+                    (bitmap.width * scale).toInt().coerceAtLeast(1),
+                    (bitmap.height * scale).toInt().coerceAtLeast(1),
+                    true,
+                )
+            } else {
+                bitmap
+            }
+            var out: ByteArray? = null
+            for (quality in intArrayOf(75, 60, 45, 30)) {
+                val bytes = java.io.ByteArrayOutputStream().also {
+                    small.compress(Bitmap.CompressFormat.JPEG, quality, it)
+                }.toByteArray()
+                if (bytes.size <= WALLPAPER_MAX_BYTES) {
+                    out = bytes
+                    break
+                }
+            }
+            out
+        }
+        wallpaperCache = id to jpeg
+        jpeg
+    }.getOrNull()
 }
 
 /**
