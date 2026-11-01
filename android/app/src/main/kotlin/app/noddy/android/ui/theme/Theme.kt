@@ -156,7 +156,7 @@ private fun ColorScheme.toGlassScheme(dark: Boolean): ColorScheme {
 /** Glass's fixed palette: the Honey preset, light and dark. */
 private fun glassScheme(dark: Boolean): ColorScheme {
     val error = if (dark) Tokens.errorDark else Tokens.errorLight
-    val seed = Tokens.bloomSeeds.getValue(Tokens.DEFAULT_SEED)
+    val seed = Tokens.glassSeeds.getValue(Tokens.DEFAULT_SEED)
     return (if (dark) seed.dark else seed.light).toScheme(dark, error).toGlassScheme(dark)
 }
 

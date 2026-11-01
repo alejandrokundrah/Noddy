@@ -107,11 +107,11 @@ const ROLES: &[&str] = &[
 /// Catches mistakes in the token file before they reach a theme.
 fn validate(tokens: &Value) -> Result<()> {
     let themes = tokens.get("themes").context("missing \"themes\"")?;
-    let status = themes.pointer("/bloom/status").context("missing bloom status")?;
-    let seeds = themes.pointer("/bloom/seeds").and_then(Value::as_object).context("missing bloom seeds")?;
+    let status = themes.pointer("/glass/status").context("missing glass status")?;
+    let seeds = themes.pointer("/glass/seeds").and_then(Value::as_object).context("missing glass seeds")?;
     for (seed, def) in seeds {
         for mode in ["light", "dark"] {
-            let name = format!("bloom.{seed}.{mode}");
+            let name = format!("glass.{seed}.{mode}");
             check_palette(def.get(mode), &name)?;
             check_contrast(def.get(mode), status.get(mode), &name)?;
         }
@@ -270,10 +270,10 @@ fn kotlin_palette(palette: &Value, indent: usize) -> Result<String> {
 }
 
 fn render_kotlin(tokens: &Value) -> Result<String> {
-    let bloom = tokens.pointer("/themes/bloom").context("missing bloom")?;
-    let seeds = bloom.get("seeds").and_then(Value::as_object).context("missing seeds")?;
-    let default_seed = bloom.get("defaultSeed").and_then(Value::as_str).context("missing defaultSeed")?;
-    let status = bloom.get("status").context("missing bloom status")?;
+    let glass = tokens.pointer("/themes/glass").context("missing glass")?;
+    let seeds = glass.get("seeds").and_then(Value::as_object).context("missing seeds")?;
+    let default_seed = glass.get("defaultSeed").and_then(Value::as_str).context("missing defaultSeed")?;
+    let status = glass.get("status").context("missing glass status")?;
     let status_color = |mode: &str, key: &str| -> Result<String> {
         let hex = status
             .pointer(&format!("/{mode}/{key}"))
@@ -298,14 +298,14 @@ fn render_kotlin(tokens: &Value) -> Result<String> {
     out.extend([
         ")".into(),
         String::new(),
-        "/** A Bloom color preset: its seed swatch and light and dark palettes. */".into(),
+        "/** A Glass color preset: its seed swatch and light and dark palettes. */".into(),
         "@Immutable".into(),
         "data class Seed(val color: Color, val light: Palette, val dark: Palette)".into(),
         String::new(),
         "object Tokens {".into(),
         format!("    const val DEFAULT_SEED = \"{default_seed}\""),
         String::new(),
-        "    val bloomSeeds: Map<String, Seed> = linkedMapOf(".into(),
+        "    val glassSeeds: Map<String, Seed> = linkedMapOf(".into(),
     ]);
     for (name, def) in seeds {
         let seed = def.get("seed").and_then(Value::as_str).context("missing seed color")?;
@@ -362,10 +362,10 @@ mod tests {
         let source = fs::read_to_string(repo_root().join(TOKENS)).unwrap();
         let tokens: Value = serde_json::from_str(&source).unwrap();
         let kotlin = render_kotlin(&tokens).unwrap();
-        for seed in tokens.pointer("/themes/bloom/seeds").unwrap().as_object().unwrap().keys() {
+        for seed in tokens.pointer("/themes/glass/seeds").unwrap().as_object().unwrap().keys() {
             assert!(kotlin.contains(&format!("\"{seed}\" to Seed(")), "{seed}");
         }
-        assert!(kotlin.contains("primary = Color(0xFF8A5100)"));
+        assert!(kotlin.contains("primary = Color(0xFFB23808)"));
     }
 
     #[test]
@@ -378,7 +378,7 @@ mod tests {
     fn rejects_low_contrast_palette() {
         let source = fs::read_to_string(repo_root().join(TOKENS)).unwrap();
         let mut tokens: Value = serde_json::from_str(&source).unwrap();
-        tokens.pointer_mut("/themes/bloom/status/light").unwrap()["warning"] = "#9A6700".into();
+        tokens.pointer_mut("/themes/glass/status/light").unwrap()["warning"] = "#9A6700".into();
         let err = validate(&tokens).unwrap_err().to_string();
         assert!(err.contains("warning"), "{err}");
     }

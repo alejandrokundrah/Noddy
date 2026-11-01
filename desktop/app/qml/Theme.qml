@@ -34,8 +34,8 @@ QtObject {
     // carries its status colors too.
     readonly property var palette: ember
         ? Tokens.data.themes.ember.variants.dark
-        : Tokens.data.themes.bloom.seeds[Tokens.data.themes.bloom.defaultSeed][dark ? "dark" : "light"]
-    readonly property var status: ember ? palette : Tokens.data.themes.bloom.status[dark ? "dark" : "light"]
+        : Tokens.data.themes.glass.seeds[Tokens.data.themes.glass.defaultSeed][dark ? "dark" : "light"]
+    readonly property var status: ember ? palette : Tokens.data.themes.glass.status[dark ? "dark" : "light"]
 
     // ---- Color roles ----
     readonly property color primary: palette.primary
@@ -90,7 +90,7 @@ QtObject {
     readonly property color scrim: Qt.rgba(0, 0, 0, dark ? 0.5 : 0.32)
 
     // ---- Shape ----
-    readonly property var shape: ember ? Tokens.data.themes.ember.shape : Tokens.data.themes.bloom.shape
+    readonly property var shape: ember ? Tokens.data.themes.ember.shape : Tokens.data.themes.glass.shape
     readonly property int radiusXs: shape.xs
     readonly property int radiusSm: shape.sm
     readonly property int radiusMd: shape.md
@@ -109,7 +109,7 @@ QtObject {
     readonly property string captionIconFont: Qt.fontFamilies().indexOf("Segoe Fluent Icons") >= 0
         ? "Segoe Fluent Icons" : "Segoe MDL2 Assets"
     readonly property var typography: Tokens.data.typography
-    readonly property var labelStyle: Tokens.data.themes.bloom.label
+    readonly property var labelStyle: Tokens.data.themes.glass.label
 
     // ---- Layout and spacing ----
     readonly property var layout: Tokens.data.layout.desktop

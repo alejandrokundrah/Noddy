@@ -47,7 +47,7 @@ class ThemeAndLocalizationTest {
 
     @Test
     fun `Glass has distinct light and dark palettes for its fixed Honey seed`() {
-        val seed = Tokens.bloomSeeds[Tokens.DEFAULT_SEED]
+        val seed = Tokens.glassSeeds[Tokens.DEFAULT_SEED]
         assertNotNull("the default seed '${Tokens.DEFAULT_SEED}' must exist", seed)
         seed!!
         assertNotEquals("light and dark surfaces must differ", seed.light.surface, seed.dark.surface)
