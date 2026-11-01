@@ -929,6 +929,85 @@ async fn too_many_failed_nearby_attempts_end_pairing_mode() {
     assert!(!pc.node.is_pairing(), "pairing mode ends after 5 failed nearby attempts");
 }
 
+// ---- PC to PC pairing ----
+//
+// The ceremony only has two roles, host (shows the link or accepts nearby
+// requests) and initiator. Neither depends on a device being a phone, so two
+// computers pair exactly like a phone and a computer do.
+
+#[tokio::test(flavor = "multi_thread")]
+async fn pc_to_pc_qr_pairing_connects_both_computers() {
+    let mut desk = device("Desktop", DeviceKind::Desktop).await;
+    let mut laptop = device("Laptop", DeviceKind::Laptop).await;
+    // The laptop joins with the link the desktop shows (pasted, not scanned).
+    pair_qr(&mut desk, &mut laptop).await;
+
+    let desk_peers = desk.node.paired_devices().unwrap();
+    assert_eq!(desk_peers.len(), 1);
+    assert_eq!(desk_peers[0].id, laptop.node.device_id());
+    assert_eq!(desk_peers[0].info.kind, DeviceKind::Laptop);
+    assert!(matches!(desk_peers[0].link, LinkState::Online { .. }));
+
+    let laptop_peers = laptop.node.paired_devices().unwrap();
+    assert_eq!(laptop_peers.len(), 1);
+    assert_eq!(laptop_peers[0].id, desk.node.device_id());
+    assert_eq!(laptop_peers[0].info.kind, DeviceKind::Desktop);
+    assert!(!desk.node.is_pairing(), "the host leaves pairing mode");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn pc_to_pc_nearby_pairing_with_matching_codes() {
+    let mut desk = device("Desktop", DeviceKind::Desktop).await;
+    let mut laptop = device("Laptop", DeviceKind::Laptop).await;
+    // Both computers show their pairing screen; the laptop picks the desktop.
+    desk.node.pairing_start_qr().await.unwrap();
+    laptop.node.pairing_start_qr().await.unwrap();
+    let desk_id = desk.node.device_id();
+    laptop.node.add_known_addrs(desk_id, &desk.node.direct_addrs().await);
+
+    let initiator = laptop.node.clone();
+    let task = tokio::spawn(async move { initiator.pairing_start_nearby(desk_id).await });
+    let (laptop_code, desk_code) = (sas_code(&mut laptop).await, sas_code(&mut desk).await);
+    assert_eq!(laptop_code, desk_code, "both screens show the same code");
+    laptop.node.pairing_confirm(true).unwrap();
+    desk.node.pairing_confirm(true).unwrap();
+    with_timeout("nearby pairing", task).await.unwrap().expect("pairing succeeds");
+
+    wait_online(&mut laptop, desk_id).await;
+    wait_online(&mut desk, laptop.node.device_id()).await;
+    assert_eq!(desk.node.paired_devices().unwrap().len(), 1);
+    assert_eq!(laptop.node.paired_devices().unwrap().len(), 1);
+    // Both were showing their pairing screen. Pairing used up each one's turn,
+    // so neither keeps accepting new devices afterwards.
+    assert!(!desk.node.is_pairing(), "the host leaves pairing mode");
+    assert!(!laptop.node.is_pairing(), "the initiator leaves pairing mode too");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn pc_to_pc_qr_join_ends_the_joiners_own_pairing_mode() {
+    let mut desk = device("Desktop", DeviceKind::Desktop).await;
+    let laptop = device("Laptop", DeviceKind::Laptop).await;
+    let uri = desk.node.pairing_start_qr().await.unwrap();
+    laptop.node.pairing_start_qr().await.unwrap();
+    with_timeout("join", laptop.node.pairing_join(&uri.to_uri())).await.expect("pairing succeeds");
+    wait_for(&mut desk, "paired", |e| match e {
+        NodeEvent::Pairing(PairingEvent::Paired(_)) => Some(()),
+        _ => None,
+    })
+    .await;
+    assert!(!desk.node.is_pairing());
+    assert!(!laptop.node.is_pairing(), "the joiner doesn't keep showing its code");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn a_computer_cannot_pair_with_itself() {
+    let pc = device("Desktop", DeviceKind::Desktop).await;
+    let uri = pc.node.pairing_start_qr().await.unwrap();
+    let result = pc.node.pairing_join(&uri.to_uri()).await;
+    assert!(matches!(result, Err(Error::Protocol(_))), "got {result:?}");
+    assert!(pc.node.paired_devices().unwrap().is_empty());
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn unpairing_is_mirrored_on_the_other_device() {
     let mut pc = device("Desktop", DeviceKind::Desktop).await;

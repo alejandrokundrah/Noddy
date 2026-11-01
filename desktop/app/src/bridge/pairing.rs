@@ -10,7 +10,7 @@ use std::{
 
 use cxx_qt::{CxxQtType, Threading};
 use cxx_qt_lib::{QHash, QHashPair_QString_QVariant, QList, QString, QVariant};
-use noddy_core::{DeviceId, PairingFailure};
+use noddy_core::{DeviceId, PairingFailure, PairingUri};
 
 use crate::{
     core_host, qr,
@@ -42,6 +42,9 @@ pub mod qobject {
         #[qproperty(i32, qr_size)]
         /// When the QR code expires (ms since the epoch); it refreshes itself.
         #[qproperty(f64, expires_at)]
+        /// The pairing link behind the QR code, for another computer (which has no
+        /// camera to scan it with) to paste into "Pair a computer".
+        #[qproperty(QString, link)]
         /// The 6-digit code to compare, and the device it's shared with.
         #[qproperty(QString, code)]
         #[qproperty(QString, peer_name)]
@@ -58,6 +61,10 @@ pub mod qobject {
         /// Pairs with a nearby device that shows its pairing screen.
         #[qinvokable]
         fn pair_nearby(self: Pin<&mut Pairing>, device: &QString);
+        /// Pairs with the computer whose pairing link was pasted (the PC version of
+        /// scanning its QR code).
+        #[qinvokable]
+        fn pair_link(self: Pin<&mut Pairing>, link: &QString);
         /// Answers the code comparison.
         #[qinvokable]
         fn confirm(self: Pin<&mut Pairing>, codes_match: bool);
@@ -76,6 +83,7 @@ pub struct PairingRust {
     qr_path: QString,
     qr_size: i32,
     expires_at: f64,
+    link: QString,
     code: QString,
     peer_name: QString,
     failure: QString,
@@ -178,6 +186,7 @@ impl qobject::Pairing {
                         Err(e) => tracing::error!(error = %e, "can't encode the pairing link"),
                     }
                     self.as_mut().rust_mut().shown_uri = uri.clone();
+                    self.as_mut().set_link(QString::from(uri));
                 }
                 let ms = expires_at.duration_since(UNIX_EPOCH).unwrap_or_default().as_millis() as f64;
                 self.as_mut().set_expires_at(ms);
@@ -228,6 +237,33 @@ impl qobject::Pairing {
                 hub().update(|s| match s.pairing {
                     PairingView::Connecting { .. } => {
                         s.set_pairing(PairingView::Failed(PairingFailure::Unreachable))
+                    }
+                    _ => Changes::NONE,
+                });
+            }
+        });
+    }
+
+    pub fn pair_link(mut self: Pin<&mut Self>, link: &QString) {
+        let link = String::from(link).trim().to_owned();
+        let (Ok(uri), Some(node)) = (PairingUri::parse(&link), core_host::node()) else {
+            hub().update(|s| {
+                s.set_pairing(PairingView::Failed(PairingFailure::Other("not a pairing link".into())))
+            });
+            return;
+        };
+        // The other computer isn't in the device lists yet; the link carries its name.
+        self.as_mut().set_peer_name(QString::from(&uri.name));
+        let peer = uri.id;
+        hub().update(|s| s.set_pairing(PairingView::Connecting { peer }));
+        core_host::spawn(async move {
+            // Success and most failures arrive as pairing events; the rest (a link
+            // for this very computer, say) end here.
+            if let Err(e) = node.pairing_join(&link).await {
+                tracing::info!(error = %e, "pairing with a pasted link ended");
+                hub().update(|s| match s.pairing {
+                    PairingView::Connecting { .. } => {
+                        s.set_pairing(PairingView::Failed(PairingFailure::Other(e.to_string())))
                     }
                     _ => Changes::NONE,
                 });

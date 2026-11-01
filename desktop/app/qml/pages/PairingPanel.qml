@@ -2,9 +2,10 @@
 import QtQuick
 import app.noddy
 
-// Pairing a phone: a QR code to scan (refreshed automatically), nearby
-// pairing with a 6-digit code check, and the outcome. While `running`, this
-// PC is in pairing mode.
+// Pairing a phone or another computer: a QR code to scan (refreshed
+// automatically), nearby pairing with a 6-digit code check, pasting another
+// computer's pairing link (a computer has no camera to scan with), and the
+// outcome. While `running`, this PC is in pairing mode.
 Item {
     id: panel
     property bool running: false
@@ -15,12 +16,16 @@ Item {
     signal cancelled
 
     property bool showNearby: false
+    // Pairing with another computer by pasting its link.
+    property bool showLink: false
+    property bool linkCopied: false
     readonly property string state_: Pairing.state
 
     implicitHeight: content.implicitHeight
 
     onRunningChanged: {
         showNearby = false
+        showLink = false
         if (running && state_ !== "comparing" && state_ !== "confirmed" && state_ !== "connecting")
             Pairing.start()
         else if (!running)
@@ -67,13 +72,15 @@ Item {
             role: "displaySmall"
             size: 24
             wrapMode: Text.WordWrap
-            visible: !panel.compact || panel.state_ === "comparing" || panel.state_ === "paired" || panel.state_ === "failed" || panel.showNearby
+            visible: !panel.compact || panel.state_ === "comparing" || panel.state_ === "paired" || panel.state_ === "failed" || panel.showNearby || panel.showLink
             text: {
                 switch (panel.state_) {
                 case "comparing": return qsTr("Check the code")
                 case "paired": return qsTr("Paired")
                 case "failed": return qsTr("Pairing didn't work")
-                default: return panel.showNearby ? qsTr("Pair nearby") : qsTr("Scan with your phone")
+                default:
+                    if (panel.showLink) return qsTr("Pair a computer")
+                    return panel.showNearby ? qsTr("Pair nearby") : qsTr("Scan with your phone")
                 }
             }
         }
@@ -82,7 +89,7 @@ Item {
         Column {
             width: parent.width
             spacing: 12
-            visible: !panel.compact && (panel.state_ === "hosting" || panel.state_ === "starting" || panel.state_ === "idle") && !panel.showNearby
+            visible: !panel.compact && (panel.state_ === "hosting" || panel.state_ === "starting" || panel.state_ === "idle") && !panel.showNearby && !panel.showLink
 
             Item {
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -129,13 +136,23 @@ Item {
                 text: qsTr("Code refreshes in %1:%2 · Works on this network")
                       .arg(Math.floor(panel.secondsLeft / 60)).arg(("0" + panel.secondsLeft % 60).slice(-2))
             }
-            Button {
+            Row {
                 anchors.horizontalCenter: parent.horizontalCenter
-                variant: "tonal"
-                size: "sm"
-                iconPath: Icons.wifi
-                text: qsTr("Pair nearby instead")
-                onClicked: panel.showNearby = true
+                spacing: 8
+                Button {
+                    variant: "tonal"
+                    size: "sm"
+                    iconPath: Icons.wifi
+                    text: qsTr("Pair nearby instead")
+                    onClicked: panel.showNearby = true
+                }
+                Button {
+                    variant: "tonal"
+                    size: "sm"
+                    iconPath: Icons.desktop
+                    text: qsTr("Pair a computer")
+                    onClicked: panel.showLink = true
+                }
             }
         }
 
@@ -228,6 +245,14 @@ Item {
                 muted: true
                 text: qsTr("On your phone, open Noddy and choose “Pair nearby”. It shows up here.")
             }
+            Txt {
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+                role: "bodySmall"
+                muted: true
+                text: qsTr("Pairing another computer? Open Noddy's pairing screen on it too.")
+            }
             Repeater {
                 model: Pairing.nearby
                 delegate: Rectangle {
@@ -242,7 +267,8 @@ Item {
                         id: deviceIcon
                         anchors.left: parent.left; anchors.leftMargin: 12
                         anchors.verticalCenter: parent.verticalCenter
-                        iconPath: Icons.phone
+                        // A device nearby may be a phone or a computer; its kind isn't known before pairing.
+                        iconPath: Icons.wifi
                     }
                     Txt {
                         anchors.left: deviceIcon.right; anchors.leftMargin: 12
@@ -274,6 +300,110 @@ Item {
                 size: "sm"
                 text: qsTr("Show the QR code")
                 onClicked: panel.showNearby = false
+            }
+        }
+
+        // ---- Another computer: paste its link, or copy this one's ----
+        Column {
+            width: parent.width
+            spacing: 12
+            visible: panel.showLink && (panel.state_ === "hosting" || panel.state_ === "starting")
+
+            Txt {
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+                role: "body"
+                muted: true
+                text: qsTr("Open Noddy's pairing screen on the other computer and choose “Pair a computer”. Paste its link here, or copy this computer's link and paste it there.")
+            }
+
+            Rectangle {
+                width: parent.width
+                height: 40
+                radius: Theme.graphite ? Theme.radiusSm : height / 2
+                color: Theme.graphite ? "transparent" : Theme.surfaceContainerHighest
+                border.width: linkInput.activeFocus ? 2 : (Theme.graphite ? 1 : 0)
+                border.color: linkInput.activeFocus ? Theme.primary : Theme.outlineVariant
+                TextInput {
+                    id: linkInput
+                    anchors.left: parent.left
+                    anchors.leftMargin: 16
+                    anchors.right: parent.right
+                    anchors.rightMargin: 16
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.family: Theme.fontUi
+                    font.pixelSize: 14
+                    color: Theme.surfaceContent
+                    selectionColor: Theme.primaryContainer
+                    selectedTextColor: Theme.primaryContainerContent
+                    clip: true
+                    inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
+                    Accessible.name: qsTr("The other computer's pairing link")
+                    Keys.onReturnPressed: if (text.trim().length > 0) Pairing.pairLink(text)
+                }
+                Txt {
+                    anchors.left: parent.left
+                    anchors.leftMargin: 16
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: linkInput.text.length === 0
+                    text: qsTr("noddy://pair?…")
+                    role: "bodySmall"
+                    muted: true
+                }
+            }
+
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 8
+                Button {
+                    variant: "tonal"
+                    size: "sm"
+                    iconPath: Icons.clipboard
+                    text: qsTr("Paste")
+                    onClicked: linkInput.paste()
+                }
+                Button {
+                    size: "sm"
+                    text: qsTr("Pair")
+                    enabled: linkInput.text.trim().length > 0
+                    onClicked: Pairing.pairLink(linkInput.text)
+                }
+            }
+
+            // Copies this computer's own link: the field is only a vehicle for the clipboard.
+            TextInput {
+                id: ownLink
+                visible: false
+                readOnly: true
+                text: Pairing.link
+            }
+            Timer {
+                id: copiedReset
+                interval: 2000
+                onTriggered: panel.linkCopied = false
+            }
+            Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                variant: "outline"
+                size: "sm"
+                iconPath: panel.linkCopied ? Icons.check : Icons.copy
+                text: panel.linkCopied ? qsTr("Copied") : qsTr("Copy this computer's link")
+                enabled: Pairing.link.length > 0
+                onClicked: {
+                    ownLink.selectAll()
+                    ownLink.copy()
+                    panel.linkCopied = true
+                    copiedReset.restart()
+                }
+            }
+
+            Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                variant: "text"
+                size: "sm"
+                text: qsTr("Show the QR code")
+                onClicked: panel.showLink = false
             }
         }
 
@@ -340,7 +470,7 @@ Item {
                     // The other device's "They don't match" and Cancel look the same from here.
                     case "rejected": return qsTr("Pairing was cancelled or the codes didn't match, so nothing was paired. Try again.")
                     case "declined": return qsTr("Pairing was declined on one of the devices.")
-                    case "unreachable": return qsTr("Couldn't reach the phone. Make sure both devices are on the same network.")
+                    case "unreachable": return qsTr("Couldn't reach the other device. Make sure both devices are on the same network.")
                     case "expired": return qsTr("The code expired.")
                     default: return qsTr("Something went wrong. Try again.")
                     }
@@ -351,7 +481,7 @@ Item {
                 visible: panel.state_ === "failed"
                 text: qsTr("Try again")
                 iconPath: Icons.refresh
-                onClicked: { panel.showNearby = false; Pairing.start() }
+                onClicked: { panel.showNearby = false; panel.showLink = false; Pairing.start() }
             }
         }
 

@@ -8,6 +8,12 @@ change things that need a step from you, and its notes say so.
 
 ### New
 
+- **Pair two computers.** Open the pairing screen on both PCs, then pick the
+  other one under **Pair nearby instead** and compare the 6-digit code, or
+  choose **Pair a computer**, copy one PC's link and paste it on the other.
+  A computer that finishes pairing as the joiner now also stops showing its
+  own pairing code.
+
 - **Turkish.** The Android and PC apps speak Turkish (Türkçe): pick it in
   Settings, or they follow the system's language. Thanks to
   [@sedatdagg](https://github.com/sedatdagg).
