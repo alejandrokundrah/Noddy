@@ -131,7 +131,7 @@ fun CheckForUpdates(updater: AppUpdater) {
         Switch(
             checked = auto,
             onCheckedChange = updater::setAutoInstall,
-            colors = app.noddy.android.ui.theme.nectarSwitchColors(),
+            colors = app.noddy.android.ui.theme.noddySwitchColors(),
         )
     }
     val update = state.update

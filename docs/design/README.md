@@ -11,20 +11,21 @@ Contents:
 
 Open the HTML files in a browser and switch themes and Material You seeds at the top.
 
-## Decision (2026-10-31)
+## Decision (2026-11-01)
 
-- **Glass** is the only theme: translucent cards over the window backdrop in the Honey colors
-  (Material You tonal color roles), light and dark. It is built on the Bloom token set, which
-  stays in `tokens.json` as Glass's palette, shape and type.
-- **Hive** (honey with a living comb), **Graphite** (ink on paper) and the other Bloom color
-  seeds are no longer offered in the apps. The older design previews in `themes/` and
-  `mockups/` still show them.
+- **Glass** is the main theme: translucent cards in near-black (dark) or near-white (light) with one
+  orange accent (`#EB6030` dark, `#B23808` light), large corner radii, a white pill for the selected
+  navigation item and a tile ("bento") layout on Home. Colors, shape and type live in the `glass`
+  token set in `tokens.json`.
+- **Ember** is the same look with solid cards, dark only.
+- The other themes and color presets are gone. The older previews in `themes/` and `mockups/`
+  were drawn for them and are out of date.
 
 ## Logo
 
 The Noddy logo is in [`assets/noddy`](../../assets/noddy/README.md): `Noddy black.svg` for light
-backgrounds and `Noddy white.svg` for dark ones. The app icon puts it in cream (`#FFF8F3`) on the
-Honey espresso tile.
+backgrounds and `Noddy white.svg` for dark ones. The app icon puts it in near-white (`#F4F4F5`) on a
+near-black tile with an orange rim.
 
 ## Principles
 
@@ -34,5 +35,4 @@ Honey espresso tile.
   connected device).
 - No sloppy decoration: every texture, shadow and annotation must survive a 9-hour workday.
 - Light and dark share the same components and layout; they only change tokens.
-- Fonts are bundled (SIL OFL): Figtree (UI), Instrument Serif (Graphite display),
-  Space Mono (Graphite labels), Caveat (Graphite margin notes). No fonts from the web at runtime.
+- Fonts are bundled (SIL OFL): Figtree (UI) and Space Mono (code and numbers). No fonts from the web at runtime.

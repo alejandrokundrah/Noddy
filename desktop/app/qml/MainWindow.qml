@@ -346,9 +346,8 @@ NativeWindow {
     // through before it's there reveals the bare desktop (a flash), so the
     // window turns translucent only once the backdrop is in place, and opaque again
     // before it is removed.
-    // Hive keeps its own fixed colors, so it never shows the wallpaper through.
     // Windows 10 has no backdrop: the window stays opaque there.
-    readonly property bool wantBackdrop: Qt.platform.os === "windows" && systemBackdropSupported && (Preferences.backdrop || Theme.glass) && !Theme.amoled && !Theme.hive
+    readonly property bool wantBackdrop: Qt.platform.os === "windows" && systemBackdropSupported && (Preferences.backdrop || Theme.glass) && !Theme.amoled
     property bool micaApplied: false
     property bool micaVisible: false
     backdrop: micaApplied
@@ -408,7 +407,7 @@ NativeWindow {
 
     // Window background: a tinted veil of the theme over Mica/Acrylic (so the
     // theme's seed color is rich and clear), opaque otherwise.
-    readonly property color windowSurface: Theme.graphite || Theme.amoled || Theme.hive
+    readonly property color windowSurface: Theme.graphite || Theme.amoled
         ? Theme.surface
         : Qt.tint(
             Theme.surface,
@@ -959,10 +958,7 @@ NativeWindow {
             width: parent.width
             clip: true
             topLeftRadius: 18
-            // Hive: lets the comb show faintly through, under opaque cards.
-            color: Theme.hive
-                ? Qt.rgba(Theme.surfaceContainerLow.r, Theme.surfaceContainerLow.g, Theme.surfaceContainerLow.b, Theme.dark ? 0.50 : 0.58)
-                : Theme.amoled
+            color: Theme.amoled
                 ? "#07080C"
                 : (Theme.glass
                     ? Qt.rgba(Theme.surfaceContainerLow.r, Theme.surfaceContainerLow.g, Theme.surfaceContainerLow.b, Theme.dark ? 0.34 : 0.46)

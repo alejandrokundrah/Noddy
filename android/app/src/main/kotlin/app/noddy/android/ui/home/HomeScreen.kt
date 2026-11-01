@@ -250,6 +250,7 @@ fun HomeScreen(
     )
     val reducedMotion = LocalReducedMotion.current
     val isGlass = LocalGlassTheme.current
+    val pcDevices = state.devices.filter { !it.isAndroid }
     val anyModalOpen = browseFilesPcId != null || showClipboardHistory || showTimeline
 
     LaunchedEffect(highlightTarget) {
@@ -299,11 +300,23 @@ fun HomeScreen(
     ) {
         item(key = "home_header", contentType = "header") {
             Row(Modifier.padding(top = 8.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    stringResource(R.string.home_title),
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.weight(1f),
-                )
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        stringResource(R.string.home_title),
+                        style = MaterialTheme.typography.headlineMedium,
+                    )
+                    if (pcDevices.isNotEmpty()) {
+                        Text(
+                            stringResource(
+                                R.string.home_connected_count,
+                                pcDevices.count { it.online },
+                                pcDevices.size,
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
                 TextButton(
                     onClick = onOpenFeaturesGuide,
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 4.dp),
@@ -331,12 +344,6 @@ fun HomeScreen(
                 FilledTonalIconButton(onClick = onPairNew) {
                     Icon(painterResource(R.drawable.ic_qr), contentDescription = stringResource(R.string.action_pair_new))
                 }
-            }
-        }
-        // Ember: the connection and battery of the first PC as two big stat cards.
-        if (!isGlass) {
-            state.devices.firstOrNull { !it.isAndroid }?.let { pc ->
-                item(key = "ember_status", contentType = "ember_status") { EmberStatusRow(pc) }
             }
         }
         if (showWhatsNewGuideBanner) {
@@ -610,7 +617,55 @@ fun HomeScreen(
                 )
             }
         }
-        items(state.devices.filter { !it.isAndroid }, key = { it.id }, contentType = { "pc_card" }) { device ->
+        items(pcDevices.take(1), key = { it.id }, contentType = { "pc_card" }) { device ->
+            Box(
+                modifier = Modifier.guideHighlightRing(
+                    highlighted = pulsingTarget == GuideHighlightTarget.HOME_PC_CARD ||
+                        pulsingTarget == GuideHighlightTarget.HOME_PC_AUDIO,
+                ),
+            ) {
+                PcCard(
+                    device = device,
+                    onRing = onRing,
+                    onSendFiles = onSendFiles,
+                    onSendFolder = onSendFolder,
+                    onPower = onPower,
+                    onWake = onWake,
+                    onSetReconnect = onSetReconnect,
+                    onRemote = onRemote,
+                    onDeck = onDeck,
+                    onDesk = onDesk,
+                    onRecord = onRecord,
+                    onWebcam = onWebcam,
+                    onSetPcAudio = onSetPcAudio,
+                    onBrowsePcFiles = { browseFilesPcId = it },
+                    micOn = micStreamingTo == device.id,
+                    onToggleMic = { on -> if (on) onStartMic(device.id) else onStopMic() },
+                )
+            }
+        }
+        // Bento tiles for the first PC: stats and quick controls in two columns.
+        pcDevices.firstOrNull()?.let { pc ->
+            val tiles = bentoTiles(
+                state = state,
+                pc = pc,
+                micOn = micStreamingTo == pc.id,
+                onRing = onRing,
+                onSetReconnect = onSetReconnect,
+                onStartMic = onStartMic,
+                onStopMic = onStopMic,
+                onSendFiles = onSendFiles,
+                onOpenClipboard = { showClipboardHistory = true },
+                onOpenTimeline = { showTimeline = true },
+            )
+            items(tiles.chunked(2), key = { row -> "bento_" + row.joinToString("_") { it.key } }, contentType = { "bento_row" }) { row ->
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    row.forEach { tile -> Box(Modifier.weight(1f)) { tile.content() } }
+                    if (row.size == 1) Spacer(Modifier.weight(1f))
+                }
+            }
+        }
+        items(pcDevices.drop(1), key = { it.id }, contentType = { "pc_card" }) { device ->
             Box(
                 modifier = Modifier.guideHighlightRing(
                     highlighted = pulsingTarget == GuideHighlightTarget.HOME_PC_CARD ||
@@ -1292,62 +1347,160 @@ private fun PeerCard(
     }
 }
 
-/** Ember's Home opens with the PC's connection and battery as two stat cards side by side. */
-@Composable
-private fun EmberStatusRow(device: Device) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        EmberStatCard(
-            title = device.name,
-            value = linkText(device.link),
-            highlight = device.online,
-            modifier = Modifier.weight(1f),
+/** One bento tile: a stable key for the lazy list and its content. */
+private class BentoTileSpec(val key: String, val content: @Composable () -> Unit)
+
+/**
+ * The first PC's bento tiles, two per row: connection and battery, then on/off controls (reconnect,
+ * microphone, ring), send file, clipboard history and the timeline. Every tile uses an existing action.
+ */
+private fun bentoTiles(
+    state: CoreState,
+    pc: Device,
+    micOn: Boolean,
+    onRing: (String, Boolean) -> Unit,
+    onSetReconnect: (String, Boolean) -> Unit,
+    onStartMic: (String) -> Unit,
+    onStopMic: () -> Unit,
+    onSendFiles: (String, List<Uri>) -> Unit,
+    onOpenClipboard: () -> Unit,
+    onOpenTimeline: () -> Unit,
+): List<BentoTileSpec> = buildList {
+    add(BentoTileSpec("connection") {
+        BentoTile(
+            label = stringResource(R.string.home_stat_connection),
+            value = linkText(pc.link),
+            highlight = pc.online,
         )
-        device.battery?.let { battery ->
-            EmberStatCard(
-                title = stringResource(R.string.home_stat_battery),
-                value = if (battery.charging) stringResource(R.string.battery_charging, battery.level.toInt())
-                else stringResource(R.string.battery_level, battery.level.toInt()),
-                highlight = battery.charging,
-                modifier = Modifier.weight(1f),
-            )
+    })
+    val battery = pc.battery
+    add(BentoTileSpec("battery") {
+        BentoTile(
+            label = stringResource(R.string.home_stat_battery),
+            value = when {
+                battery == null -> stringResource(R.string.home_stat_unknown)
+                battery.charging -> stringResource(R.string.battery_charging, battery.level.toInt())
+                else -> stringResource(R.string.battery_level, battery.level.toInt())
+            },
+            highlight = battery?.charging == true,
+        )
+    })
+    add(BentoTileSpec("reconnect") {
+        BentoTile(
+            label = stringResource(R.string.home_stat_reconnect),
+            value = stringResource(if (pc.reconnect) R.string.home_stat_on else R.string.home_stat_off),
+            highlight = pc.reconnect,
+            switchChecked = pc.reconnect,
+            onSwitch = { on -> onSetReconnect(pc.id, on) },
+        )
+    })
+    add(BentoTileSpec("microphone") {
+        BentoTile(
+            label = stringResource(R.string.home_stat_microphone),
+            value = stringResource(if (micOn) R.string.home_stat_on else R.string.home_stat_off),
+            highlight = micOn,
+            switchChecked = micOn,
+            switchEnabled = pc.online || micOn,
+            onSwitch = { on -> if (on) onStartMic(pc.id) else onStopMic() },
+        )
+    })
+    add(BentoTileSpec("ring") {
+        var ringing by remember(pc.id) { mutableStateOf(false) }
+        BentoTile(
+            label = stringResource(R.string.home_stat_find),
+            value = stringResource(if (ringing) R.string.home_stat_ringing else R.string.home_stat_off),
+            highlight = ringing,
+            switchChecked = ringing,
+            switchEnabled = pc.online || ringing,
+            onSwitch = { on ->
+                ringing = on
+                onRing(pc.id, on)
+            },
+        )
+    })
+    add(BentoTileSpec("send") {
+        val pickFiles = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+            if (uris.isNotEmpty()) onSendFiles(pc.id, uris)
         }
-    }
+        BentoTile(
+            label = stringResource(R.string.home_stat_send),
+            value = stringResource(R.string.home_stat_choose),
+            onClick = if (pc.online) ({ pickFiles.launch(arrayOf("*/*")) }) else null,
+        )
+    })
+    add(BentoTileSpec("clipboard") {
+        BentoTile(
+            label = stringResource(R.string.home_stat_clipboard),
+            value = if (state.clipboardHistoryEnabled) state.clipboardHistory.size.toString()
+            else stringResource(R.string.home_stat_off),
+            highlight = state.clipboardHistoryEnabled && state.clipboardHistory.isNotEmpty(),
+            onClick = if (state.clipboardHistoryEnabled) onOpenClipboard else null,
+        )
+    })
+    add(BentoTileSpec("timeline") {
+        BentoTile(
+            label = stringResource(R.string.home_stat_timeline),
+            value = state.timelineTotal.toString(),
+            highlight = state.timelineTotal > 0u,
+            onClick = onOpenTimeline,
+        )
+    })
 }
 
-/** One Ember stat card: a muted title over a large value, orange when it is "on". */
+/**
+ * One bento tile for both themes: a small muted label over a large value, orange when it is "on".
+ * Tiles with [onSwitch] show an orange pill switch; tiles with [onClick] are tappable.
+ */
 @Composable
-private fun EmberStatCard(
-    title: String,
+private fun BentoTile(
+    label: String,
     value: String,
-    highlight: Boolean,
     modifier: Modifier = Modifier,
+    highlight: Boolean = false,
+    switchChecked: Boolean = false,
+    switchEnabled: Boolean = true,
+    onSwitch: ((Boolean) -> Unit)? = null,
+    onClick: (() -> Unit)? = null,
 ) {
     val scheme = MaterialTheme.colorScheme
+    val isGlass = LocalGlassTheme.current
+    val shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp)
     Column(
         modifier = modifier
+            .fillMaxWidth()
             .liquidGlassCard(
                 cornerRadius = 24.dp,
-                isGlass = false,
+                isGlass = isGlass,
                 baseColor = scheme.surfaceContainer,
                 tintColor = scheme.primary,
                 outlineColor = scheme.outlineVariant,
             )
+            .clip(shape)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text(
-            title,
-            style = MaterialTheme.typography.labelLarge,
-            color = scheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                label,
+                style = MaterialTheme.typography.labelMedium,
+                color = scheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+            if (onSwitch != null) {
+                Switch(
+                    checked = switchChecked,
+                    onCheckedChange = onSwitch,
+                    enabled = switchEnabled,
+                    colors = app.noddy.android.ui.theme.noddySwitchColors(),
+                )
+            }
+        }
         Text(
             value,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.headlineSmall,
             color = if (highlight) scheme.primary else scheme.onSurface,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,

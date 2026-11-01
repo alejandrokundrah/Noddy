@@ -19,7 +19,7 @@ The **Calls** page on your PC lets you see incoming phone calls with caller ID, 
 
 ### Handling Incoming Calls on Your PC
 
-1. When your phone rings, Noddy displays an incoming call banner on your PC (and expands `Nectar Island` if enabled) showing the caller's name, phone number, and contact photo.
+1. When your phone rings, Noddy displays an incoming call banner on your PC (and expands `Island` if enabled) showing the caller's name, phone number, and contact photo.
 2. If **Pause media during calls** is enabled in **Settings › Camera & Audio**, any music or video playing on your PC pauses automatically while the phone is ringing or in a call, and resumes when the call ends.
 3. From the incoming call banner on your PC, you can:
    - Click **Answer** to pick up the call on your phone.
@@ -63,7 +63,7 @@ For hands-free calling at your desk, click **Speaker** in Noddy's call bar (with
 - **Calls toggle** (`Settings › Devices` on PC, **On** by default): Enables caller ID, call log sync, incoming call alerts, and call control for that phone.
 - **Contacts toggle** (`Settings › Devices` on PC, **On** by default): Syncs your phone's contacts so caller ID and the dialer show names and photos.
 - **Pause media during calls** (`Settings › Camera & Audio` on PC, **On** by default): Automatically pauses active Windows media playback when a call rings or connects on your phone, and resumes playback when the call finishes unless you manually changed playback in the meantime.
-- **Island triggers › Calls** (`Settings › General` on PC, **On** by default when `Nectar Island` is enabled): Shows incoming and active phone calls inside the top-of-screen `Nectar Island` pill.
+- **Island triggers › Calls** (`Settings › General` on PC, **On** by default when `Island` is enabled): Shows incoming and active phone calls inside the top-of-screen `Island` pill.
 
 ## Data and Privacy
 

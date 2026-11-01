@@ -1,7 +1,7 @@
 # Noddy: Product & Engineering Plan
 
 > **Noddy** connects Android phones and Windows PCs. It's one open-source app that replaces Phone Link, KDE Connect, scrcpy, LocalSend and Intel Unison.
-> *Bees carry nectar back to the hive. Noddy carries everything between your phone and your PC.*
+> *Noddy carries everything between your phone and your PC.*
 > Status: **in active development (Qt Quick + Rust on Windows 11, Kotlin + Jetpack Compose on Android, shared Rust core).** Phase 1 and most of Phases 2 to 3 work end to end; see §3 for per-feature status. Last updated 2026-10-09.
 
 ---
@@ -10,7 +10,7 @@
 
 | Question | Decision | One-line reason |
 |---|---|---|
-| Name | **Noddy** (done) | Clean name (no conflicts found), warm, on the bee theme, says "connection". See §10.1 |
+| Name | **Noddy** (done) | Clean name (no conflicts found), short, friendly, says "connection". See §10.1 |
 | Shared engine | **Rust core** (`noddy-core`) used by both apps | Both ends run the same protocol code, which avoids the cross-implementation bugs KDE Connect has |
 | Transport | **iroh 1.x** (QUIC, devices dialed by public key) | E2E-encrypted by default, LAN discovery, hole punching, relay fallback and multipath in one library (1.0 June 2026, now 1.3) |
 | Wire format | **CBOR (serde)** over QUIC streams, plus a versioned spec in `docs/protocol` | Self-describing and forward-compatible, with no codegen toolchain. Third parties can still implement it |
@@ -213,7 +213,7 @@ current Android.
 ### 3.11 Ambient & signature experiences (what makes Noddy special)
 | Feature | Tier |
 |---|---|
-| **Nectar Island** (optional extra, off by default (`nectar_island: false`), with per-trigger toggles when enabled): a small, animated pill at the top of the PC screen showing live phone activity (call, timer, music, transfer, Live Update, OTP, voice recording). Expands on hover. A nice touch, not a pillar (done) | P2 |
+| **Island** (optional extra, off by default (`island: false`), with per-trigger toggles when enabled): a small, animated pill at the top of the PC screen showing live phone activity (call, timer, music, transfer, Live Update, OTP, voice recording). Expands on hover. A nice touch, not a pillar (done) | P2 |
 | **Shelf**: slide-out edge panel with the latest photo, screenshot, clipboard and recent files. Drag anything in to send (done) | P1 |
 | **Command Palette** (global hotkey): "send clipboard", "find my phone", "text Mom", "open last photo", "mirror Spotify", "record voice" (done) | P1 |
 | **Material You sync**: the PC app takes its accent and theme from the phone's wallpaper colors, so both apps look like one (done) | P1 |
@@ -529,14 +529,14 @@ Build Home, a notification card, the Deck grid, one hero transition and a live m
 
 **Shared language across both apps**
 - Same iconography, the same names for features, and the same power-level badges (mapped to the theme's own palette, no traffic-light colors).
-- **Dynamic color:** default warm honey/amber accent (on brand for Noddy). Once paired, both apps can adopt the phone's Material You palette.
+- **Dynamic color:** default orange accent (on brand for Noddy). Once paired, both apps can adopt the phone's Material You palette.
 - Motion: spring-based (no linear easing), choreographed transitions (a notification card grows into the conversation view), honoring reduced motion.
 
 **Desktop (Qt Quick)**
 - Mica backdrop, layered surfaces, real in-app blur and glass (MultiEffect), subtle shader accents, Segoe UI Variable for body text plus a characterful display face for headings.
 - Layout: slim left rail (device switcher at top) → **Home** with a live "phone hero" (wallpaper, battery, signal, now playing, quick toggles), feature surfaces (Messages, Notifications, Photos, Files, Apps, Calls, Deck), and settings that read like explanations, not checkboxes.
 - Keyboard-first: Ctrl+K palette in-app plus a global hotkey. Every action is reachable by keyboard.
-- Ambient UI: Nectar Island, Shelf and tray flyout, so most interactions never open the main window.
+- Ambient UI: Island, Shelf and tray flyout, so most interactions never open the main window.
 
 **Phone (Compose)**
 - Material 3 Expressive. A big tactile card for the connected PC (online state, laptop battery, quick actions: send clipboard, record voice, Deck, lock PC, mirror, touchpad).
@@ -620,7 +620,7 @@ Each phase ends with a usable, releasable product. Phase sizes are relative; act
   - **Unlock PC with phone fingerprint** (own workstream + external review)
   - PC in your pocket: reverse mirroring
   - Flow (cross-device mouse)
-  - Nectar Island (optional), proximity lock, automations, folder sync
+  - Island (optional), proximity lock, automations, folder sync
   - Tablet as second screen, phone as mic/speaker
   - Bluetooth fallback link
   - **macOS desktop**, plugin API
@@ -698,7 +698,6 @@ Each phase ends with a usable, releasable product. Phase sizes are relative; act
 - Repo: `github.com/alejandrokundrah/Noddy` (private until most things work locally; no pushing before that).
 - Checks done: no conflicting products found on the web; `noddy.app`, `noddy.dev`, `getnoddy.com` and the GitHub name were free (2026-10-05).
 - **Still to do before any announcement:** official trademark searches (USPTO, TMview, IP India), register the domain.
-- History: "Hive" (folder codename) and "Waggle" were dropped. Hive collides with Centrica's smart-home brand; WAGGLE is a **registered, active US trademark** (Nimble Wireless, class 9, reg. 9 May 2023) that covers "software for transmission of voice, data, images, audio, and video between devices". Dozens of other candidates were checked and rejected (Honeylink, Tandem, Skein, Wingbeat, Murmur and others).
 
 ### 10.2 License (done) | Part | License | Why |
 |---|---|---|
@@ -742,7 +741,7 @@ Each phase ends with a usable, releasable product. Phase sizes are relative; act
   | Notifications | Windows toasts | UserNotifications (needs a signed app) |
   | Window glass | Mica | macOS vibrancy |
   | Tray | System tray | Menu-bar icon |
-  | Nectar Island | Top-of-screen pill | Around the MacBook notch |
+  | Island | Top-of-screen pill | Around the MacBook notch |
   | Phone storage in file manager | Explorer (Cloud Files) | Finder (File Provider extension) |
   | "Send to phone" right-click | Explorer context menu | Finder Share / Sync extension |
   | Phone as webcam | Windows 11 virtual camera | Camera Extension (approved once by the user) |
@@ -817,5 +816,4 @@ Later: SignPath application (needs a public repo with history), Android develope
 - UI frameworks: [Qt licensing (GPL-only modules)](https://doc.qt.io/qt-6/licensing.html), [Qt supported platforms](https://doc.qt.io/qt-6/supported-platforms.html), [Qt for Windows on ARM](https://www.qt.io/blog/qt-for-windows-on-arm), [Commercial-only LTS patches](https://www.qt.io/blog/commercial-lts-qt-6.8.9-released), [CXX-Qt changelog](https://github.com/KDAB/cxx-qt/blob/main/CHANGELOG.md), [Caelestia shell (QML)](https://github.com/caelestia-dots/shell), [Slint 1.18](https://slint.dev/blog/slint-1.18-released), [Slint 1.16](https://slint.dev/blog/slint-1.16-released), [Slint changelog](https://github.com/slint-ui/slint/blob/master/CHANGELOG.md), [Slint backdrop-filter request](https://github.com/slint-ui/slint/issues/13502), [Flutter desktop → Canonical](https://www.omgubuntu.co.uk/2026/05/flutter-desktop-canonical-maintained), [Flutter multi-window status](https://startdebugging.net/2026/08/how-to-enable-multi-window-support-in-a-flutter-desktop-app/), [GPUI slowdown discussion](https://news.ycombinator.com/item?id=47003569)
 - Android platform: [sensitive notifications / ADB appops](https://www.androidauthority.com/android-15-two-factor-authentication-codes-3492585/), [Android 14 MediaProjection consent](https://developer.android.com/about/versions/14/behavior-changes-14), [background clipboard block](https://www.xda-developers.com/android-q-blocks-background-clipboard-access/), [developer verification timeline](https://www.androidauthority.com/android-sideloading-changes-timeline-3679204/), [F-Droid 2.0](https://pinggy.io/blog/f_droid_2_0_android_developer_verification/)
 - Windows platform: [PhoneLineTransportDevice](https://learn.microsoft.com/en-us/uwp/api/windows.applicationmodel.calls.phonelinetransportdevice), [22H2 breakage](https://github.com/BestOwl/MyPhone/issues/26), [virtual camera sample](https://github.com/smourier/VCamSample), [BestCam](https://github.com/OneLimeStudio/BestCam)
-- Name check: [getwaggle.app (desktop app)](https://www.getwaggle.app/download), [Waggle pet app](https://play.google.com/store/apps/details?id=com.nimble.petsafety&hl=en_US), [noddy-sensor](https://github.com/noddy-sensor)
 - Quick Share: [Windows update](https://www.androidauthority.com/quick-shares-windows-app-now-looks-a-little-more-like-an-android-app-3661953/)

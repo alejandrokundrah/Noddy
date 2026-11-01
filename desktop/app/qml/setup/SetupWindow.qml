@@ -4,8 +4,8 @@ import QtQuick.Shapes
 import app.noddy
 
 // The installer's and the uninstaller's window (src/setup.rs). One window,
-// three moments: welcome, working, done. Its own fixed colors (honey on warm
-// paper, or on charcoal), following the system's light or dark mode.
+// three moments: welcome, working, done. Its own fixed colors (orange on
+// near-white, or on near-black), following the system's light or dark mode.
 NativeWindow {
     id: window
 
@@ -14,21 +14,14 @@ NativeWindow {
     readonly property bool animate: !Setup.reduceMotion
     readonly property string phase: Setup.phase
 
-    readonly property color bg: dark ? "#121214" : "#FFF8F3"
-    readonly property color ink: dark ? "#EDE6DD" : "#1F1B16"
-    readonly property color muted: dark ? "#A39A90" : "#6B5E52"
-    readonly property color honey: dark ? "#FFB95F" : "#8A5100"
-    readonly property color onHoney: dark ? "#2C1600" : "#FFFFFF"
-    readonly property color track: dark ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(0.12, 0.10, 0.08, 0.08)
-    readonly property color danger: dark ? "#F0A39C" : "#9E2B25"
-    readonly property color panel: dark ? "#1C1B1D" : "#FFFFFF"
-    // Removing: the comb goes grey and dim.
-    readonly property color comb: removing
-        ? (dark ? Qt.rgba(1, 1, 1, 0.09) : Qt.rgba(0.30, 0.26, 0.22, 0.06))
-        : (dark ? Qt.rgba(1.0, 0.73, 0.37, 0.22) : Qt.rgba(0.54, 0.32, 0.0, 0.085))
-    readonly property color combGlow: removing
-        ? (dark ? Qt.rgba(0.55, 0.52, 0.48, 0.55) : Qt.rgba(0.72, 0.68, 0.62, 0.55))
-        : (dark ? Qt.rgba(1.0, 0.62, 0.18, 0.75) : Qt.rgba(1.0, 0.72, 0.37, 0.80))
+    readonly property color bg: dark ? "#0A0A0B" : "#FAFAFA"
+    readonly property color ink: dark ? "#F4F4F5" : "#18181B"
+    readonly property color muted: dark ? "#A1A1A6" : "#52525B"
+    readonly property color accent: dark ? "#EB6030" : "#B23808"
+    readonly property color onAccent: dark ? "#2A0D00" : "#FFFFFF"
+    readonly property color track: dark ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(0.10, 0.10, 0.12, 0.08)
+    readonly property color danger: dark ? "#FF8A7A" : "#BA1A1A"
+    readonly property color panel: dark ? "#141415" : "#FFFFFF"
 
     // Not Theme's: Theme reads the app's settings and data, which setup and
     // the uninstaller (which deletes them) must leave alone.
@@ -82,15 +75,6 @@ NativeWindow {
         }
         Keys.onReturnPressed: if (!disclosure.open && window.phase !== "working") window.primary()
         Keys.onEnterPressed: if (!disclosure.open && window.phase !== "working") window.primary()
-
-        HiveBackdrop {
-            anchors.fill: parent
-            animate: window.animate
-            lineColor: window.comb
-            glowColor: window.combGlow
-            strength: window.removing ? 0.7 : 1
-            origin: Qt.point(width / 2, window.phase === "done" && !window.removing ? 40 : 112)
-        }
 
         // There is no title bar, so the window moves from anywhere that
         // isn't a button or a link.
@@ -147,7 +131,7 @@ NativeWindow {
             }
         }
 
-        // The logo (installing) or the bee (removing), breathing while busy.
+        // The logo, breathing while busy and dimmed while uninstalling.
         Item {
             id: emblem
             width: 104
@@ -170,7 +154,7 @@ NativeWindow {
                 anchors.centerIn: parent
                 width: 96
                 height: 96
-                visible: !window.removing
+                opacity: window.removing ? 0.55 : 1
                 source: Setup.iconUrl
                 sourceSize: Qt.size(192, 192)
                 smooth: true
@@ -178,14 +162,6 @@ NativeWindow {
                 scale: 1 + emblem.breath * 0.04
                 Accessible.role: Accessible.Graphic
                 Accessible.name: qsTr("Noddy")
-            }
-            SadBee {
-                anchors.centerIn: parent
-                width: 150
-                height: 128
-                visible: window.removing
-                animate: window.animate
-                dark: window.dark
             }
         }
 
@@ -249,7 +225,7 @@ NativeWindow {
                     width: parent.width * Setup.progress
                     height: parent.height
                     radius: parent.radius
-                    color: window.removing ? window.muted : window.honey
+                    color: window.removing ? window.muted : window.accent
                     Behavior on width { NumberAnimation { duration: 700; easing.type: Easing.OutCubic } }
                 }
                 Accessible.role: Accessible.ProgressBar
@@ -280,9 +256,9 @@ NativeWindow {
                         : window.action === "update" ? qsTr("Update")
                         : window.action === "reinstall" ? qsTr("Reinstall")
                         : qsTr("Install")
-                    fill: window.removing ? window.ink : window.honey
-                    ink: window.removing ? window.bg : window.onHoney
-                    focusColor: window.honey
+                    fill: window.removing ? window.ink : window.accent
+                    ink: window.removing ? window.bg : window.onAccent
+                    focusColor: window.accent
                     onClicked: window.primary()
                 }
                 SetupButton {
@@ -290,7 +266,7 @@ NativeWindow {
                     filled: false
                     text: window.removing && window.phase !== "failed" ? qsTr("Keep Noddy") : qsTr("Close")
                     ink: window.ink
-                    focusColor: window.honey
+                    focusColor: window.accent
                     onClicked: window.close()
                 }
             }
@@ -321,7 +297,7 @@ NativeWindow {
                         height: 18
                         radius: 5
                         anchors.verticalCenter: parent.verticalCenter
-                        color: Setup.desktopShortcut ? window.honey : "transparent"
+                        color: Setup.desktopShortcut ? window.accent : "transparent"
                         border.width: Setup.desktopShortcut ? 0 : 1.5
                         border.color: window.muted
                         Shape {
@@ -331,7 +307,7 @@ NativeWindow {
                             visible: Setup.desktopShortcut
                             preferredRendererType: Shape.CurveRenderer
                             ShapePath {
-                                strokeColor: window.onHoney
+                                strokeColor: window.onAccent
                                 strokeWidth: 2
                                 fillColor: "transparent"
                                 capStyle: ShapePath.RoundCap
@@ -355,7 +331,7 @@ NativeWindow {
                     radius: 8
                     color: "transparent"
                     border.width: 2
-                    border.color: window.honey
+                    border.color: window.accent
                     visible: shortcutChoice.activeFocus
                 }
                 MouseArea {
@@ -452,7 +428,7 @@ NativeWindow {
                 font.family: "Figtree"
                 font.pixelSize: 13
                 font.underline: true
-                color: window.honey
+                color: window.accent
                 text: "github.com/alejandrokundrah/Noddy/releases/latest"
                 Accessible.role: Accessible.Link
                 Accessible.name: qsTr("Open the Android app download page")
@@ -471,9 +447,9 @@ NativeWindow {
                 spacing: 12
                 SetupButton {
                     text: window.removing ? qsTr("Close") : qsTr("Open Noddy")
-                    fill: window.removing ? window.ink : window.honey
-                    ink: window.removing ? window.bg : window.onHoney
-                    focusColor: window.honey
+                    fill: window.removing ? window.ink : window.accent
+                    ink: window.removing ? window.bg : window.onAccent
+                    focusColor: window.accent
                     onClicked: window.primary()
                 }
                 SetupButton {
@@ -481,7 +457,7 @@ NativeWindow {
                     filled: false
                     text: qsTr("Close")
                     ink: window.ink
-                    focusColor: window.honey
+                    focusColor: window.accent
                     onClicked: window.close()
                 }
             }
@@ -541,7 +517,7 @@ NativeWindow {
                         font.family: "Figtree"
                         font.pixelSize: 14
                         font.underline: true
-                        color: window.honey
+                        color: window.accent
                         text: qsTr("Privacy details")
                         Accessible.role: Accessible.Link
                         Accessible.name: text

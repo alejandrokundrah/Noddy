@@ -14,7 +14,7 @@ On Windows, **Settings** uses a two-pane layout with 9 categories in the left na
 
 ### 1. Appearance
 
-Controls light/dark mode and the Windows 11 Mica backdrop. Noddy has one look, **Glass**: translucent cards over the window backdrop, each with a lit glass rim (a specular edge from the top left, a softer reflection at the bottom right, and a faint inner glow), in the Honey colors.
+Controls light/dark mode and the Windows 11 Mica backdrop. Noddy has one look, **Glass**: translucent cards over the window backdrop, each with a lit glass rim (a specular edge from the top left, a softer reflection at the bottom right, and a faint inner glow), with an orange accent.
 
 | Setting | Options / Default | What It Does |
 | :--- | :--- | :--- |
@@ -25,14 +25,14 @@ Controls light/dark mode and the Windows 11 Mica backdrop. Noddy has one look, *
 
 ### 2. General
 
-Controls startup behavior, the system tray, `Nectar Island`, battery notifications, and clipboard automation.
+Controls startup behavior, the system tray, `Island`, battery notifications, and clipboard automation.
 
 | Setting | Default | What It Does |
 | :--- | :--- | :--- |
 | **Start with Windows** | **On** for installed copies | Launches Noddy quietly in the Windows system tray when you sign in to your PC. |
 | **Stay in system tray** | **On** | Keeps Noddy running in the system tray (unloading the UI window to ~5 to 10 MB working set) when you close the main window, so your phone stays connected. When turned off, closing the window quits the app completely. |
-| **Nectar Island** | **Off** | Shows a compact pill at the top center of your primary monitor during active phone events. Automatically hides during full-screen games/videos or Windows Do Not Disturb. |
-| **Island triggers** *(shown when Nectar Island is On)* | **Calls**: On, **Transfers**: On, **Media**: On, **Alerts**: Off | Toggles which phone events expand `Nectar Island`: incoming/active **Calls**, active file **Transfers**, now-playing **Media**, and phone notification **Alerts** (including OTPs, timers, and recordings). |
+| **Island** | **Off** | Shows a compact pill at the top center of your primary monitor during active phone events. Automatically hides during full-screen games/videos or Windows Do Not Disturb. |
+| **Island triggers** *(shown when Island is On)* | **Calls**: On, **Transfers**: On, **Media**: On, **Alerts**: Off | Toggles which phone events expand `Island`: incoming/active **Calls**, active file **Transfers**, now-playing **Media**, and phone notification **Alerts** (including OTPs, timers, and recordings). |
 | **Battery alerts** | **On** | Shows a desktop notification when a connected phone's battery drops low or reaches a full charge. |
 | **Sync clipboard to phone** | **On** | Automatically sends text and images copied on this PC (`Ctrl+C`) to connected phones. |
 | **Clipboard follows control** | **On** | Sends the PC clipboard to the phone when you start controlling it: the mouse moves into its mirror window, or a remote control session starts. |

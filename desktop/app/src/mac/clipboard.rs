@@ -152,7 +152,7 @@ pub fn write_image(mime: &str, bytes: &[u8]) -> Result<(), String> {
 
     let seq = CLIP_COUNTER.fetch_add(1, Ordering::Relaxed);
     let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_nanos());
-    let tmp = std::env::temp_dir().join(format!("nectar_clip_{}_{}_{}.png", std::process::id(), now, seq));
+    let tmp = std::env::temp_dir().join(format!("noddy_clip_{}_{}_{}.png", std::process::id(), now, seq));
 
     std::fs::write(&tmp, &png_bytes).map_err(|e| e.to_string())?;
     let script =

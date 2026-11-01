@@ -54,10 +54,10 @@ class CompanionAndMigrationTest {
 
     @Test
     fun `Preferences sanitizeAppearance ignores legacy theme values and keeps only a valid mode`() {
-        // Old installs saved a theme (hive, bloom, graphite), a seed color, dynamic color, AMOLED
-        // and comb motion; only glass and ember exist now, and an unknown mode falls back to
+        // Old installs saved a theme (a name that no longer exists), a seed color, dynamic color, AMOLED
+        // and cell motion; only glass and ember exist now, and an unknown mode falls back to
         // following the system.
-        assertEquals("glass", Preferences.sanitizeAppearance(mode = "dark", theme = "hive").theme)
+        assertEquals("glass", Preferences.sanitizeAppearance(mode = "dark", theme = "legacy").theme)
         assertEquals("glass", Preferences.sanitizeAppearance(mode = "dark", theme = "graphite").theme)
         assertEquals("system", Preferences.sanitizeAppearance(mode = "neon").mode)
         assertEquals("system", Preferences.sanitizeAppearance(mode = null).mode)

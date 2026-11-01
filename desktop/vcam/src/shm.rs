@@ -765,11 +765,10 @@ pub fn bgrx_to_nv12(bgrx: &[u8], width: u32, height: u32, nv12: &mut [u8]) {
 
 const FIGTREE_TTF: &[u8] = include_bytes!("../../../assets/fonts/Figtree.ttf");
 
-/// Honey primary (`docs/design/tokens.json`) and white ink for the Noddy mark.
-const MARK_BG_BGR: [u8; 3] = [0x00, 0x51, 0x8A];
+/// Glass primary, orange (`docs/design/tokens.json`), and white ink for the Noddy mark.
+const MARK_BG_BGR: [u8; 3] = [0x30, 0x60, 0xEB];
 const MARK_INK_BGR: [u8; 3] = [0xFF, 0xFF, 0xFF];
-const MARK_HEXAGON: [(f32, f32); 6] =
-    [(12.0, 2.5), (20.2, 7.25), (20.2, 16.75), (12.0, 21.5), (3.8, 16.75), (3.8, 7.25)];
+const MARK_TILE: [(f32, f32); 4] = [(4.0, 4.0), (20.0, 4.0), (20.0, 20.0), (4.0, 20.0)];
 const MARK_BAR: ((f32, f32), (f32, f32)) = ((9.0, 12.0), (15.0, 12.0));
 
 struct CachedPlaceholderCard {
@@ -953,7 +952,7 @@ fn blend_mark(bgrx: &mut [u8], w: usize, h: usize, ox: usize, oy: usize, size: u
     let offset = (s - glyph) / 2.0;
     let stroke = (1.8 * scale).max(1.4);
     let hex: Vec<(f32, f32)> =
-        MARK_HEXAGON.iter().map(|&(x, y)| (offset + x * scale, offset + y * scale)).collect();
+        MARK_TILE.iter().map(|&(x, y)| (offset + x * scale, offset + y * scale)).collect();
     let bar = (
         (offset + MARK_BAR.0.0 * scale, offset + MARK_BAR.0.1 * scale),
         (offset + MARK_BAR.1.0 * scale, offset + MARK_BAR.1.1 * scale),
@@ -1165,13 +1164,13 @@ mod tests {
         render_placeholder_bgrx(&mut frame, w, h, "Pixel 9");
         // Corner pixel is dark neutral background (#111318 -> BGR 0x18, 0x13, 0x11).
         assert_eq!(&frame[0..4], &[0x18, 0x13, 0x11, 0xFF]);
-        // Center card contains the honey mark (#8A5100 -> BGR 0x00, 0x51, 0x8A) and anti-aliased text.
-        let has_honey_mark = frame
+        // Center card contains the orange mark (#EB6030 -> BGR 0x30, 0x60, 0xEB) and anti-aliased text.
+        let has_orange_mark = frame
             .as_chunks::<4>()
             .0
             .iter()
-            .any(|px| px[0] == 0x00 && px[1] == 0x51 && px[2] == 0x8A && px[3] == 0xFF);
-        assert!(has_honey_mark, "placeholder should include the Noddy honey mark");
+            .any(|px| px[0] == 0x30 && px[1] == 0x60 && px[2] == 0xEB && px[3] == 0xFF);
+        assert!(has_orange_mark, "placeholder should include the Noddy mark");
         let has_text_ink =
             frame.as_chunks::<4>().0.iter().any(|px| px[0] > 0xD0 && px[1] > 0xD0 && px[2] > 0xD0);
         assert!(has_text_ink, "placeholder should include bright headline text ink");

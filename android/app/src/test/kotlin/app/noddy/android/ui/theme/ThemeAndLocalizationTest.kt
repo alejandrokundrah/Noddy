@@ -8,6 +8,7 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import androidx.compose.ui.graphics.Color
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 import org.w3c.dom.Element
@@ -35,7 +36,7 @@ class ThemeAndLocalizationTest {
             assertEquals(theme, Preferences.sanitizeAppearance(mode = "dark", theme = theme).theme)
         }
         // Themes that no longer exist, unknown values and nothing saved yet are Glass.
-        for (old in listOf("hive", "bloom", "graphite", "sepia", "", "EMBER")) {
+        for (old in listOf("legacy", "bloom", "sepia", "", "EMBER")) {
             assertEquals("glass", Preferences.sanitizeAppearance(mode = "dark", theme = old).theme)
         }
         assertEquals("glass", Preferences.sanitizeAppearance(mode = "dark", theme = null).theme)
@@ -46,14 +47,16 @@ class ThemeAndLocalizationTest {
     }
 
     @Test
-    fun `Glass has distinct light and dark palettes for its fixed Honey seed`() {
-        val seed = Tokens.bloomSeeds[Tokens.DEFAULT_SEED]
+    fun `Glass has distinct light and dark palettes for its fixed orange seed`() {
+        val seed = Tokens.glassSeeds[Tokens.DEFAULT_SEED]
         assertNotNull("the default seed '${Tokens.DEFAULT_SEED}' must exist", seed)
         seed!!
         assertNotEquals("light and dark surfaces must differ", seed.light.surface, seed.dark.surface)
         assertNotEquals("light and dark onSurface must differ", seed.light.onSurface, seed.dark.onSurface)
         assertNotEquals("light and dark primary must differ", seed.light.primary, seed.dark.primary)
         assertNotEquals(Tokens.errorLight, Tokens.errorDark)
+        assertEquals(Color(0xFFB23808), seed.light.primary)
+        assertEquals(Color(0xFFEB6030), seed.dark.primary)
     }
 
     private fun resolveResDir(): File {

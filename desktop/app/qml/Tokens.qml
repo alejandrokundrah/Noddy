@@ -80,232 +80,6 @@ QtObject {
         "unit": 4
       },
       "themes": {
-        "bloom": {
-          "defaultSeed": "honey",
-          "description": "Default. Minimal Material You: neutral surfaces, color only where it carries meaning.",
-          "dynamicColor": true,
-          "fonts": {
-            "display": "Figtree",
-            "label": "Figtree",
-            "mono": "Space Mono",
-            "ui": "Figtree"
-          },
-          "label": {
-            "case": "none",
-            "size": 12.5,
-            "tracking": 0,
-            "weight": 600
-          },
-          "seeds": {
-            "black": {
-              "dark": {
-                "onPrimary": "#141418",
-                "onPrimaryContainer": "#F0F0F5",
-                "onSecondaryContainer": "#E2E2EA",
-                "onSurface": "#ECECF0",
-                "onSurfaceVariant": "#C2C2CA",
-                "outline": "#8E8E98",
-                "outlineVariant": "#3E3E48",
-                "primary": "#E2E2EA",
-                "primaryContainer": "#2E2E36",
-                "secondaryContainer": "#26262E",
-                "surface": "#0A0A0C",
-                "surfaceContainer": "#141418",
-                "surfaceContainerHigh": "#1E1E24",
-                "surfaceContainerHighest": "#282830",
-                "surfaceContainerLow": "#060608"
-              },
-              "light": {
-                "onPrimary": "#FFFFFF",
-                "onPrimaryContainer": "#141418",
-                "onSecondaryContainer": "#18181C",
-                "onSurface": "#111114",
-                "onSurfaceVariant": "#43434A",
-                "outline": "#73737C",
-                "outlineVariant": "#C7C7D0",
-                "primary": "#18181C",
-                "primaryContainer": "#DCDCE2",
-                "secondaryContainer": "#E5E5EB",
-                "surface": "#FAFAFC",
-                "surfaceContainer": "#EEEEF2",
-                "surfaceContainerHigh": "#E7E7EC",
-                "surfaceContainerHighest": "#E0E0E6",
-                "surfaceContainerLow": "#F4F4F7"
-              },
-              "seed": "#18181C"
-            },
-            "honey": {
-              "dark": {
-                "onPrimary": "#4A2800",
-                "onPrimaryContainer": "#FFDDB8",
-                "onSecondaryContainer": "#F3E0CB",
-                "onSurface": "#EBE1D9",
-                "onSurfaceVariant": "#D5C3B5",
-                "outline": "#9E8E81",
-                "outlineVariant": "#51453A",
-                "primary": "#FFB95F",
-                "primaryContainer": "#693C00",
-                "secondaryContainer": "#574330",
-                "surface": "#17130E",
-                "surfaceContainer": "#241F1A",
-                "surfaceContainerHigh": "#2E2924",
-                "surfaceContainerHighest": "#39342E",
-                "surfaceContainerLow": "#120E0A"
-              },
-              "light": {
-                "onPrimary": "#FFFFFF",
-                "onPrimaryContainer": "#2C1600",
-                "onSecondaryContainer": "#261A0C",
-                "onSurface": "#1F1B16",
-                "onSurfaceVariant": "#51453A",
-                "outline": "#837468",
-                "outlineVariant": "#D5C3B5",
-                "primary": "#8A5100",
-                "primaryContainer": "#FFDDB8",
-                "secondaryContainer": "#F3E0CB",
-                "surface": "#FFF8F3",
-                "surfaceContainer": "#F5ECE4",
-                "surfaceContainerHigh": "#EFE6DE",
-                "surfaceContainerHighest": "#E9E1D9",
-                "surfaceContainerLow": "#FBF2EB"
-              },
-              "seed": "#B7791F"
-            },
-            "lavender": {
-              "dark": {
-                "onPrimary": "#36275D",
-                "onPrimaryContainer": "#E9DDFF",
-                "onSecondaryContainer": "#E8DEF8",
-                "onSurface": "#E6E0E9",
-                "onSurfaceVariant": "#CAC4CF",
-                "outline": "#948F99",
-                "outlineVariant": "#49454E",
-                "primary": "#CFBDFE",
-                "primaryContainer": "#4D3D75",
-                "secondaryContainer": "#4A4458",
-                "surface": "#141218",
-                "surfaceContainer": "#211F24",
-                "surfaceContainerHigh": "#2B292F",
-                "surfaceContainerHighest": "#36343A",
-                "surfaceContainerLow": "#0F0D13"
-              },
-              "light": {
-                "onPrimary": "#FFFFFF",
-                "onPrimaryContainer": "#201047",
-                "onSecondaryContainer": "#1D192B",
-                "onSurface": "#1D1B20",
-                "onSurfaceVariant": "#49454E",
-                "outline": "#7A757F",
-                "outlineVariant": "#CAC4CF",
-                "primary": "#65558F",
-                "primaryContainer": "#E9DDFF",
-                "secondaryContainer": "#E8DEF8",
-                "surface": "#FDF7FF",
-                "surfaceContainer": "#F2ECF4",
-                "surfaceContainerHigh": "#ECE6EE",
-                "surfaceContainerHighest": "#E6E0E9",
-                "surfaceContainerLow": "#F7F2FA"
-              },
-              "seed": "#7E6AA8"
-            },
-            "ocean": {
-              "dark": {
-                "onPrimary": "#003354",
-                "onPrimaryContainer": "#CEE5FF",
-                "onSecondaryContainer": "#D5E4F7",
-                "onSurface": "#E0E2E8",
-                "onSurfaceVariant": "#C2C7CF",
-                "outline": "#8C9199",
-                "outlineVariant": "#42474E",
-                "primary": "#9BCBFB",
-                "primaryContainer": "#0F4A73",
-                "secondaryContainer": "#3B4858",
-                "surface": "#101418",
-                "surfaceContainer": "#1C2024",
-                "surfaceContainerHigh": "#262A2F",
-                "surfaceContainerHighest": "#31353A",
-                "surfaceContainerLow": "#0B0F13"
-              },
-              "light": {
-                "onPrimary": "#FFFFFF",
-                "onPrimaryContainer": "#001D33",
-                "onSecondaryContainer": "#0E1D2A",
-                "onSurface": "#181C20",
-                "onSurfaceVariant": "#42474E",
-                "outline": "#72777F",
-                "outlineVariant": "#C2C7CF",
-                "primary": "#2F628C",
-                "primaryContainer": "#CEE5FF",
-                "secondaryContainer": "#D5E4F7",
-                "surface": "#F7F9FF",
-                "surfaceContainer": "#ECEEF4",
-                "surfaceContainerHigh": "#E6E8EE",
-                "surfaceContainerHighest": "#E0E2E8",
-                "surfaceContainerLow": "#F1F4FA"
-              },
-              "seed": "#3D7DA8"
-            },
-            "sage": {
-              "dark": {
-                "onPrimary": "#0A390F",
-                "onPrimaryContainer": "#BCF0B4",
-                "onSecondaryContainer": "#D6E8CF",
-                "onSurface": "#E0E4DA",
-                "onSurfaceVariant": "#C2C8BD",
-                "outline": "#8C9388",
-                "outlineVariant": "#424940",
-                "primary": "#A1D39A",
-                "primaryContainer": "#234F24",
-                "secondaryContainer": "#3B4B38",
-                "surface": "#10140F",
-                "surfaceContainer": "#1D211B",
-                "surfaceContainerHigh": "#272B25",
-                "surfaceContainerHighest": "#32362F",
-                "surfaceContainerLow": "#0C100B"
-              },
-              "light": {
-                "onPrimary": "#FFFFFF",
-                "onPrimaryContainer": "#002204",
-                "onSecondaryContainer": "#111F0F",
-                "onSurface": "#191D17",
-                "onSurfaceVariant": "#424940",
-                "outline": "#72796F",
-                "outlineVariant": "#C2C8BD",
-                "primary": "#3B6939",
-                "primaryContainer": "#BCF0B4",
-                "secondaryContainer": "#D6E8CF",
-                "surface": "#F7FBF1",
-                "surfaceContainer": "#EBEFE5",
-                "surfaceContainerHigh": "#E6E9E0",
-                "surfaceContainerHighest": "#E0E4DA",
-                "surfaceContainerLow": "#F1F5EB"
-              },
-              "seed": "#5B8C5A"
-            }
-          },
-          "shape": {
-            "full": 999,
-            "lg": 20,
-            "md": 16,
-            "sm": 12,
-            "xl": 28,
-            "xs": 8
-          },
-          "status": {
-            "dark": {
-              "error": "#FFB4AB",
-              "onError": "#690005",
-              "success": "{primary}",
-              "warning": "#F2C14E"
-            },
-            "light": {
-              "error": "#BA1A1A",
-              "onError": "#FFFFFF",
-              "success": "{primary}",
-              "warning": "#7D5200"
-            }
-          }
-        },
         "ember": {
           "description": "Dark only. Near-black cards on black with one orange accent, a white pill for the selected item, large corner radii and a bento grid on Home. The look of the Ember theme.",
           "dynamicColor": false,
@@ -337,14 +111,14 @@ QtObject {
             "dark": {
               "error": "#FF8A7A",
               "onError": "#4A0A02",
-              "onPrimary": "#2E0F00",
+              "onPrimary": "#2A0D00",
               "onPrimaryContainer": "#FFDBCE",
               "onSecondaryContainer": "#EDEDEF",
               "onSurface": "#F4F4F5",
               "onSurfaceVariant": "#A1A1A6",
               "outline": "#6E6E74",
               "outlineVariant": "#2A2A2D",
-              "primary": "#FF6B3D",
+              "primary": "#EB6030",
               "primaryContainer": "#5A2412",
               "secondaryContainer": "#2C2C30",
               "surface": "#0A0A0B",
@@ -353,6 +127,84 @@ QtObject {
               "surfaceContainerHighest": "#242427",
               "surfaceContainerLow": "#0E0E0F",
               "warning": "#F2C14E"
+            }
+          }
+        },
+        "glass": {
+          "defaultSeed": "orange",
+          "description": "Translucent near-black (or near-white) cards with one orange accent, large corner radii. The look of the Glass theme.",
+          "dynamicColor": true,
+          "fonts": {
+            "display": "Figtree",
+            "label": "Figtree",
+            "mono": "Space Mono",
+            "ui": "Figtree"
+          },
+          "label": {
+            "case": "none",
+            "size": 12.5,
+            "tracking": 0,
+            "weight": 600
+          },
+          "seeds": {
+            "orange": {
+              "dark": {
+                "onPrimary": "#2A0D00",
+                "onPrimaryContainer": "#FFDBCE",
+                "onSecondaryContainer": "#EDEDEF",
+                "onSurface": "#F4F4F5",
+                "onSurfaceVariant": "#A1A1A6",
+                "outline": "#6E6E74",
+                "outlineVariant": "#2A2A2D",
+                "primary": "#EB6030",
+                "primaryContainer": "#5A2412",
+                "secondaryContainer": "#2C2C30",
+                "surface": "#0A0A0B",
+                "surfaceContainer": "#141415",
+                "surfaceContainerHigh": "#1B1B1D",
+                "surfaceContainerHighest": "#242427",
+                "surfaceContainerLow": "#0E0E0F"
+              },
+              "light": {
+                "onPrimary": "#FFFFFF",
+                "onPrimaryContainer": "#3A0F00",
+                "onSecondaryContainer": "#1B1B1E",
+                "onSurface": "#18181B",
+                "onSurfaceVariant": "#52525B",
+                "outline": "#8A8A92",
+                "outlineVariant": "#D4D4D8",
+                "primary": "#B23808",
+                "primaryContainer": "#FFDBCE",
+                "secondaryContainer": "#E9E9EC",
+                "surface": "#FAFAFA",
+                "surfaceContainer": "#EEEEF0",
+                "surfaceContainerHigh": "#E8E8EA",
+                "surfaceContainerHighest": "#E2E2E5",
+                "surfaceContainerLow": "#F4F4F5"
+              },
+              "seed": "#E85C29"
+            }
+          },
+          "shape": {
+            "full": 999,
+            "lg": 24,
+            "md": 16,
+            "sm": 12,
+            "xl": 32,
+            "xs": 8
+          },
+          "status": {
+            "dark": {
+              "error": "#FFB4AB",
+              "onError": "#690005",
+              "success": "{primary}",
+              "warning": "#F2C14E"
+            },
+            "light": {
+              "error": "#BA1A1A",
+              "onError": "#FFFFFF",
+              "success": "{primary}",
+              "warning": "#7D5200"
             }
           }
         }

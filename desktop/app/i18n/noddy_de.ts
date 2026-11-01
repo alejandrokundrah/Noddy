@@ -2695,8 +2695,8 @@ Assistenz-Modus (Android-Bedienungshilfen)
     </message>
     <message>
         <location filename="rust_strings.h" line="282"/>
-        <source>Nectar Island</source>
-        <translation>Nectar Island</translation>
+        <source>Island</source>
+        <translation>Island</translation>
     </message>
     <message>
         <location filename="rust_strings.h" line="283"/>
@@ -2899,18 +2899,18 @@ Voraussetzungen
 Displays a compact pill at the top center of your primary monitor for incoming calls, live file transfer progress, media playback, and optional notification previews.
 
 Where to find it
-- Settings › General › Nectar Island.
+- Settings › General › Island.
 
 What it needs
-- Turn on Nectar Island in Settings › General and pick which events should appear.</source>
+- Turn on Island in Settings › General and pick which events should appear.</source>
         <translation>Funktion
 Zeigt oben mittig auf deinem Hauptbildschirm eine kompakte Leiste für eingehende Anrufe, laufende Dateiübertragungen, Medienwiedergabe und optionale Benachrichtigungsvorschauen an.
 
 Wo zu finden
-- Einstellungen › Allgemein › Nectar Island.
+- Einstellungen › Allgemein › Island.
 
 Voraussetzungen
-- Aktiviere Nectar Island unter Einstellungen › Allgemein und wähle aus, welche Ereignisse angezeigt werden sollen.</translation>
+- Aktiviere Island unter Einstellungen › Allgemein und wähle aus, welche Ereignisse angezeigt werden sollen.</translation>
     </message>
     <message>
         <location filename="rust_strings.h" line="307"/>
@@ -3259,7 +3259,7 @@ Shows incoming and active phone calls on your PC with Answer, Decline, and Rejec
 
 Where to find it
 - Left navigation rail › Calls.
-- Incoming call banner on Home and Nectar Island.
+- Incoming call banner on Home and Island.
 
 What it needs
 - Phone, Call Log, and Contacts permissions on your Android phone.
@@ -3269,7 +3269,7 @@ Zeigt eingehende und aktive Telefonate auf deinem PC mit Aktionen zum Annehmen, 
 
 Wo zu finden
 - Linke Seitenleiste › Anrufe.
-- Banner für eingehende Anrufe auf der Startseite und in der Nectar Island.
+- Banner für eingehende Anrufe auf der Startseite und in der Island.
 
 Voraussetzungen
 - Berechtigungen für Telefon, Anrufliste und Kontakte auf deinem Android-Gerät.
@@ -3515,24 +3515,9 @@ Voraussetzungen
         <translation>Funktionsübersicht öffnen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HomePage.qml" line="371"/>
-        <source>Try Hive, the new theme</source>
-        <translation>Probiere „Wabe“, das neue Design</translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HomePage.qml" line="378"/>
-        <source>Honey on charcoal or warm wax, with a living honeycomb behind the app. Change it any time in Settings › Appearance.</source>
-        <translation>Honig auf Anthrazit oder warmem Wachs, mit einer lebendigen Bienenwabe hinter der App. Jederzeit unter Einstellungen › Darstellung änderbar.</translation>
-    </message>
-    <message>
         <location filename="../qml/pages/HomePage.qml" line="390"/>
         <source>Not now</source>
         <translation>Jetzt nicht</translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HomePage.qml" line="397"/>
-        <source>Try Hive</source>
-        <translation>Wabe ausprobieren</translation>
     </message>
     <message>
         <location filename="../qml/pages/HomePage.qml" line="425"/>
@@ -4381,8 +4366,8 @@ Voraussetzungen
     <name>IslandWindow</name>
     <message>
         <location filename="../qml/IslandWindow.qml" line="16"/>
-        <source>Nectar Island</source>
-        <translation>Nectar Island</translation>
+        <source>Island</source>
+        <translation>Island</translation>
     </message>
     <message>
         <location filename="../qml/IslandWindow.qml" line="223"/>
@@ -4418,13 +4403,13 @@ Voraussetzungen
     </message>
     <message>
         <location filename="../qml/IslandWindow.qml" line="238"/>
-        <source>Nectar Island · %1</source>
-        <translation>Nectar Island · %1</translation>
+        <source>Island · %1</source>
+        <translation>Island · %1</translation>
     </message>
     <message>
         <location filename="../qml/IslandWindow.qml" line="239"/>
-        <source>Nectar Island · Ready</source>
-        <translation>Nectar Island · Bereit</translation>
+        <source>Island · Ready</source>
+        <translation>Island · Bereit</translation>
     </message>
     <message>
         <location filename="../qml/IslandWindow.qml" line="244"/>
@@ -6381,14 +6366,6 @@ Voraussetzungen
     </message>
 </context>
 <context>
-    <name>SadBee</name>
-    <message>
-        <location filename="../qml/setup/SadBee.qml" line="23"/>
-        <source>A sad bee</source>
-        <translation>Eine traurige Biene</translation>
-    </message>
-</context>
-<context>
     <name>SendTo</name>
     <message>
         <location filename="rust_strings.h" line="429"/>
@@ -6773,11 +6750,6 @@ Voraussetzungen
         <translation>Design</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="532"/>
-        <source>Hive</source>
-        <translation>Wabe</translation>
-    </message>
-    <message>
         <location filename="../qml/pages/SettingsPage.qml" line="533"/>
         <source>Bloom</source>
         <translation>Blüte</translation>
@@ -6842,12 +6814,6 @@ Voraussetzungen
         <translation>Albumcover</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="808"/>
-        <location filename="../qml/pages/SettingsPage.qml" line="817"/>
-        <source>Animated comb</source>
-        <translation>Animierte Wabe</translation>
-    </message>
-    <message>
         <location filename="../qml/pages/SettingsPage.qml" line="811"/>
         <source>Still while animations are off in system settings.</source>
         <translation>Statisch, solange Animationen in den Systemeinstellungen deaktiviert sind.</translation>
@@ -6861,11 +6827,6 @@ Voraussetzungen
         <location filename="../qml/pages/SettingsPage.qml" line="814"/>
         <source>Still while energy saver is on.</source>
         <translation>Statisch, solange der Energiesparmodus aktiv ist.</translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="815"/>
-        <source>The honeycomb breathes and pulses.</source>
-        <translation>Die Bienenwabe atmet und pulsiert.</translation>
     </message>
     <message>
         <location filename="../qml/pages/SettingsPage.qml" line="848"/>
@@ -6935,8 +6896,8 @@ Voraussetzungen
     <message>
         <location filename="../qml/pages/SettingsPage.qml" line="1019"/>
         <location filename="../qml/pages/SettingsPage.qml" line="1022"/>
-        <source>Nectar Island</source>
-        <translation>Nectar Island</translation>
+        <source>Island</source>
+        <translation>Island</translation>
     </message>
     <message>
         <location filename="../qml/pages/SettingsPage.qml" line="1020"/>

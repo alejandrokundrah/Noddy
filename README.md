@@ -13,8 +13,6 @@ Notifications, messages, calls, clipboard, files, photos, screen mirroring and
 phone apps in windows, between Android and Windows 10 (2004+) or 11. Free and open source.
 Local-first, end-to-end encrypted, no account and no cloud.
 
-Hi, I'm Bee, and yes, a bee built an app called Noddy.
-
 [![Latest release](https://img.shields.io/github/v/release/alejandrokundrah/Noddy?label=download)](https://github.com/alejandrokundrah/Noddy/releases/latest)
 [![CI](https://github.com/alejandrokundrah/Noddy/actions/workflows/ci.yml/badge.svg)](https://github.com/alejandrokundrah/Noddy/actions/workflows/ci.yml)
 [![Apps: GPL-3.0-or-later](https://img.shields.io/badge/apps-GPL--3.0--or--later-blue)](LICENSE)

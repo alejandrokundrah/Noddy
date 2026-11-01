@@ -576,10 +576,9 @@ Item {
             width: home.width - home.sideWidth - home.spacing
             spacing: Theme.gutter
 
-            // ---- Ember: connection and battery as two stat tiles ----
+            // ---- Connection and battery as two stat tiles ----
             Row {
                 id: emberStats
-                visible: Theme.ember
                 width: parent.width
                 height: visible ? 96 : 0
                 spacing: Theme.gutter
@@ -739,33 +738,22 @@ Item {
                         readonly property real rBl: home.screenData && home.screenData.corners
                             ? Math.max(3, home.screenData.corners.bl * width) : defaultCorner
                         readonly property var phonePalette: Theme.phonePalette(home.deviceId)
-                        // Hive keeps its own honey here too, whatever the phone's colors.
-                        readonly property color seedColor: Theme.hive
-                            ? Theme.primary
-                            : phonePalette
+                        readonly property color seedColor: phonePalette
                             ? Qt.color(phonePalette.primary)
                             : (home.accent && home.accent.length > 0 ? Qt.color(home.accent) : Theme.primary)
-                        readonly property color frameFill: Theme.hive
-                            ? (Theme.dark ? "#0E0E10" : "#2A2420")
-                            : Theme.graphite
+                        readonly property color frameFill: Theme.graphite
                             ? (Theme.dark ? "#1B1D21" : "#282B30")
                             : Qt.darker(seedColor, Theme.dark ? 2.8 : 2.3)
                         readonly property color frameStroke: Theme.graphite
                             ? Theme.outline
                             : Qt.rgba(Theme.heroContent.r, Theme.heroContent.g, Theme.heroContent.b, 0.42)
-                        readonly property color screenTop: Theme.hive
-                            ? (Theme.dark ? "#3A2709" : "#FFE2BC")
-                            : Theme.graphite
+                        readonly property color screenTop: Theme.graphite
                             ? (Theme.dark ? "#262930" : "#E4E7EC")
                             : (Theme.dark ? Qt.darker(seedColor, 1.85) : Qt.lighter(seedColor, 1.35))
-                        readonly property color screenBottom: Theme.hive
-                            ? (Theme.dark ? "#141210" : "#F1C27F")
-                            : Theme.graphite
+                        readonly property color screenBottom: Theme.graphite
                             ? (Theme.dark ? "#17191D" : "#CFD4DC")
                             : (Theme.dark ? Qt.darker(seedColor, 2.55) : Qt.darker(seedColor, 1.25))
-                        readonly property color screenInk: Theme.hive
-                            ? (Theme.dark ? "#FFDDB3" : "#2C1600")
-                            : (Theme.graphite && !Theme.dark ? "#1E2025" : "#FFFFFF")
+                        readonly property color screenInk: Theme.graphite && !Theme.dark ? "#1E2025" : "#FFFFFF"
                         readonly property string cutoutSvg: {
                             const s = home.screenData
                             if (!s) return ""
@@ -1250,6 +1238,7 @@ Item {
                     width: actions.tileWidth
                     deviceOnline: home.online
                     title: qsTr("Mirror screen")
+                    stateful: true
                     subtitle: ""
                     iconPath: Icons.mirror
                     feature: home.feature("mirroring.view")
@@ -1301,6 +1290,7 @@ Item {
                     width: actions.tileWidth
                     deviceOnline: home.online
                     title: home.ringing ? qsTr("Stop ringing") : qsTr("Find phone")
+                    stateful: true
                     subtitle: ""
                     iconPath: Icons.ring
                     feature: home.feature("device.find_phone")
@@ -3065,6 +3055,8 @@ Item {
         property string iconPath
         property var feature: ({})
         property bool active: false
+        // Shows an on/off switch in the corner (for a tile that has a state, like Find phone).
+        property bool stateful: false
         property bool accented: false
         property bool deviceOnline: true
         // A second, smaller action in the corner (e.g. "Send a folder").
@@ -3084,11 +3076,9 @@ Item {
         height: (tile.subtitle.length > 0 || !tile.available) ? 96 : 82
         activeFocusOnTab: available
         radius: Theme.radiusLg
-        color: tile.active
-            ? Theme.primary
-            : (tile.accented && !Theme.graphite
-                ? Qt.tint(Theme.tileColor, Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Theme.dark ? 0.14 : 0.10))
-                : Theme.tileColor)
+        color: tile.accented
+            ? Qt.tint(Theme.tileColor, Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Theme.dark ? 0.14 : 0.10))
+            : Theme.tileColor
         border.width: Theme.focusVisible(tile) ? 2 : ((tile.accented || Theme.graphite) && !Theme.glass ? 1 : 0)
         border.color: Theme.focusVisible(tile)
             ? Theme.primary
@@ -3111,7 +3101,7 @@ Item {
             }
         }
 
-        readonly property color ink: tile.active ? Theme.primaryContent : Theme.surfaceContent
+        readonly property color ink: Theme.surfaceContent
         Rectangle {
             anchors.fill: parent
             radius: parent.radius
@@ -3126,7 +3116,7 @@ Item {
                 width: 32; height: 32
                 radius: Theme.graphite ? Theme.radiusSm : Theme.radiusMd
                 color: tile.active
-                    ? Qt.rgba(1, 1, 1, 0.18)
+                    ? Theme.primary
                     : (Theme.graphite ? "transparent" : (tile.accented ? Theme.primaryContainer : Theme.secondaryContainer))
                 border.width: Theme.graphite ? 1 : 0
                 border.color: Theme.outlineVariant
@@ -3158,6 +3148,23 @@ Item {
         }
         HoverHandler { id: hover; cursorShape: tile.available ? Qt.PointingHandCursor : Qt.ArrowCursor }
         TapHandler { id: tap; enabled: tile.available; onTapped: tile.clicked() }
+        // The state as a pill switch: orange when on.
+        Rectangle {
+            visible: tile.stateful && tile.available
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.margins: 12
+            width: 40; height: 24; radius: 12
+            color: tile.active ? Theme.primary : Theme.surfaceContainerHighest
+            Behavior on color { enabled: !Theme.reduceMotion; ColorAnimation { duration: Theme.fadeFast } }
+            Rectangle {
+                width: 18; height: 18; radius: 9
+                anchors.verticalCenter: parent.verticalCenter
+                x: tile.active ? parent.width - width - 3 : 3
+                color: tile.active ? Theme.primaryContent : Theme.surfaceContent
+                Behavior on x { enabled: !Theme.reduceMotion; NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+            }
+        }
         IconButton {
             anchors.right: parent.right
             anchors.top: parent.top

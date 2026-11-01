@@ -1,6 +1,6 @@
 # Desktop Surfaces and Automation
 
-Beyond the main window, Noddy integrates into Windows 11 with fast, low-overhead desktop surfaces and automation tools: the slide-out **`Shelf`** edge panel, **`Nectar Island`** at the top of your screen, the searchable cross-device **`Timeline`**, the global **`Command Palette`** (`Ctrl+Alt+Space`), rich **`Handoff`** for links, maps, videos, and documents, **`notify-when`** process completion alerts, a trigger-action **Rules Engine**, a local authenticated **HTTP API**, a **PowerToys Command Palette** extension, and the `noddy` command-line client.
+Beyond the main window, Noddy integrates into Windows 11 with fast, low-overhead desktop surfaces and automation tools: the slide-out **`Shelf`** edge panel, **`Island`** at the top of your screen, the searchable cross-device **`Timeline`**, the global **`Command Palette`** (`Ctrl+Alt+Space`), rich **`Handoff`** for links, maps, videos, and documents, **`notify-when`** process completion alerts, a trigger-action **Rules Engine**, a local authenticated **HTTP API**, a **PowerToys Command Palette** extension, and the `noddy` command-line client.
 
 <p align="center">
   <img src="images/command-palette.png" alt="Global Command Palette open over the Noddy window on Windows 11" width="760">
@@ -11,7 +11,7 @@ Beyond the main window, Noddy integrates into Windows 11 with fast, low-overhead
 | Feature | Requirements |
 | :--- | :--- |
 | **`Shelf` edge panel (`Ctrl+Alt+S`)** | Windows 11 app running (window open or in the system tray). |
-| **`Nectar Island`** | Turn on **Nectar Island** in PC **Settings › General** (off by default). |
+| **`Island`** | Turn on **Island** in PC **Settings › General** (off by default). |
 | **`Timeline`** | Enabled by default on both Windows and Android (retains up to 5,000 items or 90 days by default). |
 | **`Command Palette` (`Ctrl+Alt+Space`)** | Windows 11 app running (window open or in the system tray). |
 | **Rich `Handoff` (links, maps, video timestamps, documents)** | `Standard` power level. **Files** toggle enabled in **Settings › Devices**. |
@@ -39,17 +39,17 @@ The `Shelf` is a lightweight edge panel on your PC that gives you instant drag-a
 4. **Drop or Flick in to send**: Drag any file, folder, image, or text selection from your PC into the `Shelf` (or flick a file toward the `Shelf` screen edge) to send it straight to your phone, with a 3-second **Undo** option.
 5. Press **Escape** or click outside the `Shelf` to hide it. When hidden, the `Shelf` unloads its QML surface completely so it uses zero background GPU or memory overhead.
 
-### 2. `Nectar Island`
+### 2. `Island`
 
-`Nectar Island` is an optional compact pill at the top center of your primary monitor that surfaces live phone activity without covering your workspace in notification popups:
+`Island` is an optional compact pill at the top center of your primary monitor that surfaces live phone activity without covering your workspace in notification popups:
 
-1. Turn on **Nectar Island** in PC **Settings › General** (it is **off by default**).
+1. Turn on **Island** in PC **Settings › General** (it is **off by default**).
 2. In the **Island triggers** row right below it, choose which activities appear in the pill:
    - **Calls** (on by default): Incoming caller ID with Answer/Decline buttons and live call duration.
    - **Transfers** (on by default): Live file transfer progress bars and `Waiting to send` count.
    - **Media** (on by default): Now-playing track artwork, title, and transport controls.
    - **Alerts** (off by default): Phone notifications, one-time verification codes, active timers/Live Updates, and incoming voice recordings.
-3. Hover over or click `Nectar Island` to expand its interactive controls, or let it collapse back into a minimal pill when idle. `Nectar Island` automatically hides itself when you are running a full-screen game or video, or when Windows Do Not Disturb is active.
+3. Hover over or click `Island` to expand its interactive controls, or let it collapse back into a minimal pill when idle. `Island` automatically hides itself when you are running a full-screen game or video, or when Windows Do Not Disturb is active.
 
 ### 3. Cross-Device `Timeline`
 
@@ -141,7 +141,7 @@ For power users who use **PowerToys Command Palette**, **AutoHotkey**, **Raycast
 
 ## What the Options Do
 
-- **Nectar Island** and **Island triggers** (`Settings › General` on PC, default: **Off**): Enables the top-of-screen activity pill and selects which triggers (`Calls`, `Transfers`, `Media`, `Alerts`) expand it.
+- **Island** and **Island triggers** (`Settings › General` on PC, default: **Off**): Enables the top-of-screen activity pill and selects which triggers (`Calls`, `Transfers`, `Media`, `Alerts`) expand it.
 - **Command palette / File shelf / Take photo / Scan document shortcuts** (`Settings › Shortcuts & Rules` on PC): Customizes the global Windows hotkeys (`Ctrl+Alt+Space`, `Ctrl+Alt+S`, `Ctrl+Alt+C`, `Ctrl+Alt+D`), with a **Reset** button next to each.
 - **Trigger-action rules** (`Settings › Shortcuts & Rules` on PC): Manages "When X, Do Y" automation rules.
 - **Cross-device timeline** (`Settings › Storage & Privacy` on PC and `Settings › Features & Data › Data & storage` on Android, default: **90d**): Sets auto-purge retention (**30d**, **90d**, **1y**, or **All** up to 5,000 items) and provides a **Clear** button.

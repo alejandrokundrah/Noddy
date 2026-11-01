@@ -384,19 +384,19 @@ Item {
             docKey: "shelf"
         },
         {
-            id: "nectar_island",
-            name: "Nectar Island",
+            id: "island",
+            name: "Island",
             icon: Icons.island,
             area: "surfaces",
             capKey: "",
             toggleKey: "",
             pcLocal: true,
-            prefKey: "nectarIsland",
+            prefKey: "island",
             summary: "Compact floating pill at the top center of your monitor for calls, transfers, media, and alerts.",
-            whereLabel: "Settings › General › Nectar Island",
-            needsLabel: "Nectar Island enabled in Settings",
+            whereLabel: "Settings › General › Island",
+            needsLabel: "Island enabled in Settings",
             targetId: "settings:general:island",
-            docKey: "nectar-island"
+            docKey: "island"
         },
         {
             id: "timeline",

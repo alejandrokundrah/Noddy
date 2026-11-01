@@ -2695,8 +2695,8 @@ Assist mode (Android Accessibility Service)
     </message>
     <message>
         <location filename="rust_strings.h" line="282"/>
-        <source>Nectar Island</source>
-        <translation>Nectar 岛</translation>
+        <source>Island</source>
+        <translation>灵动岛</translation>
     </message>
     <message>
         <location filename="rust_strings.h" line="283"/>
@@ -2899,18 +2899,18 @@ What it needs
 Displays a compact pill at the top center of your primary monitor for incoming calls, live file transfer progress, media playback, and optional notification previews.
 
 Where to find it
-- Settings › General › Nectar Island.
+- Settings › General › Island.
 
 What it needs
-- Turn on Nectar Island in Settings › General and pick which events should appear.</source>
+- Turn on Island in Settings › General and pick which events should appear.</source>
         <translation>功能
 在主显示器顶部中央显示一个小巧的胶囊，用于来电、实时文件传输进度、媒体播放以及可选的通知预览。
 
 位置
-- 设置 › 通用 › Nectar 岛。
+- 设置 › 通用 › 灵动岛。
 
 需要
-- 在 设置 › 通用 中开启 Nectar 岛，并选择要显示哪些事件。</translation>
+- 在 设置 › 通用 中开启 灵动岛，并选择要显示哪些事件。</translation>
     </message>
     <message>
         <location filename="rust_strings.h" line="307"/>
@@ -3259,7 +3259,7 @@ Shows incoming and active phone calls on your PC with Answer, Decline, and Rejec
 
 Where to find it
 - Left navigation rail › Calls.
-- Incoming call banner on Home and Nectar Island.
+- Incoming call banner on Home and Island.
 
 What it needs
 - Phone, Call Log, and Contacts permissions on your Android phone.
@@ -3269,7 +3269,7 @@ What it needs
 
 位置
 - 左侧导航栏 › 通话。
-- 首页和 Nectar 岛上的来电横幅。
+- 首页和 灵动岛上的来电横幅。
 
 需要
 - Android 手机上的电话、通话记录和通讯录权限。
@@ -3513,24 +3513,9 @@ What it needs
         <translation>打开功能指南</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HomePage.qml" line="371"/>
-        <source>Try Hive, the new theme</source>
-        <translation>试试新主题蜂巢</translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HomePage.qml" line="378"/>
-        <source>Honey on charcoal or warm wax, with a living honeycomb behind the app. Change it any time in Settings › Appearance.</source>
-        <translation>炭黑底色上的蜜色，或温暖的蜡色，应用背后还有鲜活的蜂巢。可随时在设置 › 外观中更换。</translation>
-    </message>
-    <message>
         <location filename="../qml/pages/HomePage.qml" line="390"/>
         <source>Not now</source>
         <translation>暂不</translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HomePage.qml" line="397"/>
-        <source>Try Hive</source>
-        <translation>试用蜂巢</translation>
     </message>
     <message>
         <location filename="../qml/pages/HomePage.qml" line="425"/>
@@ -4379,8 +4364,8 @@ What it needs
     <name>IslandWindow</name>
     <message>
         <location filename="../qml/IslandWindow.qml" line="16"/>
-        <source>Nectar Island</source>
-        <translation>Nectar 岛</translation>
+        <source>Island</source>
+        <translation>灵动岛</translation>
     </message>
     <message>
         <location filename="../qml/IslandWindow.qml" line="223"/>
@@ -4416,13 +4401,13 @@ What it needs
     </message>
     <message>
         <location filename="../qml/IslandWindow.qml" line="238"/>
-        <source>Nectar Island · %1</source>
-        <translation>Nectar 岛 · %1</translation>
+        <source>Island · %1</source>
+        <translation>灵动岛 · %1</translation>
     </message>
     <message>
         <location filename="../qml/IslandWindow.qml" line="239"/>
-        <source>Nectar Island · Ready</source>
-        <translation>Nectar 岛 · 就绪</translation>
+        <source>Island · Ready</source>
+        <translation>灵动岛 · 就绪</translation>
     </message>
     <message>
         <location filename="../qml/IslandWindow.qml" line="244"/>
@@ -6377,14 +6362,6 @@ What it needs
     </message>
 </context>
 <context>
-    <name>SadBee</name>
-    <message>
-        <location filename="../qml/setup/SadBee.qml" line="23"/>
-        <source>A sad bee</source>
-        <translation>一只难过的蜜蜂</translation>
-    </message>
-</context>
-<context>
     <name>SendTo</name>
     <message>
         <location filename="rust_strings.h" line="429"/>
@@ -6769,11 +6746,6 @@ What it needs
         <translation>主题</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="532"/>
-        <source>Hive</source>
-        <translation>蜂巢</translation>
-    </message>
-    <message>
         <location filename="../qml/pages/SettingsPage.qml" line="533"/>
         <source>Bloom</source>
         <translation>绽放</translation>
@@ -6838,12 +6810,6 @@ What it needs
         <translation>媒体封面</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="808"/>
-        <location filename="../qml/pages/SettingsPage.qml" line="817"/>
-        <source>Animated comb</source>
-        <translation>动态蜂巢</translation>
-    </message>
-    <message>
         <location filename="../qml/pages/SettingsPage.qml" line="811"/>
         <source>Still while animations are off in system settings.</source>
         <translation>系统设置中关闭动画时保持静止。</translation>
@@ -6857,11 +6823,6 @@ What it needs
         <location filename="../qml/pages/SettingsPage.qml" line="814"/>
         <source>Still while energy saver is on.</source>
         <translation>开启节能模式时保持静止。</translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="815"/>
-        <source>The honeycomb breathes and pulses.</source>
-        <translation>蜂巢会呼吸与脉动。</translation>
     </message>
     <message>
         <location filename="../qml/pages/SettingsPage.qml" line="848"/>
@@ -6926,8 +6887,8 @@ What it needs
     <message>
         <location filename="../qml/pages/SettingsPage.qml" line="1019"/>
         <location filename="../qml/pages/SettingsPage.qml" line="1022"/>
-        <source>Nectar Island</source>
-        <translation>Nectar 岛</translation>
+        <source>Island</source>
+        <translation>灵动岛</translation>
     </message>
     <message>
         <location filename="../qml/pages/SettingsPage.qml" line="1020"/>

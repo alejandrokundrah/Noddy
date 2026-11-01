@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <resources>
-    <!-- Glass, Honey light (docs/design/tokens.json). -->
-    <color name="surface">#FFF8F3</color>
-    <color name="primary">#8A5100</color>
+    <!-- Glass (docs/design/tokens.json). -->
+    <color name="surface">#FAFAFA</color>
+    <color name="primary">#B23808</color>
 </resources>

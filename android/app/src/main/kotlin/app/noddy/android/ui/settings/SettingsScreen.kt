@@ -325,7 +325,7 @@ fun SettingsScreen(
                                             runCatching { context.startActivity(PhoneStorage.allFilesAccessIntent(context)) }
                                         }
                                     },
-                                    colors = app.noddy.android.ui.theme.nectarSwitchColors(),
+                                    colors = app.noddy.android.ui.theme.noddySwitchColors(),
                                     modifier = Modifier.semantics { contentDescription = storageToggleTitle },
                                 )
                             }
@@ -343,7 +343,7 @@ fun SettingsScreen(
                                     Switch(
                                         checked = device.micEnabled,
                                         onCheckedChange = { enabled -> onSetMicEnabled(device.id, enabled) },
-                                        colors = app.noddy.android.ui.theme.nectarSwitchColors(),
+                                        colors = app.noddy.android.ui.theme.noddySwitchColors(),
                                         modifier = Modifier.semantics { contentDescription = micToggleTitle },
                                     )
                                 }
@@ -365,7 +365,7 @@ fun SettingsScreen(
                         Switch(
                             checked = state.awayMode,
                             onCheckedChange = onToggleAwayMode,
-                            colors = app.noddy.android.ui.theme.nectarSwitchColors(),
+                            colors = app.noddy.android.ui.theme.noddySwitchColors(),
                             modifier = Modifier.semantics { contentDescription = mobileDataTitle },
                         )
                     }
@@ -418,7 +418,7 @@ fun SettingsScreen(
                         Switch(
                             checked = backgroundServiceEnabled,
                             onCheckedChange = onToggleBackgroundService,
-                            colors = app.noddy.android.ui.theme.nectarSwitchColors(),
+                            colors = app.noddy.android.ui.theme.noddySwitchColors(),
                             modifier = Modifier.semantics { contentDescription = runInBackgroundTitle },
                         )
                     }
@@ -535,7 +535,7 @@ fun SettingsScreen(
                         Switch(
                             checked = suggestClipboardActions,
                             onCheckedChange = onSetSuggestClipboardActions,
-                            colors = app.noddy.android.ui.theme.nectarSwitchColors(),
+                            colors = app.noddy.android.ui.theme.noddySwitchColors(),
                             modifier = Modifier.semantics { contentDescription = suggestionsTitle },
                         )
                     }
@@ -577,7 +577,7 @@ fun SettingsScreen(
                         Switch(
                             checked = volumeKeysControlPc,
                             onCheckedChange = onSetVolumeKeysControlPc,
-                            colors = app.noddy.android.ui.theme.nectarSwitchColors(),
+                            colors = app.noddy.android.ui.theme.noddySwitchColors(),
                             modifier = Modifier.semantics { contentDescription = volumeKeysTitle },
                         )
                     }
@@ -602,7 +602,7 @@ fun SettingsScreen(
                         Switch(
                             checked = state.localsendEnabled,
                             onCheckedChange = onToggleLocalSend,
-                            colors = app.noddy.android.ui.theme.nectarSwitchColors(),
+                            colors = app.noddy.android.ui.theme.noddySwitchColors(),
                             modifier = Modifier.semantics { contentDescription = localsendTitle },
                         )
                     }
@@ -651,7 +651,7 @@ fun SettingsScreen(
                         Switch(
                             checked = state.clipboardHistoryEnabled,
                             onCheckedChange = onSetClipboardHistoryEnabled,
-                            colors = app.noddy.android.ui.theme.nectarSwitchColors(),
+                            colors = app.noddy.android.ui.theme.noddySwitchColors(),
                             modifier = Modifier.semantics { contentDescription = clipboardHistoryTitle },
                         )
                     }

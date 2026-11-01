@@ -8,12 +8,12 @@
 //! of the square and the mark is a little larger, as in the hand-tuned small
 //! sizes.
 
-/// Espresso tile, its glow, the honey rim and the cream mark
-/// (docs/design/tokens.json, Honey palette).
-const TILE: [f32; 3] = rgb(0x2C, 0x16, 0x00);
-const GLOW: [f32; 3] = rgb(0x69, 0x3C, 0x00);
-const RIM: [f32; 3] = rgb(0xFF, 0xB9, 0x5F);
-const MARK: [f32; 3] = rgb(0xFF, 0xF8, 0xF3);
+/// Near-black tile, its warm glow, the orange rim and the near-white mark
+/// (docs/design/tokens.json, Glass palette).
+const TILE: [f32; 3] = rgb(0x14, 0x14, 0x15);
+const GLOW: [f32; 3] = rgb(0x3A, 0x1A, 0x0E);
+const RIM: [f32; 3] = rgb(0xEB, 0x60, 0x30);
+const MARK: [f32; 3] = rgb(0xF4, 0xF4, 0xF5);
 
 /// One of the mark's closed shapes: where it starts, then cubic Béziers as
 /// (control, control, end), the last ending where the shape started.
