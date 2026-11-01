@@ -576,6 +576,81 @@ Item {
             width: home.width - home.sideWidth - home.spacing
             spacing: Theme.gutter
 
+            // ---- Ember: connection and battery as two stat tiles ----
+            Row {
+                id: emberStats
+                visible: Theme.ember
+                width: parent.width
+                height: visible ? 96 : 0
+                spacing: Theme.gutter
+                readonly property real tileWidth: batteryTile.visible ? (width - spacing) / 2 : width
+
+                Rectangle {
+                    width: emberStats.tileWidth
+                    height: parent.height
+                    radius: Theme.radiusLg
+                    color: Theme.cardColor
+                    border.width: 1
+                    border.color: Theme.cardBorder
+                    Column {
+                        anchors.left: parent.left
+                        anchors.leftMargin: 20
+                        anchors.right: parent.right
+                        anchors.rightMargin: 20
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 4
+                        Txt {
+                            width: parent.width
+                            text: home.name
+                            role: "label"
+                            muted: true
+                        }
+                        Txt {
+                            width: parent.width
+                            text: home.online
+                                ? (home.rttMs > 0 ? qsTr("Connected · %1 ms").arg(home.rttMs) : qsTr("Connected"))
+                                : qsTr("Offline")
+                            role: "headline"
+                            size: 22
+                            color: home.online ? Theme.primary : Theme.surfaceContent
+                        }
+                    }
+                }
+                Rectangle {
+                    id: batteryTile
+                    visible: home.battery >= 0
+                    width: emberStats.tileWidth
+                    height: parent.height
+                    radius: Theme.radiusLg
+                    color: Theme.cardColor
+                    border.width: 1
+                    border.color: Theme.cardBorder
+                    Column {
+                        anchors.left: parent.left
+                        anchors.leftMargin: 20
+                        anchors.right: parent.right
+                        anchors.rightMargin: 20
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 4
+                        Txt {
+                            width: parent.width
+                            text: qsTr("Battery")
+                            role: "label"
+                            muted: true
+                        }
+                        Txt {
+                            width: parent.width
+                            text: home.charging
+                                ? qsTr("%1% · charging").arg(home.battery)
+                                : qsTr("%1%").arg(home.battery)
+                            role: "headline"
+                            size: 22
+                            color: home.charging ? Theme.primary : Theme.surfaceContent
+                        }
+                    }
+                }
+            }
+
             // ---- Hero ----
             Rectangle {
                 id: heroCard

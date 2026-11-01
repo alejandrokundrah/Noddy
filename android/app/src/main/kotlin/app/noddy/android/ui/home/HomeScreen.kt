@@ -333,6 +333,12 @@ fun HomeScreen(
                 }
             }
         }
+        // Ember: the connection and battery of the first PC as two big stat cards.
+        if (!isGlass) {
+            state.devices.firstOrNull { !it.isAndroid }?.let { pc ->
+                item(key = "ember_status", contentType = "ember_status") { EmberStatusRow(pc) }
+            }
+        }
         if (showWhatsNewGuideBanner) {
             item(key = "whats_new_guide_banner", contentType = "banner") {
                 WhatsNewFeaturesGuideCard(
@@ -1286,6 +1292,69 @@ private fun PeerCard(
     }
 }
 
+/** Ember's Home opens with the PC's connection and battery as two stat cards side by side. */
+@Composable
+private fun EmberStatusRow(device: Device) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        EmberStatCard(
+            title = device.name,
+            value = linkText(device.link),
+            highlight = device.online,
+            modifier = Modifier.weight(1f),
+        )
+        device.battery?.let { battery ->
+            EmberStatCard(
+                title = stringResource(R.string.home_stat_battery),
+                value = if (battery.charging) stringResource(R.string.battery_charging, battery.level.toInt())
+                else stringResource(R.string.battery_level, battery.level.toInt()),
+                highlight = battery.charging,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+/** One Ember stat card: a muted title over a large value, orange when it is "on". */
+@Composable
+private fun EmberStatCard(
+    title: String,
+    value: String,
+    highlight: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val scheme = MaterialTheme.colorScheme
+    Column(
+        modifier = modifier
+            .liquidGlassCard(
+                cornerRadius = 24.dp,
+                isGlass = false,
+                baseColor = scheme.surfaceContainer,
+                tintColor = scheme.primary,
+                outlineColor = scheme.outlineVariant,
+            )
+            .padding(18.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Text(
+            title,
+            style = MaterialTheme.typography.labelLarge,
+            color = scheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+            value,
+            style = MaterialTheme.typography.titleLarge,
+            color = if (highlight) scheme.primary else scheme.onSurface,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
 @Composable
 private fun PcCard(
     device: Device,
@@ -1315,22 +1384,25 @@ private fun PcCard(
     var ringing by remember(device.id) { mutableStateOf(false) }
     val isGlass = LocalGlassTheme.current
     androidx.compose.runtime.CompositionLocalProvider(
-        androidx.compose.material3.LocalContentColor provides MaterialTheme.colorScheme.onPrimaryContainer,
+        androidx.compose.material3.LocalContentColor provides
+            (if (isGlass) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .liquidGlassCard(
-                    cornerRadius = 28.dp,
+                    cornerRadius = if (isGlass) 28.dp else 24.dp,
                     isGlass = isGlass,
-                    baseColor = MaterialTheme.colorScheme.primaryContainer,
+                    // Ember: a solid near-black card with a hairline, not the tinted container.
+                    baseColor = if (isGlass) MaterialTheme.colorScheme.primaryContainer
+                    else MaterialTheme.colorScheme.surfaceContainer,
                     tintColor = MaterialTheme.colorScheme.primary,
-                    outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
+                    outlineColor = MaterialTheme.colorScheme.outlineVariant,
                 )
                 .padding(22.dp),
         ) {
             val context = LocalContext.current
-            val ink = MaterialTheme.colorScheme.onPrimaryContainer
+            val ink = if (isGlass) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
             val primaryBtn = ButtonDefaults.buttonColors(
                 disabledContainerColor = ink.copy(alpha = 0.08f),
                 disabledContentColor = ink.copy(alpha = 0.38f),

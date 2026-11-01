@@ -232,15 +232,26 @@ fun SettingsScreen(
         if (showAppearance) {
             item(key = "appearance", contentType = "section") {
                 Section(stringResource(R.string.settings_appearance)) {
-                    Label(stringResource(R.string.settings_mode))
+                    Label(stringResource(R.string.settings_theme))
                     Choice(
                         listOf(
-                            "system" to stringResource(R.string.mode_system),
-                            "light" to stringResource(R.string.mode_light),
-                            "dark" to stringResource(R.string.mode_dark),
+                            "glass" to stringResource(R.string.theme_glass),
+                            "ember" to stringResource(R.string.theme_ember),
                         ),
-                        appearance.mode,
-                    ) { value -> onAppearance { it.copy(mode = value) } }
+                        appearance.theme,
+                    ) { value -> onAppearance { it.copy(theme = value) } }
+                    // Ember is always dark, so there is no mode to pick.
+                    if (!appearance.isEmber) {
+                        Label(stringResource(R.string.settings_mode))
+                        Choice(
+                            listOf(
+                                "system" to stringResource(R.string.mode_system),
+                                "light" to stringResource(R.string.mode_light),
+                                "dark" to stringResource(R.string.mode_dark),
+                            ),
+                            appearance.mode,
+                        ) { value -> onAppearance { it.copy(mode = value) } }
+                    }
                     if (AppLanguage.supported) {
                         // System and English, plus the language picked from the list (or More).
                         val context = LocalContext.current

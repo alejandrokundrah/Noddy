@@ -522,6 +522,8 @@ NativeWindow {
     Rectangle {
         id: rail
         visible: !window.welcome
+        // Ember's hover labels reach over the page.
+        z: Theme.ember ? 5 : 0
         width: Theme.railWidth
         height: parent.height
         color: "transparent"
@@ -542,11 +544,24 @@ NativeWindow {
                 color: Theme.graphite ? Theme.surface : Theme.primaryContent
             }
         }
+        // Ember: the destinations sit in one rounded pill.
+        Rectangle {
+            visible: Theme.ember
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: navColumn.y - 10
+            width: 60
+            height: navColumn.height + 20
+            radius: width / 2
+            color: Theme.railColor
+            border.width: 1
+            border.color: Theme.cardBorder
+        }
         Column {
+            id: navColumn
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: mark.bottom
-            anchors.topMargin: 31
-            spacing: 6
+            anchors.topMargin: Theme.ember ? 34 : 31
+            spacing: Theme.ember ? 4 : 6
             NavItem {
                 iconPath: Icons.home
                 text: qsTr("Home")
@@ -684,8 +699,71 @@ NativeWindow {
                     : window.page === "deck" ? qsTr("Deck")
                     : window.page === "guide" ? qsTr("Features guide")
                     : qsTr("Settings")
+                visible: !(Theme.ember && window.page === "home")
                 role: "headline"
                 size: 20
+            }
+            // Ember: the wordmark stands where Home's title is.
+            Txt {
+                visible: Theme.ember && window.page === "home"
+                anchors.left: pageTitle.left
+                anchors.verticalCenter: parent.verticalCenter
+                text: "Noddy"
+                role: "headline"
+                size: 20
+            }
+            // Ember: a search field that opens the command palette.
+            FocusScope {
+                id: emberSearch
+                readonly property real room: topBarActions.x - (pageTitle.x + pageTitle.width) - 48
+                visible: Theme.ember && width > 160 && !sharingPill.shown
+                width: Math.max(0, Math.min(420, room))
+                height: 36
+                x: Math.max(pageTitle.x + pageTitle.width + 24,
+                            Math.min((parent.width - width) / 2, topBarActions.x - width - 24))
+                anchors.verticalCenter: parent.verticalCenter
+                activeFocusOnTab: true
+                Accessible.role: Accessible.Button
+                Accessible.name: qsTr("Search commands")
+                Accessible.onPressAction: AppController.openCommandPalette()
+                Keys.onPressed: (event) => {
+                    if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
+                        AppController.openCommandPalette()
+                        event.accepted = true
+                    }
+                }
+                Rectangle {
+                    anchors.fill: parent
+                    radius: height / 2
+                    color: Theme.surfaceContainer
+                    border.width: Theme.focusVisible(emberSearch) ? 2 : 1
+                    border.color: Theme.focusVisible(emberSearch) ? Theme.primary : Theme.outlineVariant
+                }
+                Icon {
+                    id: emberSearchIcon
+                    anchors.left: parent.left
+                    anchors.leftMargin: 14
+                    anchors.verticalCenter: parent.verticalCenter
+                    path: Icons.search
+                    color: Theme.surfaceContentVariant
+                }
+                Txt {
+                    anchors.left: emberSearchIcon.right
+                    anchors.leftMargin: 10
+                    anchors.right: parent.right
+                    anchors.rightMargin: 14
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: qsTr("Search commands")
+                    role: "bodySmall"
+                    muted: true
+                    elide: Text.ElideRight
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: AppController.openCommandPalette()
+                }
+                Component.onCompleted: window.addCaptionHole(emberSearch)
             }
             // Screen sharing: a live pill in the title bar, so the page never shifts. It sits
             // centered, and slides aside rather than overlap the title or the actions.
@@ -777,8 +855,23 @@ NativeWindow {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 4
 
+                // Ember is dark only: the moon shows it, and does nothing.
+                Rectangle {
+                    visible: Theme.ember
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 36; height: 36; radius: 18
+                    color: Theme.indicator
+                    Accessible.role: Accessible.StaticText
+                    Accessible.name: qsTr("Dark theme")
+                    Icon {
+                        anchors.centerIn: parent
+                        path: Icons.moon
+                        color: Theme.indicatorContent
+                    }
+                }
                 IconButton {
                     id: paletteTopBtn
+                    visible: !Theme.ember
                     anchors.verticalCenter: parent.verticalCenter
                     iconPath: Icons.search
                     iconSize: 16
@@ -793,7 +886,7 @@ NativeWindow {
                     id: timelineTopBtn
                     anchors.verticalCenter: parent.verticalCenter
                     visible: (window.page === "home" || window.page === "timeline") && AppController.hasDevices
-                    iconPath: Icons.history
+                    iconPath: Theme.ember ? Icons.bell : Icons.history
                     iconSize: 16
                     text: qsTr("Timeline")
                     tonal: window.page === "timeline"
@@ -822,6 +915,39 @@ NativeWindow {
                         easing.type: Easing.OutCubic
                     }
                     Component.onCompleted: window.addCaptionHole(refresh)
+                }
+                // Ember: the phone on screen, as a chip.
+                Rectangle {
+                    visible: Theme.ember && DeviceList.count > 0
+                    anchors.verticalCenter: parent.verticalCenter
+                    height: 40
+                    width: Math.min(180, 6 + 28 + 8 + chipName.implicitWidth + 14)
+                    radius: height / 2
+                    color: Theme.surfaceContainer
+                    border.width: 1
+                    border.color: Theme.outlineVariant
+                    Accessible.role: Accessible.StaticText
+                    Accessible.name: window.currentDeviceName
+                    Avatar {
+                        id: chipAvatar
+                        anchors.left: parent.left
+                        anchors.leftMargin: 6
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 28; height: 28
+                        name: window.currentDeviceName
+                        iconPath: Icons.phone
+                    }
+                    Txt {
+                        id: chipName
+                        anchors.left: chipAvatar.right
+                        anchors.leftMargin: 8
+                        anchors.right: parent.right
+                        anchors.rightMargin: 14
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: window.currentDeviceName
+                        role: "label"
+                        elide: Text.ElideRight
+                    }
                 }
             }
         }

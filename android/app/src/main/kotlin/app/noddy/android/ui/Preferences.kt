@@ -45,7 +45,10 @@ class Preferences(context: Context) {
 
     private fun load(): Appearance {
         val defaults = Appearance()
-        return sanitizeAppearance(mode = prefs.getString(MODE, defaults.mode))
+        return sanitizeAppearance(
+            mode = prefs.getString(MODE, defaults.mode),
+            theme = prefs.getString(THEME, defaults.theme),
+        )
     }
 
     private fun loadWalkthrough(): WalkthroughPersistence {
@@ -62,7 +65,10 @@ class Preferences(context: Context) {
 
     fun update(change: (Appearance) -> Appearance) {
         val next = sanitizeAppearance(change(_appearance.value))
-        prefs.edit { putString(MODE, next.mode) }
+        prefs.edit {
+            putString(THEME, next.theme)
+            putString(MODE, next.mode)
+        }
         _appearance.value = next
     }
 
@@ -108,6 +114,7 @@ class Preferences(context: Context) {
     private val appContext = context.applicationContext
 
     companion object {
+        private const val THEME = "theme"
         private const val MODE = "mode"
         private const val TOUCHPAD_SENSITIVITY = "touchpad_sensitivity"
         private const val SUGGEST_CLIPBOARD_ACTIONS = "suggest_clipboard_actions"
@@ -118,13 +125,23 @@ class Preferences(context: Context) {
         private const val WALKTHROUGH_STEP = "walkthrough_step"
         private const val WHATS_NEW_GUIDE_DISMISSED = "whats_new_guide_dismissed"
 
+        val VALID_THEMES = setOf("glass", "ember")
         val VALID_MODES = setOf("system", "light", "dark")
 
-        /** Old saved values (a theme, a seed color, AMOLED, the comb) are ignored; only the mode is kept. */
-        fun sanitizeAppearance(mode: String?): Appearance =
-            Appearance(mode = mode?.takeIf { it in VALID_MODES } ?: Appearance().mode)
+        /**
+         * Keeps a valid theme ("glass" or "ember") and mode. Anything else, including the
+         * themes that no longer exist and old color choices, falls back to the defaults.
+         */
+        fun sanitizeAppearance(mode: String?, theme: String? = null): Appearance {
+            val defaults = Appearance()
+            return Appearance(
+                theme = theme?.takeIf { it in VALID_THEMES } ?: defaults.theme,
+                mode = mode?.takeIf { it in VALID_MODES } ?: defaults.mode,
+            )
+        }
 
-        fun sanitizeAppearance(appearance: Appearance): Appearance = sanitizeAppearance(mode = appearance.mode)
+        fun sanitizeAppearance(appearance: Appearance): Appearance =
+            sanitizeAppearance(mode = appearance.mode, theme = appearance.theme)
 
         fun isSuggestClipboardActionsEnabled(context: Context): Boolean =
             context.applicationContext

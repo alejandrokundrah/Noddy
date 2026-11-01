@@ -3,6 +3,8 @@ import QtQuick
 import app.noddy
 
 // A navigation rail destination: an icon in a pill indicator above a label.
+// In Ember it is icon only: a round button, white when selected, with the
+// label as a hover tooltip (and as the accessible name).
 FocusScope {
     id: item
     property string iconPath
@@ -12,8 +14,8 @@ FocusScope {
     property bool activeHover: mouse.containsMouse
     signal clicked
 
-    implicitWidth: 72
-    implicitHeight: 56
+    implicitWidth: Theme.ember ? 56 : 72
+    implicitHeight: Theme.ember ? 46 : 56
     activeFocusOnTab: true
 
     Accessible.role: Accessible.PageTab
@@ -31,7 +33,8 @@ FocusScope {
         id: pill
         anchors.horizontalCenter: parent.horizontalCenter
         y: 2
-        width: 52; height: 30
+        width: Theme.ember ? 42 : 52
+        height: Theme.ember ? 42 : 30
         radius: Theme.pill(height)
         color: "transparent"
         scale: mouse.pressed ? Theme.pressScale : 1.0
@@ -40,7 +43,7 @@ FocusScope {
         Rectangle {
             anchors.centerIn: parent
             height: parent.height
-            width: item.selected ? parent.width : (item.activeHover ? 42 : 24)
+            width: (item.selected || Theme.ember) ? parent.width : (item.activeHover ? 42 : 24)
             radius: parent.radius
             color: item.selected
                 ? (Theme.glass
@@ -80,6 +83,7 @@ FocusScope {
         }
     }
     Txt {
+        visible: !Theme.ember
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: pill.bottom
         anchors.topMargin: 4
@@ -90,6 +94,26 @@ FocusScope {
         Behavior on color {
             enabled: !Theme.reduceMotion
             ColorAnimation { duration: Theme.fadeFast }
+        }
+    }
+    // Ember: the label, beside the button, while hovered or focused.
+    Rectangle {
+        id: tip
+        visible: Theme.ember && (item.activeHover || Theme.focusVisible(item))
+        z: 10
+        x: pill.x + pill.width + 14
+        anchors.verticalCenter: pill.verticalCenter
+        width: tipText.implicitWidth + 24
+        height: 30
+        radius: height / 2
+        color: Theme.surfaceContainerHighest
+        border.width: 1
+        border.color: Theme.outlineVariant
+        Txt {
+            id: tipText
+            anchors.centerIn: parent
+            text: item.text
+            role: "caption"
         }
     }
     Rectangle {
