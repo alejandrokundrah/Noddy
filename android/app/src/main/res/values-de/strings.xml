@@ -729,7 +729,7 @@
 
     <!-- Setup Walkthrough -->
     <string name="walkthrough_step_progress">Schritt %1$d von %2$d</string>
-    <string name="walkthrough_stage_desc">Waben-Einrichtungsstatus, Schritt %1$d von %2$d</string>
+    <string name="walkthrough_stage_desc">Einrichtungsschritt %1$d von %2$d</string>
     <string name="walkthrough_action_skip">Einrichtung überspringen</string>
     <string name="walkthrough_action_back">Zurück</string>
     <string name="walkthrough_action_get_started">Los geht’s</string>
@@ -1005,7 +1005,7 @@
     <string name="guide_files_need_1">Gekoppelter PC (Offline-Dateien warten bis zu 7 Tage in der Sendewarteschlange).</string>
     <string name="guide_files_phone_1">Tippe auf der Startseite auf der Karte deines gekoppelten PCs auf „Dateien senden“ oder „Ordner senden“.</string>
     <string name="guide_files_phone_2">Pausiere, setze fort oder brich aktive Übertragungen in der Karte „Übertragungen“ auf der Startseite ab.</string>
-    <string name="guide_files_pc_1">Ziehe Dateien auf das Noddy-Fenster oder auf die Nectar Island am oberen Bildschirmrand deines PCs.</string>
+    <string name="guide_files_pc_1">Ziehe Dateien auf das Noddy-Fenster oder auf die Island am oberen Bildschirmrand deines PCs.</string>
     <string name="guide_files_opt_1">Dateien senden / Ordner senden: Überträgt einzelne Dateien oder komplette Ordnerstrukturen.</string>
     <string name="guide_files_opt_2">Pause / Fortsetzen: Setzt unterbrochene Übertragungen fort, ohne bereits übertragene Bytes erneut zu senden.</string>
     <string name="guide_files_privacy">Dateien werden über QUIC TLS 1.3 mit BLAKE3-Integritätsprüfung in den Ordner Download/Noddy übertragen.</string>
@@ -1350,4 +1350,17 @@
     <string name="device_name_in_profile">%1$s (%2$s)</string>
     <string name="profile_work">Arbeit</string>
     <string name="profile_other">Zweites Profil</string>
+    <string name="home_stat_connection">Verbindung</string>
+    <string name="home_stat_unknown">Unbekannt</string>
+    <string name="home_stat_on">An</string>
+    <string name="home_stat_off">Aus</string>
+    <string name="home_stat_reconnect">Wiederverbinden</string>
+    <string name="home_stat_microphone">Mikrofon</string>
+    <string name="home_stat_find">Gerät finden</string>
+    <string name="home_stat_ringing">Klingelt</string>
+    <string name="home_stat_send">Datei senden</string>
+    <string name="home_stat_choose">Auswählen</string>
+    <string name="home_stat_clipboard">Zwischenablage</string>
+    <string name="home_stat_timeline">Verlauf</string>
+    <string name="home_connected_count">%1$d von %2$d PCs verbunden</string>
 </resources>

@@ -728,7 +728,7 @@
 
     <!-- Setup Walkthrough -->
     <string name="walkthrough_step_progress">Adım %1$d / %2$d</string>
-    <string name="walkthrough_stage_desc">Petek kurulum aşaması, adım %1$d / %2$d</string>
+    <string name="walkthrough_stage_desc">Kurulum adımı %1$d / %2$d</string>
     <string name="walkthrough_action_skip">Kurulumu atla</string>
     <string name="walkthrough_action_back">Geri</string>
     <string name="walkthrough_action_get_started">Başlayın</string>
@@ -1349,6 +1349,19 @@
     <string name="device_name_in_profile">%1$s (%2$s)</string>
     <string name="profile_work">İş</string>
     <string name="profile_other">İkinci profil</string>
+    <string name="home_stat_connection">Bağlantı</string>
+    <string name="home_stat_unknown">Bilinmiyor</string>
+    <string name="home_stat_on">Açık</string>
+    <string name="home_stat_off">Kapalı</string>
+    <string name="home_stat_reconnect">Yeniden bağlan</string>
+    <string name="home_stat_microphone">Mikrofon</string>
+    <string name="home_stat_find">Cihazı bul</string>
+    <string name="home_stat_ringing">Çalıyor</string>
+    <string name="home_stat_send">Dosya gönder</string>
+    <string name="home_stat_choose">Seç</string>
+    <string name="home_stat_clipboard">Pano</string>
+    <string name="home_stat_timeline">Geçmiş</string>
+    <string name="home_connected_count">%1$d / %2$d PC bağlı</string>
 </resources>
 
 

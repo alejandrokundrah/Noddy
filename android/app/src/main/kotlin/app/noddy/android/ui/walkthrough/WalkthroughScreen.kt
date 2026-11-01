@@ -13,8 +13,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -41,6 +39,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -112,8 +111,6 @@ import app.noddy.android.ui.theme.bentoWell
 import app.noddy.android.ui.theme.liquidGlassCard
 import app.noddy.core.DiscoveredDevice
 import app.noddy.core.PairingFailure
-import kotlin.math.cos
-import kotlin.math.sin
 import kotlinx.coroutines.launch
 
 /**
@@ -178,11 +175,6 @@ fun WalkthroughScreen(
     }
 
     val hasPairedPc = state.devices.isNotEmpty() || state.pairing is PairingState.Paired
-    val activeTierIndex = when {
-        state.elevated -> 2
-        state.inputAccess -> 1
-        else -> 0
-    }
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -201,16 +193,10 @@ fun WalkthroughScreen(
             )
             Spacer(Modifier.height(12.dp))
 
-            HoneycombCellStage(
+            WalkthroughStepHeader(
                 step = step,
-                permissionGrantedFlags = permissionGrantedFlags,
-                hasPairedPc = hasPairedPc,
-                activeTierIndex = activeTierIndex,
                 isGlass = isGlass,
-                reducedMotion = reducedMotion,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(128.dp),
+                modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(14.dp))
 
@@ -416,400 +402,50 @@ private fun WalkthroughFooterBar(
     }
 }
 
-/**
- * Fixed-height (128.dp) vector Honeycomb Cell stage shown at the top of every walkthrough step.
- * Combines the 5-cell step honeycomb cluster on the left with the active step's honeycomb motif on the right.
- */
+/** Compact header shown at the top of every walkthrough step: the step counter and its title. */
 @Composable
-private fun HoneycombCellStage(
+private fun WalkthroughStepHeader(
     step: WalkthroughStep,
-    permissionGrantedFlags: List<Boolean>,
-    hasPairedPc: Boolean,
-    activeTierIndex: Int,
     isGlass: Boolean,
-    reducedMotion: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val primary = MaterialTheme.colorScheme.primary
-    val primaryContainer = MaterialTheme.colorScheme.primaryContainer
-    val onPrimaryContainer = MaterialTheme.colorScheme.onPrimaryContainer
-    val surfaceHigh = MaterialTheme.colorScheme.surfaceContainerHigh
-    val outlineVariant = MaterialTheme.colorScheme.outlineVariant
     val stageDesc = stringResource(
         R.string.walkthrough_stage_desc,
         step.index + 1,
         WalkthroughStep.entries.size,
     )
-
-    val pairJoinProgress by animateFloatAsState(
-        targetValue = if (hasPairedPc) 1f else 0f,
-        animationSpec = if (reducedMotion) snap() else tween(durationMillis = 320),
-        label = "pair_hex_join",
-    )
-
-    val hexPath = remember { Path() }
-
-    Box(
+    Row(
         modifier = modifier
             .liquidGlassCard(
                 cornerRadius = 24.dp,
                 isGlass = isGlass,
                 baseColor = MaterialTheme.colorScheme.surfaceContainer,
-                tintColor = primary,
-                outlineColor = if (isGlass) outlineVariant else Color.Transparent,
+                tintColor = MaterialTheme.colorScheme.primary,
+                outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
             )
             .semantics { contentDescription = stageDesc }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val w = size.width
-            val h = size.height
-            val strokePx = 2.dp.toPx()
-            val accentStrokePx = 1.5.dp.toPx()
-
-            // Left section (36% width): 5-cell honeycomb cluster representing Steps 0..4
-            val clusterCx = w * 0.22f
-            val clusterCy = h * 0.5f
-            val cellR = 13.dp.toPx()
-            val dx = cellR * 1.62f
-            val dy = cellR * 1.42f
-
-            // 5-cell honeycomb offsets (top row 3 cells, bottom row 2 interlocking cells)
-            for (i in 0 until 5) {
-                val cx = when (i) {
-                    0 -> clusterCx - dx
-                    1 -> clusterCx
-                    2 -> clusterCx + dx
-                    3 -> clusterCx - dx * 0.5f
-                    else -> clusterCx + dx * 0.5f
-                }
-                val cy = if (i < 3) clusterCy - dy * 0.5f else clusterCy + dy * 0.5f
-
-                val completed = i < step.index
-                val isCurrent = i == step.index
-                val fill = if (completed || isCurrent) primaryContainer else surfaceHigh
-                val border = if (completed || isCurrent) primary else outlineVariant
-
-                drawHexCell(
-                    path = hexPath,
-                    center = Offset(cx, cy),
-                    radius = cellR,
-                    fillColor = fill,
-                    strokeColor = border,
-                    strokeWidth = strokePx,
-                )
-
-                if (isCurrent) {
-                    drawHexRing(
-                        path = hexPath,
-                        center = Offset(cx, cy),
-                        radius = cellR + 3.5.dp.toPx(),
-                        strokeColor = primary.copy(alpha = 0.55f),
-                        strokeWidth = accentStrokePx,
-                    )
-                    drawCircle(
-                        color = primary,
-                        radius = 3.dp.toPx(),
-                        center = Offset(cx, cy),
-                    )
-                } else if (completed) {
-                    drawCheckGlyph(
-                        path = hexPath,
-                        center = Offset(cx, cy),
-                        size = cellR * 0.45f,
-                        color = primary,
-                        strokeWidth = strokePx,
-                    )
-                }
-            }
-
-            // Subtle vertical divider between step cluster and active step motif
-            val dividerX = w * 0.44f
-            drawLine(
-                color = outlineVariant.copy(alpha = 0.45f),
-                start = Offset(dividerX, h * 0.14f),
-                end = Offset(dividerX, h * 0.86f),
-                strokeWidth = 1.dp.toPx(),
-                cap = StrokeCap.Round,
-            )
-
-            // Right section (56% width): Active step honeycomb motif
-            val motifCx = w * 0.72f
-            val motifCy = h * 0.5f
-
-            when (step) {
-                WalkthroughStep.Welcome -> {
-                    val sideR = 20.dp.toPx()
-                    val linkR = 14.dp.toPx()
-                    val leftCenter = Offset(motifCx - 46.dp.toPx(), motifCy)
-                    val rightCenter = Offset(motifCx + 46.dp.toPx(), motifCy)
-                    val midCenter = Offset(motifCx, motifCy)
-
-                    drawLine(
-                        color = primary,
-                        start = Offset(leftCenter.x + sideR, motifCy),
-                        end = Offset(midCenter.x - linkR, motifCy),
-                        strokeWidth = strokePx,
-                        cap = StrokeCap.Round,
-                    )
-                    drawLine(
-                        color = primary,
-                        start = Offset(midCenter.x + linkR, motifCy),
-                        end = Offset(rightCenter.x - sideR, motifCy),
-                        strokeWidth = strokePx,
-                        cap = StrokeCap.Round,
-                    )
-
-                    drawHexCell(hexPath, leftCenter, sideR, primaryContainer, primary, strokePx)
-                    drawPhoneGlyph(leftCenter, sideR * 0.48f, onPrimaryContainer, strokePx)
-
-                    drawHexCell(hexPath, midCenter, linkR, primaryContainer, primary, strokePx)
-                    drawHexRing(hexPath, midCenter, linkR + 3.dp.toPx(), primary.copy(alpha = 0.5f), accentStrokePx)
-                    drawCircle(color = primary, radius = 3.dp.toPx(), center = midCenter)
-
-                    drawHexCell(hexPath, rightCenter, sideR, primaryContainer, primary, strokePx)
-                    drawMonitorGlyph(rightCenter, sideR * 0.52f, onPrimaryContainer, strokePx)
-                }
-
-                WalkthroughStep.Permissions -> {
-                    val centerR = 18.dp.toPx()
-                    val nodeR = 9.5.dp.toPx()
-                    val orbitR = 34.dp.toPx()
-
-                    for (idx in 0 until 7) {
-                        val angleRad = Math.toRadians((idx * (360.0 / 7.0)) - 90.0)
-                        val nx = motifCx + (orbitR * cos(angleRad)).toFloat()
-                        val ny = motifCy + (orbitR * sin(angleRad)).toFloat()
-                        val granted = permissionGrantedFlags.getOrElse(idx) { false }
-
-                        drawLine(
-                            color = if (granted) primary else outlineVariant,
-                            start = Offset(motifCx, motifCy),
-                            end = Offset(nx, ny),
-                            strokeWidth = accentStrokePx,
-                        )
-                        drawHexCell(
-                            path = hexPath,
-                            center = Offset(nx, ny),
-                            radius = nodeR,
-                            fillColor = if (granted) primaryContainer else surfaceHigh,
-                            strokeColor = if (granted) primary else outlineVariant,
-                            strokeWidth = accentStrokePx,
-                        )
-                        if (granted) {
-                            drawCircle(
-                                color = primary,
-                                radius = 2.5.dp.toPx(),
-                                center = Offset(nx, ny),
-                            )
-                        }
-                    }
-
-                    drawHexCell(
-                        path = hexPath,
-                        center = Offset(motifCx, motifCy),
-                        radius = centerR,
-                        fillColor = primaryContainer,
-                        strokeColor = primary,
-                        strokeWidth = strokePx,
-                    )
-                    drawShieldGlyph(
-                        path = hexPath,
-                        center = Offset(motifCx, motifCy),
-                        size = centerR * 0.52f,
-                        color = primary,
-                        strokeWidth = strokePx,
-                    )
-                }
-
-                WalkthroughStep.Pair -> {
-                    val hexR = 22.dp.toPx()
-                    val maxOffset = 38.dp.toPx()
-                    val minOffset = 19.dp.toPx()
-                    val currentOffset = maxOffset - (maxOffset - minOffset) * pairJoinProgress
-                    val leftCenter = Offset(motifCx - currentOffset, motifCy)
-                    val rightCenter = Offset(motifCx + currentOffset, motifCy)
-
-                    drawLine(
-                        color = if (hasPairedPc) primary else outlineVariant,
-                        start = leftCenter,
-                        end = rightCenter,
-                        strokeWidth = strokePx,
-                    )
-                    drawHexCell(
-                        path = hexPath,
-                        center = leftCenter,
-                        radius = hexR,
-                        fillColor = primaryContainer,
-                        strokeColor = primary,
-                        strokeWidth = strokePx,
-                    )
-                    drawPhoneGlyph(leftCenter, hexR * 0.45f, onPrimaryContainer, strokePx)
-
-                    drawHexCell(
-                        path = hexPath,
-                        center = rightCenter,
-                        radius = hexR,
-                        fillColor = if (hasPairedPc) primaryContainer else surfaceHigh,
-                        strokeColor = if (hasPairedPc) primary else outlineVariant,
-                        strokeWidth = strokePx,
-                    )
-                    drawMonitorGlyph(rightCenter, hexR * 0.48f, onPrimaryContainer, strokePx)
-
-                    if (hasPairedPc) {
-                        val bondR = 11.dp.toPx()
-                        drawHexCell(
-                            path = hexPath,
-                            center = Offset(motifCx, motifCy),
-                            radius = bondR,
-                            fillColor = primaryContainer,
-                            strokeColor = primary,
-                            strokeWidth = strokePx,
-                        )
-                        drawCheckGlyph(
-                            path = hexPath,
-                            center = Offset(motifCx, motifCy),
-                            size = bondR * 0.45f,
-                            color = primary,
-                            strokeWidth = strokePx,
-                        )
-                    }
-                }
-
-                WalkthroughStep.PowerLevel -> {
-                    val tierR = 18.dp.toPx()
-                    val stepX = 36.dp.toPx()
-                    for (tier in 0..2) {
-                        val tx = motifCx + (tier - 1) * stepX
-                        val ty = motifCy + (1 - tier) * 7.dp.toPx()
-                        val isSelected = tier == activeTierIndex
-                        val isUnlocked = tier <= activeTierIndex
-
-                        drawHexCell(
-                            path = hexPath,
-                            center = Offset(tx, ty),
-                            radius = tierR,
-                            fillColor = if (isUnlocked) primaryContainer else surfaceHigh,
-                            strokeColor = if (isUnlocked) primary else outlineVariant,
-                            strokeWidth = strokePx,
-                        )
-                        if (isSelected) {
-                            drawHexRing(
-                                path = hexPath,
-                                center = Offset(tx, ty),
-                                radius = tierR + 3.5.dp.toPx(),
-                                strokeColor = primary.copy(alpha = 0.6f),
-                                strokeWidth = accentStrokePx,
-                            )
-                        }
-                        // Draw 1, 2, or 3 level bars inside the hex
-                        val barCount = tier + 1
-                        val barSpacing = 4.5.dp.toPx()
-                        val barHalfW = 5.dp.toPx()
-                        val startY = ty + ((barCount - 1) * barSpacing) * 0.5f
-                        for (b in 0 until barCount) {
-                            val by = startY - b * barSpacing
-                            drawLine(
-                                color = if (isUnlocked) primary else outlineVariant,
-                                start = Offset(tx - barHalfW, by),
-                                end = Offset(tx + barHalfW, by),
-                                strokeWidth = strokePx,
-                                cap = StrokeCap.Round,
-                            )
-                        }
-                    }
-                }
-
-                WalkthroughStep.Done -> {
-                    val outerR = 13.dp.toPx()
-                    val ringDist = 25.dp.toPx()
-                    for (i in 0 until 5) {
-                        val angleRad = Math.toRadians((i * 72.0) - 90.0)
-                        val hx = motifCx + (ringDist * cos(angleRad)).toFloat()
-                        val hy = motifCy + (ringDist * sin(angleRad)).toFloat()
-                        drawHexCell(
-                            path = hexPath,
-                            center = Offset(hx, hy),
-                            radius = outerR,
-                            fillColor = primaryContainer,
-                            strokeColor = primary,
-                            strokeWidth = accentStrokePx,
-                        )
-                    }
-                    val centerR = 19.dp.toPx()
-                    drawHexCell(
-                        path = hexPath,
-                        center = Offset(motifCx, motifCy),
-                        radius = centerR,
-                        fillColor = primaryContainer,
-                        strokeColor = primary,
-                        strokeWidth = strokePx,
-                    )
-                    drawHexRing(
-                        path = hexPath,
-                        center = Offset(motifCx, motifCy),
-                        radius = centerR + 3.5.dp.toPx(),
-                        strokeColor = primary.copy(alpha = 0.6f),
-                        strokeWidth = accentStrokePx,
-                    )
-                    drawCheckGlyph(
-                        path = hexPath,
-                        center = Offset(motifCx, motifCy),
-                        size = centerR * 0.48f,
-                        color = primary,
-                        strokeWidth = strokePx * 1.2f,
-                    )
-                }
-            }
-        }
+        Text(
+            text = "${step.index + 1}",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.primary, CircleShape)
+                .size(32.dp)
+                .wrapContentSize(Alignment.Center),
+        )
+        Text(
+            text = step.title,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
-}
-
-private fun DrawScope.buildHexPath(
-    path: Path,
-    center: Offset,
-    radius: Float,
-) {
-    path.reset()
-    for (i in 0 until 6) {
-        val angleRad = Math.toRadians((60.0 * i) - 30.0)
-        val x = center.x + (radius * cos(angleRad)).toFloat()
-        val y = center.y + (radius * sin(angleRad)).toFloat()
-        if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
-    }
-    path.close()
-}
-
-private fun DrawScope.drawHexCell(
-    path: Path,
-    center: Offset,
-    radius: Float,
-    fillColor: Color,
-    strokeColor: Color,
-    strokeWidth: Float,
-) {
-    buildHexPath(path, center, radius)
-    drawPath(path = path, color = fillColor, style = Fill)
-    drawPath(
-        path = path,
-        color = strokeColor,
-        style = Stroke(width = strokeWidth, join = StrokeJoin.Round),
-    )
-}
-
-private fun DrawScope.drawHexRing(
-    path: Path,
-    center: Offset,
-    radius: Float,
-    strokeColor: Color,
-    strokeWidth: Float,
-) {
-    buildHexPath(path, center, radius)
-    drawPath(
-        path = path,
-        color = strokeColor,
-        style = Stroke(width = strokeWidth, join = StrokeJoin.Round),
-    )
 }
 
 private fun DrawScope.drawCheckGlyph(
@@ -827,77 +463,6 @@ private fun DrawScope.drawCheckGlyph(
         path = path,
         color = color,
         style = Stroke(width = strokeWidth, cap = StrokeCap.Round, join = StrokeJoin.Round),
-    )
-}
-
-private fun DrawScope.drawPhoneGlyph(
-    center: Offset,
-    halfH: Float,
-    color: Color,
-    strokeWidth: Float,
-) {
-    val halfW = halfH * 0.62f
-    drawRoundRect(
-        color = color,
-        topLeft = Offset(center.x - halfW, center.y - halfH),
-        size = Size(halfW * 2f, halfH * 2f),
-        cornerRadius = CornerRadius(strokeWidth * 1.5f, strokeWidth * 1.5f),
-        style = Stroke(width = strokeWidth),
-    )
-}
-
-private fun DrawScope.drawMonitorGlyph(
-    center: Offset,
-    halfW: Float,
-    color: Color,
-    strokeWidth: Float,
-) {
-    val halfH = halfW * 0.68f
-    val top = center.y - halfH
-    val bottom = center.y + halfH * 0.65f
-    drawRoundRect(
-        color = color,
-        topLeft = Offset(center.x - halfW, top),
-        size = Size(halfW * 2f, bottom - top),
-        cornerRadius = CornerRadius(strokeWidth * 1.2f, strokeWidth * 1.2f),
-        style = Stroke(width = strokeWidth),
-    )
-    val baseY = center.y + halfH
-    drawLine(
-        color = color,
-        start = Offset(center.x, bottom),
-        end = Offset(center.x, baseY),
-        strokeWidth = strokeWidth,
-        cap = StrokeCap.Round,
-    )
-    drawLine(
-        color = color,
-        start = Offset(center.x - halfW * 0.45f, baseY),
-        end = Offset(center.x + halfW * 0.45f, baseY),
-        strokeWidth = strokeWidth,
-        cap = StrokeCap.Round,
-    )
-}
-
-private fun DrawScope.drawShieldGlyph(
-    path: Path,
-    center: Offset,
-    size: Float,
-    color: Color,
-    strokeWidth: Float,
-) {
-    path.reset()
-    path.moveTo(center.x, center.y - size)
-    path.lineTo(center.x + size * 0.78f, center.y - size * 0.55f)
-    path.lineTo(center.x + size * 0.65f, center.y + size * 0.25f)
-    path.lineTo(center.x, center.y + size)
-    path.lineTo(center.x - size * 0.65f, center.y + size * 0.25f)
-    path.lineTo(center.x - size * 0.78f, center.y - size * 0.55f)
-    path.close()
-    drawPath(
-        path = path,
-        color = color,
-        style = Stroke(width = strokeWidth, join = StrokeJoin.Round),
     )
 }
 

@@ -53,8 +53,8 @@ import java.util.Locale
 
 internal fun normalizeArgbSeed(argb: Int): UInt = (argb.toUInt() or 0xFF00_0000u)
 
-/** The Honey seed (the app's own color), for phones without Material You (before Android 12). */
-private const val HONEY_SEED = 0xFFB7_791Fu
+/** The orange seed (the app's own color), for phones without Material You (before Android 12). */
+private const val ORANGE_SEED = 0xFFB2_3808u
 
 private fun parseSecureOverlaySeed(context: Context): UInt? = runCatching {
     val json = Settings.Secure.getString(context.contentResolver, "theme_customization_overlay_packages")
@@ -74,13 +74,13 @@ private fun parseSecureOverlaySeed(context: Context): UInt? = runCatching {
 /**
  * Reads the phone's Material You seed color (`0xFFRRGGBB` ARGB) from
  * `Settings.Secure`, fresh configuration resources (`system_accent1_500`) and
- * `WallpaperManager.getWallpaperColors` (Android 12+, `API 31+`); Honey before that.
+ * `WallpaperManager.getWallpaperColors` (Android 12+, `API 31+`); orange before that.
  */
 fun materialYouAccent(
     context: Context,
     wallpaperColors: WallpaperColors? = null,
 ): UInt? {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return HONEY_SEED
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return ORANGE_SEED
 
     // Kept as is so the stock check below can see it (a neighboring shade of a stock
     // palette is also stock, and would pass for a real choice).

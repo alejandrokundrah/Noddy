@@ -728,7 +728,7 @@
 
     <!-- Setup Walkthrough -->
     <string name="walkthrough_step_progress">Step %1$d of %2$d</string>
-    <string name="walkthrough_stage_desc">Honeycomb setup stage, step %1$d of %2$d</string>
+    <string name="walkthrough_stage_desc">Setup step %1$d of %2$d</string>
     <string name="walkthrough_action_skip">Skip setup</string>
     <string name="walkthrough_action_back">Back</string>
     <string name="walkthrough_action_get_started">Get started</string>
@@ -1350,6 +1350,19 @@
     <string name="device_name_in_profile">%1$s (%2$s)</string>
     <string name="profile_work">Work</string>
     <string name="profile_other">Second profile</string>
+    <string name="home_stat_connection">Connection</string>
+    <string name="home_stat_unknown">Unknown</string>
+    <string name="home_stat_on">On</string>
+    <string name="home_stat_off">Off</string>
+    <string name="home_stat_reconnect">Reconnect</string>
+    <string name="home_stat_microphone">Microphone</string>
+    <string name="home_stat_find">Find device</string>
+    <string name="home_stat_ringing">Ringing</string>
+    <string name="home_stat_send">Send file</string>
+    <string name="home_stat_choose">Choose</string>
+    <string name="home_stat_clipboard">Clipboard</string>
+    <string name="home_stat_timeline">History</string>
+    <string name="home_connected_count">%1$d of %2$d PCs connected</string>
 </resources>
 
 

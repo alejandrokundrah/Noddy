@@ -153,7 +153,7 @@ private fun ColorScheme.toGlassScheme(dark: Boolean): ColorScheme {
     }
 }
 
-/** Glass's fixed palette: the Honey preset, light and dark. */
+/** Glass's fixed palette: the orange preset, light and dark. */
 private fun glassScheme(dark: Boolean): ColorScheme {
     val error = if (dark) Tokens.errorDark else Tokens.errorLight
     val seed = Tokens.glassSeeds.getValue(Tokens.DEFAULT_SEED)
@@ -173,18 +173,12 @@ private val emberShapes = Shapes(
     extraLarge = RoundedCornerShape(32.dp),
 )
 
-/** Glass shapes from the tokens: smoothly rounded. */
-private val glassShapes = Shapes(
-    extraSmall = RoundedCornerShape(10.dp),
-    small = RoundedCornerShape(14.dp),
-    medium = RoundedCornerShape(20.dp),
-    large = RoundedCornerShape(24.dp),
-    extraLarge = RoundedCornerShape(30.dp),
-)
+/** Glass shapes: the same large radii as Ember. */
+private val glassShapes = emberShapes
 
 /** Frosted Switch colors. */
 @Composable
-fun nectarSwitchColors(): androidx.compose.material3.SwitchColors {
+fun noddySwitchColors(): androidx.compose.material3.SwitchColors {
     val scheme = MaterialTheme.colorScheme
     return androidx.compose.material3.SwitchDefaults.colors(
         checkedThumbColor = Color.White,
