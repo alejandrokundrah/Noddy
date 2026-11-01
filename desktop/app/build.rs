@@ -66,8 +66,6 @@ const QML: &[&str] = &[
     "qml/pages/TimelinePage.qml",
     "qml/pages/WalkthroughPage.qml",
     "qml/pages/WelcomePage.qml",
-    "qml/components/HiveBackdrop.qml",
-    "qml/setup/SadBee.qml",
     "qml/setup/SetupButton.qml",
     "qml/setup/SetupWindow.qml",
 ];
@@ -157,7 +155,7 @@ fn icon_file() -> Vec<u8> {
 }
 
 /// Fragment shaders, served under `qrc:/shaders/`.
-const SHADERS: &[&str] = &["glassrim.frag", "hive.frag"];
+const SHADERS: &[&str] = &["glassrim.frag"];
 
 /// Compiles the shaders with Qt's `qsb` when it can be found (next to qmake, or on PATH),
 /// otherwise uses the compiled copies committed beside the sources. Returns the qrc path.

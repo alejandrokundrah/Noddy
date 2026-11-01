@@ -156,10 +156,11 @@ has a Stop button. Choosing another
 
 ### Changed
 
-- **Glass is the only theme.** Hive, Bloom and Graphite are gone, along with
-  the Theme setting, the color swatches (wallpaper, artwork and phone colors),
-  Pure black (AMOLED) and the animated comb, on Windows, Linux and Android.
-  Noddy keeps Glass in the Honey colors; **Mode** (system, light or dark) and
+- **Glass is the main theme.** The other themes are gone, along with the
+  color swatches (wallpaper, artwork and phone colors) and Pure black (AMOLED),
+  on Windows, Linux and Android.
+  Glass now has the dashboard look: near-black or near-white cards with an
+  orange accent; **Mode** (system, light or dark) and
   the Mica backdrop stay. Saved theme and color choices are ignored.
 
 - **A new logo.** Noddy has a new logo: on the PC in the window, the taskbar,
@@ -479,9 +480,6 @@ Installed copies update themselves.
   covers the QR scanner and Continuity Camera).
 - Android: changing the theme in Settings no longer jumps back to Home
   ([#8](https://github.com/alejandrokundrah/Noddy/issues/8)).
-- Android: on Hive, the category chips at the top of Settings and the
-  Home/Settings bar are solid, so the honeycomb and the list no longer show
-  through them.
 - Windows: button tooltips, such as **Pause** on the media card, show next to
   their button again instead of in the window's top-left corner.
 - Pausing a transfer on the receiving device just as its last bytes arrived
@@ -501,8 +499,8 @@ GitHub and X.
 
 ## 0.1.3 (2026-10-15)
 
-Hive, a new theme for both apps, and updates to the Windows app that work on
-slow or unsteady connections and show how far they are.
+Updates to the Windows app that work on slow or unsteady connections and show
+how far they are.
 
 ### Downloads
 
@@ -515,24 +513,6 @@ Both are listed with their SHA-256 hashes in [SHA256SUMS.txt](https://github.com
 Installed copies update themselves. If **Update** in 0.1.2 or earlier closes
 Noddy and nothing happens, install this version from the link above
 once; updates after it work from the app.
-
-### New
-
-- **Hive**, a theme for the Windows and Android apps: honey on charcoal in
-  dark mode and on warm wax in light mode, with a living honeycomb behind the
-  whole app. The comb grows from the logo, breathes slowly, and sends a soft
-  pulse of light outward every few seconds, the same on the PC and the phone.
-  On the PC the phone on Home shows it too. Its colors are fixed, so the
-  wallpaper, artwork and phone color options are hidden while it's on.
-  - Choose it in **Settings › Appearance**, or from the **Try Hive** card on
-    Home. Dismissed, the card returns only after an update or a reinstall.
-  - **Animated comb** (on by default) turns the motion off. The comb also
-    holds still with reduced motion or battery saver on, and while the app
-    isn't in front.
-  - Light on resources: one GPU shader draws the comb, updated about 30
-    times a second and only while the window is in front. On Android 12 and
-    older, a still comb breathes.
-- The installer and uninstaller share Hive's comb.
 
 ### Fixed
 
@@ -640,7 +620,7 @@ Installed copies update themselves.
 - Release notes on GitHub keep their paragraphs instead of breaking at every
   line of the changelog.
 
-## 0.1.0 "Pollen" (2026-10-14)
+## 0.1.0 (2026-10-14)
 
 The first public release of Noddy: the Windows app, the Android app and
 the `noddy` command-line client. Noddy connects an Android phone and
@@ -809,7 +789,7 @@ info**, then **Run anyway**.
 - **Command Palette** (`Ctrl+Alt+Space`) for every action, from any app.
 - **Shelf** (`Ctrl+Alt+S`): a slide-out panel with the phone's latest photo,
   screenshot, clipboard item and recent files, plus Flick to send.
-- **Nectar Island**: an optional pill at the top of the screen for calls,
+- **Island**: an optional pill at the top of the screen for calls,
   transfers, media, timers and alerts.
 - The system tray and a taskbar Jump List.
 - Automations: trigger-action rules, and `noddy notify-when` for an

@@ -36,7 +36,7 @@ Notifications that report ongoing progress or live time stay pinned at the top o
 
 - **Android 16 Live Updates (`ProgressStyle`)**: Ride-share, food delivery, navigation, and flight tracker notifications display their multi-segment progress bar, current milestone point, and tracker icon live on your PC.
 - **Ongoing Progress Bars**: Downloads, uploads, and system tasks update their percentage bar in place.
-- **Chronometers and Countdowns**: Active kitchen timers, stopwatches, and ongoing workout timers tick every second in the feed (and in `Nectar Island` when enabled).
+- **Chronometers and Countdowns**: Active kitchen timers, stopwatches, and ongoing workout timers tick every second in the feed (and in `Island` when enabled).
 
 ### One-Time Verification Codes (OTPs)
 

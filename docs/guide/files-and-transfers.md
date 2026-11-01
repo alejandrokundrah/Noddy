@@ -55,7 +55,7 @@ Received files on your PC are saved to `Downloads\Noddy` (avoiding overwrites by
 When you send files, folders, clipboard items, links, `Handoff` documents, or `notify-when` alerts while your other device is offline, Noddy does not fail the action. Instead, it queues the item reliably:
 
 1. A confirmation toast lets you know the target device is offline and that your item will be sent automatically when it reconnects, with an **Undo** button.
-2. On Home (both PC and Android), a compact **`Waiting to send`** panel appears whenever items are queued, showing the total count and each item's icon, name, target device, size, and status (`Waiting`, `Sending` with live progress, `Failed` with reason, or `Expired`). The system tray tooltip and `Nectar Island` also quietly note how many items are waiting.
+2. On Home (both PC and Android), a compact **`Waiting to send`** panel appears whenever items are queued, showing the total count and each item's icon, name, target device, size, and status (`Waiting`, `Sending` with live progress, `Failed` with reason, or `Expired`). The system tray tooltip and `Island` also quietly note how many items are waiting.
 3. The queue is stored in SQLite (`send_queue` table) and **survives app restarts and system reboots** on both platforms, holding up to 200 items or 10 GiB of pending files.
 4. Queued files are referenced by path and checked before sending (`mtime` and byte size). If a queued file was modified or deleted on disk while waiting, Noddy stops that item with a clear reason rather than sending unexpected content, and lets you retry or remove it.
 5. **Automatic Expiry**: To prevent stale actions from running days later, queued items expire by type:

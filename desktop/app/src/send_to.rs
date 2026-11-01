@@ -545,7 +545,7 @@ mod tests {
     #[test]
     fn device_names_become_file_names() {
         assert_eq!(file_name("Pixel 9 Pro"), "Pixel 9 Pro");
-        assert_eq!(file_name("Bee's \"phone\": <1/2>?"), "Bee's phone 1 2");
+        assert_eq!(file_name("Sam's \"phone\": <1/2>?"), "Sam's phone 1 2");
         assert_eq!(file_name("  phone.. "), "phone");
         assert_eq!(file_name("\u{7}"), "Phone");
         assert_eq!(file_name("CON"), "CON phone");

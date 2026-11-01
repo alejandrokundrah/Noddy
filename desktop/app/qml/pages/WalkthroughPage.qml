@@ -39,18 +39,6 @@ FocusScope {
             Preferences.walkthroughStep = step
         if (bodyFlick)
             bodyFlick.contentY = 0
-        if (honeycombCanvas)
-            honeycombCanvas.requestPaint()
-    }
-
-    onHasPairedDeviceChanged: {
-        if (honeycombCanvas)
-            honeycombCanvas.requestPaint()
-    }
-
-    onPairJoinProgressChanged: {
-        if (honeycombCanvas)
-            honeycombCanvas.requestPaint()
     }
 
     Connections {
@@ -59,10 +47,6 @@ FocusScope {
             let clamped = Math.max(0, Math.min(walkthrough.totalSteps - 1, Preferences.walkthroughStep))
             if (walkthrough.step !== clamped)
                 walkthrough.step = clamped
-        }
-        function onStartWithWindowsChanged() {
-            if (honeycombCanvas)
-                honeycombCanvas.requestPaint()
         }
     }
 
@@ -146,8 +130,6 @@ FocusScope {
                 next[entry.name] = Boolean(entry.on)
         }
         deviceTogglesMap = next
-        if (honeycombCanvas)
-            honeycombCanvas.requestPaint()
     }
 
     function isDeviceToggleOn(name) {
@@ -160,8 +142,6 @@ FocusScope {
         deviceTogglesMap = next
         if (activeDeviceId !== "")
             AppController.setDeviceToggle(activeDeviceId, name, on)
-        if (honeycombCanvas)
-            honeycombCanvas.requestPaint()
     }
 
     readonly property var parsedDoctorChecks: {
@@ -240,20 +220,14 @@ FocusScope {
         function onHasDevicesChanged() { walkthrough.refreshDeviceToggles() }
         function onTogglesRevisionChanged() { walkthrough.refreshDeviceToggles() }
         function onToastsEnabledChanged() {
-            if (honeycombCanvas)
-                honeycombCanvas.requestPaint()
         }
         function onDoctorChecksChanged() {
-            if (honeycombCanvas)
-                honeycombCanvas.requestPaint()
         }
     }
 
     Connections {
         target: Theme
         function onDarkChanged() {
-            if (honeycombCanvas)
-                honeycombCanvas.requestPaint()
         }
     }
 
@@ -348,326 +322,21 @@ FocusScope {
                 y: Math.max(4, Math.floor((bodyFlick.height - implicitHeight) / 2))
                 spacing: 12
 
-                // Unified Honeycomb Cell Stage (fixed height across all 7 steps)
+                // Which step this is.
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 148
+                    Layout.preferredHeight: 64
                     implicitWidth: 640
-                    implicitHeight: 148
+                    implicitHeight: 64
                     radius: Theme.radiusLg
                     color: Theme.surfaceContainerLow
                     border.width: 1
                     border.color: Theme.outlineVariant
-
-                    Canvas {
-                        id: honeycombCanvas
-                        anchors.fill: parent
-                        implicitWidth: 640
-                        implicitHeight: 148
-
-                        function drawHex(ctx, cx, cy, r) {
-                            ctx.beginPath()
-                            for (let i = 0; i < 6; i++) {
-                                let angle = (Math.PI / 3) * i - Math.PI / 6
-                                let px = cx + r * Math.cos(angle)
-                                let py = cy + r * Math.sin(angle)
-                                if (i === 0)
-                                    ctx.moveTo(px, py)
-                                else
-                                    ctx.lineTo(px, py)
-                            }
-                            ctx.closePath()
-                        }
-
-                        function drawStyledHex(ctx, cx, cy, r, fillStyle, strokeStyle, lineWidth) {
-                            drawHex(ctx, cx, cy, r)
-                            if (fillStyle) {
-                                ctx.fillStyle = fillStyle
-                                ctx.fill()
-                            }
-                            if (strokeStyle) {
-                                ctx.strokeStyle = strokeStyle
-                                ctx.lineWidth = lineWidth || 1.5
-                                ctx.stroke()
-                            }
-                        }
-
-                        function drawPhoneGlyph(ctx, cx, cy, color) {
-                            ctx.strokeStyle = color
-                            ctx.lineWidth = 1.8
-                            ctx.beginPath()
-                            ctx.roundedRect(cx - 9, cy - 15, 18, 30, 3, 3)
-                            ctx.stroke()
-                            ctx.fillStyle = color
-                            ctx.beginPath()
-                            ctx.arc(cx, cy + 10, 1.4, 0, Math.PI * 2)
-                            ctx.fill()
-                        }
-
-                        function drawPcGlyph(ctx, cx, cy, color) {
-                            ctx.strokeStyle = color
-                            ctx.lineWidth = 1.8
-                            ctx.beginPath()
-                            ctx.roundedRect(cx - 16, cy - 13, 32, 21, 3, 3)
-                            ctx.stroke()
-                            ctx.beginPath()
-                            ctx.moveTo(cx - 7, cy + 13)
-                            ctx.lineTo(cx + 7, cy + 13)
-                            ctx.moveTo(cx, cy + 8)
-                            ctx.lineTo(cx, cy + 13)
-                            ctx.stroke()
-                        }
-
-                        function drawCheckGlyph(ctx, cx, cy, scale, color) {
-                            ctx.strokeStyle = color
-                            ctx.lineWidth = 2.2
-                            ctx.lineCap = "round"
-                            ctx.lineJoin = "round"
-                            ctx.beginPath()
-                            ctx.moveTo(cx - 6 * scale, cy + 0.5 * scale)
-                            ctx.lineTo(cx - 1.5 * scale, cy + 5 * scale)
-                            ctx.lineTo(cx + 6.5 * scale, cy - 4.5 * scale)
-                            ctx.stroke()
-                        }
-
-                        onPaint: {
-                            let ctx = getContext("2d")
-                            ctx.reset()
-                            let w = width
-                            let h = height
-                            let cy = h / 2
-                            let clusterX = w * 0.24
-                            let cx = w * 0.62
-
-                            let primaryHex = Theme.primary.toString()
-                            let primarySoft = Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.18).toString()
-                            let primaryGlow = Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.32).toString()
-                            let surfaceCell = Theme.surfaceContainerHigh.toString()
-                            let outlineCell = Theme.outlineVariant.toString()
-                            let mutedColor = Theme.surfaceContentVariant.toString()
-
-                            // Left: 7-cell honeycomb cluster (6 outer ring + 1 center cell) filling as steps complete
-                            let ringDist = 29
-                            let cellR = 14
-                            for (let s = 0; s < 7; s++) {
-                                let hx = clusterX
-                                let hy = cy
-                                if (s < 6) {
-                                    let ang = (Math.PI / 3) * s - Math.PI / 2
-                                    hx = clusterX + ringDist * Math.cos(ang)
-                                    hy = cy + ringDist * Math.sin(ang)
-                                }
-                                let isDone = s < walkthrough.step
-                                let isCurr = s === walkthrough.step
-                                drawStyledHex(
-                                    ctx,
-                                    hx,
-                                    hy,
-                                    isCurr ? cellR + 1.5 : cellR,
-                                    isCurr ? primaryHex : (isDone ? primarySoft : surfaceCell),
-                                    (isCurr || isDone) ? primaryHex : outlineCell,
-                                    isCurr ? 2.0 : 1.4
-                                )
-                                if (isDone) {
-                                    drawCheckGlyph(ctx, hx, hy, 0.55, primaryHex)
-                                } else if (isCurr) {
-                                    ctx.fillStyle = Theme.primaryContent.toString()
-                                    ctx.beginPath()
-                                    ctx.arc(hx, hy, 2.6, 0, Math.PI * 2)
-                                    ctx.fill()
-                                }
-                            }
-
-                            // Subtle divider line between 7-cell cluster and active step motif
-                            ctx.strokeStyle = Qt.rgba(Theme.outlineVariant.r, Theme.outlineVariant.g, Theme.outlineVariant.b, 0.45).toString()
-                            ctx.lineWidth = 1.0
-                            ctx.beginPath()
-                            ctx.moveTo(w * 0.40, cy - 38)
-                            ctx.lineTo(w * 0.40, cy + 38)
-                            ctx.stroke()
-
-                            if (walkthrough.step === 0) {
-                                // Step 0: Phone hex + glowing honeycomb bridge + PC hex
-                                ctx.strokeStyle = primaryGlow
-                                ctx.lineWidth = 2.0
-                                ctx.beginPath()
-                                ctx.moveTo(cx - 64, cy)
-                                ctx.lineTo(cx + 64, cy)
-                                ctx.stroke()
-
-                                drawStyledHex(ctx, cx - 88, cy, 32, primarySoft, primaryHex, 2.0)
-                                drawPhoneGlyph(ctx, cx - 88, cy, primaryHex)
-
-                                drawStyledHex(ctx, cx, cy, 18, surfaceCell, primaryHex, 1.8)
-                                drawStyledHex(ctx, cx, cy, 7, primaryHex, primaryHex, 1.0)
-
-                                drawStyledHex(ctx, cx + 88, cy, 32, primarySoft, primaryHex, 2.0)
-                                drawPcGlyph(ctx, cx + 88, cy, primaryHex)
-                            } else if (walkthrough.step === 1) {
-                                // Step 1: 3 interlocking security honeycomb cells (QUIC, DPAPI+Keystore, Local LAN)
-                                let triad = [
-                                    { x: cx - 54, y: cy + 6 },
-                                    { x: cx, y: cy - 10 },
-                                    { x: cx + 54, y: cy + 6 }
-                                ]
-                                ctx.strokeStyle = primaryGlow
-                                ctx.lineWidth = 2.0
-                                ctx.beginPath()
-                                ctx.moveTo(triad[0].x, triad[0].y)
-                                ctx.lineTo(triad[1].x, triad[1].y)
-                                ctx.lineTo(triad[2].x, triad[2].y)
-                                ctx.stroke()
-
-                                for (let i = 0; i < triad.length; i++) {
-                                    let isCenter = i === 1
-                                    drawStyledHex(
-                                        ctx,
-                                        triad[i].x,
-                                        triad[i].y,
-                                        isCenter ? 31 : 26,
-                                        isCenter ? primarySoft : surfaceCell,
-                                        primaryHex,
-                                        isCenter ? 2.2 : 1.6
-                                    )
-                                }
-                                // Lock glyph in center cell
-                                ctx.strokeStyle = primaryHex
-                                ctx.lineWidth = 1.8
-                                ctx.beginPath()
-                                ctx.arc(cx, cy - 14, 6, Math.PI, 0, false)
-                                ctx.stroke()
-                                ctx.beginPath()
-                                ctx.roundedRect(cx - 8, cy - 14, 16, 13, 2.5, 2.5)
-                                ctx.stroke()
-                                drawCheckGlyph(ctx, cx - 54, cy + 6, 0.85, primaryHex)
-                                drawCheckGlyph(ctx, cx + 54, cy + 6, 0.85, primaryHex)
-                            } else if (walkthrough.step === 2) {
-                                // Step 2: APK package cell to Phone hex cell
-                                ctx.strokeStyle = primaryGlow
-                                ctx.lineWidth = 2.0
-                                ctx.beginPath()
-                                ctx.moveTo(cx - 52, cy)
-                                ctx.lineTo(cx + 52, cy)
-                                ctx.stroke()
-
-                                drawStyledHex(ctx, cx - 68, cy, 28, surfaceCell, primaryHex, 1.8)
-                                ctx.strokeStyle = primaryHex
-                                ctx.lineWidth = 2.0
-                                ctx.lineCap = "round"
-                                ctx.beginPath()
-                                ctx.moveTo(cx - 68, cy - 9)
-                                ctx.lineTo(cx - 68, cy + 7)
-                                ctx.moveTo(cx - 74, cy + 1)
-                                ctx.lineTo(cx - 68, cy + 7)
-                                ctx.lineTo(cx - 62, cy + 1)
-                                ctx.stroke()
-
-                                drawStyledHex(ctx, cx + 68, cy, 32, primarySoft, primaryHex, 2.2)
-                                drawPhoneGlyph(ctx, cx + 68, cy, primaryHex)
-                            } else if (walkthrough.step === 3) {
-                                // Step 3: Pairing dual honeycomb cells joining together
-                                let offset = 76 - (walkthrough.pairJoinProgress * 42)
-                                ctx.strokeStyle = primaryGlow
-                                ctx.lineWidth = 2.2
-                                ctx.beginPath()
-                                ctx.moveTo(cx - offset, cy)
-                                ctx.lineTo(cx + offset, cy)
-                                ctx.stroke()
-
-                                drawStyledHex(ctx, cx - offset, cy, 32, primarySoft, primaryHex, 2.0)
-                                drawPhoneGlyph(ctx, cx - offset, cy, primaryHex)
-
-                                drawStyledHex(ctx, cx + offset, cy, 32, primarySoft, primaryHex, 2.0)
-                                drawPcGlyph(ctx, cx + offset, cy, primaryHex)
-
-                                if (walkthrough.hasPairedDevice) {
-                                    drawStyledHex(ctx, cx, cy, 15, primaryHex, primaryHex, 1.5)
-                                    drawCheckGlyph(ctx, cx, cy, 0.85, Theme.primaryContent.toString())
-                                }
-                            } else if (walkthrough.step === 4) {
-                                // Step 4: 7 default-on amber hex cells + 3 opt-in outlined hex cells
-                                let leftCluster = [
-                                    [-102, -16], [-72, -16], [-42, -16],
-                                    [-87, 13],   [-57, 13],  [-27, 13],
-                                    [-117, 13]
-                                ]
-                                for (let i = 0; i < leftCluster.length; i++) {
-                                    drawStyledHex(
-                                        ctx,
-                                        cx + leftCluster[i][0],
-                                        cy + leftCluster[i][1],
-                                        14,
-                                        primarySoft,
-                                        primaryHex,
-                                        1.6
-                                    )
-                                }
-                                let rightCluster = [
-                                    [46, -13], [80, -13], [63, 15]
-                                ]
-                                let optKeys = ["pc_mirror", "remote_input", "storage"]
-                                for (let j = 0; j < rightCluster.length; j++) {
-                                    let activeOpt = walkthrough.hasPairedDevice && walkthrough.isDeviceToggleOn(optKeys[j])
-                                    drawStyledHex(
-                                        ctx,
-                                        cx + rightCluster[j][0],
-                                        cy + rightCluster[j][1],
-                                        15,
-                                        activeOpt ? primarySoft : surfaceCell,
-                                        activeOpt ? primaryHex : outlineCell,
-                                        1.6
-                                    )
-                                    ctx.fillStyle = activeOpt ? primaryHex : mutedColor
-                                    ctx.beginPath()
-                                    ctx.arc(cx + rightCluster[j][0], cy + rightCluster[j][1], 2.5, 0, Math.PI * 2)
-                                    ctx.fill()
-                                }
-                            } else if (walkthrough.step === 5) {
-                                // Step 5: 3 linked check hex cells (Toasts, Startup, Firewall)
-                                let checks = [
-                                    { x: cx - 72, y: cy, ok: AppController.toastsEnabled },
-                                    { x: cx, y: cy, ok: Preferences.startWithWindows },
-                                    { x: cx + 72, y: cy, ok: walkthrough.doctorAllPassed }
-                                ]
-                                ctx.strokeStyle = outlineCell
-                                ctx.lineWidth = 1.8
-                                ctx.beginPath()
-                                ctx.moveTo(checks[0].x, checks[0].y)
-                                ctx.lineTo(checks[2].x, checks[2].y)
-                                ctx.stroke()
-
-                                for (let k = 0; k < checks.length; k++) {
-                                    let c = checks[k]
-                                    drawStyledHex(
-                                        ctx,
-                                        c.x,
-                                        c.y,
-                                        27,
-                                        c.ok ? primarySoft : surfaceCell,
-                                        c.ok ? primaryHex : outlineCell,
-                                        c.ok ? 2.0 : 1.5
-                                    )
-                                    drawCheckGlyph(ctx, c.x, c.y, 0.95, c.ok ? primaryHex : mutedColor)
-                                }
-                            } else {
-                                // Step 6: Phone + PC linked into completed honeycomb check cell
-                                ctx.strokeStyle = primaryHex
-                                ctx.lineWidth = 2.2
-                                ctx.beginPath()
-                                ctx.moveTo(cx - 76, cy)
-                                ctx.lineTo(cx + 76, cy)
-                                ctx.stroke()
-
-                                drawStyledHex(ctx, cx - 76, cy, 30, primarySoft, primaryHex, 2.0)
-                                drawPhoneGlyph(ctx, cx - 76, cy, primaryHex)
-
-                                drawStyledHex(ctx, cx, cy, 24, primaryHex, primaryHex, 2.0)
-                                drawCheckGlyph(ctx, cx, cy, 1.05, Theme.primaryContent.toString())
-
-                                drawStyledHex(ctx, cx + 76, cy, 30, primarySoft, primaryHex, 2.0)
-                                drawPcGlyph(ctx, cx + 76, cy, primaryHex)
-                            }
-                        }
+                    Txt {
+                        anchors.centerIn: parent
+                        role: "label"
+                        muted: true
+                        text: qsTr("Step %1 of %2").arg(walkthrough.step + 1).arg(walkthrough.totalSteps)
                     }
                 }
 

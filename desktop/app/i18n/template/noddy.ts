@@ -2655,7 +2655,7 @@ Assist mode (Android Accessibility Service)
     </message>
     <message>
         <location filename="../rust_strings.h" line="282"/>
-        <source>Nectar Island</source>
+        <source>Island</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2819,10 +2819,10 @@ What it needs
 Displays a compact pill at the top center of your primary monitor for incoming calls, live file transfer progress, media playback, and optional notification previews.
 
 Where to find it
-- Settings › General › Nectar Island.
+- Settings › General › Island.
 
 What it needs
-- Turn on Nectar Island in Settings › General and pick which events should appear.</source>
+- Turn on Island in Settings › General and pick which events should appear.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3042,7 +3042,7 @@ Shows incoming and active phone calls on your PC with Answer, Decline, and Rejec
 
 Where to find it
 - Left navigation rail › Calls.
-- Incoming call banner on Home and Nectar Island.
+- Incoming call banner on Home and Island.
 
 What it needs
 - Phone, Call Log, and Contacts permissions on your Android phone.
@@ -3237,23 +3237,8 @@ What it needs
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../qml/pages/HomePage.qml" line="371"/>
-        <source>Try Hive, the new theme</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../qml/pages/HomePage.qml" line="378"/>
-        <source>Honey on charcoal or warm wax, with a living honeycomb behind the app. Change it any time in Settings › Appearance.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../../qml/pages/HomePage.qml" line="390"/>
         <source>Not now</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../qml/pages/HomePage.qml" line="397"/>
-        <source>Try Hive</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4103,7 +4088,7 @@ What it needs
     <name>IslandWindow</name>
     <message>
         <location filename="../../qml/IslandWindow.qml" line="16"/>
-        <source>Nectar Island</source>
+        <source>Island</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4140,12 +4125,12 @@ What it needs
     </message>
     <message>
         <location filename="../../qml/IslandWindow.qml" line="238"/>
-        <source>Nectar Island · %1</source>
+        <source>Island · %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../qml/IslandWindow.qml" line="239"/>
-        <source>Nectar Island · Ready</source>
+        <source>Island · Ready</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6097,14 +6082,6 @@ What it needs
     </message>
 </context>
 <context>
-    <name>SadBee</name>
-    <message>
-        <location filename="../../qml/setup/SadBee.qml" line="23"/>
-        <source>A sad bee</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>SendTo</name>
     <message>
         <location filename="../rust_strings.h" line="429"/>
@@ -6489,11 +6466,6 @@ What it needs
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../qml/pages/SettingsPage.qml" line="532"/>
-        <source>Hive</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../../qml/pages/SettingsPage.qml" line="533"/>
         <source>Bloom</source>
         <translation type="unfinished"></translation>
@@ -6558,12 +6530,6 @@ What it needs
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../qml/pages/SettingsPage.qml" line="808"/>
-        <location filename="../../qml/pages/SettingsPage.qml" line="817"/>
-        <source>Animated comb</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../../qml/pages/SettingsPage.qml" line="811"/>
         <source>Still while animations are off in system settings.</source>
         <translation type="unfinished"></translation>
@@ -6576,11 +6542,6 @@ What it needs
     <message>
         <location filename="../../qml/pages/SettingsPage.qml" line="814"/>
         <source>Still while energy saver is on.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../qml/pages/SettingsPage.qml" line="815"/>
-        <source>The honeycomb breathes and pulses.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6651,7 +6612,7 @@ What it needs
     <message>
         <location filename="../../qml/pages/SettingsPage.qml" line="1019"/>
         <location filename="../../qml/pages/SettingsPage.qml" line="1022"/>
-        <source>Nectar Island</source>
+        <source>Island</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

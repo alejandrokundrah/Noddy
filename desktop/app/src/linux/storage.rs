@@ -2055,10 +2055,10 @@ mod tests {
     #[test]
     fn finds_a_mount_left_by_an_earlier_run() {
         let mounts = "sysfs /sys sysfs rw 0 0\n\
-                      noddy /home/bee/Noddy/Pixel\\0409 fuse.noddy rw,nosuid,nodev 0 0\n\
+                      noddy /home/sam/Noddy/Pixel\\0409 fuse.noddy rw,nosuid,nodev 0 0\n\
                       portal /run/user/1000/doc fuse.portal rw 0 0\n";
-        assert!(is_listed_mount(mounts, Path::new("/home/bee/Noddy/Pixel 9")));
-        assert!(!is_listed_mount(mounts, Path::new("/home/bee/Noddy/Galaxy")));
+        assert!(is_listed_mount(mounts, Path::new("/home/sam/Noddy/Pixel 9")));
+        assert!(!is_listed_mount(mounts, Path::new("/home/sam/Noddy/Galaxy")));
         assert!(!is_listed_mount(mounts, Path::new("/run/user/1000/doc")), "only Noddy's own mounts");
     }
 

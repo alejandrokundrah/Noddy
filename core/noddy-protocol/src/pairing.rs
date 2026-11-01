@@ -159,7 +159,7 @@ mod tests {
         let uri = PairingUri {
             id: id(3),
             secret: [9; SECRET_LEN],
-            name: "Bee's Desktop".into(),
+            name: "Sam's Desktop".into(),
             addrs: vec!["192.168.1.20:41641".parse().unwrap(), "[fe80::1]:41641".parse().unwrap()],
         };
         let text = uri.to_uri();

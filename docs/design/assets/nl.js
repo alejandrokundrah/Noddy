@@ -37,8 +37,8 @@ const ICON = {
 const i = n => `<svg viewBox="0 0 24 24">${ICON[n]}</svg>`;
 
 const SEEDS = {
-  honey:{light:{primary:'#8A5100','on-primary':'#FFFFFF','primary-container':'#FFDDB8','on-primary-container':'#2C1600','secondary-container':'#F3E0CB','on-secondary-container':'#261A0C',surface:'#FFF8F3','surface-low':'#FBF2EB','surface-container':'#F5ECE4','surface-container-high':'#EFE6DE','surface-container-highest':'#E9E1D9','on-surface':'#1F1B16','on-surface-variant':'#51453A',outline:'#837468','outline-variant':'#D5C3B5'},
-         dark:{primary:'#FFB95F','on-primary':'#4A2800','primary-container':'#693C00','on-primary-container':'#FFDDB8','secondary-container':'#574330','on-secondary-container':'#F3E0CB',surface:'#17130E','surface-low':'#120E0A','surface-container':'#241F1A','surface-container-high':'#2E2924','surface-container-highest':'#39342E','on-surface':'#EBE1D9','on-surface-variant':'#D5C3B5',outline:'#9E8E81','outline-variant':'#51453A'}},
+  orange:{light:{primary:'#B23808','on-primary':'#FFFFFF','primary-container':'#FFDBCE','on-primary-container':'#3A0F00','secondary-container':'#E9E9EC','on-secondary-container':'#1B1B1E',surface:'#FAFAFA','surface-low':'#F4F4F5','surface-container':'#EEEEF0','surface-container-high':'#E8E8EA','surface-container-highest':'#E2E2E5','on-surface':'#18181B','on-surface-variant':'#52525B',outline:'#8A8A92','outline-variant':'#D4D4D8'},
+         dark:{primary:'#EB6030','on-primary':'#2A0D00','primary-container':'#5A2412','on-primary-container':'#FFDBCE','secondary-container':'#2C2C30','on-secondary-container':'#EDEDEF',surface:'#0A0A0B','surface-low':'#0E0E0F','surface-container':'#141415','surface-container-high':'#1B1B1D','surface-container-highest':'#242427','on-surface':'#F4F4F5','on-surface-variant':'#A1A1A6',outline:'#6E6E74','outline-variant':'#2A2A2D'}},
   sage:{light:{primary:'#3B6939','on-primary':'#FFFFFF','primary-container':'#BCF0B4','on-primary-container':'#002204','secondary-container':'#D6E8CF','on-secondary-container':'#111F0F',surface:'#F7FBF1','surface-low':'#F1F5EB','surface-container':'#EBEFE5','surface-container-high':'#E6E9E0','surface-container-highest':'#E0E4DA','on-surface':'#191D17','on-surface-variant':'#424940',outline:'#72796F','outline-variant':'#C2C8BD'},
         dark:{primary:'#A1D39A','on-primary':'#0A390F','primary-container':'#234F24','on-primary-container':'#BCF0B4','secondary-container':'#3B4B38','on-secondary-container':'#D6E8CF',surface:'#10140F','surface-low':'#0C100B','surface-container':'#1D211B','surface-container-high':'#272B25','surface-container-highest':'#32362F','on-surface':'#E0E4DA','on-surface-variant':'#C2C8BD',outline:'#8C9388','outline-variant':'#424940'}},
   lavender:{light:{primary:'#65558F','on-primary':'#FFFFFF','primary-container':'#E9DDFF','on-primary-container':'#201047','secondary-container':'#E8DEF8','on-secondary-container':'#1D192B',surface:'#FDF7FF','surface-low':'#F7F2FA','surface-container':'#F2ECF4','surface-container-high':'#ECE6EE','surface-container-highest':'#E6E0E9','on-surface':'#1D1B20','on-surface-variant':'#49454E',outline:'#7A757F','outline-variant':'#CAC4CF'},
@@ -59,7 +59,7 @@ function qrSVG(size = 25, seed = 7) {
 
 function setupThemeBar() {
   const body = document.body, themes = document.getElementById('themes'), seeds = document.getElementById('seeds');
-  let theme = 'bloom-light', seed = 'honey';
+  let theme = 'bloom-light', seed = 'orange';
   const apply = () => {
     body.dataset.theme = theme; body.style.cssText = '';
     const bloom = theme.startsWith('bloom');

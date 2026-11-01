@@ -19,11 +19,6 @@ rust-version = "1.97"
 authors = ["The Noddy contributors"]
 repository = "https://github.com/alejandrokundrah/Noddy"
 
-# Each release's name, from a bee's life (0.1 Pollen, …); the release
-# workflow puts it in the release's title.
-[workspace.metadata.release]
-name = "Pollen"
-
 [workspace.dependencies]
 noddy-adb = { path = "core/noddy-adb", version = "0.1.4" }
 noddy-protocol = { path = "core/noddy-protocol", version = "0.1.4" }

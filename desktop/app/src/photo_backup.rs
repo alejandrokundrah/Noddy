@@ -795,7 +795,7 @@ mod tests {
     #[test]
     fn phone_names_become_safe_folder_names() {
         assert_eq!(folder_name("Pixel 9a"), "Pixel 9a");
-        assert_eq!(folder_name("Bee's: phone?"), "Bee's_ phone_");
+        assert_eq!(folder_name("Sam's: phone?"), "Sam's_ phone_");
         assert_eq!(folder_name("  ..  "), "Phone");
         assert_eq!(folder_name("Galaxy. "), "Galaxy");
     }

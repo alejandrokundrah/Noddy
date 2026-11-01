@@ -21,7 +21,6 @@ QtObject {
     // Left over from the themes Glass replaced; consumers still read them.
     // Only amoled moves: Ember has opaque black windows and hairline borders,
     // which is what those branches draw. Fold the rest away as files are touched.
-    readonly property bool hive: false
     readonly property bool graphite: false
     readonly property bool amoled: ember
     readonly property bool isPhoneSeed: false
@@ -30,7 +29,7 @@ QtObject {
     readonly property bool ambientBlurActive: glass
     function phonePalette(deviceId) { return null }
 
-    // Glass: the default (Honey) preset. Ember: its own dark palette, which
+    // Glass: the orange preset, light or dark. Ember: its own dark palette, which
     // carries its status colors too.
     readonly property var palette: ember
         ? Tokens.data.themes.ember.variants.dark

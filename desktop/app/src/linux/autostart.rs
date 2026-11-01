@@ -188,7 +188,7 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let appimage = dir.path().join("Noddy-0.1.5-x86_64.AppImage");
         fs::write(&appimage, b"").unwrap();
-        let mounted = Path::new("/tmp/.mount_NectarAbc123/usr/bin/noddy-desktop");
+        let mounted = Path::new("/tmp/.mount_NoddyAbc123/usr/bin/noddy-desktop");
         assert_eq!(launcher_from(mounted, Some(appimage.clone())), appimage);
         // Not from an AppImage, or one that isn't there: the program itself.
         let exe = Path::new("/usr/lib/noddy/noddy-desktop");

@@ -36,7 +36,7 @@ class ThemeAndLocalizationTest {
             assertEquals(theme, Preferences.sanitizeAppearance(mode = "dark", theme = theme).theme)
         }
         // Themes that no longer exist, unknown values and nothing saved yet are Glass.
-        for (old in listOf("hive", "bloom", "graphite", "sepia", "", "EMBER")) {
+        for (old in listOf("legacy", "bloom", "sepia", "", "EMBER")) {
             assertEquals("glass", Preferences.sanitizeAppearance(mode = "dark", theme = old).theme)
         }
         assertEquals("glass", Preferences.sanitizeAppearance(mode = "dark", theme = null).theme)

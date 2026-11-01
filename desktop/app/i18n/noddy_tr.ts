@@ -2695,8 +2695,8 @@ Yardımcı mod (Android Erişilebilirlik Hizmeti)
     </message>
     <message>
         <location filename="rust_strings.h" line="282"/>
-        <source>Nectar Island</source>
-        <translation>Nectar Island</translation>
+        <source>Island</source>
+        <translation>Island</translation>
     </message>
     <message>
         <location filename="rust_strings.h" line="283"/>
@@ -2899,18 +2899,18 @@ Neler gerekir
 Displays a compact pill at the top center of your primary monitor for incoming calls, live file transfer progress, media playback, and optional notification previews.
 
 Where to find it
-- Settings › General › Nectar Island.
+- Settings › General › Island.
 
 What it needs
-- Turn on Nectar Island in Settings › General and pick which events should appear.</source>
+- Turn on Island in Settings › General and pick which events should appear.</source>
         <translation>Ne yapar
 Gelen aramalar, canlı dosya aktarım ilerlemesi, medya oynatma ve isteğe bağlı bildirim önizlemeleri için birincil monitörünüzün üst ortasında küçük bir hap gösterir.
 
 Nerede bulunur
-- Ayarlar › Genel › Nectar Island.
+- Ayarlar › Genel › Island.
 
 Neler gerekir
-- Ayarlar › Genel bölümünde Nectar Island&apos;ı açın ve hangi olayların görüneceğini seçin.</translation>
+- Ayarlar › Genel bölümünde Island&apos;ı açın ve hangi olayların görüneceğini seçin.</translation>
     </message>
     <message>
         <location filename="rust_strings.h" line="307"/>
@@ -3259,7 +3259,7 @@ Shows incoming and active phone calls on your PC with Answer, Decline, and Rejec
 
 Where to find it
 - Left navigation rail › Calls.
-- Incoming call banner on Home and Nectar Island.
+- Incoming call banner on Home and Island.
 
 What it needs
 - Phone, Call Log, and Contacts permissions on your Android phone.
@@ -3269,7 +3269,7 @@ Gelen ve devam eden telefon aramalarını Yanıtla, Reddet ve SMS ile reddet eyl
 
 Nerede bulunur
 - Sol gezinme çubuğu › Aramalar.
-- Ana Sayfa&apos;daki ve Nectar Island&apos;daki gelen arama bildirimi.
+- Ana Sayfa&apos;daki ve Island&apos;daki gelen arama bildirimi.
 
 Neler gerekir
 - Android telefonunuzda Telefon, Arama Kaydı ve Kişiler izinleri.
@@ -3513,24 +3513,9 @@ Neler gerekir
         <translation>Özellik rehberini aç</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HomePage.qml" line="371"/>
-        <source>Try Hive, the new theme</source>
-        <translation>Yeni tema Hive&apos;ı deneyin</translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HomePage.qml" line="378"/>
-        <source>Honey on charcoal or warm wax, with a living honeycomb behind the app. Change it any time in Settings › Appearance.</source>
-        <translation>Kömür üzerinde bal ya da sıcak balmumu, uygulamanın arkasında canlı bir petek. İstediğiniz zaman Ayarlar › Görünüm&apos;den değiştirebilirsiniz.</translation>
-    </message>
-    <message>
         <location filename="../qml/pages/HomePage.qml" line="390"/>
         <source>Not now</source>
         <translation>Şimdi değil</translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HomePage.qml" line="397"/>
-        <source>Try Hive</source>
-        <translation>Hive&apos;ı dene</translation>
     </message>
     <message>
         <location filename="../qml/pages/HomePage.qml" line="425"/>
@@ -4379,8 +4364,8 @@ Neler gerekir
     <name>IslandWindow</name>
     <message>
         <location filename="../qml/IslandWindow.qml" line="16"/>
-        <source>Nectar Island</source>
-        <translation>Nectar Island</translation>
+        <source>Island</source>
+        <translation>Island</translation>
     </message>
     <message>
         <location filename="../qml/IslandWindow.qml" line="223"/>
@@ -4416,13 +4401,13 @@ Neler gerekir
     </message>
     <message>
         <location filename="../qml/IslandWindow.qml" line="238"/>
-        <source>Nectar Island · %1</source>
-        <translation>Nectar Island · %1</translation>
+        <source>Island · %1</source>
+        <translation>Island · %1</translation>
     </message>
     <message>
         <location filename="../qml/IslandWindow.qml" line="239"/>
-        <source>Nectar Island · Ready</source>
-        <translation>Nectar Island · Hazır</translation>
+        <source>Island · Ready</source>
+        <translation>Island · Hazır</translation>
     </message>
     <message>
         <location filename="../qml/IslandWindow.qml" line="244"/>
@@ -6373,14 +6358,6 @@ Neler gerekir
     </message>
 </context>
 <context>
-    <name>SadBee</name>
-    <message>
-        <location filename="../qml/setup/SadBee.qml" line="23"/>
-        <source>A sad bee</source>
-        <translation>Üzgün bir arı</translation>
-    </message>
-</context>
-<context>
     <name>SendTo</name>
     <message>
         <location filename="rust_strings.h" line="429"/>
@@ -6765,11 +6742,6 @@ Neler gerekir
         <translation>Tema</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="532"/>
-        <source>Hive</source>
-        <translation>Hive</translation>
-    </message>
-    <message>
         <location filename="../qml/pages/SettingsPage.qml" line="533"/>
         <source>Bloom</source>
         <translation>Bloom</translation>
@@ -6834,12 +6806,6 @@ Neler gerekir
         <translation>Medya kapağı</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="808"/>
-        <location filename="../qml/pages/SettingsPage.qml" line="817"/>
-        <source>Animated comb</source>
-        <translation>Hareketli petek</translation>
-    </message>
-    <message>
         <location filename="../qml/pages/SettingsPage.qml" line="811"/>
         <source>Still while animations are off in system settings.</source>
         <translation>Sistem ayarlarında animasyonlar kapalıyken durağan.</translation>
@@ -6853,11 +6819,6 @@ Neler gerekir
         <location filename="../qml/pages/SettingsPage.qml" line="814"/>
         <source>Still while energy saver is on.</source>
         <translation>Enerji tasarrufu açıkken durağan.</translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="815"/>
-        <source>The honeycomb breathes and pulses.</source>
-        <translation>Petek nefes alır ve atar.</translation>
     </message>
     <message>
         <location filename="../qml/pages/SettingsPage.qml" line="848"/>
@@ -6927,8 +6888,8 @@ Neler gerekir
     <message>
         <location filename="../qml/pages/SettingsPage.qml" line="1019"/>
         <location filename="../qml/pages/SettingsPage.qml" line="1022"/>
-        <source>Nectar Island</source>
-        <translation>Nectar Island</translation>
+        <source>Island</source>
+        <translation>Island</translation>
     </message>
     <message>
         <location filename="../qml/pages/SettingsPage.qml" line="1020"/>
