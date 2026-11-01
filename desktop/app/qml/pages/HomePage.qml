@@ -522,6 +522,7 @@ Item {
         required property real pairedAt
         required property string accent
         required property string screen
+        required property string wallpaper
         required property bool reconnect
 
         // Dropped files go to the device on screen (and Messages shows it).
@@ -826,6 +827,56 @@ Item {
                             }
 
                         }
+
+                        // The phone's own wallpaper, sent once when it connects, fills the display.
+                        RoundedImage {
+                            id: wallpaperImage
+                            x: phoneArt.bezel
+                            y: phoneArt.bezel
+                            width: phoneArt.innerW
+                            height: phoneArt.innerH
+                            radius: Math.max(2, Math.max(phoneArt.rTl, phoneArt.rTr, phoneArt.rBr, phoneArt.rBl) - phoneArt.bezel)
+                            visible: home.wallpaper.length > 0
+                            source: home.wallpaper
+                            fillMode: Image.PreserveAspectCrop
+                            // Keep the status bar and the battery ring readable on bright wallpapers.
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: wallpaperImage.radius
+                                color: Qt.rgba(0, 0, 0, 0.22)
+                            }
+                        }
+
+                        // "Preview" opens the phone's live screen; the phone asks for consent first.
+                        Rectangle {
+                            id: previewChip
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: phoneArt.bezel + 6
+                            width: previewLabel.implicitWidth + 16
+                            height: 20
+                            radius: 10
+                            color: Qt.rgba(0, 0, 0, 0.55)
+                            border.width: 1
+                            border.color: Qt.rgba(1, 1, 1, 0.22)
+                            visible: home.online && home.feature("mirroring.view").state === "available"
+                                     && previewHover.hovered
+                            Txt {
+                                id: previewLabel
+                                anchors.centerIn: parent
+                                size: 9
+                                weight: Font.DemiBold
+                                color: "#FFFFFF"
+                                text: qsTr("Preview")
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Mirror.start(home.deviceId)
+                            }
+                        }
+                        HoverHandler { id: previewHover }
+
 
                         // 3. Measured front camera cutout (SVG path or bounding rects; empty when plain/unknown).
                         Shape {

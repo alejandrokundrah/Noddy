@@ -1115,6 +1115,7 @@ mod tests {
                 model: None,
                 accent: None,
                 screen: None,
+                wallpaper: None,
                 install_id: None,
             },
             paired_at: at,

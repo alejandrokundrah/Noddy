@@ -3366,6 +3366,7 @@ mod tests {
                 model: None,
                 accent: Some(accent),
                 screen: None,
+                wallpaper: None,
                 install_id: None,
             },
             paired_at: i64::from(n),

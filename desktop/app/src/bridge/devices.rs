@@ -104,13 +104,20 @@ pub mod qobject {
 struct Row {
     device: DeviceView,
     screen_json: String,
+    wallpaper_url: String,
 }
 
 impl Row {
     fn from_device(device: DeviceView) -> Self {
         let screen_json =
             device.info.screen.as_ref().and_then(|s| serde_json::to_string(s).ok()).unwrap_or_default();
-        Self { device, screen_json }
+        let wallpaper_url = device
+            .info
+            .wallpaper
+            .as_deref()
+            .map(|jpeg| format!("data:image/jpeg;base64,{}", data_encoding::BASE64.encode(jpeg)))
+            .unwrap_or_default();
+        Self { device, screen_json, wallpaper_url }
     }
 }
 
@@ -153,6 +160,7 @@ const ROLES: &[&str] = &[
     "pairedAt",
     "accent",
     "screen",
+    "wallpaper",
     "reconnect",
 ];
 const USER_ROLE: i32 = 0x0100;
@@ -220,6 +228,7 @@ fn role_value(device: &Row, role: &str) -> QVariant {
             text(&device.info.accent.map(|argb| format!("#{:06X}", argb & 0x00FF_FFFF)).unwrap_or_default())
         }
         "screen" => text(&device.screen_json),
+        "wallpaper" => text(&device.wallpaper_url),
         _ => QVariant::default(),
     }
 }
@@ -330,6 +339,7 @@ mod tests {
                 model: None,
                 accent: None,
                 screen: None,
+                wallpaper: None,
                 install_id: None,
             },
             paired_at: i64::from(n),

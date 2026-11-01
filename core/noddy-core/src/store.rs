@@ -574,6 +574,8 @@ const MIGRATIONS: &[&str] = &[
         ON send_queue(status, next_retry_ms ASC, expires_at ASC);",
     // v8: a device's install-stable ID, the only key used to merge re-paired entries
     "ALTER TABLE peers ADD COLUMN install_id TEXT;",
+    // v9: a small JPEG of a phone's wallpaper (`DeviceInfo.wallpaper`).
+    "ALTER TABLE peers ADD COLUMN wallpaper BLOB;",
 ];
 
 /// A paired device as stored on disk.
@@ -641,15 +643,16 @@ impl Store {
         let screen = encode_screen(info.screen.as_ref());
         self.with(|c| {
             c.execute(
-                "INSERT INTO peers (id, name, kind, os, os_ver, model, accent, paired_at, screen, install_id)
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)
+                "INSERT INTO peers (id, name, kind, os, os_ver, model, accent, paired_at, screen, install_id, wallpaper)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)
                  ON CONFLICT(id) DO UPDATE SET
                     name = excluded.name, kind = excluded.kind, os = excluded.os,
                     os_ver = excluded.os_ver, model = excluded.model,
                     accent = COALESCE(excluded.accent, peers.accent),
                     paired_at = excluded.paired_at,
                     screen = CASE WHEN excluded.screen = '' THEN peers.screen ELSE excluded.screen END,
-                    install_id = COALESCE(excluded.install_id, peers.install_id)",
+                    install_id = COALESCE(excluded.install_id, peers.install_id),
+                    wallpaper = COALESCE(excluded.wallpaper, peers.wallpaper)",
                 params![
                     id.as_bytes().as_slice(),
                     info.name,
@@ -660,7 +663,8 @@ impl Store {
                     info.accent.map(i64::from),
                     paired_at,
                     screen,
-                    valid_install_id(info)
+                    valid_install_id(info),
+                    valid_wallpaper(info)
                 ],
             )?;
             cleanup_peers(c, Some(id))?;
@@ -694,7 +698,8 @@ impl Store {
             tx.execute(
                 "UPDATE peers SET name = ?2, kind = ?3, os = ?4, os_ver = ?5, model = ?6,
                     accent = COALESCE(?7, accent),
-                    screen = CASE WHEN ?8 = '' THEN screen ELSE ?8 END
+                    screen = CASE WHEN ?8 = '' THEN screen ELSE ?8 END,
+                    wallpaper = COALESCE(?9, wallpaper)
                  WHERE id = ?1",
                 params![
                     id.as_bytes().as_slice(),
@@ -705,6 +710,7 @@ impl Store {
                     info.model,
                     info.accent.map(i64::from),
                     screen,
+                    valid_wallpaper(info),
                 ],
             )?;
             tx.execute(
@@ -2178,7 +2184,12 @@ fn decode_queue_row(c: &Connection, raw: RawQueueRow, include_blob: bool) -> Opt
 }
 
 const SELECT: &str = "SELECT id, name, kind, os, os_ver, model, accent, paired_at, last_seen, last_addrs, \
-     caps, power, wake_info, screen, install_id FROM peers";
+     caps, power, wake_info, screen, install_id, wallpaper FROM peers";
+
+/// The device's wallpaper thumbnail when it is a plausible JPEG (others are never stored).
+fn valid_wallpaper(info: &DeviceInfo) -> Option<&[u8]> {
+    info.wallpaper.as_deref().filter(|w| noddy_protocol::messages::is_valid_wallpaper(w))
+}
 
 /// The device's install ID when it's well formed (others are never stored).
 fn valid_install_id(info: &DeviceInfo) -> Option<&str> {
@@ -2405,6 +2416,9 @@ fn row_to_peer(row: &rusqlite::Row<'_>) -> rusqlite::Result<PeerRecord> {
             model: row.get(5)?,
             accent: accent.and_then(|a| u32::try_from(a).ok()),
             screen: decode_screen(&screen),
+            wallpaper: row
+                .get::<_, Option<Vec<u8>>>(15)?
+                .filter(|w| noddy_protocol::messages::is_valid_wallpaper(w)),
             install_id: row.get(14)?,
         },
         paired_at: row.get(7)?,
@@ -2576,6 +2590,7 @@ mod tests {
                 cutouts: vec![ScreenRect { x: 0.46, y: 0.018, w: 0.08, h: 0.036 }],
                 cutout_path: Some("M 0.5 0.018 L 0.54 0.036 L 0.5 0.054 L 0.46 0.036 Z".into()),
             }),
+            wallpaper: None,
             install_id: None,
         }
     }

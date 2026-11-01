@@ -78,6 +78,9 @@ pub struct DeviceInfo {
     pub accent: Option<u32>,
     #[uniffi(default = None)]
     pub screen: Option<ScreenShape>,
+    /// Small JPEG of the wallpaper for the PC's phone preview.
+    #[uniffi(default = None)]
+    pub wallpaper: Option<Vec<u8>>,
     /// Identifies the device across reinstalls; see [`install_id_from`].
     #[uniffi(default = None)]
     pub install_id: Option<String>,
@@ -1961,6 +1964,7 @@ impl From<core::DeviceInfo> for DeviceInfo {
             model: i.model,
             accent: i.accent,
             screen: i.screen.map(Into::into),
+            wallpaper: i.wallpaper,
             install_id: i.install_id,
         }
     }
@@ -1976,6 +1980,7 @@ impl From<DeviceInfo> for core::DeviceInfo {
             model: i.model,
             accent: i.accent,
             screen: i.screen.map(Into::into),
+            wallpaper: i.wallpaper,
             install_id: i.install_id,
         }
         .sanitized()
@@ -4622,6 +4627,7 @@ mod tests {
                 cutouts: vec![ScreenRect { x: 0.46, y: 0.018, w: 0.08, h: 0.036 }],
                 cutout_path: None,
             }),
+            wallpaper: None,
             install_id: None,
         };
         assert_eq!(DeviceInfo::from(core::DeviceInfo::from(info.clone())), info);

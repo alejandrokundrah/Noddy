@@ -2577,7 +2577,8 @@ async fn start_node(cli: &Cli) -> Result<Node> {
         None if cli.as_phone && is_demo => Some(0xFF3F_8F7B),
         None => None,
     };
-    let device = DeviceInfo { name, kind, os, os_ver, model: None, accent, screen, install_id: None };
+    let device =
+        DeviceInfo { name, kind, os, os_ver, model: None, accent, screen, wallpaper: None, install_id: None };
     let power = node_power(cli);
     let mut config = NodeConfig::new(data_dir.clone(), device, env!("CARGO_PKG_VERSION"));
     config.downloads_dir = cli.downloads_dir.clone();

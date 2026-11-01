@@ -619,6 +619,7 @@ fn info(name: &str, kind: DeviceKind) -> DeviceInfo {
         model: None,
         accent: None,
         screen: None,
+        wallpaper: None,
         install_id: None,
     }
 }
