@@ -220,6 +220,28 @@ object Tokens {
         ),
     )
 
+    val emberDark = Palette(
+        primary = Color(0xFFFF6B3D),
+        onPrimary = Color(0xFF2E0F00),
+        primaryContainer = Color(0xFF5A2412),
+        onPrimaryContainer = Color(0xFFFFDBCE),
+        secondaryContainer = Color(0xFF2C2C30),
+        onSecondaryContainer = Color(0xFFEDEDEF),
+        surface = Color(0xFF0A0A0B),
+        surfaceContainerLow = Color(0xFF0E0E0F),
+        surfaceContainer = Color(0xFF141415),
+        surfaceContainerHigh = Color(0xFF1B1B1D),
+        surfaceContainerHighest = Color(0xFF242427),
+        onSurface = Color(0xFFF4F4F5),
+        onSurfaceVariant = Color(0xFFA1A1A6),
+        outline = Color(0xFF6E6E74),
+        outlineVariant = Color(0xFF2A2A2D),
+    )
+
+    val emberWarning = Color(0xFFF2C14E)
+    val emberError = Color(0xFFFF8A7A)
+    val emberOnError = Color(0xFF4A0A02)
+
     val warningLight = Color(0xFF7D5200)
     val warningDark = Color(0xFFF2C14E)
     val errorLight = Color(0xFFBA1A1A)

@@ -116,6 +116,14 @@ fn validate(tokens: &Value) -> Result<()> {
             check_contrast(def.get(mode), status.get(mode), &name)?;
         }
     }
+    // The Ember theme is dark only and carries its own status colors.
+    let ember =
+        themes.pointer("/ember/variants").and_then(Value::as_object).context("missing ember variants")?;
+    for (variant, palette) in ember {
+        let name = format!("ember.{variant}");
+        check_palette(Some(palette), &name)?;
+        check_contrast(Some(palette), Some(palette), &name)?;
+    }
     Ok(())
 }
 
@@ -308,6 +316,14 @@ fn render_kotlin(tokens: &Value) -> Result<String> {
         out.push("        ),".into());
     }
     out.push("    )".into());
+    out.push(String::new());
+    let ember = tokens.pointer("/themes/ember/variants/dark").context("missing ember dark variant")?;
+    out.push(format!("    val emberDark = {}", kotlin_palette(ember, 4)?));
+    out.push(String::new());
+    for (field, key) in [("emberWarning", "warning"), ("emberError", "error"), ("emberOnError", "onError")] {
+        let hex = ember.get(key).and_then(Value::as_str).context("missing ember status")?;
+        out.push(format!("    val {field} = {}", kotlin_color(hex)));
+    }
     out.push(String::new());
     out.push(format!("    val warningLight = {}", status_color("light", "warning")?));
     out.push(format!("    val warningDark = {}", status_color("dark", "warning")?));

@@ -4,6 +4,7 @@ import QtQuick
 
 // Stands in for the Rust Preferences in QML tests: light.
 QtObject {
+    property string theme: "glass"
     property string colorMode: "light"
     property string commandPaletteHotkey: ""
     property bool streamPcAudioToPhone: false

@@ -14,6 +14,27 @@ const FILE_NAME: &str = "desktop-settings.json";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Default)]
 #[serde(rename_all = "lowercase")]
+pub enum Theme {
+    /// Translucent cards over the window backdrop, in the Honey colors.
+    #[default]
+    Glass,
+    /// Dark only: near-black cards with an orange accent and a bento Home.
+    Ember,
+}
+
+impl<'de> Deserialize<'de> for Theme {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let s = String::deserialize(deserializer).unwrap_or_default();
+        // Anything else, including the themes that no longer exist, is Glass.
+        Ok(match s.trim().to_ascii_lowercase().as_str() {
+            "ember" => Theme::Ember,
+            _ => Theme::Glass,
+        })
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Default)]
+#[serde(rename_all = "lowercase")]
 pub enum ColorMode {
     #[default]
     System,
@@ -325,6 +346,7 @@ pub fn set_window_geometry(
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct Settings {
+    pub theme: Theme,
     #[serde(alias = "color_mode")]
     pub color_mode: ColorMode,
     /// Use the Windows 11 Mica backdrop.
@@ -508,6 +530,7 @@ pub struct Settings {
 impl Default for Settings {
     fn default() -> Self {
         Settings {
+            theme: Theme::default(),
             color_mode: ColorMode::default(),
             backdrop: true,
             close_to_tray: default_close_to_tray(),

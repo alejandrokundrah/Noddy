@@ -3,32 +3,39 @@ pragma Singleton
 import QtQuick
 import app.noddy
 
-// The theme: Glass, the app's only look, in light or dark (resolved from
-// Preferences and the system). Colors come from Tokens (generated from
-// docs/design/tokens.json); Material's "onX" roles are named "xContent"
-// because QML reserves the "on" prefix.
+// The theme: Glass (translucent cards, the default, light or dark) or Ember
+// (near-black cards with an orange accent, dark only), chosen in Preferences.
+// Colors come from Tokens (generated from docs/design/tokens.json);
+// Material's "onX" roles are named "xContent" because QML reserves the "on"
+// prefix.
 QtObject {
     id: theme
 
-    readonly property bool glass: true
-    readonly property bool dark: Preferences.colorMode === "dark"
+    readonly property bool ember: Preferences.theme === "ember"
+    readonly property bool glass: !ember
+    // Ember is dark only.
+    readonly property bool dark: ember || Preferences.colorMode === "dark"
                                  || (Preferences.colorMode === "system" && AppController.systemDark)
     readonly property bool reduceMotion: AppController.reduceMotion
 
-    // Left over from the themes Glass replaced; consumers still read them,
-    // and they never change. Fold their branches away as each file is touched.
+    // Left over from the themes Glass replaced; consumers still read them.
+    // Only amoled moves: Ember has opaque black windows and hairline borders,
+    // which is what those branches draw. Fold the rest away as files are touched.
     readonly property bool hive: false
     readonly property bool graphite: false
-    readonly property bool amoled: false
+    readonly property bool amoled: ember
     readonly property bool isPhoneSeed: false
     readonly property bool isArtworkSeed: false
     readonly property bool artworkAmbientActive: false
-    readonly property bool ambientBlurActive: true
+    readonly property bool ambientBlurActive: glass
     function phonePalette(deviceId) { return null }
 
-    // Glass's fixed colors: the default (Honey) preset.
-    readonly property var palette: Tokens.data.themes.bloom.seeds[Tokens.data.themes.bloom.defaultSeed][dark ? "dark" : "light"]
-    readonly property var status: Tokens.data.themes.bloom.status[dark ? "dark" : "light"]
+    // Glass: the default (Honey) preset. Ember: its own dark palette, which
+    // carries its status colors too.
+    readonly property var palette: ember
+        ? Tokens.data.themes.ember.variants.dark
+        : Tokens.data.themes.bloom.seeds[Tokens.data.themes.bloom.defaultSeed][dark ? "dark" : "light"]
+    readonly property var status: ember ? palette : Tokens.data.themes.bloom.status[dark ? "dark" : "light"]
 
     // ---- Color roles ----
     readonly property color primary: palette.primary
@@ -58,30 +65,32 @@ QtObject {
     readonly property color errorContainerContent: surfaceContent
 
     // ---- Component colors (docs/design/assets/nl.css) ----
-    readonly property color cardColor: Qt.tint(
+    readonly property color cardColor: ember ? surfaceContainer : Qt.tint(
         Qt.rgba(surfaceContainer.r, surfaceContainer.g, surfaceContainer.b, dark ? 0.36 : 0.52),
         Qt.rgba(primary.r, primary.g, primary.b, dark ? 0.08 : 0.06)
     )
-    readonly property color cardBorder: dark ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(1, 1, 1, 0.28)
-    readonly property color tileColor: Qt.tint(
+    readonly property color cardBorder: ember ? outlineVariant
+        : (dark ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(1, 1, 1, 0.28))
+    readonly property color tileColor: ember ? surfaceContainerHigh : Qt.tint(
         Qt.rgba(1, 1, 1, dark ? 0.08 : 0.48),
         Qt.rgba(primary.r, primary.g, primary.b, dark ? 0.08 : 0.06)
     )
-    readonly property color heroColor: Qt.tint(
+    readonly property color heroColor: ember ? surfaceContainer : Qt.tint(
         Qt.rgba(surface.r, surface.g, surface.b, dark ? 0.34 : 0.48),
         Qt.rgba(primaryContainer.r, primaryContainer.g, primaryContainer.b, dark ? 0.30 : 0.38)
     )
     readonly property color heroContent: primaryContainerContent
-    readonly property color railColor: Qt.rgba(surfaceLow.r, surfaceLow.g, surfaceLow.b, dark ? 0.28 : 0.42)
-    readonly property color indicator: secondaryContainer
-    readonly property color indicatorContent: secondaryContainerContent
+    readonly property color railColor: ember ? surfaceContainer : Qt.rgba(surfaceLow.r, surfaceLow.g, surfaceLow.b, dark ? 0.28 : 0.42)
+    // Ember's selected item is a white pill.
+    readonly property color indicator: ember ? Tokens.data.themes.ember.indicator.color : secondaryContainer
+    readonly property color indicatorContent: ember ? Tokens.data.themes.ember.indicator.content : secondaryContainerContent
     // The halo around a primary control on hover.
     readonly property color glow: Qt.rgba(primary.r, primary.g, primary.b, dark ? 0.30 : 0.22)
     readonly property color buttonShadow: "transparent"
     readonly property color scrim: Qt.rgba(0, 0, 0, dark ? 0.5 : 0.32)
 
     // ---- Shape ----
-    readonly property var shape: Tokens.data.themes.bloom.shape
+    readonly property var shape: ember ? Tokens.data.themes.ember.shape : Tokens.data.themes.bloom.shape
     readonly property int radiusXs: shape.xs
     readonly property int radiusSm: shape.sm
     readonly property int radiusMd: shape.md

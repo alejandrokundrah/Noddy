@@ -18,7 +18,7 @@ use cxx_qt_lib::{QString, QUrl};
 
 use crate::{
     core_host,
-    settings::{ColorMode, RecordingFormat, Settings},
+    settings::{ColorMode, RecordingFormat, Settings, Theme},
 };
 
 pub use super::deck::DeckControllerRust;
@@ -35,6 +35,8 @@ pub mod qobject {
         #[qobject]
         #[qml_element]
         #[qml_singleton]
+        /// "glass" or "ember".
+        #[qproperty(QString, theme)]
         /// "system", "light" or "dark".
         #[qproperty(QString, color_mode)]
         /// Mica behind the window.
@@ -279,6 +281,7 @@ pub mod qobject {
 
 #[derive(Default)]
 pub struct PreferencesRust {
+    theme: QString,
     color_mode: QString,
     backdrop: bool,
     close_to_tray: bool,
@@ -342,6 +345,10 @@ impl cxx_qt::Initialize for qobject::Preferences {
     fn initialize(mut self: Pin<&mut Self>) {
         let settings = Settings::load(&core_host::host().data_dir);
         settings.apply_runtime();
+        self.as_mut().set_theme(QString::from(match settings.theme {
+            Theme::Glass => "glass",
+            Theme::Ember => "ember",
+        }));
         self.as_mut().set_color_mode(QString::from(match settings.color_mode {
             ColorMode::System => "system",
             ColorMode::Light => "light",
@@ -427,6 +434,7 @@ impl cxx_qt::Initialize for qobject::Preferences {
 
         // Save after any change (connected after loading, so loading doesn't
         // rewrite the file).
+        self.as_mut().on_theme_changed(|p| p.save()).release();
         self.as_mut().on_color_mode_changed(|p| p.save()).release();
         self.as_mut().on_backdrop_changed(|p| p.save()).release();
         self.as_mut()
@@ -700,12 +708,19 @@ impl qobject::Preferences {
             self.as_mut().set_stream_pc_audio_to_phone(on);
         }
         let disk = Settings::load(&core_host::host().data_dir);
+        let disk_theme = QString::from(match disk.theme {
+            Theme::Glass => "glass",
+            Theme::Ember => "ember",
+        });
         let disk_mode = QString::from(match disk.color_mode {
             ColorMode::System => "system",
             ColorMode::Light => "light",
             ColorMode::Dark => "dark",
         });
         let disk_step = i32::from(disk.walkthrough_step.min(6));
+        if *self.theme() != disk_theme {
+            self.as_mut().set_theme(disk_theme);
+        }
         if *self.color_mode() != disk_mode {
             self.as_mut().set_color_mode(disk_mode);
         }
@@ -973,6 +988,10 @@ impl qobject::Preferences {
         let p = self.rust();
         let (win_screen, win_x, win_y, win_w, win_h, win_max) = crate::settings::window_geometry();
         Settings {
+            theme: match String::from(&p.theme).as_str() {
+                "ember" => Theme::Ember,
+                _ => Theme::Glass,
+            },
             color_mode: match String::from(&p.color_mode).as_str() {
                 "light" => ColorMode::Light,
                 "dark" => ColorMode::Dark,

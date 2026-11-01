@@ -38,7 +38,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 
 val LocalReducedMotion = compositionLocalOf { false }
 
-/** Glass is the app's only theme, so this is always true. */
+/** True in Glass (translucent cards); false in Ember (solid cards with a hairline). */
 val LocalGlassTheme = compositionLocalOf { true }
 
 /** True when Android's "Remove animations" (animator duration scale 0) is enabled. */
@@ -58,11 +58,17 @@ fun rememberReducedMotion(): Boolean {
     return reduced
 }
 
-/** The user's look choice (see Preferences): light, dark, or follow the system. */
+/**
+ * The user's look choice (see Preferences): the theme ("glass" or "ember") and, for Glass,
+ * light, dark, or follow the system. Ember is always dark.
+ */
 @androidx.compose.runtime.Immutable
 data class Appearance(
+    val theme: String = "glass",
     val mode: String = "system",
-)
+) {
+    val isEmber: Boolean get() = theme == "ember"
+}
 
 private fun Palette.toScheme(dark: Boolean, error: Color): ColorScheme {
     val base = if (dark) darkColorScheme() else lightColorScheme()
@@ -154,6 +160,19 @@ private fun glassScheme(dark: Boolean): ColorScheme {
     return (if (dark) seed.dark else seed.light).toScheme(dark, error).toGlassScheme(dark)
 }
 
+/** Ember's fixed palette: near-black surfaces with one orange accent (always dark). */
+private fun emberScheme(): ColorScheme =
+    Tokens.emberDark.toScheme(true, Tokens.emberError).copy(onError = Tokens.emberOnError)
+
+/** Ember shapes from the tokens: large radii. */
+private val emberShapes = Shapes(
+    extraSmall = RoundedCornerShape(8.dp),
+    small = RoundedCornerShape(12.dp),
+    medium = RoundedCornerShape(16.dp),
+    large = RoundedCornerShape(24.dp),
+    extraLarge = RoundedCornerShape(32.dp),
+)
+
 /** Glass shapes from the tokens: smoothly rounded. */
 private val glassShapes = Shapes(
     extraSmall = RoundedCornerShape(10.dp),
@@ -177,18 +196,20 @@ fun nectarSwitchColors(): androidx.compose.material3.SwitchColors {
     )
 }
 
-/** The app's theme: Glass, light or dark. */
+/** The app's theme: Glass (light or dark) or Ember (dark only). */
 @Composable
 fun NoddyTheme(
     appearance: Appearance = Appearance(),
     content: @Composable () -> Unit,
 ) {
-    val dark = when (appearance.mode) {
+    val ember = appearance.isEmber
+    val systemDark = isSystemInDarkTheme()
+    val dark = ember || when (appearance.mode) {
         "light" -> false
         "dark" -> true
-        else -> isSystemInDarkTheme()
+        else -> systemDark
     }
-    val targetScheme = remember(dark) { glassScheme(dark) }
+    val targetScheme = remember(dark, ember) { if (ember) emberScheme() else glassScheme(dark) }
     val reducedMotion = rememberReducedMotion()
 
     // System bar icons follow the app's theme, which can differ from the system's.
@@ -208,11 +229,11 @@ fun NoddyTheme(
     CompositionLocalProvider(
         LocalAppFonts provides fonts,
         LocalReducedMotion provides reducedMotion,
-        LocalGlassTheme provides true,
+        LocalGlassTheme provides !ember,
     ) {
         MaterialTheme(
             colorScheme = targetScheme,
-            shapes = glassShapes,
+            shapes = if (ember) emberShapes else glassShapes,
             typography = currentTypography,
         ) {
             androidx.compose.foundation.layout.Box(Modifier.fillMaxSize()) {

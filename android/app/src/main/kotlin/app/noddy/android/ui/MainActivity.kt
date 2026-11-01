@@ -1062,6 +1062,10 @@ private fun FloatingBottomPillDock(
     }
 }
 
+/** Ember's selected dock item: a white pill with a near-black icon and label. */
+private val EmberPill = androidx.compose.ui.graphics.Color(0xFFF4F4F5)
+private val EmberPillContent = androidx.compose.ui.graphics.Color(0xFF111113)
+
 @Composable
 private fun FloatingDockTabPill(
     selected: Boolean,
@@ -1072,6 +1076,7 @@ private fun FloatingDockTabPill(
     reducedMotion: Boolean,
 ) {
     val scheme = MaterialTheme.colorScheme
+    val glass = LocalGlassTheme.current
     val scaleState = androidx.compose.animation.core.animateFloatAsState(
         targetValue = if (selected) 1f else 0.95f,
         animationSpec = if (reducedMotion) {
@@ -1087,7 +1092,11 @@ private fun FloatingDockTabPill(
         label = "pill_scale",
     )
     val bgColorState = androidx.compose.animation.animateColorAsState(
-        targetValue = if (selected) scheme.primaryContainer else androidx.compose.ui.graphics.Color.Transparent,
+        targetValue = when {
+            !selected -> androidx.compose.ui.graphics.Color.Transparent
+            glass -> scheme.primaryContainer
+            else -> EmberPill
+        },
         animationSpec = if (reducedMotion) {
             androidx.compose.animation.core.snap()
         } else {
@@ -1095,7 +1104,11 @@ private fun FloatingDockTabPill(
         },
         label = "pill_bg",
     )
-    val contentColor = if (selected) scheme.onPrimaryContainer else scheme.onSurfaceVariant
+    val contentColor = when {
+        !selected -> scheme.onSurfaceVariant
+        glass -> scheme.onPrimaryContainer
+        else -> EmberPillContent
+    }
     androidx.compose.foundation.layout.Row(
         modifier = Modifier
             .semantics {

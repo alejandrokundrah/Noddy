@@ -305,6 +305,56 @@ QtObject {
               "warning": "#7D5200"
             }
           }
+        },
+        "ember": {
+          "description": "Dark only. Near-black cards on black with one orange accent, a white pill for the selected item, large corner radii and a bento grid on Home. The look of the Ember theme.",
+          "dynamicColor": false,
+          "fonts": {
+            "display": "Figtree",
+            "label": "Figtree",
+            "mono": "Space Mono",
+            "ui": "Figtree"
+          },
+          "indicator": {
+            "color": "#F4F4F5",
+            "content": "#111113"
+          },
+          "label": {
+            "case": "none",
+            "size": 12.5,
+            "tracking": 0,
+            "weight": 600
+          },
+          "shape": {
+            "full": 999,
+            "lg": 24,
+            "md": 16,
+            "sm": 12,
+            "xl": 32,
+            "xs": 8
+          },
+          "variants": {
+            "dark": {
+              "error": "#FF8A7A",
+              "onError": "#4A0A02",
+              "onPrimary": "#2E0F00",
+              "onPrimaryContainer": "#FFDBCE",
+              "onSecondaryContainer": "#EDEDEF",
+              "onSurface": "#F4F4F5",
+              "onSurfaceVariant": "#A1A1A6",
+              "outline": "#6E6E74",
+              "outlineVariant": "#2A2A2D",
+              "primary": "#FF6B3D",
+              "primaryContainer": "#5A2412",
+              "secondaryContainer": "#2C2C30",
+              "surface": "#0A0A0B",
+              "surfaceContainer": "#141415",
+              "surfaceContainerHigh": "#1B1B1D",
+              "surfaceContainerHighest": "#242427",
+              "surfaceContainerLow": "#0E0E0F",
+              "warning": "#F2C14E"
+            }
+          }
         }
       },
       "typography": {
