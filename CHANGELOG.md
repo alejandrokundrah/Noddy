@@ -163,6 +163,17 @@ has a Stop button. Choosing another
   orange accent; **Mode** (system, light or dark) and
   the Mica backdrop stay. Saved theme and color choices are ignored.
 
+- **A new look for Home and the whole app.** Home is rebuilt as a grid of
+  rounded tiles on near-black (or near-white) cards with one orange accent:
+  the phone's connection and battery up top, then the same actions as before
+  as tiles, with an orange switch on the ones that have a state (Mirror
+  screen, Find phone). The side navigation is one rounded pill of round
+  buttons with the labels on hover, and the top bar has a search field for
+  the command palette. On Android, Home gets the same tiles for the PC's
+  connection, battery, reconnect, microphone, files, clipboard and timeline,
+  and the dock's selected item is a white pill. **Ember** is the same look
+  with solid cards, dark only.
+
 - **A new logo.** Noddy has a new logo: on the PC in the window, the taskbar,
   the tray, notifications and the installer, and on the phone in the launcher
   icon, the themed icon and notifications.

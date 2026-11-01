@@ -576,10 +576,9 @@ Item {
             width: home.width - home.sideWidth - home.spacing
             spacing: Theme.gutter
 
-            // ---- Ember: connection and battery as two stat tiles ----
+            // ---- Connection and battery as two stat tiles ----
             Row {
                 id: emberStats
-                visible: Theme.ember
                 width: parent.width
                 height: visible ? 96 : 0
                 spacing: Theme.gutter
@@ -1239,6 +1238,7 @@ Item {
                     width: actions.tileWidth
                     deviceOnline: home.online
                     title: qsTr("Mirror screen")
+                    stateful: true
                     subtitle: ""
                     iconPath: Icons.mirror
                     feature: home.feature("mirroring.view")
@@ -1290,6 +1290,7 @@ Item {
                     width: actions.tileWidth
                     deviceOnline: home.online
                     title: home.ringing ? qsTr("Stop ringing") : qsTr("Find phone")
+                    stateful: true
                     subtitle: ""
                     iconPath: Icons.ring
                     feature: home.feature("device.find_phone")
@@ -3054,6 +3055,8 @@ Item {
         property string iconPath
         property var feature: ({})
         property bool active: false
+        // Shows an on/off switch in the corner (for a tile that has a state, like Find phone).
+        property bool stateful: false
         property bool accented: false
         property bool deviceOnline: true
         // A second, smaller action in the corner (e.g. "Send a folder").
@@ -3073,11 +3076,9 @@ Item {
         height: (tile.subtitle.length > 0 || !tile.available) ? 96 : 82
         activeFocusOnTab: available
         radius: Theme.radiusLg
-        color: tile.active
-            ? Theme.primary
-            : (tile.accented && !Theme.graphite
-                ? Qt.tint(Theme.tileColor, Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Theme.dark ? 0.14 : 0.10))
-                : Theme.tileColor)
+        color: tile.accented
+            ? Qt.tint(Theme.tileColor, Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, Theme.dark ? 0.14 : 0.10))
+            : Theme.tileColor
         border.width: Theme.focusVisible(tile) ? 2 : ((tile.accented || Theme.graphite) && !Theme.glass ? 1 : 0)
         border.color: Theme.focusVisible(tile)
             ? Theme.primary
@@ -3100,7 +3101,7 @@ Item {
             }
         }
 
-        readonly property color ink: tile.active ? Theme.primaryContent : Theme.surfaceContent
+        readonly property color ink: Theme.surfaceContent
         Rectangle {
             anchors.fill: parent
             radius: parent.radius
@@ -3115,7 +3116,7 @@ Item {
                 width: 32; height: 32
                 radius: Theme.graphite ? Theme.radiusSm : Theme.radiusMd
                 color: tile.active
-                    ? Qt.rgba(1, 1, 1, 0.18)
+                    ? Theme.primary
                     : (Theme.graphite ? "transparent" : (tile.accented ? Theme.primaryContainer : Theme.secondaryContainer))
                 border.width: Theme.graphite ? 1 : 0
                 border.color: Theme.outlineVariant
@@ -3147,6 +3148,23 @@ Item {
         }
         HoverHandler { id: hover; cursorShape: tile.available ? Qt.PointingHandCursor : Qt.ArrowCursor }
         TapHandler { id: tap; enabled: tile.available; onTapped: tile.clicked() }
+        // The state as a pill switch: orange when on.
+        Rectangle {
+            visible: tile.stateful && tile.available
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.margins: 12
+            width: 40; height: 24; radius: 12
+            color: tile.active ? Theme.primary : Theme.surfaceContainerHighest
+            Behavior on color { enabled: !Theme.reduceMotion; ColorAnimation { duration: Theme.fadeFast } }
+            Rectangle {
+                width: 18; height: 18; radius: 9
+                anchors.verticalCenter: parent.verticalCenter
+                x: tile.active ? parent.width - width - 3 : 3
+                color: tile.active ? Theme.primaryContent : Theme.surfaceContent
+                Behavior on x { enabled: !Theme.reduceMotion; NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+            }
+        }
         IconButton {
             anchors.right: parent.right
             anchors.top: parent.top
