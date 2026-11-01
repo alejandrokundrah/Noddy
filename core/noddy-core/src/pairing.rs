@@ -235,7 +235,9 @@ pub(crate) fn cancel(shared: &Shared) {
 
 // ---- Initiator side ----
 
-/// Joins a host by scanning its pairing link (the phone side of the QR flow).
+/// Joins a host with its pairing link (the joiner's side of the QR flow). A
+/// phone scans the link; a computer, which has no camera to scan with, is
+/// given it as text. The ceremony is the same for both.
 pub(crate) async fn join_qr(shared: &Arc<Shared>, uri: &PairingUri) -> Result<()> {
     shared.remember_addrs(&uri.id, &uri.addrs);
     let conn = dial(shared, &uri.id).await?;
@@ -306,7 +308,14 @@ async fn settle_initiator(
     result: Result<DeviceInfo>,
 ) -> Result<()> {
     match result {
-        Ok(device) => shared.complete_pairing(peer, device).await,
+        Ok(device) => {
+            shared.complete_pairing(peer, device).await?;
+            // A computer can be both: showing its own pairing code while it
+            // joins another device. It just paired, so it stops accepting new
+            // devices, as a host does after its pairing (phones never host).
+            shared.pairing.end_host();
+            Ok(())
+        }
         Err(err) => {
             conn.close(VarInt::from_u32(CLOSE_FAILED), b"failed");
             Err(fail(shared, err))

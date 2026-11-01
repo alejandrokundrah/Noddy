@@ -136,6 +136,15 @@ If you have USB debugging (`adb`) enabled on your phone, Noddy detects the phone
 3. Confirm that the 6-digit code matches on both screens and accept on both devices.
 4. Once paired, Noddy uses the high-speed USB connection (`On USB`) whenever the cable is plugged in and switches to Wi-Fi automatically when you unplug it.
 
+### Pairing Two Computers
+
+Two PCs pair with each other the same way a phone and a PC do. Open Noddy's pairing screen on both computers, then use either method:
+
+- **Nearby code**: on the first computer, choose **Pair nearby instead** and pick the other computer from the list. Both screens show a 6-digit code; confirm it matches on both.
+- **Pairing link** (the computer version of scanning the QR code): on the first computer, choose **Pair a computer** and click **Copy this computer's link**. On the second computer, choose **Pair a computer**, paste the link and click **Pair**. The link carries a one-time secret that expires after 5 minutes, so send it only to the computer you want to pair.
+
+Once paired, the computers trust each other like any other paired device, and each one keeps its own per-device permissions. After a pairing, the computer that joined stops showing its own pairing code.
+
 ## Choosing an Android Power Level
 
 Android groups app capabilities into tiers of system access. Noddy is designed so that everyday features work out of the box at the `Standard` level, while power users can opt into `Assist` or `Elevated` without rooting their phone.
