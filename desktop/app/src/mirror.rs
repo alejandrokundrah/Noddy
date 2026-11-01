@@ -762,6 +762,10 @@ pub fn start(device: DeviceId) {
         // The phone's screen starts on, unless app windows already turned it off.
         if !s.mirroring(&device) {
             s.screen_off.remove(&device);
+            // A new mirroring session keeps the phone awake: left to its own
+            // timeout the phone locks while the PC is in use, and the screen
+            // freezes or goes black. The window's toggle turns it off again.
+            s.stay_awake.insert(device);
         }
         s.windows.insert(window, Shown { phase: Phase::Asking, app: None, pkg: None });
         power(s, &device)
