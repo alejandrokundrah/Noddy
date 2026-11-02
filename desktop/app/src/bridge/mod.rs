@@ -36,6 +36,8 @@ pub mod photos;
 #[allow(unsafe_code)]
 pub mod prefs;
 #[allow(unsafe_code)]
+pub mod remote_files;
+#[allow(unsafe_code)]
 pub mod setup;
 #[allow(unsafe_code)]
 pub mod timeline;

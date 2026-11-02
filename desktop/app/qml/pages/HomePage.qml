@@ -1364,6 +1364,16 @@ Item {
                 ActionTile {
                     width: actions.tileWidth
                     deviceOnline: home.online
+                    visible: home.isComputer
+                    title: qsTr("Browse files")
+                    subtitle: ""
+                    iconPath: Icons.folder
+                    feature: home.feature("desktop.files")
+                    onClicked: remoteFilesSheet.openFor(home.deviceId)
+                }
+                ActionTile {
+                    width: actions.tileWidth
+                    deviceOnline: home.online
                     title: home.ringing ? qsTr("Stop ringing")
                                         : (home.isComputer ? qsTr("Find PC") : qsTr("Find phone"))
                     stateful: true
@@ -2758,6 +2768,10 @@ Item {
     // Notifications from the last day that are gone from the phone.
     AppsSheet {
         id: appsSheet
+    }
+
+    RemoteFilesSheet {
+        id: remoteFilesSheet
     }
 
     Sheet {

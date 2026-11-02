@@ -75,6 +75,8 @@ impl Changes {
     pub const MIC: Changes = Changes(1 << 29);
     /// Photo backup settings or progress (kept by crate::photo_backup).
     pub const PHOTO_BACKUP: Changes = Changes(1 << 30);
+    /// Browsing another computer's shared folders (kept by crate::remote_files).
+    pub const REMOTE_FILES: Changes = Changes(1 << 31);
 
     pub fn is_empty(self) -> bool {
         self.0 == 0

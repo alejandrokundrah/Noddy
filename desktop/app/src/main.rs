@@ -48,6 +48,8 @@ mod play_on_phone;
 mod qr;
 mod recordings;
 mod remote;
+mod remote_files;
+mod remote_paths;
 mod send_to;
 mod settings;
 mod setup;
