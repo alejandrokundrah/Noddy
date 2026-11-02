@@ -833,33 +833,27 @@ mod tests {
 
     #[test]
     fn has_the_structure_of_the_token_presets() {
+        // The Glass palette is tuned by hand (neutral surfaces, orange accent), so it
+        // isn't compared with a generated scheme; `cargo xtask tokens` checks its contrast.
         let tokens: serde_json::Value =
             serde_json::from_str(include_str!("../../../docs/design/tokens.json")).unwrap();
-        let seeds = tokens["themes"]["bloom"]["seeds"].as_object().unwrap();
+        let seeds = tokens["themes"]["glass"]["seeds"].as_object().unwrap();
         assert!(!seeds.is_empty());
-        let mut mismatches = Vec::new();
+        let is_hex = |v: &serde_json::Value| {
+            v.as_str().is_some_and(|s| {
+                s.len() == 7 && s.starts_with('#') && u32::from_str_radix(&s[1..], 16).is_ok()
+            })
+        };
         for (name, preset) in seeds {
-            if name == "black" {
-                continue;
-            }
-            let built = scheme_json(hex(preset["seed"].as_str().unwrap()));
+            assert!(is_hex(&preset["seed"]), "{name}: seed");
             for mode in ["light", "dark"] {
                 let roles = preset[mode].as_object().unwrap();
                 assert_eq!(roles.len(), ROLES.len(), "{name} {mode}: roles changed in the tokens");
-                for (role, value) in roles {
-                    let ours = Hct::new(hex(built[mode][role].as_str().unwrap()));
-                    let theirs = Hct::new(hex(value.as_str().unwrap()));
-                    let tone = (ours.get_tone() - theirs.get_tone()).abs();
-                    let chromatic = ours.get_chroma() > 10.0 && theirs.get_chroma() > 10.0;
-                    let hue = if chromatic { hue_distance(ours.get_hue(), theirs.get_hue()) } else { 0.0 };
-                    if tone > 2.0 || hue > 15.0 {
-                        mismatches
-                            .push(format!("{name} {mode} {role}: tone off by {tone:.1}, hue by {hue:.0}"));
-                    }
+                for (role, ..) in ROLES {
+                    assert!(is_hex(&roles[role]), "{name} {mode} {role}");
                 }
             }
         }
-        assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
     }
 
     #[test]
