@@ -24,6 +24,10 @@ use crate::{Error, NodeEvent, Result, node::Shared, session::Session};
 /// presentation input (`docs/protocol/remote.md` §1).
 pub const INPUT_INJECT: &str = "input.inject";
 
+/// Capability ID announced by a desktop that also understands desktop control:
+/// an absolute pointer and physical key down/up (`docs/protocol/desktop-control.md`).
+pub const INPUT_DESKTOP: &str = "input.desktop";
+
 /// Per-device toggle name on the PC (off by default).
 pub(crate) const TOGGLE: &str = "remote_input";
 
@@ -172,6 +176,9 @@ pub(crate) async fn input(shared: &Arc<Shared>, session: &Arc<Session>, event: R
     if !peer_offers(shared, &session.peer, INPUT_INJECT)? {
         return Err(Error::Unsupported);
     }
+    if event.needs_desktop() && !peer_offers(shared, &session.peer, INPUT_DESKTOP)? {
+        return Err(Error::Unsupported);
+    }
     if let RemoteInput::Move { dx, dy } = event {
         check(shared, session).await?;
         return move_pointer(shared, session, dx, dy).await;
@@ -217,6 +224,19 @@ pub(crate) async fn scroll_fast(
     let event = RemoteInput::Scroll { dx, dy };
     if !event.is_valid() {
         return Err(Error::Protocol("scroll delta out of bounds".into()));
+    }
+    send_datagram(shared, session, &event).await
+}
+
+/// Sends the pointer position `(x, y)`, as fractions (`0.0..=1.0`) of the
+/// monitor being streamed, in a QUIC datagram (desktop control).
+pub(crate) async fn abs_pointer(shared: &Arc<Shared>, session: &Arc<Session>, x: f32, y: f32) -> Result<()> {
+    let event = RemoteInput::Abs { x, y };
+    if !event.is_valid() {
+        return Err(Error::Protocol("pointer position out of bounds".into()));
+    }
+    if !peer_offers(shared, &session.peer, INPUT_DESKTOP)? {
+        return Err(Error::Unsupported);
     }
     send_datagram(shared, session, &event).await
 }
@@ -274,6 +294,9 @@ pub(crate) async fn handle(shared: &Arc<Shared>, session: &Arc<Session>, env: &E
         types::REMOTE_INPUT => match check_allowed(shared, &session.peer) {
             Err((code, msg)) => Envelope::error(code, msg),
             Ok(()) => match env.body::<RemoteInput>() {
+                Ok(event) if event.needs_desktop() && !shared.we_offer(INPUT_DESKTOP) => {
+                    Envelope::error(ErrorCode::Unsupported, "desktop control is not supported here")
+                }
                 Ok(event) if event.is_control_allowed() && event.is_valid() => {
                     let allowed = shared
                         .remote
@@ -309,6 +332,9 @@ pub(crate) fn handle_datagram(shared: &Arc<Shared>, peer: DeviceId, bytes: &[u8]
     let Ok(event) = RemoteInput::from_datagram(bytes) else {
         return;
     };
+    if event.needs_desktop() && !shared.we_offer(INPUT_DESKTOP) {
+        return;
+    }
     let allowed =
         shared.remote.lock().unwrap_or_else(|e| e.into_inner()).allow_datagram(peer, Instant::now());
     if !allowed {
@@ -331,6 +357,9 @@ pub(crate) async fn receive_motion(
         let Ok(env) = Envelope::from_cbor(&bytes) else { break };
         let Ok(event) = env.expect_body::<RemoteInput>(types::REMOTE_INPUT) else { break };
         if !event.is_datagram_allowed() || !event.is_valid() {
+            break;
+        }
+        if event.needs_desktop() && !shared.we_offer(INPUT_DESKTOP) {
             break;
         }
         let allowed =

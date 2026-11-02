@@ -183,6 +183,9 @@ pub fn compute_capabilities(
     if remote_input_enabled && input_available {
         caps.push(noddy_core::MIRROR_INPUT.into());
         caps.push(noddy_core::INPUT_INJECT.into());
+        // Desktop control (absolute pointer, key down/up) is Windows-only so far.
+        #[cfg(windows)]
+        caps.push(noddy_core::INPUT_DESKTOP.into());
     }
     if crate::win::vcam::is_registered() {
         caps.push(noddy_core::WEBCAM_ADDON_VCAM.into());

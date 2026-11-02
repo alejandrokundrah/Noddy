@@ -7112,3 +7112,72 @@ async fn elevated_over_usb_is_refused_without_a_usb_connection() {
     pc.node.shutdown().await;
     phone.node.shutdown().await;
 }
+
+#[tokio::test(flavor = "multi_thread")]
+async fn desktop_control_needs_input_desktop_and_delivers_pointer_and_keys() {
+    use noddy_core::{INPUT_DESKTOP, INPUT_INJECT, RemoteInput};
+
+    let mut pc = device("Desktop", DeviceKind::Desktop).await;
+    let mut phone = device("Pixel", DeviceKind::Phone).await;
+    pair_qr(&mut pc, &mut phone).await;
+    let (pc_id, phone_id) = (pc.node.device_id(), phone.node.device_id());
+
+    // A PC that offers `input.inject` but not `input.desktop` refuses desktop control.
+    pc.node.update_power(PowerLevel::NotApplicable, vec![INPUT_INJECT.into()]).await;
+    wait_for(&mut phone, "input.remote available on phone", |e| match e {
+        NodeEvent::Capabilities(m)
+            if m.device == pc_id && m.state("input.remote") == Some(FeatureState::Available) =>
+        {
+            Some(())
+        }
+        _ => None,
+    })
+    .await;
+    pc.node.set_device_toggle(phone_id, "remote_input", true).unwrap();
+    with_timeout("remote_check allowed", phone.node.remote_check(pc_id)).await.unwrap();
+
+    let down = RemoteInput::KeyEv { code: "KeyA".into(), down: true };
+    let up = RemoteInput::KeyEv { code: "KeyA".into(), down: false };
+    assert!(matches!(phone.node.remote_input(pc_id, down.clone()).await, Err(Error::Unsupported)));
+    assert!(matches!(phone.node.remote_abs(pc_id, 0.5, 0.5).await, Err(Error::Unsupported)));
+    assert!(pc.platform.remote_inputs.lock().unwrap().is_empty(), "nothing injected without the capability");
+
+    // Out-of-range input is refused before it is sent.
+    assert!(matches!(phone.node.remote_abs(pc_id, 1.5, 0.5).await, Err(Error::Protocol(_))));
+
+    // Once the PC offers `input.desktop`, the pointer travels in a datagram.
+    pc.node.update_power(PowerLevel::NotApplicable, vec![INPUT_INJECT.into(), INPUT_DESKTOP.into()]).await;
+    let deadline = tokio::time::Instant::now() + WAIT;
+    loop {
+        match phone.node.remote_abs(pc_id, 0.25, 0.75).await {
+            Ok(()) => break,
+            Err(Error::Unsupported) => {}
+            Err(e) => panic!("remote_abs: {e:?}"),
+        }
+        assert!(tokio::time::Instant::now() < deadline, "timed out waiting for input.desktop");
+        tokio::time::sleep(Duration::from_millis(20)).await;
+    }
+    let deadline = tokio::time::Instant::now() + WAIT;
+    loop {
+        if pc.platform.remote_inputs.lock().unwrap().contains(&RemoteInput::Abs { x: 0.25, y: 0.75 }) {
+            break;
+        }
+        assert!(tokio::time::Instant::now() < deadline, "timed out waiting for abs datagram");
+        tokio::time::sleep(Duration::from_millis(20)).await;
+    }
+
+    // Keys go down and up on the control stream, in order.
+    for ev in [&down, &up] {
+        with_timeout("keyev", phone.node.remote_input(pc_id, ev.clone())).await.unwrap();
+    }
+    let recorded = pc.platform.remote_inputs.lock().unwrap().clone();
+    let keys: Vec<_> = recorded.iter().filter(|e| matches!(e, RemoteInput::KeyEv { .. })).cloned().collect();
+    assert_eq!(keys, vec![down, up]);
+
+    // With the toggle off again, desktop control is refused like any remote input.
+    pc.node.set_device_toggle(phone_id, "remote_input", false).unwrap();
+    assert!(matches!(
+        phone.node.remote_input(pc_id, RemoteInput::KeyEv { code: "KeyB".into(), down: true }).await,
+        Err(Error::Denied)
+    ));
+}

@@ -8,6 +8,13 @@ change things that need a step from you, and its notes say so.
 
 ### New
 
+- **Desktop control, first part (Windows).** The groundwork for controlling one
+  computer from another: a Windows PC that allows remote input now also accepts
+  an absolute pointer and physical keys going down and up (it announces
+  `input.desktop`), and lets go of any held key when a session ends. There is
+  no viewer window yet, so nothing changes on screen. Protocol draft:
+  `docs/protocol/desktop-control.md`.
+
 - **Browse another computer's files in the app.** On a paired computer's page,
   **Browse files** opens its shared folders: open folders, go back up, and
   download a file into Downloads/Noddy (an interrupted download carries on).

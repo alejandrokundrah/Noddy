@@ -94,6 +94,7 @@ capability is missing.
 | `files.browse` | Lets a paired phone browse and fetch its files | app update |
 | `storage.mount` | Mounts a paired phone's shared storage in File Explorer ([storage](storage.md)) | app update |
 | `input.inject` | Accepts pointer, keyboard and presentation input ([remote input](remote.md)) | app update |
+| `input.desktop` | Also accepts desktop control: an absolute pointer and physical key down/up ([desktop control](desktop-control.md)); offered together with `input.inject` | app update |
 | `recorder` | Saves and converts voice recordings from a phone ([recorder](recorder.md)) | app update |
 | `deck.actions` | Shares its Deck layout and live tile state and runs Deck actions ([deck](deck.md)) | app update |
 | `pc.audio` | Reports active audio output devices in `deck.state` and accepts `pc.audio.set` volume/mute changes ([deck](deck.md)) | app update |

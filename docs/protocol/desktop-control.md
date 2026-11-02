@@ -18,8 +18,9 @@ monitor, an absolute pointer, and keys that go down and up.
 | `input.desktop` | host | Accepts the desktop input in §3 |
 | `desktop.view` | viewer | Shows and controls another computer's screen |
 
-A viewer offers the controls only for a host that offers both `mirror.capture`
-and `input.desktop`. Both devices must allow it: the `mirroring` toggle on each
+`input.desktop` is offered together with `input.inject`. A viewer offers the
+controls only for a host that offers `mirror.capture` and `input.desktop`. Both
+devices must allow it: the `mirroring` toggle on each
 side, and `remote_input` on the host, which stays **off by default**.
 
 ## 2. Monitors
@@ -48,7 +49,6 @@ Input =
   | { type: "abs",   x: float32, y: float32 }
   | { type: "keyev", code: text, down: bool }
 
-Button = "left" | "right" | "middle" | "back" | "forward"
 ```
 
 - **`abs`** places the pointer at fractions of the monitor now streaming
@@ -61,7 +61,9 @@ Button = "left" | "right" | "middle" | "back" | "forward"
   physical key means the host's keyboard layout applies, as if typed there.
   A `down` for a key already held is an auto-repeat. Text from input methods or
   dead keys uses `text` instead. Sent on the control stream as `remote.input`.
-  An unknown `code` is `BAD_MESSAGE`; so is a 17th key held at once.
+  `code` is letters and digits only. An invalid `code` is `BAD_MESSAGE`, and a
+  host that doesn't offer `input.desktop` answers `UNSUPPORTED`. A host
+  ignores a 17th key held at once, and a `code` it has no key for.
 - **Release rules.** The host releases every held key and button when the
   session ends, when `remote_input` is turned off, and when the connection
   drops, so nothing stays stuck.
@@ -77,9 +79,8 @@ Button = "left" | "right" | "middle" | "back" | "forward"
   shows that it is being controlled for as long as it is, and lets its user end
   the session from the host. Unattended access is a separate per-device toggle,
   off by default, and skips only the prompt, never pairing.
-- Rate limits follow [remote.md](remote.md) §4. Key repeat and fast typing
-  need more headroom on control requests for `input.desktop` peers: use a burst
-  of 120.
+- Rate limits follow [remote.md](remote.md) §4; the control-request limit
+  already leaves room for key repeat and fast typing.
 - Implementations **MUST NOT** log `code` or `text`: key codes reveal
   passwords as well as text does (v0 §11).
 

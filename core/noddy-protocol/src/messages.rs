@@ -3122,6 +3122,10 @@ pub mod remote {
     pub const MAX_TEXT_BYTES: usize = 256;
     /// Most modifiers on a key press.
     pub const MAX_MODS: usize = 4;
+    /// Longest `KeyEv` code (a DOM `KeyboardEvent.code` such as `ArrowLeft`).
+    pub const MAX_KEY_CODE_BYTES: usize = 32;
+    /// Most keys a peer may hold down at once with `KeyEv`.
+    pub const MAX_HELD_KEYS: usize = 16;
     /// Stream service and operation when falling back from datagrams.
     pub const SERVICE: &str = "remote";
     pub const OP_MOTION: &str = "motion";
@@ -3271,6 +3275,15 @@ pub enum RemoteInput {
         #[serde(default)]
         y: f32,
     },
+    /// Desktop control (`docs/protocol/desktop-control.md`): the pointer at
+    /// fractions (`0.0..=1.0`) of the monitor now being streamed. Needs the
+    /// receiver's `input.desktop` capability.
+    Abs { x: f32, y: f32 },
+    /// Desktop control: a physical key going down or up, named by its DOM
+    /// `KeyboardEvent.code` (`KeyA`, `ArrowLeft`, `ControlLeft`, ...). Needs the
+    /// receiver's `input.desktop` capability.
+    #[serde(rename = "keyev")]
+    KeyEv { code: String, down: bool },
 }
 
 /// Never prints typed text (protocol v0 §11).
@@ -3286,6 +3299,9 @@ impl std::fmt::Debug for RemoteInput {
             RemoteInput::Slide { action } => write!(f, "Slide({action:?})"),
             RemoteInput::Laser { on: false, .. } => f.write_str("Laser(off)"),
             RemoteInput::Laser { on: true, x, y } => write!(f, "Laser({x}, {y})"),
+            RemoteInput::Abs { x, y } => write!(f, "Abs({x}, {y})"),
+            // Key codes reveal passwords as well as text does (v0 §11).
+            RemoteInput::KeyEv { down, .. } => write!(f, "KeyEv({})", if *down { "down" } else { "up" }),
         }
     }
 }
@@ -3318,12 +3334,29 @@ impl RemoteInput {
                     && y.is_finite()
                     && (!*on || ((0.0..=1.0).contains(x) && (0.0..=1.0).contains(y)))
             }
+            RemoteInput::Abs { x, y } => (0.0..=1.0).contains(x) && (0.0..=1.0).contains(y),
+            RemoteInput::KeyEv { code, .. } => {
+                !code.is_empty()
+                    && code.len() <= remote::MAX_KEY_CODE_BYTES
+                    && code.bytes().all(|b| b.is_ascii_alphanumeric())
+            }
         }
+    }
+
+    /// Whether this event needs the receiver's `input.desktop` capability.
+    pub fn needs_desktop(&self) -> bool {
+        matches!(self, RemoteInput::Abs { .. } | RemoteInput::KeyEv { .. })
     }
 
     /// Whether this event may travel in a lossy QUIC datagram.
     pub fn is_datagram_allowed(&self) -> bool {
-        matches!(self, RemoteInput::Move { .. } | RemoteInput::Scroll { .. } | RemoteInput::Laser { .. })
+        matches!(
+            self,
+            RemoteInput::Move { .. }
+                | RemoteInput::Scroll { .. }
+                | RemoteInput::Laser { .. }
+                | RemoteInput::Abs { .. }
+        )
     }
 
     /// Whether this event may travel in a `remote.input` control request.
@@ -5101,6 +5134,40 @@ mod tests {
         let slide = RemoteInput::Slide { action: SlideAction::Next };
         let env = Envelope::new(types::REMOTE_INPUT, &slide).unwrap();
         assert_eq!(env.body::<RemoteInput>().unwrap(), slide);
+    }
+
+    #[test]
+    fn desktop_input_validates_and_round_trips() {
+        // An absolute pointer travels in a datagram, and also on the control stream.
+        let abs = RemoteInput::Abs { x: 0.25, y: 1.0 };
+        assert!(
+            abs.is_valid() && abs.is_datagram_allowed() && abs.is_control_allowed() && abs.needs_desktop()
+        );
+        assert_eq!(RemoteInput::from_datagram(&abs.to_datagram()).unwrap(), abs);
+        for (x, y) in [(-0.1, 0.5), (0.5, 1.1), (f32::NAN, 0.5), (0.5, f32::INFINITY)] {
+            assert!(!RemoteInput::Abs { x, y }.is_valid(), "({x}, {y})");
+        }
+
+        // Keys go down and up on the control stream, never in a datagram.
+        let down = RemoteInput::KeyEv { code: "ArrowLeft".into(), down: true };
+        assert!(down.is_valid() && down.is_control_allowed() && !down.is_datagram_allowed());
+        assert!(down.needs_desktop());
+        assert!(RemoteInput::from_datagram(&down.to_datagram()).is_err());
+        let env = Envelope::new(types::REMOTE_INPUT, &down).unwrap();
+        assert_eq!(env.body::<RemoteInput>().unwrap(), down);
+        for code in ["KeyA", "Digit1", "Numpad5", "F13", "IntlBackslash"] {
+            assert!(RemoteInput::KeyEv { code: code.into(), down: false }.is_valid(), "{code}");
+        }
+        for code in ["", "Key A", "Arrow-Left", "Ключ", &"A".repeat(remote::MAX_KEY_CODE_BYTES + 1)] {
+            assert!(!RemoteInput::KeyEv { code: code.into(), down: true }.is_valid(), "{code}");
+        }
+        // The key code is never printed (v0 §11).
+        let secret = RemoteInput::KeyEv { code: "KeyP".into(), down: true };
+        assert!(!format!("{secret:?}").contains("KeyP"));
+
+        // The phone-era inputs don't need the capability.
+        assert!(!RemoteInput::Move { dx: 1.0, dy: 1.0 }.needs_desktop());
+        assert!(!RemoteInput::Text { text: "a".into() }.needs_desktop());
     }
 
     #[test]

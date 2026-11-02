@@ -35,6 +35,18 @@ pub fn handle_input(peer: &DeviceId, input: RemoteInput) {
         RemoteInput::Text { text } => win::input::type_text(&text),
         RemoteInput::Key { key, mods } => win::input::press_key(&key, &mods),
         RemoteInput::Slide { action } => win::input::slide(action),
+        // Desktop control (`docs/protocol/desktop-control.md`): Windows only so far. The
+        // core only lets these through when this PC offers `input.desktop`.
+        #[cfg(windows)]
+        RemoteInput::Abs { x, y } => {
+            win::desktop_input::move_absolute_on(win::desktop_input::primary_monitor(), x, y);
+        }
+        #[cfg(windows)]
+        RemoteInput::KeyEv { code, down } => {
+            win::desktop_input::key_event(&code, down);
+        }
+        #[cfg(not(windows))]
+        RemoteInput::Abs { .. } | RemoteInput::KeyEv { .. } => {}
         RemoteInput::Laser { on: true, x, y } => {
             let x = x.clamp(0.0, 1.0);
             let y = y.clamp(0.0, 1.0);
@@ -73,6 +85,8 @@ pub fn handle_input(peer: &DeviceId, input: RemoteInput) {
 pub fn stop_all() {
     let _ = crate::input_share::leave_remote();
     win::input::release_held_buttons();
+    #[cfg(windows)]
+    win::desktop_input::release_held_keys();
     hide_laser();
 }
 
@@ -81,6 +95,8 @@ pub fn on_event(event: &NodeEvent) {
         NodeEvent::LinkChanged { link: LinkState::Offline { .. }, .. } | NodeEvent::DeviceRemoved(_) => {
             let _ = crate::input_share::leave_remote();
             win::input::release_held_buttons();
+            #[cfg(windows)]
+            win::desktop_input::release_held_keys();
         }
         NodeEvent::RemoteInputRequested { .. } => {
             core_host::host().hub.update(|s| s.apply(event));
