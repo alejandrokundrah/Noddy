@@ -832,7 +832,7 @@ mod tests {
         fs::write(dir.path().join(FILE_NAME), r#"{ "backdrop": false }"#).unwrap();
         let loaded = Settings::load(dir.path());
         assert!(!loaded.backdrop);
-        assert!(loaded.close_to_tray);
+        assert_eq!(loaded.close_to_tray, default_close_to_tray());
 
         fs::write(dir.path().join(FILE_NAME), "{ not json").unwrap();
         assert_eq!(Settings::load(dir.path()), Settings::default());
