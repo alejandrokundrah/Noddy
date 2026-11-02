@@ -8,6 +8,14 @@ change things that need a step from you, and its notes say so.
 
 ### New
 
+- **Browse another computer's files.** Paired computers can look through each
+  other's shared folders and download files, resuming if the connection drops.
+  It is read-only and off until you turn on **Share folders** for that
+  computer, so pairing alone shares nothing.
+- **One list of your devices.** `noddy devices` shows paired and nearby
+  devices together, with whether each is connected, offline, being paired or
+  just nearby, how it is connected, and whether you can browse its files.
+
 - **Pair two computers.** Open the pairing screen on both PCs, then pick the
   other one under **Pair nearby instead** and compare the 6-digit code, or
   choose **Pair a computer**, copy one PC's link and paste it on the other.

@@ -110,6 +110,11 @@ impl PairingState {
         self.host_secret().is_some()
     }
 
+    /// The device whose 6-digit code is on screen, if a comparison is going on.
+    pub(crate) fn comparing_with(&self) -> Option<DeviceId> {
+        lock(&self.sas_decision).as_ref().map(|(peer, _)| *peer)
+    }
+
     fn end_host(&self) {
         *lock(&self.host) = None;
     }

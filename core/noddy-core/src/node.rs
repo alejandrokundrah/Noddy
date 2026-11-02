@@ -1827,6 +1827,32 @@ impl Node {
             .collect())
     }
 
+    /// Every device this one knows or can see, in one list: paired devices
+    /// (connected, connecting or offline), a pairing in progress, and devices
+    /// nearby that aren't paired. Connected devices come first. A device that
+    /// is only discovered has no actions: discovery never grants access.
+    pub fn devices(&self) -> Result<Vec<crate::DeviceEntry>> {
+        let known = self
+            .shared
+            .store
+            .list_peers()?
+            .into_iter()
+            .map(|p| {
+                let caps = p.caps.clone();
+                let device = PairedDevice {
+                    link: self.shared.link(&p.id, p.last_seen),
+                    can_wake: p.wake_info.as_ref().is_some_and(|w| !w.macs.is_empty()),
+                    reconnect: self.shared.reconnects(&p.id),
+                    id: p.id,
+                    info: p.info,
+                    paired_at: p.paired_at,
+                };
+                crate::devices::KnownDevice { device, caps }
+            })
+            .collect();
+        Ok(crate::devices::assemble(known, self.discovered_devices(), self.shared.pairing.comparing_with()))
+    }
+
     /// Unpairs a device, telling it if it's connected.
     pub async fn unpair(&self, peer: DeviceId) -> Result<()> {
         if !self.shared.store.is_paired(&peer)? {
@@ -3400,6 +3426,22 @@ impl Node {
     ) -> Result<(crate::StorageReadMeta, iroh::endpoint::RecvStream)> {
         let session = self.connected(&peer)?;
         crate::storage::open_read_stream(&self.shared, &session, path.into(), offset, length).await
+    }
+
+    /// Saves the file at `remote` on a connected device (a phone, or a
+    /// computer that shares its folders) as `dest`, and returns its size.
+    ///
+    /// Safe to repeat: bytes arrive in `<dest>.noddy-part` and `dest` appears
+    /// only when the file is whole, and a retry after a dropped connection
+    /// carries on from the part. Folders in `dest`'s path are created.
+    pub async fn storage_download(
+        &self,
+        peer: DeviceId,
+        remote: impl Into<String>,
+        dest: &std::path::Path,
+    ) -> Result<u64> {
+        let session = self.connected(&peer)?;
+        crate::storage::download(&self.shared, &session, remote.into(), dest).await
     }
 
     /// Uploads a local file to `path` on a connected phone (`storage.write`).

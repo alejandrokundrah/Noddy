@@ -131,7 +131,25 @@ with the same `id` resumes from `have` bytes. Once all `size` bytes arrive, the
 phone atomically commits the file to `path` (applying `modified` if given) and
 sends `storage.write.done`.
 
-## 5. Security and privacy
+## 5. Computers
+
+A computer may also serve its folders to another paired computer (capability
+`storage.read`; the matrix feature is `desktop.files`). The serving computer
+treats it more narrowly than a phone:
+
+- **Read only.** `storage.list` and `storage.read` work; `storage.write`,
+  `storage.mkdir`, `storage.rename` and `storage.delete` are answered with
+  `denied`.
+- **Per computer, off by default.** The serving computer answers `denied`
+  until its owner turns on `share_folders` for that peer (a device toggle,
+  see [toggles](toggles.md)). Pairing alone shares nothing. The first refused
+  request raises a single `StorageRequested` event so the owner can allow it.
+- Turning the toggle off takes effect on the next request.
+
+Phones are unaffected: they are gated by the PC's folder-sharing setting and
+the `storage` toggle as before.
+
+## 6. Security and privacy
 
 - The phone never exposes `/data` or its own private app directories.
 - Every path is validated before touching the filesystem, and canonical paths

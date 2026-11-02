@@ -371,6 +371,10 @@ pub const DEVICE_TOGGLES: &[(&str, bool)] = &[
     ("commands", false),
     // Browsing the PC's files from anywhere is opt-in.
     ("remote_files", false),
+    // Letting another paired computer browse and download this PC's shared
+    // folders is opt-in, per computer. (Phones are gated by the app's
+    // "share this PC's folders" setting alone, as before.)
+    ("share_folders", false),
 ];
 
 /// The default for a toggle, or `None` if no such toggle exists.
@@ -389,10 +393,11 @@ pub struct MatrixInputs<'a> {
     pub toggles: &'a HashMap<String, bool>,
 }
 
-/// Computes the state of every feature in [`FEATURES`] and
-/// [`ANDROID_PAIR_FEATURES`] for one pair: the first for a phone (or
-/// tablet) and a PC, the second for two Android devices; the other list is
-/// Unsupported for the pair.
+/// Computes the state of every feature in [`FEATURES`],
+/// [`ANDROID_PAIR_FEATURES`] and [`DESKTOP_PAIR_FEATURES`] for one pair: the
+/// first for a phone (or tablet) and a PC, the second for two Android
+/// devices, the third for two PCs; the other lists are Unsupported for the
+/// pair.
 pub fn compute(device: DeviceId, inputs: MatrixInputs<'_>) -> CapabilityMatrix {
     let (local, peer) = (inputs.local, inputs.peer);
     let pc_pair = match (local.role(), peer.role()) {
@@ -401,6 +406,7 @@ pub fn compute(device: DeviceId, inputs: MatrixInputs<'_>) -> CapabilityMatrix {
         _ => None,
     };
     let android_pair = local.os == "android" && peer.os == "android";
+    let desktop_pair = matches!((local.role(), peer.role()), (Some(Role::Desktop), Some(Role::Desktop)));
     let run = |list: &'static [FeatureDef], applies: Option<(&DeviceFacts, &DeviceFacts)>| {
         list.iter()
             .map(|def| {
@@ -426,6 +432,9 @@ pub fn compute(device: DeviceId, inputs: MatrixInputs<'_>) -> CapabilityMatrix {
     // other device (and its Android version).
     let mut features = run(FEATURES, pc_pair);
     features.extend(run(ANDROID_PAIR_FEATURES, android_pair.then_some((peer, local))));
+    // Requirements here are about the peer or this device, not about a phone
+    // or a computer role, so which one is passed as which doesn't matter.
+    features.extend(run(DESKTOP_PAIR_FEATURES, desktop_pair.then_some((peer, local))));
     let features = features.into_iter().collect();
     CapabilityMatrix { device, features }
 }
@@ -599,6 +608,16 @@ const fn peer(id: &'static str) -> Requirement {
 const fn here(id: &'static str) -> Requirement {
     Requirement::Here { id, unlock: Unlock::UpdateApp }
 }
+
+/// What two computers do for each other, from this device's side.
+/// The other computer decides what it shares (its `share_folders` toggle for
+/// this one), so what is checked here is only that it can.
+pub const DESKTOP_PAIR_FEATURES: &[FeatureDef] = &[FeatureDef {
+    id: "desktop.files",
+    group: FeatureGroup::Files,
+    requires: &[peer("storage.read")],
+    partial: None,
+}];
 
 /// What a phone and a tablet (or two phones) do for each other, from this
 /// device's side: the other one's battery, ringing it, its notifications
@@ -1327,11 +1346,34 @@ mod tests {
     #[test]
     fn pairs_without_a_phone_and_a_desktop_are_unsupported() {
         let m = matrix_with(&pc(), &pc(), &HashMap::new());
+        let unsupported = FeatureState::Unsupported { reason: UnsupportedReason::DeviceKinds };
+        // Everything but what two computers do for each other.
         assert!(
-            m.features
-                .values()
-                .all(|s| *s == FeatureState::Unsupported { reason: UnsupportedReason::DeviceKinds })
+            m.features.iter().filter(|(id, _)| !id.starts_with("desktop.")).all(|(_, s)| *s == unsupported)
         );
+        // And what a phone and a computer do for each other isn't about two computers.
+        let phone = facts(DeviceKind::Phone, "android", "16", PowerLevel::Basic, BASIC_PHONE);
+        assert_eq!(matrix_with(&phone, &pc(), &HashMap::new()).state("desktop.files"), Some(unsupported));
+    }
+
+    #[test]
+    fn two_computers_can_browse_each_others_folders_when_the_other_offers_them() {
+        // `matrix_with` takes the peer first, then this device.
+        let mut other = pc();
+        other.caps.remove("storage.read");
+        let m = matrix_with(&other, &pc(), &HashMap::new());
+        assert!(
+            matches!(m.state("desktop.files"), Some(FeatureState::Locked { .. })),
+            "a computer that doesn't offer its folders can be asked to update: {:?}",
+            m.state("desktop.files")
+        );
+        other.caps.insert("storage.read".to_owned());
+        let m = matrix_with(&other, &pc(), &HashMap::new());
+        assert_eq!(m.state("desktop.files"), Some(FeatureState::Available));
+        // What the other computer lets this one see is that computer's decision (its
+        // `share_folders` toggle), not something this device's toggles change.
+        let off = HashMap::from([("share_folders".to_owned(), false)]);
+        assert_eq!(matrix_with(&other, &pc(), &off).state("desktop.files"), Some(FeatureState::Available));
     }
 
     #[test]
