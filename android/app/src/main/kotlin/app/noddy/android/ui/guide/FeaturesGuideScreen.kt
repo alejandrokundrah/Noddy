@@ -66,11 +66,9 @@ import app.noddy.android.photos.RecentPhotos
 import app.noddy.android.sms.PhoneSms
 import app.noddy.android.storage.PhoneStorage
 import app.noddy.android.toggles.PhoneToggles
-import app.noddy.android.ui.theme.LocalGlassTheme
-import app.noddy.android.ui.theme.bentoWell
-import app.noddy.android.ui.theme.glassModalBlur
-import app.noddy.android.ui.theme.glassModalContainerColor
-import app.noddy.android.ui.theme.liquidGlassCard
+import app.noddy.android.ui.theme.insetWell
+import app.noddy.android.ui.theme.modalContainerColor
+import app.noddy.android.ui.theme.softCard
 import kotlinx.coroutines.launch
 
 /**
@@ -105,7 +103,6 @@ fun FeaturesGuideScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val isGlass = LocalGlassTheme.current
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var selectedAreaId by rememberSaveable { mutableStateOf(FeatureArea.All.id) }
     var activeLearnMoreId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -229,8 +226,7 @@ fun FeaturesGuideScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .windowInsetsPadding(WindowInsets.safeDrawing)
-                .glassModalBlur(isGlass && activeLearnMoreEntry != null),
+                .windowInsetsPadding(WindowInsets.safeDrawing),
             contentPadding = PaddingValues(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 36.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -268,7 +264,7 @@ fun FeaturesGuideScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .bentoWell(
+                                .insetWell(
                                     cornerRadius = 16.dp,
                                     fillColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                                 )
@@ -327,10 +323,9 @@ fun FeaturesGuideScreen(
                             }
                             Box(
                                 modifier = Modifier
-                                    .bentoWell(
+                                    .insetWell(
                                         cornerRadius = 10.dp,
                                         fillColor = chipBg,
-                                        borderColor = chipBorder,
                                     )
                                     .clickable(role = Role.Tab) { selectedAreaId = area.id }
                                     .padding(horizontal = 14.dp, vertical = 8.dp),
@@ -352,12 +347,9 @@ fun FeaturesGuideScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .liquidGlassCard(
+                            .softCard(
                                 cornerRadius = 24.dp,
-                                isGlass = isGlass,
                                 baseColor = MaterialTheme.colorScheme.surfaceContainer,
-                                tintColor = MaterialTheme.colorScheme.primary,
-                                outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
                             )
                             .padding(20.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -385,7 +377,6 @@ fun FeaturesGuideScreen(
                 ) { card ->
                     FeatureGuideCard(
                         card = card,
-                        isGlass = isGlass,
                         showMeLabel = showMeLabel,
                         learnMoreLabel = learnMoreLabel,
                         externalHeading = externalHeading,
@@ -403,7 +394,7 @@ fun FeaturesGuideScreen(
         ModalBottomSheet(
             onDismissRequest = { activeLearnMoreId = null },
             sheetState = sheetState,
-            containerColor = glassModalContainerColor(),
+            containerColor = modalContainerColor(),
         ) {
             FeatureLearnMoreSheetContent(
                 entry = activeLearnMoreEntry,
@@ -423,7 +414,6 @@ fun FeaturesGuideScreen(
 @Composable
 private fun FeatureGuideCard(
     card: ResolvedGuideCard,
-    isGlass: Boolean,
     showMeLabel: String,
     learnMoreLabel: String,
     externalHeading: String,
@@ -434,12 +424,9 @@ private fun FeatureGuideCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .liquidGlassCard(
+            .softCard(
                 cornerRadius = 26.dp,
-                isGlass = isGlass,
                 baseColor = MaterialTheme.colorScheme.surfaceContainer,
-                tintColor = MaterialTheme.colorScheme.primary,
-                outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
             )
             .padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -464,7 +451,7 @@ private fun FeatureGuideCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .bentoWell(
+                .insetWell(
                     cornerRadius = 16.dp,
                     fillColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 )
@@ -487,7 +474,7 @@ private fun FeatureGuideCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .bentoWell(
+                    .insetWell(
                         cornerRadius = 16.dp,
                         fillColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.65f),
                     )
@@ -518,7 +505,7 @@ private fun FeatureGuideCard(
             if (card.showMeTarget != null) {
                 Box(
                     modifier = Modifier
-                        .bentoWell(
+                        .insetWell(
                             cornerRadius = 20.dp,
                             fillColor = MaterialTheme.colorScheme.secondaryContainer,
                         )
@@ -549,7 +536,7 @@ private fun FeatureGuideCard(
             if (card.fixAction != null && card.fixButtonLabel != null) {
                 Box(
                     modifier = Modifier
-                        .bentoWell(
+                        .insetWell(
                             cornerRadius = 20.dp,
                             fillColor = MaterialTheme.colorScheme.primary,
                         )
@@ -595,7 +582,7 @@ private fun FeatureBadgeChip(
         style = MaterialTheme.typography.labelSmall,
         color = fg,
         modifier = Modifier
-            .bentoWell(cornerRadius = 10.dp, fillColor = bg)
+            .insetWell(cornerRadius = 10.dp, fillColor = bg)
             .padding(horizontal = 8.dp, vertical = 4.dp),
     )
 }

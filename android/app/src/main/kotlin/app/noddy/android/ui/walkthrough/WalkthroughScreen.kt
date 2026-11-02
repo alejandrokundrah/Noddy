@@ -105,10 +105,9 @@ import app.noddy.android.sms.PhoneSms
 import app.noddy.android.storage.PhoneStorage
 import app.noddy.android.ui.pairing.PairingActions
 import app.noddy.android.ui.pairing.QrScanner
-import app.noddy.android.ui.theme.LocalGlassTheme
 import app.noddy.android.ui.theme.LocalReducedMotion
-import app.noddy.android.ui.theme.bentoWell
-import app.noddy.android.ui.theme.liquidGlassCard
+import app.noddy.android.ui.theme.insetWell
+import app.noddy.android.ui.theme.softCard
 import app.noddy.core.DiscoveredDevice
 import app.noddy.core.PairingFailure
 import kotlinx.coroutines.launch
@@ -135,7 +134,6 @@ fun WalkthroughScreen(
 ) {
     val context = LocalContext.current
     val reducedMotion = LocalReducedMotion.current
-    val isGlass = LocalGlassTheme.current
 
     BackHandler(enabled = step.previous != null) {
         step.previous?.let(onStepChange)
@@ -195,7 +193,6 @@ fun WalkthroughScreen(
 
             WalkthroughStepHeader(
                 step = step,
-                isGlass = isGlass,
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(14.dp))
@@ -228,28 +225,23 @@ fun WalkthroughScreen(
             ) { targetStep ->
                 when (targetStep) {
                     WalkthroughStep.Welcome -> WelcomeStepContent(
-                        isGlass = isGlass,
                     )
                     WalkthroughStep.Permissions -> PermissionsStepContent(
                         state = state,
                         postNotifGranted = postNotifGranted,
-                        isGlass = isGlass,
                         onAccessChanged = onAccessChanged,
                     )
                     WalkthroughStep.Pair -> PairStepContent(
                         state = state,
                         actions = pairingActions,
-                        isGlass = isGlass,
                         onContinue = { onStepChange(WalkthroughStep.PowerLevel) },
                     )
                     WalkthroughStep.PowerLevel -> PowerLevelStepContent(
                         state = state,
-                        isGlass = isGlass,
                         onAccessChanged = onAccessChanged,
                     )
                     WalkthroughStep.Done -> DoneStepContent(
                         state = state,
-                        isGlass = isGlass,
                     )
                 }
             }
@@ -304,7 +296,7 @@ private fun WalkthroughTopProgressRow(
                     modifier = Modifier
                         .weight(1f)
                         .height(6.dp)
-                        .bentoWell(cornerRadius = 3.dp, fillColor = color)
+                        .insetWell(cornerRadius = 3.dp, fillColor = color)
                         .clickable(role = Role.Tab) { onSelectStep(item) },
                 )
             }
@@ -406,7 +398,6 @@ private fun WalkthroughFooterBar(
 @Composable
 private fun WalkthroughStepHeader(
     step: WalkthroughStep,
-    isGlass: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val stageDesc = stringResource(
@@ -416,12 +407,9 @@ private fun WalkthroughStepHeader(
     )
     Row(
         modifier = modifier
-            .liquidGlassCard(
+            .softCard(
                 cornerRadius = 24.dp,
-                isGlass = isGlass,
                 baseColor = MaterialTheme.colorScheme.surfaceContainer,
-                tintColor = MaterialTheme.colorScheme.primary,
-                outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
             )
             .semantics { contentDescription = stageDesc }
             .padding(horizontal = 16.dp, vertical = 14.dp),
@@ -468,7 +456,6 @@ private fun DrawScope.drawCheckGlyph(
 
 @Composable
 private fun WelcomeStepContent(
-    isGlass: Boolean,
 ) {
     Column(
         modifier = Modifier
@@ -489,12 +476,9 @@ private fun WelcomeStepContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .liquidGlassCard(
+                .softCard(
                     cornerRadius = 24.dp,
-                    isGlass = isGlass,
                     baseColor = MaterialTheme.colorScheme.surfaceContainer,
-                    tintColor = MaterialTheme.colorScheme.primary,
-                    outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
                 )
                 .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -558,7 +542,6 @@ private data class WalkthroughPermissionSpec(
 private fun PermissionsStepContent(
     state: CoreState,
     postNotifGranted: Boolean,
-    isGlass: Boolean,
     onAccessChanged: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -726,12 +709,9 @@ private fun PermissionsStepContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .liquidGlassCard(
+                .softCard(
                     cornerRadius = 24.dp,
-                    isGlass = isGlass,
                     baseColor = MaterialTheme.colorScheme.surfaceContainer,
-                    tintColor = MaterialTheme.colorScheme.primary,
-                    outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
                 )
                 .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -929,7 +909,6 @@ private fun RestrictedSettingsHelp(onOpenAppInfo: () -> Unit) {
 private fun PairStepContent(
     state: CoreState,
     actions: PairingActions,
-    isGlass: Boolean,
     onContinue: () -> Unit,
 ) {
     var showQrScanner by rememberSaveable { mutableStateOf(false) }
@@ -958,12 +937,9 @@ private fun PairStepContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .liquidGlassCard(
+                .softCard(
                     cornerRadius = 24.dp,
-                    isGlass = isGlass,
                     baseColor = MaterialTheme.colorScheme.surfaceContainer,
-                    tintColor = MaterialTheme.colorScheme.primary,
-                    outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
                 )
                 .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -1245,7 +1221,6 @@ private fun PairingStatusCard(
 @Composable
 private fun PowerLevelStepContent(
     state: CoreState,
-    isGlass: Boolean,
     onAccessChanged: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -1290,12 +1265,9 @@ private fun PowerLevelStepContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .liquidGlassCard(
+                .softCard(
                     cornerRadius = 24.dp,
-                    isGlass = isGlass,
                     baseColor = MaterialTheme.colorScheme.surfaceContainer,
-                    tintColor = MaterialTheme.colorScheme.primary,
-                    outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
                 )
                 .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -1405,7 +1377,7 @@ private fun PowerLevelStepContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 4.dp)
-                            .bentoWell(
+                            .insetWell(
                                 cornerRadius = 16.dp,
                                 fillColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                             )
@@ -1494,7 +1466,6 @@ private fun PowerLevelRow(
 @Composable
 private fun DoneStepContent(
     state: CoreState,
-    isGlass: Boolean,
 ) {
     val noPcText = stringResource(R.string.walkthrough_done_no_pc)
     val pairedText = if (state.devices.isNotEmpty()) {
@@ -1552,12 +1523,9 @@ private fun DoneStepContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .liquidGlassCard(
+                .softCard(
                     cornerRadius = 24.dp,
-                    isGlass = isGlass,
                     baseColor = MaterialTheme.colorScheme.surfaceContainer,
-                    tintColor = MaterialTheme.colorScheme.primary,
-                    outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
                 )
                 .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -1623,7 +1591,7 @@ internal fun StatusPillBadge(
         maxLines = 1,
         softWrap = false,
         modifier = Modifier
-            .bentoWell(cornerRadius = 10.dp, fillColor = bg)
+            .insetWell(cornerRadius = 10.dp, fillColor = bg)
             .padding(horizontal = 8.dp, vertical = 4.dp),
     )
 }

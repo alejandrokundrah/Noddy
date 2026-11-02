@@ -52,9 +52,6 @@
     <string name="settings_title">Ayarlar</string>
     <string name="settings_appearance">Görünüm</string>
     <string name="settings_mode">Mod</string>
-    <string name="settings_theme">Tema</string>
-    <string name="theme_glass">Cam</string>
-    <string name="theme_ember">Ember</string>
     <string name="home_stat_battery">Pil</string>
     <string name="settings_language">Dil</string>
     <string name="settings_language_more">Daha fazla</string>
@@ -1362,6 +1359,18 @@
     <string name="home_stat_clipboard">Pano</string>
     <string name="home_stat_timeline">Geçmiş</string>
     <string name="home_connected_count">%1$d / %2$d PC bağlı</string>
+    <string name="remote_mode_pad">Tuş takımı</string>
+    <string name="remote_pad_ok">TAMAM</string>
+    <string name="remote_pad_ok_desc">Enter</string>
+    <string name="remote_pad_volume_up">Sesi artır</string>
+    <string name="remote_pad_volume_down">Sesi azalt</string>
+    <string name="remote_pad_page">SAYFA</string>
+    <string name="remote_pad_page_up">Sayfa yukarı</string>
+    <string name="remote_pad_page_down">Sayfa aşağı</string>
+    <string name="remote_pad_back">Geri</string>
+    <string name="remote_pad_exit">Çıkış</string>
+    <string name="remote_pad_space">Boşluk</string>
+    <string name="remote_pad_task_view">Görev görünümü</string>
 </resources>
 
 

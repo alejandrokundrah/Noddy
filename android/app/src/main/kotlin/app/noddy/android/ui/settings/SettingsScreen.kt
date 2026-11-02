@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -81,10 +82,8 @@ import androidx.compose.ui.draw.drawBehind
 import app.noddy.android.notifications.NotificationListener
 import app.noddy.android.ui.guide.GuideHighlightTarget
 import app.noddy.android.ui.theme.Appearance
-import app.noddy.android.ui.theme.LocalGlassTheme
-import app.noddy.android.ui.theme.glassModalBlur
-import app.noddy.android.ui.theme.glassModalContainerColor
-import app.noddy.android.ui.theme.liquidGlassCard
+import app.noddy.android.ui.theme.modalContainerColor
+import app.noddy.android.ui.theme.softCard
 import kotlinx.coroutines.delay
 
 @Composable
@@ -129,7 +128,6 @@ fun SettingsScreen(
     var pickLanguage by remember { mutableStateOf(false) }
     var activeCategory by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf("all") }
     var pulsingSectionKey by remember { mutableStateOf<String?>(null) }
-    val isGlass = LocalGlassTheme.current
     val anyDialogOpen = confirmUnpair != null || confirmClearEverything
 
     val categories = remember {
@@ -185,7 +183,7 @@ fun SettingsScreen(
 
     LazyColumn(
         state = listState,
-        modifier = modifier.glassModalBlur(isGlass && anyDialogOpen),
+        modifier = modifier,
         contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 104.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -232,26 +230,15 @@ fun SettingsScreen(
         if (showAppearance) {
             item(key = "appearance", contentType = "section") {
                 Section(stringResource(R.string.settings_appearance)) {
-                    Label(stringResource(R.string.settings_theme))
+                    Label(stringResource(R.string.settings_mode))
                     Choice(
                         listOf(
-                            "glass" to stringResource(R.string.theme_glass),
-                            "ember" to stringResource(R.string.theme_ember),
+                            "system" to stringResource(R.string.mode_system),
+                            "light" to stringResource(R.string.mode_light),
+                            "dark" to stringResource(R.string.mode_dark),
                         ),
-                        appearance.theme,
-                    ) { value -> onAppearance { it.copy(theme = value) } }
-                    // Ember is always dark, so there is no mode to pick.
-                    if (!appearance.isEmber) {
-                        Label(stringResource(R.string.settings_mode))
-                        Choice(
-                            listOf(
-                                "system" to stringResource(R.string.mode_system),
-                                "light" to stringResource(R.string.mode_light),
-                                "dark" to stringResource(R.string.mode_dark),
-                            ),
-                            appearance.mode,
-                        ) { value -> onAppearance { it.copy(mode = value) } }
-                    }
+                        appearance.mode,
+                    ) { value -> onAppearance { it.copy(mode = value) } }
                     if (AppLanguage.supported) {
                         // System and English, plus the language picked from the list (or More).
                         val context = LocalContext.current
@@ -793,7 +780,7 @@ fun SettingsScreen(
     confirmUnpair?.let { device ->
         AlertDialog(
             onDismissRequest = { confirmUnpair = null },
-            containerColor = glassModalContainerColor(),
+            containerColor = modalContainerColor(),
             title = { Text(stringResource(R.string.unpair_title, device.name)) },
             text = { Text(stringResource(R.string.unpair_text)) },
             confirmButton = {
@@ -812,7 +799,7 @@ fun SettingsScreen(
         val language = remember { AppLanguage.current(context) }
         AlertDialog(
             onDismissRequest = { pickLanguage = false },
-            containerColor = glassModalContainerColor(),
+            containerColor = modalContainerColor(),
             title = { Text(stringResource(R.string.settings_language)) },
             text = {
                 Column {
@@ -843,7 +830,7 @@ fun SettingsScreen(
     if (confirmClearEverything) {
         AlertDialog(
             onDismissRequest = { confirmClearEverything = false },
-            containerColor = glassModalContainerColor(),
+            containerColor = modalContainerColor(),
             title = { Text(stringResource(R.string.data_clear_everything_dialog_title)) },
             text = { Text(stringResource(R.string.data_clear_everything_dialog_body)) },
             confirmButton = {
@@ -1326,14 +1313,7 @@ private fun StorageAccess(
 
 @Composable
 private fun SettingRowDivider() {
-    val isGlass = LocalGlassTheme.current
-    HorizontalDivider(
-        color = if (isGlass) {
-            MaterialTheme.colorScheme.outlineVariant
-        } else {
-            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
-        },
-    )
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f))
 }
 
 @Composable
@@ -1342,7 +1322,6 @@ private fun Section(
     highlighted: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    val isGlass = LocalGlassTheme.current
     val scheme = MaterialTheme.colorScheme
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -1356,15 +1335,15 @@ private fun Section(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .liquidGlassCard(
-                    cornerRadius = if (isGlass) 24.dp else 16.dp,
-                    isGlass = isGlass,
+                .softCard(
+                    cornerRadius = 24.dp,
                     baseColor = if (highlighted) scheme.secondaryContainer else scheme.surfaceContainer,
-                    tintColor = scheme.primary,
-                    outlineColor = when {
-                        highlighted -> scheme.primary
-                        isGlass -> scheme.outlineVariant
-                        else -> androidx.compose.ui.graphics.Color.Transparent
+                )
+                .then(
+                    if (highlighted) {
+                        Modifier.border(2.dp, scheme.primary, androidx.compose.foundation.shape.RoundedCornerShape(24.dp))
+                    } else {
+                        Modifier
                     },
                 )
                 .padding(16.dp),
