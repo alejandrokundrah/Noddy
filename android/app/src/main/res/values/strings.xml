@@ -1372,6 +1372,19 @@
     <string name="remote_pad_exit">Exit</string>
     <string name="remote_pad_space">Space</string>
     <string name="remote_pad_task_view">Task view</string>
+    <string name="home_dash_chip">Noddy</string>
+    <string name="home_dash_none">Pair your PC</string>
+    <string name="home_dash_searching">Searching for %1$s…</string>
+    <string name="home_dash_connected">%1$s is connected</string>
+    <string name="home_dash_offline">%1$s is offline</string>
+    <string name="home_tile_remote">Remote</string>
+    <string name="home_tile_files">Files</string>
+    <string name="home_tile_clipboard">Clipboard</string>
+    <string name="home_dock_devices">Devices</string>
+    <string name="home_dash_notice_none">Pair your first PC to control it from this phone.</string>
+    <string name="home_dash_notice_offline">%1$s is offline. Tap to wake it or check its connection.</string>
+    <string name="home_dash_notice_background">Background connection is off. Tap to turn it on.</string>
+    <string name="home_dash_notice_ok">Everything is connected. Tap for transfers, media and more.</string>
 </resources>
 
 

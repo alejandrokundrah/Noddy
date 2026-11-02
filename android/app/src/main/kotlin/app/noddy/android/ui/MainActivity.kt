@@ -69,6 +69,7 @@ import app.noddy.android.service.ConnectionService
 import app.noddy.android.ui.deck.DeckScreen
 import app.noddy.android.ui.guide.FeaturesGuideScreen
 import app.noddy.android.ui.guide.GuideHighlightTarget
+import app.noddy.android.ui.home.HomeDashboard
 import app.noddy.android.ui.home.HomeScreen
 import app.noddy.android.ui.pairing.PairingActions
 import app.noddy.android.ui.pairing.PairingScreen
@@ -304,7 +305,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class Tab { Home, Settings }
+private enum class Tab { Home, Devices, Settings }
 
 private sealed interface ScreenRoute {
     data object Starting : ScreenRoute
@@ -346,6 +347,7 @@ private fun App(
     var featuresGuideOpen by rememberSaveable { mutableStateOf(false) }
     var pendingHighlightTarget by rememberSaveable { mutableStateOf<GuideHighlightTarget?>(null) }
     var remotePcId by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedPcId by rememberSaveable { mutableStateOf<String?>(null) }
     var remoteInitialMode by rememberSaveable { mutableStateOf(RemoteMode.Touchpad) }
     var deckPcId by rememberSaveable { mutableStateOf<String?>(null) }
     var deskPcId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -610,7 +612,7 @@ private fun App(
                                 GuideHighlightTarget.HOME_TIMELINE,
                                 GuideHighlightTarget.HOME_SEND_QUEUE,
                                 GuideHighlightTarget.HOME_SETUP_PERMISSIONS,
-                                GuideHighlightTarget.HOME_LOCALSEND -> Tab.Home
+                                GuideHighlightTarget.HOME_LOCALSEND -> Tab.Devices
                                 GuideHighlightTarget.SETTINGS_DEVICES,
                                 GuideHighlightTarget.SETTINGS_NOTIFICATIONS,
                                 GuideHighlightTarget.SETTINGS_CONTROL,
@@ -746,6 +748,18 @@ private fun App(
                             onSelectTab = { tab = it },
                             onlineCount = onlineCount,
                             pairedCount = pairedCount,
+                            onRemote = {
+                                val pcs = state.devices.filter { !it.isAndroid }
+                                val pc = pcs.firstOrNull { it.id == selectedPcId }
+                                    ?: pcs.firstOrNull { it.online }
+                                    ?: pcs.firstOrNull()
+                                if (pc == null) {
+                                    pairing = true
+                                } else {
+                                    remoteInitialMode = RemoteMode.Pad
+                                    remotePcId = pc.id
+                                }
+                            },
                         )
                     },
                 ) { padding ->
@@ -799,6 +813,44 @@ private fun App(
                     ) { shownTab ->
                         when (shownTab) {
                             Tab.Home -> saveableStateHolder.SaveableStateProvider("tab_home") {
+                                HomeDashboard(
+                                    state = state,
+                                    selectedPcId = selectedPcId,
+                                    onSelectPc = { selectedPcId = it },
+                                    backgroundServiceEnabled = backgroundServiceEnabled,
+                                    micStreamingTo = micStreamingTo,
+                                    onPairNew = { pairing = true },
+                                    onRefresh = core::refresh,
+                                    onWake = core::wake,
+                                    onOpenRemote = { id ->
+                                        remoteInitialMode = RemoteMode.Pad
+                                        remotePcId = id
+                                    },
+                                    onOpenScreen = { id ->
+                                        remoteInitialMode = RemoteMode.Screen
+                                        remotePcId = id
+                                    },
+                                    onOpenDevices = { tab = Tab.Devices },
+                                    onOpenSettings = { tab = Tab.Settings },
+                                    onSendFiles = core::sendFiles,
+                                    onWebcam = { id ->
+                                        webcamAutoStart = false
+                                        webcamPcId = id
+                                    },
+                                    onRecord = { id -> recordPcId = id },
+                                    onDeck = { id -> deckPcId = id },
+                                    onStartMic = { pcId ->
+                                        // Asks for the microphone permission if needed, then starts.
+                                        context.startActivity(
+                                            android.content.Intent(context, app.noddy.android.mic.MicStartActivity::class.java)
+                                                .putExtra(app.noddy.android.mic.MicStartActivity.EXTRA_PC, pcId),
+                                        )
+                                    },
+                                    onStopMic = { app.noddy.android.mic.MicService.stopFromUser(context) },
+                                    modifier = Modifier.fillMaxSize(),
+                                )
+                            }
+                            Tab.Devices -> saveableStateHolder.SaveableStateProvider("tab_devices") {
                                 HomeScreen(
                                     state = state,
                                     onRing = core::ring,
@@ -966,21 +1018,28 @@ private fun App(
     }
 }
 
-/** The bottom dock: Home and Settings, the selected one on a lighter tile with an orange icon. */
+/**
+ * The bottom dock: Home, Devices, the PC's remote, and Settings. The remote opens its own
+ * screen, so the highlighted item is always the tab you are on.
+ */
 @Composable
 private fun AppDock(
     selectedTab: Tab,
     onSelectTab: (Tab) -> Unit,
     onlineCount: Int,
     pairedCount: Int,
+    onRemote: () -> Unit,
 ) {
     val scheme = MaterialTheme.colorScheme
-    val tabs = listOf(Tab.Home, Tab.Settings)
     BottomDock(
         items = listOf(
             DockItem(
                 icon = painterResource(R.drawable.ic_home),
                 label = stringResource(R.string.home_title),
+            ),
+            DockItem(
+                icon = painterResource(R.drawable.ic_devices),
+                label = stringResource(R.string.home_dock_devices),
                 dot = when {
                     onlineCount > 0 -> scheme.primary
                     pairedCount > 0 -> scheme.outline
@@ -988,12 +1047,27 @@ private fun AppDock(
                 },
             ),
             DockItem(
+                icon = painterResource(R.drawable.ic_remote),
+                label = stringResource(R.string.action_remote_pc),
+            ),
+            DockItem(
                 icon = painterResource(R.drawable.ic_settings),
                 label = stringResource(R.string.settings_title),
             ),
         ),
-        selectedIndex = tabs.indexOf(selectedTab).coerceAtLeast(0),
-        onSelect = { onSelectTab(tabs[it]) },
+        selectedIndex = when (selectedTab) {
+            Tab.Home -> 0
+            Tab.Devices -> 1
+            Tab.Settings -> 3
+        },
+        onSelect = { index ->
+            when (index) {
+                0 -> onSelectTab(Tab.Home)
+                1 -> onSelectTab(Tab.Devices)
+                2 -> onRemote()
+                else -> onSelectTab(Tab.Settings)
+            }
+        },
         modifier = Modifier
             .windowInsetsPadding(androidx.compose.foundation.layout.WindowInsets.navigationBars)
             .padding(horizontal = 20.dp, vertical = 8.dp),

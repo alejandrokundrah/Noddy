@@ -1371,6 +1371,19 @@
     <string name="remote_pad_exit">Çıkış</string>
     <string name="remote_pad_space">Boşluk</string>
     <string name="remote_pad_task_view">Görev görünümü</string>
+    <string name="home_dash_chip">Noddy</string>
+    <string name="home_dash_none">PC\'nizi eşleyin</string>
+    <string name="home_dash_searching">%1$s aranıyor…</string>
+    <string name="home_dash_connected">%1$s bağlı</string>
+    <string name="home_dash_offline">%1$s çevrimdışı</string>
+    <string name="home_tile_remote">Kumanda</string>
+    <string name="home_tile_files">Dosyalar</string>
+    <string name="home_tile_clipboard">Pano</string>
+    <string name="home_dock_devices">Cihazlar</string>
+    <string name="home_dash_notice_none">Bu telefondan kontrol etmek için ilk PC\'nizi eşleyin.</string>
+    <string name="home_dash_notice_offline">%1$s çevrimdışı. Uyandırmak veya bağlantıyı kontrol etmek için dokunun.</string>
+    <string name="home_dash_notice_background">Arka plan bağlantısı kapalı. Açmak için dokunun.</string>
+    <string name="home_dash_notice_ok">Her şey bağlı. Aktarımlar, medya ve daha fazlası için dokunun.</string>
 </resources>
 
 

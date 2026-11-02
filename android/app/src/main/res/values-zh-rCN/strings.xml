@@ -1232,4 +1232,17 @@
     <string name="remote_pad_exit">退出</string>
     <string name="remote_pad_space">空格</string>
     <string name="remote_pad_task_view">任务视图</string>
+    <string name="home_dash_chip">Noddy</string>
+    <string name="home_dash_none">配对你的电脑</string>
+    <string name="home_dash_searching">正在查找 %1$s…</string>
+    <string name="home_dash_connected">%1$s 已连接</string>
+    <string name="home_dash_offline">%1$s 已离线</string>
+    <string name="home_tile_remote">遥控</string>
+    <string name="home_tile_files">文件</string>
+    <string name="home_tile_clipboard">剪贴板</string>
+    <string name="home_dock_devices">设备</string>
+    <string name="home_dash_notice_none">配对你的第一台电脑，即可用这部手机控制它。</string>
+    <string name="home_dash_notice_offline">%1$s 已离线。点按以唤醒或检查连接。</string>
+    <string name="home_dash_notice_background">后台连接已关闭。点按以开启。</string>
+    <string name="home_dash_notice_ok">一切已连接。点按查看传输、媒体等。</string>
 </resources>
