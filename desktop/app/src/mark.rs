@@ -227,7 +227,7 @@ mod tests {
         pixel(img, size, (x / 100.0 * size as f32) as usize, (y / 100.0 * size as f32) as usize)
     }
 
-    const CREAM: [u8; 4] = [0xFF, 0xF8, 0xF3, 255];
+    const CREAM: [u8; 4] = [0xF4, 0xF4, 0xF5, 255];
 
     #[test]
     fn corners_are_transparent_and_the_tile_is_dark() {
