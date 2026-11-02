@@ -612,12 +612,35 @@ const fn here(id: &'static str) -> Requirement {
 /// What two computers do for each other, from this device's side.
 /// The other computer decides what it shares (its `share_folders` toggle for
 /// this one), so what is checked here is only that it can.
-pub const DESKTOP_PAIR_FEATURES: &[FeatureDef] = &[FeatureDef {
-    id: "desktop.files",
-    group: FeatureGroup::Files,
-    requires: &[peer("storage.read")],
-    partial: None,
-}];
+pub const DESKTOP_PAIR_FEATURES: &[FeatureDef] = &[
+    FeatureDef {
+        id: "desktop.files",
+        group: FeatureGroup::Files,
+        requires: &[peer("storage.read")],
+        partial: None,
+    },
+    // Making the other computer sound an alarm to find it.
+    FeatureDef {
+        id: "desktop.ring",
+        group: FeatureGroup::Device,
+        requires: &[peer("device.ring")],
+        partial: None,
+    },
+    // Sending it files and folders.
+    FeatureDef {
+        id: "desktop.send_files",
+        group: FeatureGroup::Files,
+        requires: &[peer("files.transfer"), DeviceToggle("files")],
+        partial: None,
+    },
+    // Sending it the clipboard.
+    FeatureDef {
+        id: "desktop.clipboard",
+        group: FeatureGroup::Clipboard,
+        requires: &[peer("clip.write"), DeviceToggle("clipboard")],
+        partial: None,
+    },
+];
 
 /// What a phone and a tablet (or two phones) do for each other, from this
 /// device's side: the other one's battery, ringing it, its notifications
@@ -1374,6 +1397,32 @@ mod tests {
         // `share_folders` toggle), not something this device's toggles change.
         let off = HashMap::from([("share_folders".to_owned(), false)]);
         assert_eq!(matrix_with(&other, &pc(), &off).state("desktop.files"), Some(FeatureState::Available));
+    }
+
+    #[test]
+    fn two_computers_can_find_message_and_send_things_to_each_other() {
+        let mut other = pc();
+        other.caps.extend(["device.ring", "files.transfer", "clip.write"].map(str::to_owned));
+        let m = matrix_with(&other, &pc(), &HashMap::new());
+        for id in ["desktop.ring", "desktop.send_files", "desktop.clipboard"] {
+            assert_eq!(m.state(id), Some(FeatureState::Available), "{id}");
+        }
+        // The user's per-device switches apply, like for a phone.
+        let off = HashMap::from([("files".to_owned(), false), ("clipboard".to_owned(), false)]);
+        let m = matrix_with(&other, &pc(), &off);
+        assert!(matches!(m.state("desktop.send_files"), Some(FeatureState::Locked { .. })));
+        assert!(matches!(m.state("desktop.clipboard"), Some(FeatureState::Locked { .. })));
+        assert_eq!(m.state("desktop.ring"), Some(FeatureState::Available));
+        // A computer whose app is too old to take a clipboard is asked to update.
+        other.caps.remove("clip.write");
+        let m = matrix_with(&other, &pc(), &HashMap::new());
+        assert!(matches!(m.state("desktop.clipboard"), Some(FeatureState::Locked { .. })));
+        // None of it applies between a phone and a computer: they use their own features.
+        let phone = facts(DeviceKind::Phone, "android", "16", PowerLevel::Basic, BASIC_PHONE);
+        let m = matrix_with(&phone, &pc(), &HashMap::new());
+        for id in ["desktop.ring", "desktop.send_files", "desktop.clipboard"] {
+            assert!(matches!(m.state(id), Some(FeatureState::Unsupported { .. })), "{id}");
+        }
     }
 
     #[test]

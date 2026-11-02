@@ -8,6 +8,11 @@ change things that need a step from you, and its notes say so.
 
 ### New
 
+- **Two computers, properly.** A paired computer now shows as a computer, not an
+  Android phone, and its Home screen offers what two computers can do:
+  **Find PC**, **Send files** and **Send clipboard**. Phone-only actions
+  (mirroring, Continuity Camera, phone as webcam, Type on phone) are hidden
+  for a computer instead of showing as unavailable. Phones are unchanged.
 - **Browse another computer's files.** Paired computers can look through each
   other's shared folders and download files, resuming if the connection drops.
   It is read-only and off until you turn on **Share folders** for that

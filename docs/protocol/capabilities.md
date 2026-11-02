@@ -51,7 +51,7 @@ capability is missing.
 | `call.log` | Lists recent calls ([calls](calls.md)) | phone permission |
 | `call.dial` | Places a call or opens the dialer when a PC asks ([calls](calls.md)) | phone permission |
 | `contacts.read` | Lists and searches contacts ([contacts](contacts.md)) | contacts permission |
-| `clip.write` | Accepts clipboard content from the PC ([clipboard service](clipboard.md)) | app update |
+| `clip.write` | Accepts clipboard content from another device ([clipboard service](clipboard.md)); phones and, to take a clipboard from another computer, PCs | app update |
 | `clip.share` | Sends the clipboard when the user taps "Send" | app update |
 | `clip.read.auto` | Sends clipboard changes automatically, in the background | Elevated |
 | `photos.read` | Announces new photos and screenshots, lists albums and items, serves thumbnails, and sends files on request ([photos](photos.md)) | photos permission |

@@ -1189,6 +1189,36 @@ async fn a_computer_downloads_a_file_from_another_computer_and_resumes_after_an_
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn two_computers_can_find_each_other_and_send_the_clipboard() {
+    let mut a = device_with("Laptop", DeviceKind::Laptop, &["clip.write"]).await;
+    let mut b = device_with("Desktop", DeviceKind::Desktop, &["clip.write"]).await;
+    pair_qr(&mut a, &mut b).await;
+    let (a_id, b_id) = (a.node.device_id(), b.node.device_id());
+
+    // Find PC: the other computer sounds its alarm, and stops on request.
+    with_timeout("ring", a.node.ring(b_id, true)).await.unwrap();
+    assert_eq!(*b.platform.rings.lock().unwrap(), [true]);
+    with_timeout("stop ringing", a.node.ring(b_id, false)).await.unwrap();
+    assert_eq!(*b.platform.rings.lock().unwrap(), [true, false]);
+
+    // Send clipboard.
+    with_timeout("clipboard", a.node.send_clipboard(b_id, "copied on the laptop".into())).await.unwrap();
+    assert_eq!(*b.platform.clipboard.lock().unwrap(), ["copied on the laptop"]);
+
+    // The user's per-device switch on the receiving side still decides.
+    b.node.set_device_toggle(a_id, "clipboard", false).unwrap();
+    let denied = with_timeout("clipboard off", a.node.send_clipboard(b_id, "nope".into())).await;
+    assert!(denied.is_err(), "the receiving computer turned the clipboard off");
+    assert_eq!(b.platform.clipboard.lock().unwrap().len(), 1);
+
+    // What the matrix says each side can do.
+    let m = a.node.capabilities(b_id).unwrap();
+    for id in ["desktop.ring", "desktop.send_files", "desktop.clipboard"] {
+        assert_eq!(m.state(id), Some(noddy_core::FeatureState::Available), "{id}");
+    }
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn the_device_list_follows_a_pairing_through_its_states() {
     use noddy_core::{DeviceAction, DeviceState};
     let (mut host, _shared) = sharing_computer("Laptop", &[("Downloads/a.txt", b"a")]).await;
