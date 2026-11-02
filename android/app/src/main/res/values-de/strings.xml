@@ -1372,4 +1372,17 @@
     <string name="remote_pad_exit">Beenden</string>
     <string name="remote_pad_space">Leertaste</string>
     <string name="remote_pad_task_view">Aufgabenansicht</string>
+    <string name="home_dash_chip">Noddy</string>
+    <string name="home_dash_none">PC koppeln</string>
+    <string name="home_dash_searching">Suche nach %1$s…</string>
+    <string name="home_dash_connected">%1$s ist verbunden</string>
+    <string name="home_dash_offline">%1$s ist offline</string>
+    <string name="home_tile_remote">Fernbedienung</string>
+    <string name="home_tile_files">Dateien</string>
+    <string name="home_tile_clipboard">Zwischenablage</string>
+    <string name="home_dock_devices">Geräte</string>
+    <string name="home_dash_notice_none">Kopple deinen ersten PC, um ihn mit diesem Handy zu steuern.</string>
+    <string name="home_dash_notice_offline">%1$s ist offline. Tippe, um ihn aufzuwecken oder die Verbindung zu prüfen.</string>
+    <string name="home_dash_notice_background">Die Hintergrundverbindung ist aus. Tippe, um sie einzuschalten.</string>
+    <string name="home_dash_notice_ok">Alles verbunden. Tippe für Übertragungen, Medien und mehr.</string>
 </resources>

@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -48,8 +49,11 @@ fun RemotePadView(
     core: Core,
     onStatus: (Core.RemoteAccess) -> Unit,
     modifier: Modifier = Modifier,
+    /** What sits under BACK / HOME / EXIT; the default is a row of Tab, Space and Task view. */
+    footer: (@Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit)? = null,
 ) {
     val id = device.id
+    val on = device.online
     val key: (String, List<String>) -> Unit = { name, mods -> core.remoteKey(id, name, mods, onStatus) }
     val volume = device.deckState?.volume?.toInt() ?: 50
     val setVolume: (Int) -> Unit = { next -> core.setPcAudio(id, volume = next.coerceIn(0, 100)) }
@@ -69,12 +73,14 @@ fun RemotePadView(
                     painterResource(R.drawable.ic_plus),
                     stringResource(R.string.remote_pad_volume_up),
                     { setVolume(volume + VOLUME_STEP) },
+                    on,
                 ),
                 middle = painterResource(R.drawable.ic_volume),
                 bottom = PadKey(
                     painterResource(R.drawable.ic_minus),
                     stringResource(R.string.remote_pad_volume_down),
                     { setVolume(volume - VOLUME_STEP) },
+                    on,
                 ),
             )
             RingPad(
@@ -83,24 +89,27 @@ fun RemotePadView(
                     icon = null,
                     label = stringResource(R.string.remote_pad_ok_desc),
                     onClick = { key("enter", emptyList()) },
+                    enabled = on,
                     shortLabel = stringResource(R.string.remote_pad_ok),
                 ),
-                top = PadKey(painterResource(R.drawable.ic_chevron_up), stringResource(R.string.remote_key_up_desc), { key("up", emptyList()) }),
-                bottom = PadKey(painterResource(R.drawable.ic_chevron_down), stringResource(R.string.remote_key_down_desc), { key("down", emptyList()) }),
-                left = PadKey(painterResource(R.drawable.ic_chevron_left), stringResource(R.string.remote_key_left_desc), { key("left", emptyList()) }),
-                right = PadKey(painterResource(R.drawable.ic_chevron_right), stringResource(R.string.remote_key_right_desc), { key("right", emptyList()) }),
+                top = PadKey(painterResource(R.drawable.ic_chevron_up), stringResource(R.string.remote_key_up_desc), { key("up", emptyList()) }, on),
+                bottom = PadKey(painterResource(R.drawable.ic_chevron_down), stringResource(R.string.remote_key_down_desc), { key("down", emptyList()) }, on),
+                left = PadKey(painterResource(R.drawable.ic_chevron_left), stringResource(R.string.remote_key_left_desc), { key("left", emptyList()) }, on),
+                right = PadKey(painterResource(R.drawable.ic_chevron_right), stringResource(R.string.remote_key_right_desc), { key("right", emptyList()) }, on),
             )
             SideStrip(
                 top = PadKey(
                     painterResource(R.drawable.ic_chevron_up),
                     stringResource(R.string.remote_pad_page_up),
                     { key("page_up", emptyList()) },
+                    on,
                 ),
                 middleLabel = stringResource(R.string.remote_pad_page),
                 bottom = PadKey(
                     painterResource(R.drawable.ic_chevron_down),
                     stringResource(R.string.remote_pad_page_down),
                     { key("page_down", emptyList()) },
+                    on,
                 ),
             )
         }
@@ -109,18 +118,22 @@ fun RemotePadView(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
-            LabelCircle(stringResource(R.string.remote_pad_back)) { key("left", listOf("alt")) }
-            LabelCircle(stringResource(R.string.remote_key_home)) { key("home", emptyList()) }
-            LabelCircle(stringResource(R.string.remote_pad_exit)) { key("escape", emptyList()) }
+            LabelCircle(stringResource(R.string.remote_pad_back), on) { key("left", listOf("alt")) }
+            LabelCircle(stringResource(R.string.remote_key_home), on) { key("home", emptyList()) }
+            LabelCircle(stringResource(R.string.remote_pad_exit), on) { key("escape", emptyList()) }
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            PillButton(stringResource(R.string.remote_key_tab), { key("tab", emptyList()) }, Modifier.weight(1f))
-            PillButton(stringResource(R.string.remote_pad_space), { key("space", emptyList()) }, Modifier.weight(1f))
-            PillButton(stringResource(R.string.remote_pad_task_view), { key("task_view", emptyList()) }, Modifier.weight(1.3f))
+        if (footer != null) {
+            footer()
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                PillButton(stringResource(R.string.remote_key_tab), { key("tab", emptyList()) }, Modifier.weight(1f), enabled = on)
+                PillButton(stringResource(R.string.remote_pad_space), { key("space", emptyList()) }, Modifier.weight(1f), enabled = on)
+                PillButton(stringResource(R.string.remote_pad_task_view), { key("task_view", emptyList()) }, Modifier.weight(1.3f), enabled = on)
+            }
         }
     }
 }
@@ -168,15 +181,16 @@ private fun StripKey(key: PadKey) {
 
 /** A round dark button with a word in it: BACK, HOME, EXIT. */
 @Composable
-private fun LabelCircle(label: String, onClick: () -> Unit) {
+private fun LabelCircle(label: String, enabled: Boolean, onClick: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
     Box(
         modifier = Modifier
             .size(76.dp)
             .clip(androidx.compose.foundation.shape.CircleShape)
             .drawBehind { drawCircle(scheme.surfaceContainer) }
-            .clickable(role = Role.Button, onClick = onClick)
-            .semantics { contentDescription = label },
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = label }
+            .alpha(if (enabled) 1f else 0.38f),
         contentAlignment = Alignment.Center,
     ) {
         Text(label.uppercase(), style = MaterialTheme.typography.labelLarge, color = scheme.onSurface, maxLines = 1)
