@@ -505,6 +505,7 @@ Item {
         required property string rawName
         required property bool hasNickname
         required property string kind
+        required property string os
         required property string osVersion
         required property string model
         required property bool online
@@ -532,11 +533,25 @@ Item {
         Binding {
             target: page
             property: "currentCanReceive"
-            value: home.feature("files.send").state === "available"
+            value: home.feature(home.sendFilesFeature).state === "available"
                    || (!home.online
-                       && home.feature("files.send").state !== "locked"
-                       && home.feature("files.send").state !== "unsupported")
+                       && home.feature(home.sendFilesFeature).state !== "locked"
+                       && home.feature(home.sendFilesFeature).state !== "unsupported")
             when: home.visible
+        }
+
+        // Another computer (not a phone or tablet): it has no phone screen, camera or
+        // ringer, and what two computers do for each other has its own features.
+        readonly property string sendFilesFeature: isComputer ? "desktop.send_files" : "files.send"
+        readonly property bool isComputer: kind === "desktop" || kind === "laptop"
+                                           || (kind === "unknown" && os !== "" && os !== "android")
+        readonly property string osLabel: {
+            if (os === "android")
+                return osVersion.length > 0 ? qsTr("Android %1").arg(osVersion) : ""
+            if (os === "windows") return qsTr("Windows")
+            if (os === "macos") return qsTr("macOS")
+            if (os === "linux") return qsTr("Linux")
+            return ""
         }
 
         // Re-read capabilities whenever any matrix changes.
@@ -715,8 +730,16 @@ Item {
                     height: Math.max(phoneArt.height, identityCol.height)
 
                     // Vector front-only phone preview measured on the phone, with live status bar & circular battery arc inside.
+                    Icon {
+                        anchors.centerIn: phoneArt
+                        visible: home.isComputer
+                        width: 72; height: 72
+                        path: home.kind === "laptop" ? Icons.laptop : Icons.desktop
+                        color: Theme.heroContent
+                    }
                     Item {
                         id: phoneArt
+                        visible: !home.isComputer
                         anchors.verticalCenter: parent.verticalCenter
                         readonly property real aspect: {
                             const s = home.screenData
@@ -1129,7 +1152,7 @@ Item {
                             elide: Text.ElideRight
                             visible: text.length > 0
                             // The model is often a code (like "SM-X000"), so only the version.
-                            text: home.osVersion.length > 0 ? qsTr("Android %1").arg(home.osVersion) : ""
+                            text: home.osLabel
                         }
                         Flow {
                             width: parent.width
@@ -1288,6 +1311,7 @@ Item {
                 ActionTile {
                     width: actions.tileWidth
                     deviceOnline: home.online
+                    visible: !home.isComputer
                     title: qsTr("Mirror screen")
                     stateful: true
                     subtitle: ""
@@ -1314,7 +1338,7 @@ Item {
                     title: qsTr("Send files")
                     subtitle: ""
                     iconPath: Icons.send
-                    feature: home.feature("files.send")
+                    feature: home.feature(home.sendFilesFeature)
                     onClicked: filePicker.open()
                     sideIcon: Icons.folder
                     sideLabel: qsTr("Send a folder")
@@ -1327,7 +1351,7 @@ Item {
                     title: qsTr("Send clipboard")
                     subtitle: ""
                     iconPath: Icons.clipboard
-                    feature: home.feature("clipboard.pc_to_phone")
+                    feature: home.feature(home.isComputer ? "desktop.clipboard" : "clipboard.pc_to_phone")
                     onClicked: AppController.sendClipboard(home.deviceId)
                     sideIcon: Preferences.clipboardHistory ? Icons.clipboardList : ""
                     sideLabel: qsTr("Clipboard history")
@@ -1340,11 +1364,12 @@ Item {
                 ActionTile {
                     width: actions.tileWidth
                     deviceOnline: home.online
-                    title: home.ringing ? qsTr("Stop ringing") : qsTr("Find phone")
+                    title: home.ringing ? qsTr("Stop ringing")
+                                        : (home.isComputer ? qsTr("Find PC") : qsTr("Find phone"))
                     stateful: true
                     subtitle: ""
                     iconPath: Icons.ring
-                    feature: home.feature("device.find_phone")
+                    feature: home.feature(home.isComputer ? "desktop.ring" : "device.find_phone")
                     active: home.ringing
                     onClicked: {
                         home.ringing = !home.ringing
@@ -2226,6 +2251,7 @@ Item {
             // Camera & remote typing above Timeline.
             Row {
                 id: sideCameraGrid
+                visible: !home.isComputer
                 width: parent.width
                 spacing: 10
                 readonly property real tileWidth: (width - spacing) / 2
@@ -2281,6 +2307,7 @@ Item {
             // Type on phone (compact card below camera tiles; expands to capture live keystrokes).
             Card {
                 id: typeOnPhoneCard
+                visible: !home.isComputer
                 width: parent.width
                 readonly property var remoteInputFeature: home.feature("mirroring.control")
                 readonly property bool available: remoteInputFeature.state === "available"

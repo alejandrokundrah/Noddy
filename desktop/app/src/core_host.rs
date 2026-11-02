@@ -111,6 +111,9 @@ pub fn compute_capabilities(
         noddy_core::CONTACTS_SHOW.into(),
         noddy_core::SMS_SHOW.into(),
         noddy_core::TOGGLES_SHOW.into(),
+        // Another computer can send this one its clipboard (the receiving side
+        // is the same one phones already use).
+        "clip.write".into(),
     ];
     #[cfg(any(windows, target_os = "linux"))]
     {
