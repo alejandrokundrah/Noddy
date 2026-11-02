@@ -1170,6 +1170,25 @@ async fn a_computer_downloads_a_file_from_another_computer_and_resumes_after_an_
     assert_eq!(std::fs::read(&dest).unwrap(), content, "no byte repeated or missing");
     assert!(!part.exists());
 
+    // Progress: from what was kept up to the whole file, never going backwards.
+    std::fs::remove_file(&dest).unwrap();
+    std::fs::write(&part, &content[..50_000]).unwrap();
+    let seen = Arc::new(Mutex::new(Vec::<(u64, u64)>::new()));
+    let sink = seen.clone();
+    with_timeout(
+        "download with progress",
+        guest.node.storage_download_with_progress(host_id, "Documents/big.bin", &dest, move |done, total| {
+            sink.lock().unwrap().push((done, total));
+        }),
+    )
+    .await
+    .unwrap();
+    let seen = seen.lock().unwrap().clone();
+    assert_eq!(seen.first(), Some(&(50_000, content.len() as u64)), "starts from what was kept");
+    assert_eq!(seen.last(), Some(&(content.len() as u64, content.len() as u64)), "ends whole");
+    assert!(seen.windows(2).all(|w| w[0].0 <= w[1].0), "never goes backwards: {seen:?}");
+    assert_eq!(std::fs::read(&dest).unwrap(), content);
+
     // A leftover longer than the file (the file changed) is thrown away and the file fetched whole.
     std::fs::remove_file(&dest).unwrap();
     std::fs::write(&part, vec![7u8; content.len() + 1000]).unwrap();

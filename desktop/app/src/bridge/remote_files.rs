@@ -28,6 +28,9 @@ pub mod qobject {
         #[qproperty(QString, crumbs)]
         #[qproperty(QString, message)]
         #[qproperty(QString, downloading)]
+        #[qproperty(f64, progress)]
+        #[qproperty(QString, request_device, cxx_name = "requestDevice")]
+        #[qproperty(QString, request_name, cxx_name = "requestName")]
         #[qproperty(bool, can_go_up, cxx_name = "canGoUp")]
         type RemoteFiles = super::RemoteFilesRust;
     }
@@ -51,6 +54,13 @@ pub mod qobject {
         /// Downloads a file (a path from `entries`) into Downloads\Noddy.
         #[qinvokable]
         fn download(self: &RemoteFiles, path: &QString);
+        /// Allows the computer that asked to browse this one's folders.
+        #[qinvokable]
+        #[cxx_name = "allowRequest"]
+        fn allow_request(self: &RemoteFiles, device: &QString);
+        #[qinvokable]
+        #[cxx_name = "dismissRequest"]
+        fn dismiss_request(self: &RemoteFiles);
     }
 }
 
@@ -64,6 +74,9 @@ pub struct RemoteFilesRust {
     crumbs: QString,
     message: QString,
     downloading: QString,
+    progress: f64,
+    request_device: QString,
+    request_name: QString,
     can_go_up: bool,
 }
 
@@ -85,6 +98,9 @@ impl qobject::RemoteFiles {
         self.as_mut().set_crumbs(QString::from(&v.crumbs_json));
         self.as_mut().set_message(QString::from(&v.message));
         self.as_mut().set_downloading(QString::from(&v.downloading));
+        self.as_mut().set_progress(v.progress);
+        self.as_mut().set_request_device(QString::from(&v.request_device));
+        self.as_mut().set_request_name(QString::from(&v.request_name));
         self.as_mut().set_can_go_up(v.can_go_up);
     }
 
@@ -112,5 +128,15 @@ impl qobject::RemoteFiles {
 
     pub fn download(&self, path: &QString) {
         remote_files::download(&String::from(path));
+    }
+
+    pub fn allow_request(&self, device: &QString) {
+        if let Some(id) = super::parse_device(device) {
+            remote_files::allow_request(id);
+        }
+    }
+
+    pub fn dismiss_request(&self) {
+        remote_files::dismiss_request();
     }
 }

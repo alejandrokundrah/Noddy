@@ -177,6 +177,17 @@ Sheet {
                         HoverHandler { id: hover }
                         TapHandler { id: tap; onTapped: entry.act() }
 
+                        // How much of the file has arrived.
+                        Rectangle {
+                            visible: entry.downloadingThis
+                            anchors.left: parent.left
+                            anchors.bottom: parent.bottom
+                            anchors.leftMargin: 10
+                            height: 3
+                            radius: 1.5
+                            width: Math.max(0, (parent.width - 20) * RemoteFiles.progress)
+                            color: Theme.primary
+                        }
                         Icon {
                             id: kindIcon
                             anchors.left: parent.left
@@ -203,7 +214,11 @@ Sheet {
                             Txt {
                                 visible: !entry.modelData.isDir
                                 width: parent.width
-                                text: entry.downloadingThis ? qsTr("Downloading…") : sheet.sizeText(entry.modelData.size)
+                                text: entry.downloadingThis
+                                      ? (RemoteFiles.progress > 0
+                                         ? qsTr("Downloading… %1%").arg(Math.round(RemoteFiles.progress * 100))
+                                         : qsTr("Downloading…"))
+                                      : sheet.sizeText(entry.modelData.size)
                                 role: "bodySmall"
                                 muted: true
                                 elide: Text.ElideRight

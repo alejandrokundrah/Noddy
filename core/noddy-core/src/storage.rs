@@ -864,11 +864,15 @@ const DOWNLOAD_STALL: Duration = Duration::from_secs(30);
 /// The bytes go to `<dest>.noddy-part` first, and the file takes its name only
 /// once every byte has arrived, so `dest` is never half a file. An interrupted
 /// download keeps its part, and the next try carries on from it.
+///
+/// `progress(done, total)` is called with how many bytes of the file are saved
+/// (a resumed download starts from what was kept) out of its size.
 pub(crate) async fn download(
     shared: &Arc<Shared>,
     session: &Arc<Session>,
     remote: String,
     dest: &Path,
+    progress: &mut (dyn FnMut(u64, u64) + Send),
 ) -> Result<u64> {
     use tokio::io::AsyncWriteExt;
 
@@ -907,6 +911,7 @@ pub(crate) async fn download(
         tokio::fs::OpenOptions::new().append(true).open(&part).await?
     };
     let mut received: u64 = 0;
+    progress(have, meta.size);
     loop {
         match tokio::time::timeout(DOWNLOAD_STALL, recv.read_chunk(CHUNK_SIZE)).await {
             Ok(Ok(Some(chunk))) => {
@@ -915,6 +920,7 @@ pub(crate) async fn download(
                     return Err(Error::Protocol("the other device sent more bytes than it said".into()));
                 }
                 out.write_all(&chunk).await?;
+                progress(have + received, meta.size);
             }
             Ok(Ok(None)) => break,
             Ok(Err(_)) => return Err(Error::Offline),

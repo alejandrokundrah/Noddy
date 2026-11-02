@@ -351,6 +351,7 @@ async fn run(data_dir: PathBuf, platform: Arc<dyn Platform>) {
                 crate::mirror::on_event(&event);
                 crate::pc_mirror::on_event(&event);
                 crate::remote::on_event(&event);
+                crate::remote_files::on_event(&event);
                 crate::transfers::on_event(&event);
                 crate::send_to::on_event(&event);
                 crate::battery::on_event(&event);

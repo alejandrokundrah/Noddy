@@ -7,7 +7,7 @@
 
 use std::sync::{Mutex, MutexGuard};
 
-use noddy_core::{DeviceId, Error, StorageEntry};
+use noddy_core::{DeviceId, DeviceKind, Error, NodeEvent, StorageEntry};
 
 use crate::{
     bridge::app::{describe, show_message},
@@ -51,6 +51,11 @@ struct State {
     message: String,
     /// The file being downloaded, by its path on the other computer.
     downloading: Option<String>,
+    /// How much of it is saved, out of its size (0 until it is known).
+    downloaded: u64,
+    download_size: u64,
+    /// A computer that asked to browse this one's folders and isn't allowed.
+    request: Option<DeviceId>,
     /// Bumped by every listing, so a slow answer for a folder the user already left is dropped.
     generation: u64,
 }
@@ -63,7 +68,7 @@ fn state<T>(f: impl FnOnce(&mut State) -> T) -> T {
 }
 
 /// What the window shows.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct View {
     pub device: String,
     pub device_name: String,
@@ -73,11 +78,16 @@ pub struct View {
     pub crumbs_json: String,
     pub message: String,
     pub downloading: String,
+    /// How far the download is, `0.0..=1.0` (0 until the size is known).
+    pub progress: f64,
     pub can_go_up: bool,
+    /// A computer asking to browse this one's folders: its ID and name.
+    pub request_device: String,
+    pub request_name: String,
 }
 
 pub fn view() -> View {
-    state(|s| View {
+    let mut view = state(|s| View {
         device: s.device.map(|d| d.to_string()).unwrap_or_default(),
         device_name: s.device_name.clone(),
         path: s.path.clone(),
@@ -86,8 +96,20 @@ pub fn view() -> View {
         crumbs_json: remote_paths::crumbs_json(&s.device_name, &s.path),
         message: s.message.clone(),
         downloading: s.downloading.clone().unwrap_or_default(),
+        progress: if s.download_size == 0 {
+            0.0
+        } else {
+            (s.downloaded as f64 / s.download_size as f64).clamp(0.0, 1.0)
+        },
         can_go_up: !s.path.is_empty(),
-    })
+        request_device: s.request.map(|d| d.to_string()).unwrap_or_default(),
+        request_name: String::new(),
+    });
+    // Looked up outside the state's lock: the hub has its own.
+    if let Ok(id) = view.request_device.parse::<DeviceId>() {
+        view.request_name = core_host::host().hub.read(|h| h.name_of(&id)).unwrap_or_else(|| id.short());
+    }
+    view
 }
 
 fn changed() {
@@ -99,7 +121,13 @@ pub fn open(device: DeviceId) {
     let name = core_host::host().hub.read(|s| s.name_of(&device)).unwrap_or_else(|| "computer".into());
     state(|s| {
         // The count keeps rising so an answer to an earlier browse is never mistaken for this one's.
-        *s = State { device: Some(device), device_name: name, generation: s.generation, ..State::default() };
+        *s = State {
+            device: Some(device),
+            device_name: name,
+            generation: s.generation,
+            request: s.request,
+            ..State::default()
+        };
     });
     list("");
 }
@@ -168,7 +196,7 @@ pub fn refresh() {
 pub fn close() {
     state(|s| {
         s.generation += 1;
-        *s = State { generation: s.generation, ..State::default() };
+        *s = State { generation: s.generation, request: s.request, ..State::default() };
     });
     changed();
 }
@@ -181,6 +209,8 @@ pub fn download(remote: &str) {
             return None; // one at a time
         }
         s.downloading = Some(remote.to_owned());
+        s.downloaded = 0;
+        s.download_size = 0;
         s.device.map(|d| (d, s.device_name.clone()))
     }) else {
         return;
@@ -196,8 +226,27 @@ pub fn download(remote: &str) {
         let file_name = remote_paths::safe_file_name(remote_paths::leaf(&remote));
         let dir = core_host::downloads_dir();
         let dest = crate::photos::free_path(&dir, &file_name);
-        let result = node.storage_download(device, remote.clone(), &dest).await;
-        state(|s| s.downloading = None);
+        // Told about every chunk, shown at most ten times a second (and at the end).
+        let mut last: Option<std::time::Instant> = None;
+        let result = node
+            .storage_download_with_progress(device, remote.clone(), &dest, |done, total| {
+                let finished = done >= total;
+                if !finished && last.is_some_and(|at| at.elapsed() < std::time::Duration::from_millis(100)) {
+                    return;
+                }
+                last = Some(std::time::Instant::now());
+                state(|s| {
+                    s.downloaded = done;
+                    s.download_size = total;
+                });
+                changed();
+            })
+            .await;
+        state(|s| {
+            s.downloading = None;
+            s.downloaded = 0;
+            s.download_size = 0;
+        });
         changed();
         match result {
             Ok(_) => {
@@ -217,4 +266,50 @@ pub fn download(remote: &str) {
             }
         }
     });
+}
+
+/// Notices a computer asking to browse this one's folders before it is allowed,
+/// so the user can say yes (phones are asked about in their own way).
+pub fn on_event(event: &NodeEvent) {
+    match event {
+        NodeEvent::StorageRequested { device } => {
+            let computer = core_host::host().hub.read(|h| {
+                h.device(device).map(|d| matches!(d.info.kind, DeviceKind::Desktop | DeviceKind::Laptop))
+            });
+            if computer == Some(true) {
+                state(|s| s.request = Some(*device));
+                changed();
+            }
+        }
+        NodeEvent::DeviceRemoved(device) => {
+            let cleared = state(|s| {
+                if s.request == Some(*device) {
+                    s.request = None;
+                    true
+                } else {
+                    false
+                }
+            });
+            if cleared {
+                changed();
+            }
+        }
+        _ => {}
+    }
+}
+
+/// Lets `device` browse this computer's shared folders (the answer to the request).
+pub fn allow_request(device: DeviceId) {
+    if let Some(node) = core_host::node()
+        && let Err(e) = node.set_device_toggle(device, "share_folders", true)
+    {
+        show_message(describe(&e));
+    }
+    dismiss_request();
+}
+
+/// Leaves the request unanswered; the other computer is told how to ask again.
+pub fn dismiss_request() {
+    state(|s| s.request = None);
+    changed();
 }

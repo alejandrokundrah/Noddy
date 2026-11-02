@@ -3440,8 +3440,21 @@ impl Node {
         remote: impl Into<String>,
         dest: &std::path::Path,
     ) -> Result<u64> {
+        self.storage_download_with_progress(peer, remote, dest, |_, _| {}).await
+    }
+
+    /// [`storage_download`](Self::storage_download), reporting
+    /// `progress(done, total)` in bytes as the file arrives (starting from what an
+    /// earlier try kept).
+    pub async fn storage_download_with_progress(
+        &self,
+        peer: DeviceId,
+        remote: impl Into<String>,
+        dest: &std::path::Path,
+        mut progress: impl FnMut(u64, u64) + Send,
+    ) -> Result<u64> {
         let session = self.connected(&peer)?;
-        crate::storage::download(&self.shared, &session, remote.into(), dest).await
+        crate::storage::download(&self.shared, &session, remote.into(), dest, &mut progress).await
     }
 
     /// Uploads a local file to `path` on a connected phone (`storage.write`).
