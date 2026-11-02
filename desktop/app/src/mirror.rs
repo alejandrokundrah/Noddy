@@ -172,6 +172,10 @@ struct State {
     sound: HashSet<DeviceId>,
     /// Phones kept awake while mirroring (their screen or app windows).
     stay_awake: HashSet<DeviceId>,
+    /// Phones whose stay-awake setting the user changed; the others are kept
+    /// awake by default, since a phone that sleeps mid-mirror leaves a black,
+    /// frozen window.
+    stay_awake_chosen: HashSet<DeviceId>,
     /// Phones whose physical screen is turned off while mirroring (their
     /// screen or app windows); cleared when the last window closes.
     screen_off: HashSet<DeviceId>,
@@ -200,6 +204,7 @@ impl Default for State {
             last_focus_clip: None,
             sound: HashSet::new(),
             stay_awake: HashSet::new(),
+            stay_awake_chosen: HashSet::new(),
             screen_off: HashSet::new(),
             keyboard_device: None,
             notices: HashMap::new(),
@@ -263,6 +268,7 @@ pub fn screen_off(device: &DeviceId) -> bool {
 /// Toggles keeping the phone awake while mirroring (its screen or app windows).
 pub fn set_stay_awake(window: Window, on: bool) {
     let screen_off = state(|s| {
+        s.stay_awake_chosen.insert(window.device);
         if on {
             s.stay_awake.insert(window.device);
         } else {
@@ -762,6 +768,10 @@ pub fn start(device: DeviceId) {
         // The phone's screen starts on, unless app windows already turned it off.
         if !s.mirroring(&device) {
             s.screen_off.remove(&device);
+        }
+        // Kept awake unless the user turned that off for this phone.
+        if !s.stay_awake_chosen.contains(&device) {
+            s.stay_awake.insert(device);
         }
         s.windows.insert(window, Shown { phase: Phase::Asking, app: None, pkg: None });
         power(s, &device)

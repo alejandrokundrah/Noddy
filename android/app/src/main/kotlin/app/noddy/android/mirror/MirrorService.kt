@@ -6,8 +6,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ServiceInfo
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
@@ -62,6 +64,15 @@ class MirrorService : Service() {
     private var stayAwake: Boolean = false
     private var screenOff: Boolean = false
     private var soundOnly: Boolean = false
+
+    /** Wakes the phone when its screen goes dark mid-mirror (a power-button press, a timeout). */
+    private val screenOffReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            // With "screen off" on, the panel is off on purpose and the phone stays interactive.
+            if (stayAwake && !screenOff) app.noddy.android.elevated.Elevated.wakeScreen()
+        }
+    }
+    private var screenOffReceiverOn = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -317,6 +328,16 @@ class MirrorService : Service() {
     private fun applyPower() {
         val active = (encoder != null && projection != null) || elevatedSocket != null
         StreamPower.set(this, StreamPower.SCREEN, active, stayAwake, screenOff)
+        val watch = active && stayAwake && !screenOff
+        if (watch && !screenOffReceiverOn) {
+            screenOffReceiverOn = true
+            ContextCompat.registerReceiver(
+                this, screenOffReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF), ContextCompat.RECEIVER_NOT_EXPORTED,
+            )
+        } else if (!watch && screenOffReceiverOn) {
+            screenOffReceiverOn = false
+            runCatching { unregisterReceiver(screenOffReceiver) }
+        }
     }
 
     /** The sound, on a stream of its own; the screen goes on without it if it can't. */
@@ -366,6 +387,10 @@ class MirrorService : Service() {
     }
 
     private fun stopSharing() {
+        if (screenOffReceiverOn) {
+            screenOffReceiverOn = false
+            runCatching { unregisterReceiver(screenOffReceiver) }
+        }
         stayAwake = false
         screenOff = false
         soundOnly = false
