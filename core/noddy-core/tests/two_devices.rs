@@ -1008,6 +1008,248 @@ async fn a_computer_cannot_pair_with_itself() {
     assert!(pc.node.paired_devices().unwrap().is_empty());
 }
 
+// ---- A computer browsing another computer's folders ----
+
+/// A computer that shares `files` (name, bytes) from a temp folder.
+async fn sharing_computer(name: &'static str, files: &[(&str, &[u8])]) -> (TestDevice, TempDir) {
+    use noddy_core::{FolderStorage, STORAGE_READ, STORAGE_WRITE};
+    let dev = device_with(name, DeviceKind::Laptop, &[STORAGE_READ, STORAGE_WRITE]).await;
+    let shared = tempfile::tempdir().unwrap();
+    for (path, bytes) in files {
+        let path = shared.path().join(path);
+        std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+        std::fs::write(path, bytes).unwrap();
+    }
+    *dev.platform.storage.lock().unwrap() = Some(FolderStorage::new(shared.path()));
+    (dev, shared)
+}
+
+fn names(entries: &[noddy_core::StorageEntry]) -> Vec<&str> {
+    entries.iter().map(|e| e.name.as_str()).collect()
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn a_computer_browses_another_computers_folders_only_when_that_computer_allows_it() {
+    let (mut host, shared) =
+        sharing_computer("Laptop", &[("Downloads/report.pdf", b"pdf-bytes"), ("Documents/notes.txt", b"hi")])
+            .await;
+    let mut guest = device_with("Desktop", DeviceKind::Desktop, &[]).await;
+    pair_qr(&mut host, &mut guest).await;
+    let (host_id, guest_id) = (host.node.device_id(), guest.node.device_id());
+
+    // Newly paired, it gets nothing: sharing is the host's decision, per computer.
+    let denied = with_timeout("list before allowing", guest.node.storage_list(host_id, "")).await;
+    assert!(matches!(denied, Err(Error::Denied)), "got {denied:?}");
+    wait_for(&mut host, "the request to be noticed", |e| match e {
+        NodeEvent::StorageRequested { device } if *device == guest_id => Some(()),
+        _ => None,
+    })
+    .await;
+
+    // The host allows it.
+    host.node.set_device_toggle(guest_id, "share_folders", true).unwrap();
+    let root = with_timeout("list root", guest.node.storage_list(host_id, "")).await.unwrap();
+    assert_eq!(names(&root), ["Documents", "Downloads"]);
+    let downloads =
+        with_timeout("list Downloads", guest.node.storage_list(host_id, "Downloads")).await.unwrap();
+    assert_eq!(names(&downloads), ["report.pdf"]);
+    assert_eq!(downloads[0].size, 9);
+    let range = with_timeout("read a range", guest.node.read_storage(&host_id, "Downloads/report.pdf", 4, 5))
+        .await
+        .unwrap();
+    assert_eq!(range, b"bytes");
+
+    // Looking and downloading is all a computer may do; nothing changes on the host.
+    let local = tempfile::tempdir().unwrap();
+    std::fs::write(local.path().join("up.txt"), b"x").unwrap();
+    assert!(matches!(guest.node.storage_mkdir(host_id, "New").await, Err(Error::Denied)));
+    assert!(matches!(
+        guest.node.storage_rename(host_id, "Downloads/report.pdf", "Downloads/b.pdf").await,
+        Err(Error::Denied)
+    ));
+    assert!(matches!(
+        guest.node.storage_delete(host_id, "Downloads/report.pdf", true).await,
+        Err(Error::Denied)
+    ));
+    assert!(matches!(
+        guest.node.storage_write(host_id, "up.txt", &local.path().join("up.txt")).await,
+        Err(Error::Denied)
+    ));
+    assert!(shared.path().join("Downloads/report.pdf").exists(), "still there");
+    assert!(!shared.path().join("New").exists());
+    assert!(!shared.path().join("up.txt").exists());
+
+    // Paths that would leave the shared folders are refused.
+    for bad in ["../x", "Downloads/../../x", "/etc", "Downloads//report.pdf"] {
+        assert!(guest.node.storage_list(host_id, bad).await.is_err(), "list {bad}");
+        assert!(guest.node.read_storage(&host_id, bad, 0, 1).await.is_err(), "read {bad}");
+    }
+
+    // Switching it off is immediate.
+    host.node.set_device_toggle(guest_id, "share_folders", false).unwrap();
+    let denied = with_timeout("list after revoking", guest.node.storage_list(host_id, "")).await;
+    assert!(matches!(denied, Err(Error::Denied)), "got {denied:?}");
+    let denied =
+        with_timeout("read after revoking", guest.node.read_storage(&host_id, "Downloads/report.pdf", 0, 1))
+            .await;
+    assert!(matches!(denied, Err(Error::Denied)), "got {denied:?}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn sharing_folders_with_one_computer_shares_nothing_with_another() {
+    let (mut host, _shared) = sharing_computer("Laptop", &[("Downloads/report.pdf", b"pdf")]).await;
+    let mut trusted = device_with("Desk A", DeviceKind::Desktop, &[]).await;
+    let mut newcomer = device_with("Desk B", DeviceKind::Desktop, &[]).await;
+    pair_qr(&mut host, &mut trusted).await;
+    pair_qr(&mut host, &mut newcomer).await;
+    let host_id = host.node.device_id();
+
+    host.node.set_device_toggle(trusted.node.device_id(), "share_folders", true).unwrap();
+    assert!(trusted.node.storage_list(host_id, "").await.is_ok());
+    let denied = newcomer.node.storage_list(host_id, "").await;
+    assert!(matches!(denied, Err(Error::Denied)), "a newly paired computer gets nothing: {denied:?}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn a_phone_is_not_held_to_the_computer_toggle() {
+    // Phones are gated by the app's "share this PC's folders" setting, as before: the
+    // per-computer toggle doesn't apply to them, and they can still change things.
+    use noddy_core::{FolderStorage, STORAGE_MOUNT, STORAGE_READ, STORAGE_WRITE};
+    let mut pc =
+        device_with("Desktop", DeviceKind::Desktop, &[STORAGE_MOUNT, STORAGE_READ, STORAGE_WRITE]).await;
+    let mut phone = device_with("Pixel", DeviceKind::Phone, &[STORAGE_READ, STORAGE_WRITE]).await;
+    let shared = tempfile::tempdir().unwrap();
+    std::fs::create_dir_all(shared.path().join("Downloads")).unwrap();
+    *pc.platform.storage.lock().unwrap() = Some(FolderStorage::new(shared.path()));
+    pair_qr(&mut pc, &mut phone).await;
+    let pc_id = pc.node.device_id();
+
+    assert!(phone.node.storage_list(pc_id, "").await.is_ok());
+    phone.node.storage_mkdir(pc_id, "Downloads/FromPhone").await.expect("a phone may create folders");
+    assert!(shared.path().join("Downloads/FromPhone").is_dir());
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn a_computer_downloads_a_file_from_another_computer_and_resumes_after_an_interruption() {
+    // Bigger than one read chunk, with content that shows if a byte is out of place.
+    let content: Vec<u8> = (0..300_000u32).map(|i| (i % 251) as u8).collect();
+    let (mut host, _shared) = sharing_computer("Laptop", &[("Documents/big.bin", &content)]).await;
+    let mut guest = device_with("Desktop", DeviceKind::Desktop, &[]).await;
+    pair_qr(&mut host, &mut guest).await;
+    let (host_id, guest_id) = (host.node.device_id(), guest.node.device_id());
+
+    let out = tempfile::tempdir().unwrap();
+    let dest = out.path().join("saved/in/new/folders/big.bin");
+
+    // Not allowed yet: nothing is created.
+    let denied = with_timeout(
+        "download before allowing",
+        guest.node.storage_download(host_id, "Documents/big.bin", &dest),
+    )
+    .await;
+    assert!(matches!(denied, Err(Error::Denied)), "got {denied:?}");
+    assert!(!dest.exists());
+    host.node.set_device_toggle(guest_id, "share_folders", true).unwrap();
+
+    // A whole download.
+    let size = with_timeout("download", guest.node.storage_download(host_id, "Documents/big.bin", &dest))
+        .await
+        .unwrap();
+    assert_eq!(size, content.len() as u64);
+    assert_eq!(std::fs::read(&dest).unwrap(), content);
+    let part = dest.with_file_name("big.bin.noddy-part");
+    assert!(!part.exists(), "the part is gone once the file is whole");
+
+    // An earlier try that dropped halfway left the first bytes: carry on from them.
+    std::fs::remove_file(&dest).unwrap();
+    std::fs::write(&part, &content[..123_457]).unwrap();
+    let size = with_timeout("resume", guest.node.storage_download(host_id, "Documents/big.bin", &dest))
+        .await
+        .unwrap();
+    assert_eq!(size, content.len() as u64);
+    assert_eq!(std::fs::read(&dest).unwrap(), content, "no byte repeated or missing");
+    assert!(!part.exists());
+
+    // A leftover longer than the file (the file changed) is thrown away and the file fetched whole.
+    std::fs::remove_file(&dest).unwrap();
+    std::fs::write(&part, vec![7u8; content.len() + 1000]).unwrap();
+    with_timeout("restart", guest.node.storage_download(host_id, "Documents/big.bin", &dest)).await.unwrap();
+    assert_eq!(std::fs::read(&dest).unwrap(), content);
+
+    // A folder is not a file, and a missing file is reported, not saved.
+    assert!(guest.node.storage_download(host_id, "Documents", &out.path().join("folder.bin")).await.is_err());
+    assert!(!out.path().join("folder.bin").exists());
+    assert!(matches!(
+        guest.node.storage_download(host_id, "Documents/nope.bin", &out.path().join("nope.bin")).await,
+        Err(Error::NotFound)
+    ));
+    assert!(!out.path().join("nope.bin").exists());
+    let into_folder = guest.node.storage_download(host_id, "Documents/big.bin", out.path()).await;
+    assert!(matches!(into_folder, Err(Error::Protocol(_))), "got {into_folder:?}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn the_device_list_follows_a_pairing_through_its_states() {
+    use noddy_core::{DeviceAction, DeviceState};
+    let (mut host, _shared) = sharing_computer("Laptop", &[("Downloads/a.txt", b"a")]).await;
+    let mut guest = device_with("Desktop", DeviceKind::Desktop, &[]).await;
+    assert!(host.node.devices().unwrap().is_empty(), "nothing known yet");
+
+    // Pairing with a code: while the code is on screen, each side lists the other as being paired.
+    host.node.pairing_start_qr().await.unwrap();
+    let host_id = host.node.device_id();
+    guest.node.add_known_addrs(host_id, &host.node.direct_addrs().await);
+    let initiator = guest.node.clone();
+    let task = tokio::spawn(async move { initiator.pairing_start_nearby(host_id).await });
+    sas_code(&mut guest).await;
+    sas_code(&mut host).await;
+    for (dev, other) in [(&host, "Desktop"), (&guest, "")] {
+        let list = dev.node.devices().unwrap();
+        assert_eq!(list.len(), 1, "{list:?}");
+        assert_eq!(list[0].state, DeviceState::Pairing);
+        assert!(list[0].actions.is_empty(), "nothing is offered until paired");
+        if !other.is_empty() {
+            assert_eq!(list[0].name, other, "the host saw the guest's name");
+        }
+    }
+    guest.node.pairing_confirm(true).unwrap();
+    host.node.pairing_confirm(true).unwrap();
+    with_timeout("pairing", task).await.unwrap().expect("pairing succeeds");
+    // Poll rather than wait for an event: either side may already be online.
+    for dev in [&guest, &host] {
+        let deadline = tokio::time::Instant::now() + WAIT;
+        while dev.node.devices().unwrap().first().map(|e| e.state) != Some(DeviceState::Connected) {
+            assert!(tokio::time::Instant::now() < deadline, "never connected");
+            tokio::time::sleep(Duration::from_millis(50)).await;
+        }
+    }
+
+    // Paired and connected: its details, how it is connected, and what can be done with it.
+    let list = guest.node.devices().unwrap();
+    assert_eq!(list.len(), 1);
+    assert_eq!((list[0].name.as_str(), list[0].state), ("Laptop", DeviceState::Connected));
+    assert_eq!(list[0].kind, DeviceKind::Laptop);
+    assert_eq!(list[0].path, Some(noddy_core::ConnectionPath::Lan));
+    assert_eq!(list[0].actions, [DeviceAction::BrowseFiles]);
+    // The host's side: the guest offers no folders, so nothing to browse.
+    let list = host.node.devices().unwrap();
+    assert_eq!((list[0].name.as_str(), list[0].state), ("Desktop", DeviceState::Connected));
+    assert!(list[0].actions.is_empty());
+
+    // The laptop goes away: still known, now offline, nothing offered.
+    host.node.shutdown().await;
+    let deadline = tokio::time::Instant::now() + WAIT;
+    loop {
+        let list = guest.node.devices().unwrap();
+        if list[0].state == DeviceState::Offline {
+            assert!(list[0].actions.is_empty() && list[0].path.is_none());
+            break;
+        }
+        assert!(tokio::time::Instant::now() < deadline, "never went offline: {list:?}");
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn unpairing_is_mirrored_on_the_other_device() {
     let mut pc = device("Desktop", DeviceKind::Desktop).await;

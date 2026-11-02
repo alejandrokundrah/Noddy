@@ -15,6 +15,7 @@ mod config;
 mod contacts;
 pub mod continuity_camera;
 pub mod deck;
+mod devices;
 pub(crate) mod elevated_usb;
 mod error;
 mod events;
@@ -59,6 +60,7 @@ pub use deck::{
     deck_icons, deck_kinds, format_shortcut, is_valid_app_path, is_valid_command, is_valid_deck_id,
     is_valid_http_url, is_valid_shortcut, is_valid_snippet,
 };
+pub use devices::{DeviceAction, DeviceEntry, DeviceState};
 pub use error::{Error, Result, Side};
 pub use events::{
     ConnectionPath, DiscoveredDevice, LinkState, NodeEvent, PairedDevice, PairingEvent, PairingFailure,

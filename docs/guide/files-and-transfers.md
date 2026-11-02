@@ -81,6 +81,16 @@ You can browse your phone's internal storage or selected folders directly inside
 2. If you want to browse PC files while away from home over mobile data (**Connect over mobile data**), also turn on **Remote PC file access** (`remote_files`) for that phone in **Settings › Devices**.
 3. On your phone, tap **PC files** on the Home screen to browse your PC's shared folders (`Downloads`, `Documents`, `Desktop`, `Pictures`, and `Noddy Shared`), download files to your phone on demand, or upload files from your phone to a PC folder.
 
+### Browsing Another Computer's Files
+
+Two paired computers can look at each other's shared folders and download from them. Nothing is shared until its owner allows it.
+
+1. On the computer that has the files, open **Settings › Devices**, pick the other computer and turn on **Share folders** (`share_folders`).
+2. On the other computer, open the device list: a connected computer that offers its folders shows **Files**. You can browse and download; resuming an interrupted download carries on from where it stopped.
+3. Computers can't change each other's files: creating, renaming, deleting and uploading are always refused. Turn **Share folders** off to stop at any time.
+
+From the command line, `noddy devices` lists every device and its state, and `noddy storage <device> ls` / `get` browse and download.
+
 ### Automatic Folder Sync
 
 To keep a phone folder (such as `DCIM/Camera` or a notes directory) synchronized with a folder on your PC:

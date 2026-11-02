@@ -103,7 +103,7 @@ enum Command {
         #[arg(long, default_value_t = 5)]
         wait: u64,
     },
-    /// List paired devices and whether they're connected.
+    /// List paired devices, devices nearby, and where each stands.
     Devices {
         /// Seconds to wait for connections before printing.
         #[arg(long, default_value_t = 3)]
@@ -2702,13 +2702,13 @@ async fn run(cli: &Cli, node: &Node) -> Result<()> {
         Command::Nearby { device: Some(device), .. } => nearby(node, parse_id(device)?).await?,
         Command::Devices { wait } => {
             tokio::time::sleep(Duration::from_secs(*wait)).await;
-            let devices = node.paired_devices()?;
+            let devices = node.devices()?;
             let localsend = node.localsend_peers();
             if devices.is_empty() && localsend.is_empty() {
-                println!("No paired devices. Run `noddy pair` to pair one.");
+                println!("No devices. Run `noddy pair` to pair one.");
             }
             for d in devices {
-                print_device(&d);
+                print_device_entry(&d);
             }
             for p in localsend {
                 println!(
@@ -3153,6 +3153,15 @@ async fn run(cli: &Cli, node: &Node) -> Result<()> {
                             PathBuf::from(file_name)
                         }
                     };
+                    if *offset == 0 && length.is_none() {
+                        // A whole file: resumable, and written only once complete.
+                        let size = node
+                            .storage_download(id, remote.clone(), &out)
+                            .await
+                            .with_context(|| format!("failed to download {remote:?}"))?;
+                        println!("Saved {} ({size} bytes).", out.display());
+                        return Ok(());
+                    }
                     let (_meta, bytes) = node
                         .storage_read(id, remote.clone(), *offset, *length)
                         .await
@@ -5172,6 +5181,22 @@ fn print_device(d: &PairedDevice) {
         describe_link(&d.link),
         d.id
     );
+}
+
+fn print_device_entry(d: &noddy_core::DeviceEntry) {
+    use noddy_core::{DeviceAction, DeviceState};
+    let state = match (d.state, d.path) {
+        (DeviceState::Connected, Some(path)) => format!("connected ({path:?})"),
+        (DeviceState::Connected, None) => "connected".into(),
+        (DeviceState::Paired, _) => "connecting".into(),
+        (DeviceState::Offline, _) => "offline".into(),
+        (DeviceState::Pairing, _) => "pairing".into(),
+        (DeviceState::Discovered, _) => "nearby, not paired".into(),
+    };
+    let kind =
+        if d.kind == noddy_core::DeviceKind::Unknown { "-".to_owned() } else { format!("{:?}", d.kind) };
+    let browse = if d.actions.contains(&DeviceAction::BrowseFiles) { "  [files]" } else { "" };
+    println!("{:<24} {:<10} {}{browse}  {}", d.name, kind, state, d.id);
 }
 
 fn describe_link(link: &LinkState) -> String {

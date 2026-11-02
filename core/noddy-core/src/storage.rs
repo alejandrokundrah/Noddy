@@ -43,6 +43,9 @@ pub const TOGGLE: &str = "storage";
 const MAX_LISTED: usize = 100_000;
 /// Per-device toggle name for away-mode / relay file access (off by default).
 pub const REMOTE_FILES_TOGGLE: &str = "remote_files";
+/// Per-device toggle name: this PC lets that computer browse and download
+/// its shared folders (off by default).
+pub const SHARE_FOLDERS_TOGGLE: &str = "share_folders";
 
 const STREAM_TIMEOUT: Duration = Duration::from_secs(30);
 const CHUNK_SIZE: usize = 64 * 1024;
@@ -178,6 +181,24 @@ fn check_phone_allowed(
     if !shared.we_offer(cap) {
         return Err((ErrorCode::Unsupported, format!("{cap} is not offered by this device")));
     }
+    // A computer asking a computer (not a phone) is held to more than a phone
+    // is: folders are shared with it only when its own toggle says so, and
+    // it can look and download, not change anything.
+    if !serves_phone_storage(shared) && !peer_is_phone(shared, peer) {
+        if cap == STORAGE_WRITE {
+            return Err((
+                ErrorCode::Denied,
+                "a computer can browse and download another computer's folders, not change them".into(),
+            ));
+        }
+        if !shared.toggle_on(peer, SHARE_FOLDERS_TOGGLE) {
+            let first_time = shared.storage.lock().unwrap_or_else(|e| e.into_inner()).mark_prompted(*peer);
+            if first_time {
+                shared.emit(NodeEvent::StorageRequested { device: *peer });
+            }
+            return Err((ErrorCode::Denied, "sharing folders is turned off for this computer".into()));
+        }
+    }
     // The `storage` toggle is a phone's "let this PC browse my storage". On a
     // PC the same toggle means the opposite way (browse that phone here), so
     // it doesn't gate the PC's own folders: the app's "share this PC's
@@ -198,6 +219,17 @@ fn check_phone_allowed(
         ));
     }
     Ok(())
+}
+
+/// Whether `peer` is a phone or tablet. Anything else (a computer, or a kind
+/// this version doesn't know) counts as a computer, which is the stricter way.
+fn peer_is_phone(shared: &Shared, peer: &DeviceId) -> bool {
+    shared
+        .store
+        .get_peer(peer)
+        .ok()
+        .flatten()
+        .is_some_and(|p| crate::features::role_of(&p.info) == Some(crate::features::Role::Phone))
 }
 
 /// Whether this device is a phone or tablet, sharing its own storage.
@@ -821,6 +853,83 @@ pub(crate) async fn open_read_stream(
     let reply = Envelope::from_cbor(&reply_bytes)?;
     let meta: StorageReadMeta = reply.expect_body(types::STORAGE_READ_META)?;
     Ok((meta, recv))
+}
+
+/// How long a download waits for the next bytes of a file.
+const DOWNLOAD_STALL: Duration = Duration::from_secs(30);
+
+/// Saves the file `remote` on `session`'s device as `dest`, resuming from what
+/// an earlier try left behind. Returns the file's size.
+///
+/// The bytes go to `<dest>.noddy-part` first, and the file takes its name only
+/// once every byte has arrived, so `dest` is never half a file. An interrupted
+/// download keeps its part, and the next try carries on from it.
+pub(crate) async fn download(
+    shared: &Arc<Shared>,
+    session: &Arc<Session>,
+    remote: String,
+    dest: &Path,
+) -> Result<u64> {
+    use tokio::io::AsyncWriteExt;
+
+    let name = dest.file_name().ok_or_else(|| Error::Protocol("the destination has no file name".into()))?;
+    if dest.is_dir() {
+        return Err(Error::Protocol("the destination is a folder".into()));
+    }
+    let dir = dest.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
+    tokio::fs::create_dir_all(dir).await?;
+    let mut part_name = name.to_os_string();
+    part_name.push(".noddy-part");
+    let part = dir.join(part_name);
+
+    let mut have = tokio::fs::metadata(&part).await.map(|m| m.len()).unwrap_or(0);
+    let opened = open_read_stream(shared, session, remote.clone(), have, None).await;
+    let (meta, mut recv) = match opened {
+        // What was kept is no use: the file is now shorter than it, or is gone.
+        Ok((meta, _)) if have > meta.size => {
+            have = 0;
+            open_read_stream(shared, session, remote, 0, None).await?
+        }
+        Err(Error::Protocol(_) | Error::NotFound) if have > 0 => {
+            have = 0;
+            open_read_stream(shared, session, remote, 0, None).await?
+        }
+        other => other?,
+    };
+    // Someone else's idea of how much is coming: believe it only as far as the file.
+    if have.saturating_add(meta.length) > meta.size {
+        return Err(Error::Protocol("the other device offered more bytes than the file has".into()));
+    }
+
+    let mut out = if have == 0 {
+        tokio::fs::File::create(&part).await?
+    } else {
+        tokio::fs::OpenOptions::new().append(true).open(&part).await?
+    };
+    let mut received: u64 = 0;
+    loop {
+        match tokio::time::timeout(DOWNLOAD_STALL, recv.read_chunk(CHUNK_SIZE)).await {
+            Ok(Ok(Some(chunk))) => {
+                received += chunk.len() as u64;
+                if received > meta.length {
+                    return Err(Error::Protocol("the other device sent more bytes than it said".into()));
+                }
+                out.write_all(&chunk).await?;
+            }
+            Ok(Ok(None)) => break,
+            Ok(Err(_)) => return Err(Error::Offline),
+            Err(_) => return Err(Error::Timeout),
+        }
+    }
+    out.flush().await?;
+    if received != meta.length || have + received != meta.size {
+        // Keep the part: the next try resumes from it.
+        return Err(Error::Offline);
+    }
+    out.sync_all().await?;
+    drop(out);
+    tokio::fs::rename(&part, dest).await?;
+    Ok(meta.size)
 }
 
 /// Uploads `source` to `path` on `session` with resumable upload ID `id`.
