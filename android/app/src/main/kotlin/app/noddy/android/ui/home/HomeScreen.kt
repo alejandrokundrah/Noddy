@@ -118,13 +118,11 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.noddy.android.sms.PhoneSms
 import app.noddy.android.ui.guide.GuideHighlightTarget
-import app.noddy.android.ui.theme.LocalGlassTheme
 import app.noddy.android.ui.theme.LocalReducedMotion
-import app.noddy.android.ui.theme.bentoWell
-import app.noddy.android.ui.theme.glassModalBlur
-import app.noddy.android.ui.theme.glassModalContainerColor
-import app.noddy.android.ui.theme.glassModalScrimColor
-import app.noddy.android.ui.theme.liquidGlassCard
+import app.noddy.android.ui.theme.insetWell
+import app.noddy.android.ui.theme.modalContainerColor
+import app.noddy.android.ui.theme.modalScrimColor
+import app.noddy.android.ui.theme.softCard
 import app.noddy.android.update.AppUpdater
 import app.noddy.android.update.UpdateCard
 import app.noddy.android.webcam.WebcamSession
@@ -249,7 +247,6 @@ fun HomeScreen(
         cacheWindow = androidx.compose.foundation.lazy.layout.LazyLayoutCacheWindow(aheadFraction = 1f, behindFraction = 1f),
     )
     val reducedMotion = LocalReducedMotion.current
-    val isGlass = LocalGlassTheme.current
     val pcDevices = state.devices.filter { !it.isAndroid }
     val anyModalOpen = browseFilesPcId != null || showClipboardHistory || showTimeline
 
@@ -289,7 +286,7 @@ fun HomeScreen(
 
     LazyColumn(
         state = listState,
-        modifier = modifier.glassModalBlur(isGlass && anyModalOpen),
+        modifier = modifier,
         contentPadding = androidx.compose.foundation.layout.PaddingValues(
             start = 16.dp,
             top = 16.dp,
@@ -855,16 +852,12 @@ private fun WhatsNewFeaturesGuideCard(
     onOpenGuide: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val isGlass = LocalGlassTheme.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .liquidGlassCard(
+            .softCard(
                 cornerRadius = 24.dp,
-                isGlass = isGlass,
                 baseColor = MaterialTheme.colorScheme.secondaryContainer,
-                tintColor = MaterialTheme.colorScheme.primary,
-                outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
             )
             .padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -901,17 +894,13 @@ private fun NoPairedPcCard(
     onOpenFeaturesGuide: () -> Unit,
     highlighted: Boolean = false,
 ) {
-    val isGlass = LocalGlassTheme.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .guideHighlightRing(highlighted)
-            .liquidGlassCard(
+            .softCard(
                 cornerRadius = 28.dp,
-                isGlass = isGlass,
                 baseColor = MaterialTheme.colorScheme.primaryContainer,
-                tintColor = MaterialTheme.colorScheme.primary,
-                outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
             )
             .padding(22.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -1051,7 +1040,6 @@ private fun PermissionsSetupCard(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val isGlass = LocalGlassTheme.current
     var expanded by remember { mutableStateOf(false) }
     val reducedMotion = LocalReducedMotion.current
     val chevronRotation by animateFloatAsState(
@@ -1063,12 +1051,9 @@ private fun PermissionsSetupCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .liquidGlassCard(
+            .softCard(
                 cornerRadius = 28.dp,
-                isGlass = isGlass,
                 baseColor = MaterialTheme.colorScheme.surfaceContainer,
-                tintColor = MaterialTheme.colorScheme.primary,
-                outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
             )
             .padding(20.dp),
     ) {
@@ -1276,16 +1261,12 @@ private fun PeerCard(
         if (uris.isNotEmpty()) onSendFiles(device.id, uris)
     }
     var ringing by remember(device.id) { mutableStateOf(false) }
-    val isGlass = LocalGlassTheme.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .liquidGlassCard(
+            .softCard(
                 cornerRadius = 28.dp,
-                isGlass = isGlass,
                 baseColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                tintColor = MaterialTheme.colorScheme.primary,
-                outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
             )
             .padding(22.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -1463,17 +1444,13 @@ private fun BentoTile(
     onClick: (() -> Unit)? = null,
 ) {
     val scheme = MaterialTheme.colorScheme
-    val isGlass = LocalGlassTheme.current
     val shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp)
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .liquidGlassCard(
+            .softCard(
                 cornerRadius = 24.dp,
-                isGlass = isGlass,
                 baseColor = scheme.surfaceContainer,
-                tintColor = scheme.primary,
-                outlineColor = scheme.outlineVariant,
             )
             .clip(shape)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
@@ -1535,33 +1512,26 @@ private fun PcCard(
         if (tree != null) onSendFolder(device.id, tree)
     }
     var ringing by remember(device.id) { mutableStateOf(false) }
-    val isGlass = LocalGlassTheme.current
     androidx.compose.runtime.CompositionLocalProvider(
-        androidx.compose.material3.LocalContentColor provides
-            (if (isGlass) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface),
+        androidx.compose.material3.LocalContentColor provides MaterialTheme.colorScheme.onSurface,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .liquidGlassCard(
-                    cornerRadius = if (isGlass) 28.dp else 24.dp,
-                    isGlass = isGlass,
-                    // Ember: a solid near-black card with a hairline, not the tinted container.
-                    baseColor = if (isGlass) MaterialTheme.colorScheme.primaryContainer
-                    else MaterialTheme.colorScheme.surfaceContainer,
-                    tintColor = MaterialTheme.colorScheme.primary,
-                    outlineColor = MaterialTheme.colorScheme.outlineVariant,
+                .softCard(
+                    cornerRadius = 28.dp,
+                    baseColor = MaterialTheme.colorScheme.surfaceContainer,
                 )
                 .padding(22.dp),
         ) {
             val context = LocalContext.current
-            val ink = if (isGlass) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+            val ink = MaterialTheme.colorScheme.onSurface
             val primaryBtn = ButtonDefaults.buttonColors(
                 disabledContainerColor = ink.copy(alpha = 0.08f),
                 disabledContentColor = ink.copy(alpha = 0.38f),
             )
             val tonal = ButtonDefaults.filledTonalButtonColors(
-                containerColor = ink.copy(alpha = if (isGlass) 0.14f else 0.10f),
+                containerColor = ink.copy(alpha = 0.10f),
                 contentColor = ink,
                 disabledContainerColor = ink.copy(alpha = 0.05f),
                 disabledContentColor = ink.copy(alpha = 0.38f),
@@ -1659,7 +1629,7 @@ private fun PcCard(
                         style = MaterialTheme.typography.labelMedium,
                         color = ink,
                         modifier = Modifier
-                            .bentoWell(
+                            .insetWell(
                                 cornerRadius = 14.dp,
                                 fillColor = ink.copy(alpha = 0.10f),
                             )
@@ -1757,10 +1727,9 @@ private fun PcCard(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .bentoWell(
+                        .insetWell(
                             cornerRadius = 20.dp,
-                            fillColor = ink.copy(alpha = if (isGlass) 0.11f else 0.07f),
-                            borderColor = if (isGlass) ink.copy(alpha = 0.16f) else Color.Transparent,
+                            fillColor = ink.copy(alpha = 0.07f),
                         )
                         .padding(10.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -1938,7 +1907,7 @@ private fun PcCard(
                 Column(
                     Modifier
                         .fillMaxWidth()
-                        .bentoWell(
+                        .insetWell(
                             cornerRadius = 20.dp,
                             fillColor = ink.copy(alpha = 0.08f),
                         )
@@ -2001,7 +1970,7 @@ private fun PcAudioCardSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .bentoWell(
+            .insetWell(
                 cornerRadius = 20.dp,
                 fillColor = ink.copy(alpha = 0.06f),
             )
@@ -2012,7 +1981,7 @@ private fun PcAudioCardSection(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .bentoWell(
+                    .insetWell(
                         cornerRadius = 16.dp,
                         fillColor = ink.copy(alpha = 0.10f),
                     )
@@ -2072,7 +2041,7 @@ private fun PcAudioCardSection(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .bentoWell(
+                .insetWell(
                     cornerRadius = 16.dp,
                     fillColor = ink.copy(alpha = if (streamingToPhone) 0.14f else 0.06f),
                 )
@@ -2120,7 +2089,7 @@ private fun PcAudioCardSection(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .bentoWell(
+                    .insetWell(
                         cornerRadius = 16.dp,
                         fillColor = ink.copy(alpha = if (micOn) 0.14f else 0.06f),
                     )
@@ -2255,7 +2224,7 @@ internal fun PcAudioOutputsDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = glassModalContainerColor(),
+        containerColor = modalContainerColor(),
         title = { Text(stringResource(R.string.pc_audio_outputs_title, pcName)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -2319,7 +2288,6 @@ private fun ClipboardHistoryCard(
 ) {
     val latest = entries.firstOrNull() ?: return
     var revealLatest by remember(latest.id) { mutableStateOf(false) }
-    val isGlass = LocalGlassTheme.current
     val isText = latest.kind == ClipboardItemKind.TEXT
     val preview = when (latest.kind) {
         ClipboardItemKind.TEXT -> if (revealLatest) latest.text else stringResource(R.string.clipboard_preview_hidden)
@@ -2328,12 +2296,9 @@ private fun ClipboardHistoryCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .liquidGlassCard(
+            .softCard(
                 cornerRadius = 28.dp,
-                isGlass = isGlass,
                 baseColor = MaterialTheme.colorScheme.surfaceContainer,
-                tintColor = MaterialTheme.colorScheme.primary,
-                outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
             )
             .clickable(role = Role.Button, onClick = onOpen)
             .padding(20.dp),
@@ -2399,7 +2364,7 @@ private fun ClipboardHistoryDialog(
     }
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = glassModalContainerColor(),
+        containerColor = modalContainerColor(),
         title = {
             Column {
                 Text(stringResource(R.string.clipboard_history_title))
@@ -2582,16 +2547,12 @@ private fun LocalSendCard(
     onRefresh: () -> Unit,
     onSendFiles: (pcId: String, uris: List<Uri>) -> Unit,
 ) {
-    val isGlass = LocalGlassTheme.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .liquidGlassCard(
+            .softCard(
                 cornerRadius = 28.dp,
-                isGlass = isGlass,
                 baseColor = MaterialTheme.colorScheme.surfaceContainer,
-                tintColor = MaterialTheme.colorScheme.primary,
-                outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
             )
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -2681,7 +2642,6 @@ private fun SendQueueCard(
 ) {
     val items = state.sendQueue
     if (items.isEmpty()) return
-    val isGlass = LocalGlassTheme.current
     val hasActive = items.any { it.status is FfiQueueStatus.Waiting || it.status is FfiQueueStatus.Sending }
     val hasFinished = items.any { it.status is FfiQueueStatus.Failed || it.status is FfiQueueStatus.Expired }
     val showPeerChip = state.devices.size > 1
@@ -2689,12 +2649,9 @@ private fun SendQueueCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .liquidGlassCard(
+            .softCard(
                 cornerRadius = 28.dp,
-                isGlass = isGlass,
                 baseColor = MaterialTheme.colorScheme.surfaceContainer,
-                tintColor = MaterialTheme.colorScheme.primary,
-                outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
             )
             .padding(20.dp),
     ) {
@@ -2848,7 +2805,7 @@ private fun SendQueueRow(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier
-                                .bentoWell(
+                                .insetWell(
                                     cornerRadius = 8.dp,
                                     fillColor = MaterialTheme.colorScheme.secondaryContainer,
                                 )
@@ -2922,16 +2879,12 @@ private fun TransfersCard(
     onPause: (String) -> Unit = {},
     onResume: (String) -> Unit = {},
 ) {
-    val isGlass = LocalGlassTheme.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .liquidGlassCard(
+            .softCard(
                 cornerRadius = 28.dp,
-                isGlass = isGlass,
                 baseColor = MaterialTheme.colorScheme.surfaceContainer,
-                tintColor = MaterialTheme.colorScheme.primary,
-                outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
             )
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -3074,7 +3027,6 @@ private fun TimelineCard(
 ) {
     val latest = entries.firstOrNull() ?: return
     var revealLatest by remember(latest.id) { mutableStateOf(false) }
-    val isGlass = LocalGlassTheme.current
     val isClipText = latest.kind == TimelineKind.CLIP && latest.imageDataUrl == null
     val direction = if (latest.incoming) {
         stringResource(R.string.clipboard_history_from, latest.deviceName)
@@ -3089,12 +3041,9 @@ private fun TimelineCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .liquidGlassCard(
+            .softCard(
                 cornerRadius = 28.dp,
-                isGlass = isGlass,
                 baseColor = MaterialTheme.colorScheme.surfaceContainer,
-                tintColor = MaterialTheme.colorScheme.primary,
-                outlineColor = if (isGlass) MaterialTheme.colorScheme.outlineVariant else Color.Transparent,
             )
             .clickable(role = Role.Button, onClick = onOpen)
             .padding(20.dp),
@@ -3183,7 +3132,7 @@ private fun TimelineDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = glassModalContainerColor(),
+        containerColor = modalContainerColor(),
         title = {
             Column {
                 Text(stringResource(R.string.timeline_title))
@@ -3604,8 +3553,8 @@ private fun PcFilesSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = glassModalContainerColor(),
-        scrimColor = glassModalScrimColor(),
+        containerColor = modalContainerColor(),
+        scrimColor = modalScrimColor(),
     ) {
         Column(
             modifier = Modifier

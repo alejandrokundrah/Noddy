@@ -23,7 +23,6 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,7 +30,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -49,14 +47,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -84,13 +77,10 @@ import app.noddy.android.ui.remote.RemoteMode
 import app.noddy.android.ui.remote.RemoteScreen
 import app.noddy.android.ui.settings.SettingsScreen
 import app.noddy.android.ui.theme.Appearance
-import app.noddy.android.ui.theme.GlassBackdrop
-import app.noddy.android.ui.theme.LocalGlassTheme
 import app.noddy.android.ui.theme.LocalReducedMotion
 import app.noddy.android.ui.theme.NoddyTheme
-import app.noddy.android.ui.theme.glassBackdropSource
-import app.noddy.android.ui.theme.liquidGlass
-import app.noddy.android.ui.theme.liquidGlassCard
+import app.noddy.android.ui.theme.BottomDock
+import app.noddy.android.ui.theme.DockItem
 import app.noddy.android.ui.walkthrough.WalkthroughScreen
 import app.noddy.android.ui.walkthrough.WalkthroughStep
 import app.noddy.android.ui.walkthrough.resolveStartupWalkthrough
@@ -743,8 +733,6 @@ private fun App(
                 }
             }
             ScreenRoute.Main -> Box(Modifier.fillMaxSize()) {
-                val isGlass = LocalGlassTheme.current
-                val glassBackdrop = app.noddy.android.ui.theme.rememberGlassBackdrop()
                 val onlineCount by remember(state.devices) {
                     androidx.compose.runtime.derivedStateOf { state.devices.count { it.online } }
                 }
@@ -753,14 +741,11 @@ private fun App(
                     containerColor = androidx.compose.ui.graphics.Color.Transparent,
                     snackbarHost = { SnackbarHost(snackbar) },
                     bottomBar = {
-                        FloatingBottomPillDock(
+                        AppDock(
                             selectedTab = tab,
                             onSelectTab = { tab = it },
                             onlineCount = onlineCount,
                             pairedCount = pairedCount,
-                            isGlass = isGlass,
-                            reducedMotion = reducedMotion,
-                            backdrop = glassBackdrop,
                         )
                     },
                 ) { padding ->
@@ -785,7 +770,7 @@ private fun App(
                     val saveableStateHolder = androidx.compose.runtime.saveable.rememberSaveableStateHolder()
 
                     // Only apply top scaffold padding here so LazyColumns in HomeScreen/SettingsScreen
-                    // (which have bottom = 104.dp contentPadding) glide smoothly behind the floating glass dock.
+                    // (which have bottom = 104.dp contentPadding) glide smoothly behind the dock.
                     // Tabs slide toward the side of the tab you picked, on a soft spring.
                     AnimatedContent(
                         targetState = tab,
@@ -809,8 +794,7 @@ private fun App(
                         },
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(top = padding.calculateTopPadding())
-                            .glassBackdropSource(glassBackdrop, enabled = isGlass),
+                            .padding(top = padding.calculateTopPadding()),
                         label = "main_tab",
                     ) { shownTab ->
                         when (shownTab) {
@@ -825,7 +809,7 @@ private fun App(
                                     onWake = core::wake,
                                     onSetReconnect = core::setReconnect,
                                     onRemote = { id ->
-                                        remoteInitialMode = RemoteMode.Touchpad
+                                        remoteInitialMode = RemoteMode.Pad
                                         remotePcId = id
                                     },
                                     onDeck = { id ->
@@ -982,186 +966,36 @@ private fun App(
     }
 }
 
+/** The bottom dock: Home and Settings, the selected one on a lighter tile with an orange icon. */
 @Composable
-private fun FloatingBottomPillDock(
+private fun AppDock(
     selectedTab: Tab,
     onSelectTab: (Tab) -> Unit,
     onlineCount: Int,
     pairedCount: Int,
-    isGlass: Boolean,
-    reducedMotion: Boolean,
-    backdrop: GlassBackdrop? = null,
 ) {
     val scheme = MaterialTheme.colorScheme
-    val dark = scheme.surface.luminance() < 0.5f
-    val baseFill = if (isGlass) {
-        scheme.surfaceContainerHighest.copy(alpha = 0.92f)
-    } else {
-        // Solid: the list scrolls under it, and text showed through.
-        scheme.surfaceContainerHigh
-    }
-    val rimColor = if (isGlass) scheme.outlineVariant else scheme.outlineVariant.copy(alpha = 0.45f)
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .windowInsetsPadding(androidx.compose.foundation.layout.WindowInsets.navigationBars)
-            .padding(horizontal = 24.dp, vertical = 8.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        androidx.compose.foundation.layout.Row(
-            modifier = Modifier
-                .selectableGroup()
-                .then(
-                    if (isGlass) {
-                        // Content scrolling beneath bends at the rim (Android 13+); a light
-                        // tint keeps the labels readable over anything.
-                        Modifier.liquidGlass(
-                            backdrop = backdrop,
-                            enabled = true,
-                            cornerRadius = 30.dp,
-                            tint = scheme.surface.copy(alpha = if (dark) 0.42f else 0.50f),
-                            fallbackColor = baseFill,
-                            rimColor = androidx.compose.ui.graphics.Color.White,
-                            dark = dark,
-                        )
-                    } else {
-                        Modifier.liquidGlassCard(
-                            cornerRadius = 30.dp,
-                            isGlass = false,
-                            baseColor = baseFill,
-                            tintColor = scheme.primary,
-                            outlineColor = rimColor,
-                        )
-                    },
-                )
-                .padding(horizontal = 6.dp, vertical = 5.dp),
-            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            FloatingDockTabPill(
-                selected = selectedTab == Tab.Home,
-                onClick = { onSelectTab(Tab.Home) },
-                iconRes = R.drawable.ic_home,
+    val tabs = listOf(Tab.Home, Tab.Settings)
+    BottomDock(
+        items = listOf(
+            DockItem(
+                icon = painterResource(R.drawable.ic_home),
                 label = stringResource(R.string.home_title),
-                statusDotColor = when {
+                dot = when {
                     onlineCount > 0 -> scheme.primary
                     pairedCount > 0 -> scheme.outline
                     else -> null
                 },
-                reducedMotion = reducedMotion,
-            )
-            FloatingDockTabPill(
-                selected = selectedTab == Tab.Settings,
-                onClick = { onSelectTab(Tab.Settings) },
-                iconRes = R.drawable.ic_settings,
+            ),
+            DockItem(
+                icon = painterResource(R.drawable.ic_settings),
                 label = stringResource(R.string.settings_title),
-                statusDotColor = null,
-                reducedMotion = reducedMotion,
-            )
-        }
-    }
-}
-
-/** The selected dock item: a white pill with a near-black icon and label (Ember and Glass dark). */
-private val EmberPill = androidx.compose.ui.graphics.Color(0xFFF4F4F5)
-private val EmberPillContent = androidx.compose.ui.graphics.Color(0xFF111113)
-
-@Composable
-private fun FloatingDockTabPill(
-    selected: Boolean,
-    onClick: () -> Unit,
-    iconRes: Int,
-    label: String,
-    statusDotColor: androidx.compose.ui.graphics.Color?,
-    reducedMotion: Boolean,
-) {
-    val scheme = MaterialTheme.colorScheme
-    val glass = LocalGlassTheme.current
-    val darkScheme = scheme.surface.luminance() < 0.5f
-    // Glass light uses the orange primary pill with white content; every dark look the white pill.
-    val orangePill = glass && !darkScheme
-    val scaleState = androidx.compose.animation.core.animateFloatAsState(
-        targetValue = if (selected) 1f else 0.95f,
-        animationSpec = if (reducedMotion) {
-            androidx.compose.animation.core.snap()
-        } else {
-            androidx.compose.animation.core.spring(
-                dampingRatio = 0.72f,
-                stiffness = androidx.compose.animation.core.Spring.StiffnessMedium,
-                visibilityThreshold = 0.005f,
-            )
-        },
-        visibilityThreshold = 0.005f,
-        label = "pill_scale",
-    )
-    val bgColorState = androidx.compose.animation.animateColorAsState(
-        targetValue = when {
-            !selected -> androidx.compose.ui.graphics.Color.Transparent
-            orangePill -> scheme.primary
-            else -> EmberPill
-        },
-        animationSpec = if (reducedMotion) {
-            androidx.compose.animation.core.snap()
-        } else {
-            tween(200, easing = FastOutSlowInEasing)
-        },
-        label = "pill_bg",
-    )
-    val contentColor = when {
-        !selected -> scheme.onSurfaceVariant
-        orangePill -> androidx.compose.ui.graphics.Color.White
-        else -> EmberPillContent
-    }
-    androidx.compose.foundation.layout.Row(
+            ),
+        ),
+        selectedIndex = tabs.indexOf(selectedTab).coerceAtLeast(0),
+        onSelect = { onSelectTab(tabs[it]) },
         modifier = Modifier
-            .semantics {
-                role = Role.Tab
-                this.selected = selected
-            }
-            .graphicsLayer {
-                val s = scaleState.value
-                scaleX = s
-                scaleY = s
-            }
-            .drawWithCache {
-                val r = 24.dp.toPx()
-                val cr = androidx.compose.ui.geometry.CornerRadius(r, r)
-                onDrawBehind {
-                    val bg = bgColorState.value
-                    if (bg.alpha > 0f) {
-                        drawRoundRect(color = bg, cornerRadius = cr)
-                    }
-                }
-            }
-            .clickable(
-                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                indication = null,
-                onClick = onClick,
-            )
-            .padding(horizontal = 18.dp, vertical = 9.dp),
-        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            painter = painterResource(iconRes),
-            contentDescription = null,
-            tint = contentColor,
-            modifier = Modifier.size(18.dp),
-        )
-        Text(
-            text = label,
-            color = contentColor,
-            style = MaterialTheme.typography.labelLarge,
-        )
-        if (statusDotColor != null) {
-            androidx.compose.foundation.layout.Spacer(
-                modifier = Modifier
-                    .size(6.dp)
-                    .drawBehind {
-                        drawCircle(color = statusDotColor)
-                    },
-            )
-        }
-    }
+            .windowInsetsPadding(androidx.compose.foundation.layout.WindowInsets.navigationBars)
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+    )
 }
-

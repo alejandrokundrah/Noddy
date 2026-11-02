@@ -3,7 +3,6 @@ package app.noddy.android.ui.theme
 
 import app.noddy.android.ui.Preferences
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -29,25 +28,7 @@ class ThemeAndLocalizationTest {
     }
 
     @Test
-    fun `sanitizeAppearance keeps glass and ember and falls back to glass on anything else`() {
-        assertEquals("glass", Appearance().theme)
-        for (theme in listOf("glass", "ember")) {
-            assertEquals(theme, Preferences.sanitizeAppearance(Appearance(theme = theme)).theme)
-            assertEquals(theme, Preferences.sanitizeAppearance(mode = "dark", theme = theme).theme)
-        }
-        // Themes that no longer exist, unknown values and nothing saved yet are Glass.
-        for (old in listOf("legacy", "bloom", "sepia", "", "EMBER")) {
-            assertEquals("glass", Preferences.sanitizeAppearance(mode = "dark", theme = old).theme)
-        }
-        assertEquals("glass", Preferences.sanitizeAppearance(mode = "dark", theme = null).theme)
-        // The mode is kept next to Ember, which simply ignores it.
-        assertEquals("light", Preferences.sanitizeAppearance(mode = "light", theme = "ember").mode)
-        assertTrue(Appearance(theme = "ember").isEmber)
-        assertFalse(Appearance().isEmber)
-    }
-
-    @Test
-    fun `Glass has distinct light and dark palettes for its fixed orange seed`() {
+    fun `The palette has distinct light and dark colors for its fixed orange seed`() {
         val seed = Tokens.glassSeeds[Tokens.DEFAULT_SEED]
         assertNotNull("the default seed '${Tokens.DEFAULT_SEED}' must exist", seed)
         seed!!

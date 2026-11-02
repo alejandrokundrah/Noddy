@@ -50,6 +50,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -59,14 +60,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -116,11 +113,13 @@ import app.noddy.android.core.Core
 import app.noddy.android.core.Device
 import app.noddy.android.core.WakeState
 import app.noddy.android.ui.theme.LocalReducedMotion
+import app.noddy.android.ui.theme.PillButton
+import app.noddy.android.ui.theme.RoundIconButton
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlinx.coroutines.delay
 
-enum class RemoteMode { Touchpad, AirMouse, Presentation, Screen }
+enum class RemoteMode { Pad, Touchpad, AirMouse, Presentation, Screen }
 
 @Composable
 fun RemoteScreen(
@@ -191,82 +190,52 @@ fun RemoteScreen(
         verticalArrangement = Arrangement.spacedBy(if (isFullScreen) 0.dp else 12.dp),
     ) {
         if (!isFullScreen) {
-            // Header: Back, PC name, online dot
+            // Header: a round back button, the PC's name centered, and its online dot.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_back),
-                        contentDescription = stringResource(R.string.action_back),
-                    )
-                }
-                Spacer(Modifier.width(4.dp))
+                RoundIconButton(
+                    icon = painterResource(R.drawable.ic_back),
+                    contentDescription = stringResource(R.string.action_back),
+                    onClick = onBack,
+                    size = 48.dp,
+                )
                 Text(
                     device.name,
                     style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.weight(1f),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
                 )
-                Surface(
-                    shape = CircleShape,
-                    color = if (device.online) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.size(10.dp),
-                ) {}
+                Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+                    Surface(
+                        shape = CircleShape,
+                        color = if (device.online) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                        modifier = Modifier.size(10.dp),
+                    ) {}
+                }
             }
 
-            // Mode switcher: Touchpad | Air mouse | Presentation | Screen
-            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                SegmentedButton(
-                    selected = mode == RemoteMode.Touchpad,
-                    onClick = { mode = RemoteMode.Touchpad },
-                    shape = SegmentedButtonDefaults.itemShape(0, 4),
-                    icon = {},
-                    modifier = Modifier.weight(1f),
-                ) {
-                    Text(
-                        stringResource(R.string.remote_mode_touchpad),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                SegmentedButton(
-                    selected = mode == RemoteMode.AirMouse,
-                    onClick = { mode = RemoteMode.AirMouse },
-                    shape = SegmentedButtonDefaults.itemShape(1, 4),
-                    icon = {},
-                    modifier = Modifier.weight(1f),
-                ) {
-                    Text(
-                        stringResource(R.string.remote_mode_air),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                SegmentedButton(
-                    selected = mode == RemoteMode.Presentation,
-                    onClick = { mode = RemoteMode.Presentation },
-                    shape = SegmentedButtonDefaults.itemShape(2, 4),
-                    icon = {},
-                    modifier = Modifier.weight(1.1f),
-                ) {
-                    Text(
-                        stringResource(R.string.remote_mode_presentation),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                SegmentedButton(
-                    selected = mode == RemoteMode.Screen,
-                    onClick = { mode = RemoteMode.Screen },
-                    shape = SegmentedButtonDefaults.itemShape(3, 4),
-                    icon = {},
-                    modifier = Modifier.weight(0.95f),
-                ) {
-                    Text(
-                        stringResource(R.string.remote_mode_screen),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+            // Mode switcher: Pad | Touchpad | Air mouse | Presentation | Screen
+            Row(
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                val modes = listOf(
+                    RemoteMode.Pad to R.string.remote_mode_pad,
+                    RemoteMode.Touchpad to R.string.remote_mode_touchpad,
+                    RemoteMode.AirMouse to R.string.remote_mode_air,
+                    RemoteMode.Presentation to R.string.remote_mode_presentation,
+                    RemoteMode.Screen to R.string.remote_mode_screen,
+                )
+                for ((m, label) in modes) {
+                    PillButton(
+                        label = stringResource(label),
+                        onClick = { mode = m },
+                        accent = mode == m,
+                        modifier = Modifier.semantics { selected = mode == m },
                     )
                 }
             }
@@ -306,6 +275,12 @@ fun RemoteScreen(
             label = "RemoteModeTransition",
         ) { currentMode ->
             when (currentMode) {
+                RemoteMode.Pad -> RemotePadView(
+                    device = device,
+                    core = core,
+                    onStatus = onStatus,
+                    modifier = Modifier.fillMaxSize(),
+                )
                 RemoteMode.Touchpad -> TouchpadView(
                     pcId = device.id,
                     pcName = device.name,

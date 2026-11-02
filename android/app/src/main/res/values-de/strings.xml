@@ -52,9 +52,6 @@
     <string name="settings_title">Einstellungen</string>
     <string name="settings_appearance">Darstellung</string>
     <string name="settings_mode">Modus</string>
-    <string name="settings_theme">Design</string>
-    <string name="theme_glass">Glas</string>
-    <string name="theme_ember">Ember</string>
     <string name="home_stat_battery">Akku</string>
     <string name="settings_language">Sprache</string>
     <string name="settings_language_more">Mehr</string>
@@ -1363,4 +1360,16 @@
     <string name="home_stat_clipboard">Zwischenablage</string>
     <string name="home_stat_timeline">Verlauf</string>
     <string name="home_connected_count">%1$d von %2$d PCs verbunden</string>
+    <string name="remote_mode_pad">Pad</string>
+    <string name="remote_pad_ok">OK</string>
+    <string name="remote_pad_ok_desc">Eingabe</string>
+    <string name="remote_pad_volume_up">Lauter</string>
+    <string name="remote_pad_volume_down">Leiser</string>
+    <string name="remote_pad_page">SEITE</string>
+    <string name="remote_pad_page_up">Seite hoch</string>
+    <string name="remote_pad_page_down">Seite runter</string>
+    <string name="remote_pad_back">Zurück</string>
+    <string name="remote_pad_exit">Beenden</string>
+    <string name="remote_pad_space">Leertaste</string>
+    <string name="remote_pad_task_view">Aufgabenansicht</string>
 </resources>
