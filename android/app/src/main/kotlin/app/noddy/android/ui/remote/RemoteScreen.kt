@@ -119,7 +119,7 @@ import kotlin.math.abs
 import kotlin.math.hypot
 import kotlinx.coroutines.delay
 
-enum class RemoteMode { Pad, Touchpad, AirMouse, Presentation, Screen }
+enum class RemoteMode { Touchpad, AirMouse, Presentation, Screen }
 
 @Composable
 fun RemoteScreen(
@@ -218,13 +218,12 @@ fun RemoteScreen(
                 }
             }
 
-            // Mode switcher: Pad | Touchpad | Air mouse | Presentation | Screen
+            // Mode switcher: Touchpad | Air mouse | Presentation | Screen
             Row(
                 modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 val modes = listOf(
-                    RemoteMode.Pad to R.string.remote_mode_pad,
                     RemoteMode.Touchpad to R.string.remote_mode_touchpad,
                     RemoteMode.AirMouse to R.string.remote_mode_air,
                     RemoteMode.Presentation to R.string.remote_mode_presentation,
@@ -275,12 +274,6 @@ fun RemoteScreen(
             label = "RemoteModeTransition",
         ) { currentMode ->
             when (currentMode) {
-                RemoteMode.Pad -> RemotePadView(
-                    device = device,
-                    core = core,
-                    onStatus = onStatus,
-                    modifier = Modifier.fillMaxSize(),
-                )
                 RemoteMode.Touchpad -> TouchpadView(
                     pcId = device.id,
                     pcName = device.name,

@@ -756,7 +756,7 @@ private fun App(
                                 if (pc == null) {
                                     pairing = true
                                 } else {
-                                    remoteInitialMode = RemoteMode.Pad
+                                    remoteInitialMode = RemoteMode.Touchpad
                                     remotePcId = pc.id
                                 }
                             },
@@ -823,7 +823,7 @@ private fun App(
                                     onRefresh = core::refresh,
                                     onWake = core::wake,
                                     onOpenRemote = { id ->
-                                        remoteInitialMode = RemoteMode.Pad
+                                        remoteInitialMode = RemoteMode.Touchpad
                                         remotePcId = id
                                     },
                                     onOpenScreen = { id ->
@@ -861,7 +861,7 @@ private fun App(
                                     onWake = core::wake,
                                     onSetReconnect = core::setReconnect,
                                     onRemote = { id ->
-                                        remoteInitialMode = RemoteMode.Pad
+                                        remoteInitialMode = RemoteMode.Touchpad
                                         remotePcId = id
                                     },
                                     onDeck = { id ->
