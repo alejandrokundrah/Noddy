@@ -148,6 +148,9 @@ Sheet {
                         width: listColumn.width
                         height: 52
                         readonly property bool downloadingThis: RemoteFiles.downloading === modelData.path
+                        // 0..1 once the size is known.
+                        readonly property real fraction: downloadingThis && RemoteFiles.downloadSize > 0
+                            ? Math.min(1, RemoteFiles.downloaded / RemoteFiles.downloadSize) : 0
 
                         Rectangle {
                             anchors.fill: parent
@@ -203,11 +206,29 @@ Sheet {
                             Txt {
                                 visible: !entry.modelData.isDir
                                 width: parent.width
-                                text: entry.downloadingThis ? qsTr("Downloading…") : sheet.sizeText(entry.modelData.size)
+                                text: !entry.downloadingThis ? sheet.sizeText(entry.modelData.size)
+                                    : (RemoteFiles.downloadSize > 0
+                                        ? qsTr("Downloading… %1 of %2 (%3%)")
+                                            .arg(sheet.sizeText(RemoteFiles.downloaded))
+                                            .arg(sheet.sizeText(RemoteFiles.downloadSize))
+                                            .arg(Math.floor(entry.fraction * 100))
+                                        : qsTr("Downloading…"))
                                 role: "bodySmall"
                                 muted: true
                                 elide: Text.ElideRight
                             }
+                        }
+                        // Progress along the bottom edge while this file downloads.
+                        Rectangle {
+                            visible: entry.downloadingThis && RemoteFiles.downloadSize > 0
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 2
+                            height: 3
+                            radius: 1.5
+                            width: Math.max(0, (parent.width - 20) * entry.fraction)
+                            color: Theme.primary
                         }
                         Item {
                             id: trailing

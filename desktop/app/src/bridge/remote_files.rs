@@ -28,6 +28,8 @@ pub mod qobject {
         #[qproperty(QString, crumbs)]
         #[qproperty(QString, message)]
         #[qproperty(QString, downloading)]
+        #[qproperty(i64, downloaded)]
+        #[qproperty(i64, download_size, cxx_name = "downloadSize")]
         #[qproperty(bool, can_go_up, cxx_name = "canGoUp")]
         type RemoteFiles = super::RemoteFilesRust;
     }
@@ -64,6 +66,8 @@ pub struct RemoteFilesRust {
     crumbs: QString,
     message: QString,
     downloading: QString,
+    downloaded: i64,
+    download_size: i64,
     can_go_up: bool,
 }
 
@@ -85,6 +89,8 @@ impl qobject::RemoteFiles {
         self.as_mut().set_crumbs(QString::from(&v.crumbs_json));
         self.as_mut().set_message(QString::from(&v.message));
         self.as_mut().set_downloading(QString::from(&v.downloading));
+        self.as_mut().set_downloaded(v.downloaded);
+        self.as_mut().set_download_size(v.download_size);
         self.as_mut().set_can_go_up(v.can_go_up);
     }
 

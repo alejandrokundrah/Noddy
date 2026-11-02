@@ -289,6 +289,8 @@ pub struct AppState {
     pub history_enabled: bool,
     /// Phone asking to control this PC for the first time while `remote_input` is off.
     pub remote_prompt: Option<DeviceId>,
+    /// A paired computer asking to browse this PC's folders while it isn't allowed.
+    pub share_prompt: Option<DeviceId>,
     /// Phone asking to view this PC's screen while `pc_mirror` is off.
     pub pc_mirror_prompt: Option<(DeviceId, noddy_core::MirrorStart)>,
     /// Active laser pointer overlay (`(device, x, y)` in `0.0..=1.0`).
@@ -401,6 +403,10 @@ impl AppState {
                     self.remote_prompt = None;
                     changes |= Changes::REMOTE;
                 }
+                if self.share_prompt == Some(*id) {
+                    self.share_prompt = None;
+                    changes |= Changes::REMOTE;
+                }
                 if self.pc_mirror_prompt.as_ref().is_some_and(|(d, _)| d == id) {
                     self.pc_mirror_prompt = None;
                     changes |= Changes::REMOTE;
@@ -491,6 +497,21 @@ impl AppState {
                 self.remote_prompt = Some(*device);
                 Changes::REMOTE
             }
+            // A phone browses this PC through its own setting and needs no question;
+            // another computer is asked about once.
+            NodeEvent::StorageRequested { device } => {
+                let is_computer = self.device(device).is_some_and(|d| {
+                    matches!(d.info.kind, noddy_core::DeviceKind::Desktop | noddy_core::DeviceKind::Laptop)
+                        || (d.info.kind == noddy_core::DeviceKind::Unknown
+                            && !d.info.os.is_empty()
+                            && d.info.os != "android")
+                });
+                if !is_computer || self.share_prompt == Some(*device) {
+                    return Changes::NONE;
+                }
+                self.share_prompt = Some(*device);
+                Changes::REMOTE
+            }
             NodeEvent::PcMirrorRequested { device, options } => {
                 self.pc_mirror_prompt = Some((*device, options.clone()));
                 Changes::REMOTE
@@ -562,7 +583,6 @@ impl AppState {
             | NodeEvent::WakeInfoChanged { .. }
             | NodeEvent::DeckLayout { .. }
             | NodeEvent::DeckState { .. }
-            | NodeEvent::StorageRequested { .. }
             | NodeEvent::StorageChanged { .. }
             | NodeEvent::Webcam { .. }
             | NodeEvent::Mic { .. }
@@ -1221,6 +1241,30 @@ mod tests {
 
         s.apply(&NodeEvent::Pairing(PairingEvent::Failed(PairingFailure::Expired)));
         assert_eq!(s.pairing, PairingView::Failed(PairingFailure::Expired));
+    }
+
+    #[test]
+    fn only_another_computer_asking_for_folders_raises_the_prompt() {
+        let mut s = AppState::default();
+        let mut pc = paired(5, 50);
+        pc.info.kind = DeviceKind::Laptop;
+        pc.info.os = "windows".into();
+        let phone = paired(6, 60);
+        s.apply(&NodeEvent::DeviceAdded(pc.clone()));
+        s.apply(&NodeEvent::DeviceAdded(phone.clone()));
+
+        // A phone is gated by its own setting: no question.
+        assert_eq!(s.apply(&NodeEvent::StorageRequested { device: phone.id }), Changes::NONE);
+        assert_eq!(s.share_prompt, None);
+        // A device that isn't paired can't ask.
+        assert_eq!(s.apply(&NodeEvent::StorageRequested { device: DeviceId([9; 32]) }), Changes::NONE);
+
+        // A computer is asked about once, and unpairing it withdraws the question.
+        assert_eq!(s.apply(&NodeEvent::StorageRequested { device: pc.id }), Changes::REMOTE);
+        assert_eq!(s.share_prompt, Some(pc.id));
+        assert_eq!(s.apply(&NodeEvent::StorageRequested { device: pc.id }), Changes::NONE);
+        s.apply(&NodeEvent::DeviceRemoved(pc.id));
+        assert_eq!(s.share_prompt, None);
     }
 
     #[test]

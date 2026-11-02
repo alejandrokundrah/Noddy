@@ -1219,6 +1219,51 @@ async fn two_computers_can_find_each_other_and_send_the_clipboard() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn a_download_reports_its_progress_including_what_an_earlier_try_kept() {
+    let content: Vec<u8> = (0..600_000u32).map(|i| (i % 253) as u8).collect();
+    let (mut host, _shared) = sharing_computer("Laptop", &[("big.bin", &content)]).await;
+    let mut guest = device_with("Desktop", DeviceKind::Desktop, &[]).await;
+    pair_qr(&mut host, &mut guest).await;
+    let (host_id, guest_id) = (host.node.device_id(), guest.node.device_id());
+    host.node.set_device_toggle(guest_id, "share_folders", true).unwrap();
+
+    let out = tempfile::tempdir().unwrap();
+    let dest = out.path().join("big.bin");
+
+    // A fresh download: from nothing, never backwards, always against the real size, ending whole.
+    let mut seen: Vec<(u64, u64)> = Vec::new();
+    with_timeout(
+        "download",
+        guest
+            .node
+            .storage_download_with_progress(host_id, "big.bin", &dest, |got, size| seen.push((got, size))),
+    )
+    .await
+    .unwrap();
+    assert_eq!(seen.first(), Some(&(0, content.len() as u64)));
+    assert_eq!(seen.last(), Some(&(content.len() as u64, content.len() as u64)));
+    assert!(seen.windows(2).all(|w| w[0].0 <= w[1].0), "never goes backwards: {seen:?}");
+    assert!(seen.iter().all(|(got, size)| got <= size && *size == content.len() as u64));
+    assert!(seen.len() > 2, "reported along the way, not only at the ends: {seen:?}");
+
+    // Carrying on from a part: it starts where that left off.
+    std::fs::remove_file(&dest).unwrap();
+    std::fs::write(dest.with_file_name("big.bin.noddy-part"), &content[..250_000]).unwrap();
+    let mut seen: Vec<(u64, u64)> = Vec::new();
+    with_timeout(
+        "resume",
+        guest
+            .node
+            .storage_download_with_progress(host_id, "big.bin", &dest, |got, size| seen.push((got, size))),
+    )
+    .await
+    .unwrap();
+    assert_eq!(seen.first(), Some(&(250_000, content.len() as u64)));
+    assert_eq!(seen.last(), Some(&(content.len() as u64, content.len() as u64)));
+    assert_eq!(std::fs::read(&dest).unwrap(), content);
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn the_device_list_follows_a_pairing_through_its_states() {
     use noddy_core::{DeviceAction, DeviceState};
     let (mut host, _shared) = sharing_computer("Laptop", &[("Downloads/a.txt", b"a")]).await;
