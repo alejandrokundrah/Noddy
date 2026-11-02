@@ -762,6 +762,7 @@ mod tests {
         assert!(!stream_pc_audio_to_phone());
 
         let settings = Settings {
+            theme: Theme::Ember,
             color_mode: ColorMode::Dark,
             backdrop: false,
             close_to_tray: false,
