@@ -187,6 +187,13 @@ QtObject {
                     app.mainWindow.flash()
             }
         }
+        function onSharePromptDeviceIdChanged() {
+            if (AppController.sharePromptDeviceId.length > 0) {
+                app.showMain()
+                if (app.mainWindow)
+                    app.mainWindow.flash()
+            }
+        }
         function onShelfOpenChanged() {
             app.syncShelfWindow()
         }

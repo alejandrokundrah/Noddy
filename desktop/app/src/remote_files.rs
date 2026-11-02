@@ -17,6 +17,9 @@ use crate::{
     state::Changes,
 };
 
+/// How often a download's progress reaches the window at most.
+const PROGRESS_EVERY: std::time::Duration = std::time::Duration::from_millis(100);
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Phase {
     /// Nothing open.
@@ -51,6 +54,9 @@ struct State {
     message: String,
     /// The file being downloaded, by its path on the other computer.
     downloading: Option<String>,
+    /// How much of it there is so far, and its size (0 until known).
+    downloaded: u64,
+    download_size: u64,
     /// Bumped by every listing, so a slow answer for a folder the user already left is dropped.
     generation: u64,
 }
@@ -73,6 +79,8 @@ pub struct View {
     pub crumbs_json: String,
     pub message: String,
     pub downloading: String,
+    pub downloaded: i64,
+    pub download_size: i64,
     pub can_go_up: bool,
 }
 
@@ -86,6 +94,8 @@ pub fn view() -> View {
         crumbs_json: remote_paths::crumbs_json(&s.device_name, &s.path),
         message: s.message.clone(),
         downloading: s.downloading.clone().unwrap_or_default(),
+        downloaded: i64::try_from(s.downloaded).unwrap_or(i64::MAX),
+        download_size: i64::try_from(s.download_size).unwrap_or(i64::MAX),
         can_go_up: !s.path.is_empty(),
     })
 }
@@ -181,6 +191,8 @@ pub fn download(remote: &str) {
             return None; // one at a time
         }
         s.downloading = Some(remote.to_owned());
+        s.downloaded = 0;
+        s.download_size = 0;
         s.device.map(|d| (d, s.device_name.clone()))
     }) else {
         return;
@@ -196,8 +208,25 @@ pub fn download(remote: &str) {
         let file_name = remote_paths::safe_file_name(remote_paths::leaf(&remote));
         let dir = core_host::downloads_dir();
         let dest = crate::photos::free_path(&dir, &file_name);
-        let result = node.storage_download(device, remote.clone(), &dest).await;
-        state(|s| s.downloading = None);
+        // Told as bytes arrive; the window is refreshed at most every so often.
+        let mut last_shown = std::time::Instant::now() - PROGRESS_EVERY;
+        let result = node
+            .storage_download_with_progress(device, remote.clone(), &dest, |got, size| {
+                state(|s| {
+                    s.downloaded = got;
+                    s.download_size = size;
+                });
+                if got >= size || last_shown.elapsed() >= PROGRESS_EVERY {
+                    last_shown = std::time::Instant::now();
+                    changed();
+                }
+            })
+            .await;
+        state(|s| {
+            s.downloading = None;
+            s.downloaded = 0;
+            s.download_size = 0;
+        });
         changed();
         match result {
             Ok(_) => {

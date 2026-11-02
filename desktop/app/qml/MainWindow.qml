@@ -1187,6 +1187,54 @@ NativeWindow {
     }
 
     Sheet {
+        id: sharePromptSheet
+        opened: AppController.sharePromptDeviceId.length > 0
+        cardWidth: 420
+        onOpenedChanged: {
+            if (!opened && AppController.sharePromptDeviceId.length > 0)
+                AppController.dismissSharePrompt()
+        }
+        Column {
+            width: parent.width
+            spacing: 16
+            Avatar {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 56; height: 56
+                iconPath: Icons.laptop
+                emphasized: true
+            }
+            Txt {
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                text: qsTr("Let %1 browse your folders?").arg(AppController.sharePromptDeviceName)
+                role: "headline"
+                wrapMode: Text.WordWrap
+            }
+            Txt {
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                text: qsTr("%1 asked to look through your shared folders and download files. It can't change anything. You can turn this off any time in Settings › Devices.").arg(AppController.sharePromptDeviceName)
+                role: "body"
+                muted: true
+                wrapMode: Text.WordWrap
+            }
+            Row {
+                anchors.right: parent.right
+                spacing: 10
+                Button {
+                    variant: "text"
+                    text: qsTr("Not now")
+                    onClicked: AppController.dismissSharePrompt()
+                }
+                Button {
+                    text: qsTr("Allow")
+                    onClicked: AppController.allowShareFolders(AppController.sharePromptDeviceId)
+                }
+            }
+        }
+    }
+
+    Sheet {
         id: pcMirrorPromptSheet
         opened: AppController.pcMirrorPromptDeviceId.length > 0
         cardWidth: 460

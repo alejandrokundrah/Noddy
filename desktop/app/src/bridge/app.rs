@@ -87,6 +87,10 @@ pub mod qobject {
         /// first time while `remote_input` is off ("" when none).
         #[qproperty(QString, remote_prompt_device_id)]
         #[qproperty(QString, remote_prompt_device_name)]
+        /// Device ID and name of a paired computer asking to browse this PC's
+        /// folders while that isn't allowed ("" when none).
+        #[qproperty(QString, share_prompt_device_id)]
+        #[qproperty(QString, share_prompt_device_name)]
         /// Device ID and name of a phone asking to view this PC's screen
         /// while `pc_mirror` is off ("" when none), plus active sharing indicator.
         #[qproperty(QString, pc_mirror_prompt_device_id)]
@@ -204,6 +208,12 @@ pub mod qobject {
         /// Dismisses the one-time remote input prompt without enabling the toggle.
         #[qinvokable]
         fn dismiss_remote_prompt(self: Pin<&mut AppController>);
+        /// Lets a paired computer browse this PC's shared folders (from the prompt).
+        #[qinvokable]
+        fn allow_share_folders(self: Pin<&mut AppController>, device: &QString);
+        /// Dismisses the folder-sharing prompt without allowing anything.
+        #[qinvokable]
+        fn dismiss_share_prompt(self: Pin<&mut AppController>);
         /// Allows a paired phone to view this PC's screen for the current session only.
         #[qinvokable]
         fn allow_pc_mirror_once(self: Pin<&mut AppController>, device: &QString);
@@ -441,6 +451,8 @@ pub struct AppControllerRust {
     update_status: QString,
     remote_prompt_device_id: QString,
     remote_prompt_device_name: QString,
+    share_prompt_device_id: QString,
+    share_prompt_device_name: QString,
     pc_mirror_prompt_device_id: QString,
     pc_mirror_prompt_device_name: QString,
     pc_mirror_active: bool,
@@ -1248,6 +1260,11 @@ impl qobject::AppController {
         let (prompt_id, prompt_name) = remote_prompt.unwrap_or_default();
         self.as_mut().set_remote_prompt_device_id(QString::from(&prompt_id));
         self.as_mut().set_remote_prompt_device_name(QString::from(&prompt_name));
+        let (share_id, share_name) = hub
+            .read(|s| s.share_prompt.map(|id| (id.to_string(), s.name_of(&id).unwrap_or_else(|| id.short()))))
+            .unwrap_or_default();
+        self.as_mut().set_share_prompt_device_id(QString::from(&share_id));
+        self.as_mut().set_share_prompt_device_name(QString::from(&share_name));
         let (mirror_prompt_id, mirror_prompt_name) = pc_mirror_prompt.unwrap_or_default();
         self.as_mut().set_pc_mirror_prompt_device_id(QString::from(&mirror_prompt_id));
         self.as_mut().set_pc_mirror_prompt_device_name(QString::from(&mirror_prompt_name));
@@ -1550,6 +1567,17 @@ impl qobject::AppController {
             .update(|s| if s.remote_prompt.take().is_some() { Changes::REMOTE } else { Changes::NONE });
     }
 
+    pub fn allow_share_folders(mut self: Pin<&mut Self>, device: &QString) {
+        // set_device_toggle also clears the prompt for this computer.
+        self.as_mut().set_device_toggle(device, &QString::from("share_folders"), true);
+    }
+
+    pub fn dismiss_share_prompt(self: Pin<&mut Self>) {
+        core_host::host()
+            .hub
+            .update(|s| if s.share_prompt.take().is_some() { Changes::REMOTE } else { Changes::NONE });
+    }
+
     pub fn dismiss_remote_prompt(self: Pin<&mut Self>) {
         core_host::host()
             .hub
@@ -1681,6 +1709,16 @@ impl qobject::AppController {
                 }
             });
             core_host::refresh_capabilities();
+        }
+        if name_str == "share_folders" {
+            core_host::host().hub.update(|s| {
+                if s.share_prompt == Some(id) {
+                    s.share_prompt = None;
+                    Changes::REMOTE
+                } else {
+                    Changes::NONE
+                }
+            });
         }
         if name_str == "pc_mirror" {
             if !on {

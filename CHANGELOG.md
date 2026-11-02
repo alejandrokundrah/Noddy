@@ -20,6 +20,8 @@ change things that need a step from you, and its notes say so.
   download a file into Downloads/Noddy (an interrupted download carries on).
   The other computer decides: in **Settings › Devices**, turn on **Let this
   computer browse my folders** for that computer. Until then it says how.
+  A download shows how much has arrived, and the first time another computer
+  asks, this PC asks you whether to let it (**Allow** or **Not now**).
 
 - **Two computers, properly.** A paired computer now shows as a computer, not an
   Android phone, and its Home screen offers what two computers can do:
