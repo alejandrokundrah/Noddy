@@ -182,6 +182,8 @@ mod imp {
         };
         if stopped {
             win::input::release_held_buttons();
+            #[cfg(windows)]
+            win::desktop_input::release_held_keys();
             crate::input_share::leave_remote();
             core_host::host().hub.changed(crate::state::Changes::REMOTE);
             core_host::refresh_capabilities();
@@ -206,6 +208,8 @@ mod imp {
         };
         if let Some(peer) = stopped {
             win::input::release_held_buttons();
+            #[cfg(windows)]
+            win::desktop_input::release_held_keys();
             crate::input_share::leave_remote();
             if let Some(node) = core_host::node()
                 && replaced_by != Some(peer)

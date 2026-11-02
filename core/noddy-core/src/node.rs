@@ -3140,6 +3140,13 @@ impl Node {
         crate::remote::scroll_fast(&self.shared, &session, dx, dy).await
     }
 
+    /// Sends the pointer position to a paired PC for desktop control, as
+    /// fractions (`0.0..=1.0`) of the monitor it streams, in a QUIC datagram.
+    pub async fn remote_abs(&self, peer: DeviceId, x: f32, y: f32) -> Result<()> {
+        let session = self.connected(&peer)?;
+        crate::remote::abs_pointer(&self.shared, &session, x, y).await
+    }
+
     /// Sends a laser pointer update to a paired PC (`x`, `y` in `0.0..=1.0`).
     pub async fn remote_laser(&self, peer: DeviceId, on: bool, x: f32, y: f32) -> Result<()> {
         let session = self.connected(&peer)?;

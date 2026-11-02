@@ -150,7 +150,9 @@ pub use palette::{
     extract_artwork_scheme_rgba, scheme_from_seed_rgb, scheme_json, seed_from_grid, seed_from_pixels,
 };
 pub use play_on_phone::PlayOnPhone;
-pub use remote::{ButtonAction, INPUT_INJECT, KeyMod, MouseButton, RemoteInput, SlideAction, remote_keys};
+pub use remote::{
+    ButtonAction, INPUT_DESKTOP, INPUT_INJECT, KeyMod, MouseButton, RemoteInput, SlideAction, remote_keys,
+};
 pub use storage::{FolderStorage, StorageError, StorageReadFile, TOGGLE as STORAGE_TOGGLE};
 pub use store::{
     CHAT_RETENTION_SECS, ChatMessageRecord, ChatThreadRecord, MAX_CHAT_MESSAGES_PER_THREAD,

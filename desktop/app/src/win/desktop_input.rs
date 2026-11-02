@@ -17,7 +17,8 @@ use windows::Win32::UI::{
         MOUSEINPUT, SendInput, VIRTUAL_KEY,
     },
     WindowsAndMessaging::{
-        GetSystemMetrics, SM_CXVIRTUALSCREEN, SM_CYVIRTUALSCREEN, SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN,
+        GetSystemMetrics, SM_CXSCREEN, SM_CXVIRTUALSCREEN, SM_CYSCREEN, SM_CYVIRTUALSCREEN,
+        SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN,
     },
 };
 
@@ -82,6 +83,20 @@ pub fn virtual_desktop() -> ScreenRect {
             top: GetSystemMetrics(SM_YVIRTUALSCREEN),
             width: GetSystemMetrics(SM_CXVIRTUALSCREEN),
             height: GetSystemMetrics(SM_CYVIRTUALSCREEN),
+        }
+    }
+}
+
+/// The primary monitor, in physical pixels. It always sits at the origin of the
+/// virtual desktop. This is the monitor `pc_mirror` streams today.
+pub fn primary_monitor() -> ScreenRect {
+    // SAFETY: plain system metric queries.
+    unsafe {
+        ScreenRect {
+            left: 0,
+            top: 0,
+            width: GetSystemMetrics(SM_CXSCREEN),
+            height: GetSystemMetrics(SM_CYSCREEN),
         }
     }
 }
