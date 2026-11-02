@@ -85,9 +85,9 @@ You can browse your phone's internal storage or selected folders directly inside
 
 Two paired computers can look at each other's shared folders and download from them. Nothing is shared until its owner allows it.
 
-1. On the computer that has the files, open **Settings › Devices**, pick the other computer and turn on **Share folders** (`share_folders`).
-2. On the other computer, open the device list: a connected computer that offers its folders shows **Files**. You can browse and download; resuming an interrupted download carries on from where it stopped.
-3. Computers can't change each other's files: creating, renaming, deleting and uploading are always refused. Turn **Share folders** off to stop at any time.
+1. On the computer that has the files, open **Settings › Devices**, pick the other computer and turn on **Let this computer browse my folders** (`share_folders`).
+2. On the other computer, open the first computer's page and click **Browse files**. Click a folder to open it, use the steps at the top or the back arrow to go up, and click a file to download it into `Downloads/Noddy`. A download that was interrupted carries on from where it stopped the next time you click the same file.
+3. Computers can't change each other's files: creating, renaming, deleting and uploading are always refused. Turn **Let this computer browse my folders** off to stop at any time. If you haven't allowed it yet, the other computer shows how.
 
 From the command line, `noddy devices` lists every device and its state, and `noddy storage <device> ls` / `get` browse and download.
 

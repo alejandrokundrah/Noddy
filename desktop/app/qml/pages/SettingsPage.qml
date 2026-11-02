@@ -177,7 +177,8 @@ Item {
         storage: Qt.platform.os === "linux" ? qsTr("File manager integration") : qsTr("File Explorer integration"),
         remote_input: qsTr("Remote mouse, keyboard & Deck"),
         commands: qsTr("Run Deck shell commands"),
-        remote_files: qsTr("Remote PC file access")
+        remote_files: qsTr("Remote PC file access"),
+        share_folders: qsTr("Let this computer browse my folders")
     })
 
     readonly property var toggleIcons: ({
@@ -198,12 +199,14 @@ Item {
         storage: Icons.folder,
         remote_input: Icons.deck,
         commands: Icons.terminal,
-        remote_files: Icons.globe
+        remote_files: Icons.globe,
+        share_folders: Icons.folder
     })
 
     readonly property var toggleDescriptions: ({
         pc_mirror: qsTr("Allow this phone to view this PC's screen."),
-        commands: qsTr("Only enable for a phone you trust.")
+        commands: qsTr("Only enable for a phone you trust."),
+        share_folders: qsTr("Lets it look through your shared folders and download files. It can't change anything.")
     })
 
     readonly property var toggleGroups: [
@@ -213,7 +216,7 @@ Item {
         },
         {
             title: qsTr("Files, photos & clipboard"),
-            keys: ["clipboard", "files", "photos", "recordings", "storage", "remote_files"]
+            keys: ["clipboard", "files", "share_folders", "photos", "recordings", "storage", "remote_files"]
         },
         {
             title: qsTr("Screen, camera & control"),
@@ -246,7 +249,7 @@ Item {
 
     readonly property var allGroupedKeys: [
         "notifications", "messages", "calls", "contacts",
-        "clipboard", "files", "photos", "recordings", "storage", "remote_files",
+        "clipboard", "files", "share_folders", "photos", "recordings", "storage", "remote_files",
         "media", "toggles", "mirroring", "pc_mirror", "webcam", "pc_actions", "remote_input", "commands"
     ]
 
@@ -1053,12 +1056,24 @@ Item {
                         required property string deviceId
                         required property string name
                         required property bool online
+                        required property string kind
+                        required property string os
                         visible: index === page.selectedDeviceIndex
                         width: visible ? column.width : 0
 
                         // Re-read when toggles (and so capabilities) change.
-                        readonly property var toggles: AppController.capsRevision >= 0 && AppController.togglesRevision >= 0
-                                                       ? AppController.deviceToggles(deviceId) : []
+                        // Another computer has no phone to control: it only has what
+                        // two computers share; a phone never has the folder switch.
+                        readonly property bool isComputer: kind === "desktop" || kind === "laptop"
+                                                           || (kind === "unknown" && os !== "" && os !== "android")
+                        readonly property var computerToggles: ["clipboard", "files", "share_folders"]
+                        readonly property var toggles: {
+                            if (AppController.capsRevision < 0 || AppController.togglesRevision < 0)
+                                return []
+                            return AppController.deviceToggles(deviceId).filter(t => isComputer
+                                ? computerToggles.indexOf(t.name) >= 0
+                                : t.name !== "share_folders")
+                        }
 
                         Column {
                             width: parent.width
@@ -1066,7 +1081,7 @@ Item {
                             Row {
                                 width: parent.width
                                 spacing: 12
-                                Avatar { iconPath: Icons.phone; emphasized: deviceCard.online }
+                                Avatar { iconPath: deviceCard.isComputer ? Icons.laptop : Icons.phone; emphasized: deviceCard.online }
                                 Column {
                                     anchors.verticalCenter: parent.verticalCenter
                                     width: parent.width - 36 - 12 - unpair.width - 12
@@ -1103,6 +1118,7 @@ Item {
                             // after this phone turns its hotspot on.
                             ListRow {
                                 id: hotspotRow
+                                visible: !deviceCard.isComputer
                                 width: parent.width
                                 property string network: AppController.hotspotNetwork(deviceCard.deviceId)
                                 iconPath: Icons.wifi
