@@ -1,0 +1,1246 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index fa03fa6..60860a4 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -8,6 +8,14 @@ change things that need a step from you, and its notes say so.
+ 
+ ### New
+ 
++- **Control another computer (Windows host, first version).** A paired computer
++  now has a **Control PC** button. It opens that computer's screen in a window
++  where your mouse, wheel and keyboard (shortcuts included) act on it. The other
++  computer asks to allow control first, and keys held down are released when
++  the window loses focus or closes. For now the other computer must run Windows,
++  and only its main monitor is shown and controlled. Protocol draft:
++  `docs/protocol/desktop-control.md`.
++
+ - **Browse another computer's files in the app.** On a paired computer's page,
+   **Browse files** opens its shared folders: open folders, go back up, and
+   download a file into Downloads/Noddy (an interrupted download carries on).
+diff --git a/core/noddy-core/src/features.rs b/core/noddy-core/src/features.rs
+index f7238da..002fb9f 100644
+--- a/core/noddy-core/src/features.rs
++++ b/core/noddy-core/src/features.rs
+@@ -626,6 +626,13 @@ pub const DESKTOP_PAIR_FEATURES: &[FeatureDef] = &[
+         requires: &[peer("device.ring")],
+         partial: None,
+     },
++    // Seeing its screen and controlling it (`docs/protocol/desktop-control.md`).
++    FeatureDef {
++        id: "desktop.control",
++        group: FeatureGroup::Input,
++        requires: &[peer("mirror.capture"), peer("input.desktop"), DeviceToggle("mirroring")],
++        partial: None,
++    },
+     // Sending it files and folders.
+     FeatureDef {
+         id: "desktop.send_files",
+@@ -1399,6 +1406,30 @@ mod tests {
+         assert_eq!(matrix_with(&other, &pc(), &off).state("desktop.files"), Some(FeatureState::Available));
+     }
+ 
++    #[test]
++    fn two_computers_can_control_each_other_when_the_other_shares_its_screen_and_takes_input() {
++        let mut other = pc();
++        let m = matrix_with(&other, &pc(), &HashMap::new());
++        assert!(
++            matches!(m.state("desktop.control"), Some(FeatureState::Locked { .. })),
++            "a computer without desktop control can be asked to update: {:?}",
++            m.state("desktop.control")
++        );
++        // It needs both the screen and the input.
++        other.caps.insert("mirror.capture".to_owned());
++        let m = matrix_with(&other, &pc(), &HashMap::new());
++        assert!(matches!(m.state("desktop.control"), Some(FeatureState::Locked { .. })));
++        other.caps.insert("input.desktop".to_owned());
++        let m = matrix_with(&other, &pc(), &HashMap::new());
++        assert_eq!(m.state("desktop.control"), Some(FeatureState::Available));
++        // This computer's own switch for mirroring applies.
++        let off = HashMap::from([("mirroring".to_owned(), false)]);
++        assert!(matches!(
++            matrix_with(&other, &pc(), &off).state("desktop.control"),
++            Some(FeatureState::Locked { .. })
++        ));
++    }
++
+     #[test]
+     fn two_computers_can_find_message_and_send_things_to_each_other() {
+         let mut other = pc();
+diff --git a/core/noddy-core/src/lib.rs b/core/noddy-core/src/lib.rs
+index 18cc803..e40d074 100644
+--- a/core/noddy-core/src/lib.rs
++++ b/core/noddy-core/src/lib.rs
+@@ -150,7 +150,9 @@ pub use palette::{
+     extract_artwork_scheme_rgba, scheme_from_seed_rgb, scheme_json, seed_from_grid, seed_from_pixels,
+ };
+ pub use play_on_phone::PlayOnPhone;
+-pub use remote::{ButtonAction, INPUT_INJECT, KeyMod, MouseButton, RemoteInput, SlideAction, remote_keys};
++pub use remote::{
++    ButtonAction, INPUT_DESKTOP, INPUT_INJECT, KeyMod, MouseButton, RemoteInput, SlideAction, remote_keys,
++};
+ pub use storage::{FolderStorage, StorageError, StorageReadFile, TOGGLE as STORAGE_TOGGLE};
+ pub use store::{
+     CHAT_RETENTION_SECS, ChatMessageRecord, ChatThreadRecord, MAX_CHAT_MESSAGES_PER_THREAD,
+diff --git a/core/noddy-core/src/node.rs b/core/noddy-core/src/node.rs
+index 96a6c6d..4eb08cb 100644
+--- a/core/noddy-core/src/node.rs
++++ b/core/noddy-core/src/node.rs
+@@ -3140,6 +3140,13 @@ impl Node {
+         crate::remote::scroll_fast(&self.shared, &session, dx, dy).await
+     }
+ 
++    /// Sends the pointer position to a paired PC for desktop control, as
++    /// fractions (`0.0..=1.0`) of the monitor it streams, in a QUIC datagram.
++    pub async fn remote_abs(&self, peer: DeviceId, x: f32, y: f32) -> Result<()> {
++        let session = self.connected(&peer)?;
++        crate::remote::abs_pointer(&self.shared, &session, x, y).await
++    }
++
+     /// Sends a laser pointer update to a paired PC (`x`, `y` in `0.0..=1.0`).
+     pub async fn remote_laser(&self, peer: DeviceId, on: bool, x: f32, y: f32) -> Result<()> {
+         let session = self.connected(&peer)?;
+diff --git a/core/noddy-core/src/remote.rs b/core/noddy-core/src/remote.rs
+index daf9f5c..1afc369 100644
+--- a/core/noddy-core/src/remote.rs
++++ b/core/noddy-core/src/remote.rs
+@@ -24,6 +24,10 @@ use crate::{Error, NodeEvent, Result, node::Shared, session::Session};
+ /// presentation input (`docs/protocol/remote.md` §1).
+ pub const INPUT_INJECT: &str = "input.inject";
+ 
++/// Capability ID announced by a desktop that also understands desktop control:
++/// an absolute pointer and physical key down/up (`docs/protocol/desktop-control.md`).
++pub const INPUT_DESKTOP: &str = "input.desktop";
++
+ /// Per-device toggle name on the PC (off by default).
+ pub(crate) const TOGGLE: &str = "remote_input";
+ 
+@@ -172,6 +176,9 @@ pub(crate) async fn input(shared: &Arc<Shared>, session: &Arc<Session>, event: R
+     if !peer_offers(shared, &session.peer, INPUT_INJECT)? {
+         return Err(Error::Unsupported);
+     }
++    if event.needs_desktop() && !peer_offers(shared, &session.peer, INPUT_DESKTOP)? {
++        return Err(Error::Unsupported);
++    }
+     if let RemoteInput::Move { dx, dy } = event {
+         check(shared, session).await?;
+         return move_pointer(shared, session, dx, dy).await;
+@@ -221,6 +228,19 @@ pub(crate) async fn scroll_fast(
+     send_datagram(shared, session, &event).await
+ }
+ 
++/// Sends the pointer position `(x, y)`, as fractions (`0.0..=1.0`) of the
++/// monitor being streamed, in a QUIC datagram (desktop control).
++pub(crate) async fn abs_pointer(shared: &Arc<Shared>, session: &Arc<Session>, x: f32, y: f32) -> Result<()> {
++    let event = RemoteInput::Abs { x, y };
++    if !event.is_valid() {
++        return Err(Error::Protocol("pointer position out of bounds".into()));
++    }
++    if !peer_offers(shared, &session.peer, INPUT_DESKTOP)? {
++        return Err(Error::Unsupported);
++    }
++    send_datagram(shared, session, &event).await
++}
++
+ /// Sends a laser pointer update. While `on` is `true`, positions travel in
+ /// QUIC datagrams; when `on` is `false`, a datagram and a control-stream
+ /// `remote.input` are both sent so the dot reliably hides.
+@@ -274,6 +294,9 @@ pub(crate) async fn handle(shared: &Arc<Shared>, session: &Arc<Session>, env: &E
+         types::REMOTE_INPUT => match check_allowed(shared, &session.peer) {
+             Err((code, msg)) => Envelope::error(code, msg),
+             Ok(()) => match env.body::<RemoteInput>() {
++                Ok(event) if event.needs_desktop() && !shared.we_offer(INPUT_DESKTOP) => {
++                    Envelope::error(ErrorCode::Unsupported, "desktop control is not supported here")
++                }
+                 Ok(event) if event.is_control_allowed() && event.is_valid() => {
+                     let allowed = shared
+                         .remote
+@@ -309,6 +332,9 @@ pub(crate) fn handle_datagram(shared: &Arc<Shared>, peer: DeviceId, bytes: &[u8]
+     let Ok(event) = RemoteInput::from_datagram(bytes) else {
+         return;
+     };
++    if event.needs_desktop() && !shared.we_offer(INPUT_DESKTOP) {
++        return;
++    }
+     let allowed =
+         shared.remote.lock().unwrap_or_else(|e| e.into_inner()).allow_datagram(peer, Instant::now());
+     if !allowed {
+@@ -333,6 +359,9 @@ pub(crate) async fn receive_motion(
+         if !event.is_datagram_allowed() || !event.is_valid() {
+             break;
+         }
++        if event.needs_desktop() && !shared.we_offer(INPUT_DESKTOP) {
++            break;
++        }
+         let allowed =
+             shared.remote.lock().unwrap_or_else(|e| e.into_inner()).allow_datagram(peer, Instant::now());
+         if allowed {
+diff --git a/core/noddy-core/tests/two_devices.rs b/core/noddy-core/tests/two_devices.rs
+index 94ffec8..fe1ecc1 100644
+--- a/core/noddy-core/tests/two_devices.rs
++++ b/core/noddy-core/tests/two_devices.rs
+@@ -7112,3 +7112,72 @@ async fn elevated_over_usb_is_refused_without_a_usb_connection() {
+     pc.node.shutdown().await;
+     phone.node.shutdown().await;
+ }
++
++#[tokio::test(flavor = "multi_thread")]
++async fn desktop_control_needs_input_desktop_and_delivers_pointer_and_keys() {
++    use noddy_core::{INPUT_DESKTOP, INPUT_INJECT, RemoteInput};
++
++    let mut pc = device("Desktop", DeviceKind::Desktop).await;
++    let mut phone = device("Pixel", DeviceKind::Phone).await;
++    pair_qr(&mut pc, &mut phone).await;
++    let (pc_id, phone_id) = (pc.node.device_id(), phone.node.device_id());
++
++    // A PC that offers `input.inject` but not `input.desktop` refuses desktop control.
++    pc.node.update_power(PowerLevel::NotApplicable, vec![INPUT_INJECT.into()]).await;
++    wait_for(&mut phone, "input.remote available on phone", |e| match e {
++        NodeEvent::Capabilities(m)
++            if m.device == pc_id && m.state("input.remote") == Some(FeatureState::Available) =>
++        {
++            Some(())
++        }
++        _ => None,
++    })
++    .await;
++    pc.node.set_device_toggle(phone_id, "remote_input", true).unwrap();
++    with_timeout("remote_check allowed", phone.node.remote_check(pc_id)).await.unwrap();
++
++    let down = RemoteInput::KeyEv { code: "KeyA".into(), down: true };
++    let up = RemoteInput::KeyEv { code: "KeyA".into(), down: false };
++    assert!(matches!(phone.node.remote_input(pc_id, down.clone()).await, Err(Error::Unsupported)));
++    assert!(matches!(phone.node.remote_abs(pc_id, 0.5, 0.5).await, Err(Error::Unsupported)));
++    assert!(pc.platform.remote_inputs.lock().unwrap().is_empty(), "nothing injected without the capability");
++
++    // Out-of-range input is refused before it is sent.
++    assert!(matches!(phone.node.remote_abs(pc_id, 1.5, 0.5).await, Err(Error::Protocol(_))));
++
++    // Once the PC offers `input.desktop`, the pointer travels in a datagram.
++    pc.node.update_power(PowerLevel::NotApplicable, vec![INPUT_INJECT.into(), INPUT_DESKTOP.into()]).await;
++    let deadline = tokio::time::Instant::now() + WAIT;
++    loop {
++        match phone.node.remote_abs(pc_id, 0.25, 0.75).await {
++            Ok(()) => break,
++            Err(Error::Unsupported) => {}
++            Err(e) => panic!("remote_abs: {e:?}"),
++        }
++        assert!(tokio::time::Instant::now() < deadline, "timed out waiting for input.desktop");
++        tokio::time::sleep(Duration::from_millis(20)).await;
++    }
++    let deadline = tokio::time::Instant::now() + WAIT;
++    loop {
++        if pc.platform.remote_inputs.lock().unwrap().contains(&RemoteInput::Abs { x: 0.25, y: 0.75 }) {
++            break;
++        }
++        assert!(tokio::time::Instant::now() < deadline, "timed out waiting for abs datagram");
++        tokio::time::sleep(Duration::from_millis(20)).await;
++    }
++
++    // Keys go down and up on the control stream, in order.
++    for ev in [&down, &up] {
++        with_timeout("keyev", phone.node.remote_input(pc_id, ev.clone())).await.unwrap();
++    }
++    let recorded = pc.platform.remote_inputs.lock().unwrap().clone();
++    let keys: Vec<_> = recorded.iter().filter(|e| matches!(e, RemoteInput::KeyEv { .. })).cloned().collect();
++    assert_eq!(keys, vec![down, up]);
++
++    // With the toggle off again, desktop control is refused like any remote input.
++    pc.node.set_device_toggle(phone_id, "remote_input", false).unwrap();
++    assert!(matches!(
++        phone.node.remote_input(pc_id, RemoteInput::KeyEv { code: "KeyB".into(), down: true }).await,
++        Err(Error::Denied)
++    ));
++}
+diff --git a/core/noddy-protocol/src/messages.rs b/core/noddy-protocol/src/messages.rs
+index 5cecfd1..c9f76da 100644
+--- a/core/noddy-protocol/src/messages.rs
++++ b/core/noddy-protocol/src/messages.rs
+@@ -3122,6 +3122,10 @@ pub mod remote {
+     pub const MAX_TEXT_BYTES: usize = 256;
+     /// Most modifiers on a key press.
+     pub const MAX_MODS: usize = 4;
++    /// Longest `KeyEv` code (a DOM `KeyboardEvent.code` such as `ArrowLeft`).
++    pub const MAX_KEY_CODE_BYTES: usize = 32;
++    /// Most keys a peer may hold down at once with `KeyEv`.
++    pub const MAX_HELD_KEYS: usize = 16;
+     /// Stream service and operation when falling back from datagrams.
+     pub const SERVICE: &str = "remote";
+     pub const OP_MOTION: &str = "motion";
+@@ -3271,6 +3275,15 @@ pub enum RemoteInput {
+         #[serde(default)]
+         y: f32,
+     },
++    /// Desktop control (`docs/protocol/desktop-control.md`): the pointer at
++    /// fractions (`0.0..=1.0`) of the monitor now being streamed. Needs the
++    /// receiver's `input.desktop` capability.
++    Abs { x: f32, y: f32 },
++    /// Desktop control: a physical key going down or up, named by its DOM
++    /// `KeyboardEvent.code` (`KeyA`, `ArrowLeft`, `ControlLeft`, ...). Needs the
++    /// receiver's `input.desktop` capability.
++    #[serde(rename = "keyev")]
++    KeyEv { code: String, down: bool },
+ }
+ 
+ /// Never prints typed text (protocol v0 §11).
+@@ -3286,6 +3299,9 @@ impl std::fmt::Debug for RemoteInput {
+             RemoteInput::Slide { action } => write!(f, "Slide({action:?})"),
+             RemoteInput::Laser { on: false, .. } => f.write_str("Laser(off)"),
+             RemoteInput::Laser { on: true, x, y } => write!(f, "Laser({x}, {y})"),
++            RemoteInput::Abs { x, y } => write!(f, "Abs({x}, {y})"),
++            // Key codes reveal passwords as well as text does (v0 §11).
++            RemoteInput::KeyEv { down, .. } => write!(f, "KeyEv({})", if *down { "down" } else { "up" }),
+         }
+     }
+ }
+@@ -3318,12 +3334,29 @@ impl RemoteInput {
+                     && y.is_finite()
+                     && (!*on || ((0.0..=1.0).contains(x) && (0.0..=1.0).contains(y)))
+             }
++            RemoteInput::Abs { x, y } => (0.0..=1.0).contains(x) && (0.0..=1.0).contains(y),
++            RemoteInput::KeyEv { code, .. } => {
++                !code.is_empty()
++                    && code.len() <= remote::MAX_KEY_CODE_BYTES
++                    && code.bytes().all(|b| b.is_ascii_alphanumeric())
++            }
+         }
+     }
+ 
++    /// Whether this event needs the receiver's `input.desktop` capability.
++    pub fn needs_desktop(&self) -> bool {
++        matches!(self, RemoteInput::Abs { .. } | RemoteInput::KeyEv { .. })
++    }
++
+     /// Whether this event may travel in a lossy QUIC datagram.
+     pub fn is_datagram_allowed(&self) -> bool {
+-        matches!(self, RemoteInput::Move { .. } | RemoteInput::Scroll { .. } | RemoteInput::Laser { .. })
++        matches!(
++            self,
++            RemoteInput::Move { .. }
++                | RemoteInput::Scroll { .. }
++                | RemoteInput::Laser { .. }
++                | RemoteInput::Abs { .. }
++        )
+     }
+ 
+     /// Whether this event may travel in a `remote.input` control request.
+@@ -5103,6 +5136,40 @@ mod tests {
+         assert_eq!(env.body::<RemoteInput>().unwrap(), slide);
+     }
+ 
++    #[test]
++    fn desktop_input_validates_and_round_trips() {
++        // An absolute pointer travels in a datagram, and also on the control stream.
++        let abs = RemoteInput::Abs { x: 0.25, y: 1.0 };
++        assert!(
++            abs.is_valid() && abs.is_datagram_allowed() && abs.is_control_allowed() && abs.needs_desktop()
++        );
++        assert_eq!(RemoteInput::from_datagram(&abs.to_datagram()).unwrap(), abs);
++        for (x, y) in [(-0.1, 0.5), (0.5, 1.1), (f32::NAN, 0.5), (0.5, f32::INFINITY)] {
++            assert!(!RemoteInput::Abs { x, y }.is_valid(), "({x}, {y})");
++        }
++
++        // Keys go down and up on the control stream, never in a datagram.
++        let down = RemoteInput::KeyEv { code: "ArrowLeft".into(), down: true };
++        assert!(down.is_valid() && down.is_control_allowed() && !down.is_datagram_allowed());
++        assert!(down.needs_desktop());
++        assert!(RemoteInput::from_datagram(&down.to_datagram()).is_err());
++        let env = Envelope::new(types::REMOTE_INPUT, &down).unwrap();
++        assert_eq!(env.body::<RemoteInput>().unwrap(), down);
++        for code in ["KeyA", "Digit1", "Numpad5", "F13", "IntlBackslash"] {
++            assert!(RemoteInput::KeyEv { code: code.into(), down: false }.is_valid(), "{code}");
++        }
++        for code in ["", "Key A", "Arrow-Left", "Ключ", &"A".repeat(remote::MAX_KEY_CODE_BYTES + 1)] {
++            assert!(!RemoteInput::KeyEv { code: code.into(), down: true }.is_valid(), "{code}");
++        }
++        // The key code is never printed (v0 §11).
++        let secret = RemoteInput::KeyEv { code: "KeyP".into(), down: true };
++        assert!(!format!("{secret:?}").contains("KeyP"));
++
++        // The phone-era inputs don't need the capability.
++        assert!(!RemoteInput::Move { dx: 1.0, dy: 1.0 }.needs_desktop());
++        assert!(!RemoteInput::Text { text: "a".into() }.needs_desktop());
++    }
++
+     #[test]
+     fn phone_toggles_validate_and_round_trip() {
+         let state = PhoneToggles {
+diff --git a/desktop/app/qml/MirrorWindow.qml b/desktop/app/qml/MirrorWindow.qml
+index 2da8d81..1edb88f 100644
+--- a/desktop/app/qml/MirrorWindow.qml
++++ b/desktop/app/qml/MirrorWindow.qml
+@@ -19,6 +19,8 @@ Window {
+     readonly property string deviceName: info.name || ""
+     readonly property string phase: info.phase || ""
+     readonly property bool canControl: info.canControl === true
++    // Another computer's screen: its own mouse and keyboard, not a phone's touch (docs/protocol/desktop-control.md).
++    readonly property bool desktop: info.desktop === true
+ 
+     visible: true
+     title: info.app ? qsTr("%1 · %2").arg(info.title).arg(deviceName)
+@@ -67,7 +69,12 @@ Window {
+         if (phase === "showing")
+             video.forceActiveFocus()
+     }
+-    onActiveChanged: if (win.active) Mirror.syncClipboardOnFocus(win.mirrorKey)
++    onActiveChanged: {
++        if (win.active)
++            Mirror.syncClipboardOnFocus(win.mirrorKey)
++        else if (win.desktop)
++            Mirror.deskRelease(win.mirrorKey)
++    }
+ 
+     onFrameChanged: {
+         if (frame.width <= 0)
+@@ -106,6 +113,8 @@ Window {
+     onClosing: {
+         if (info.app && sized)
+             Mirror.saveGeometry(mirrorKey, x, y, width, height)
++        if (desktop)
++            Mirror.deskRelease(mirrorKey)
+         Mirror.stop(mirrorKey)
+     }
+ 
+@@ -118,7 +127,7 @@ Window {
+             ? "Noddy.App." + (win.info.device || "").slice(0, 8) + "." + win.info.pkg
+             : ""
+         focus: true
+-        acceptsText: win.phase === "showing" && win.canControl
++        acceptsText: win.phase === "showing" && win.canControl && !win.desktop
+         // The emoji panel (Win+.) and input methods give finished text here
+         // instead of as key presses.
+         onTextCommitted: (text) => Mirror.text(win.mirrorKey, text)
+@@ -157,9 +166,9 @@ Window {
+             onHoveredChanged: {
+                 if (hovered) {
+                     toolbarWakeTimer.restart()
+-                    if (win.phase === "showing")
++                    if (win.phase === "showing" && !win.desktop)
+                         Mirror.enterWindow(win.mirrorKey)
+-                } else {
++                } else if (!win.desktop) {
+                     Mirror.leaveWindow()
+                 }
+             }
+@@ -170,11 +179,28 @@ Window {
+             anchors.fill: parent
+             enabled: win.phase === "showing"
+             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+-            cursorShape: win.canControl ? Qt.PointingHandCursor : Qt.ArrowCursor
++            cursorShape: win.canControl && !win.desktop ? Qt.PointingHandCursor : Qt.ArrowCursor
++            // Another computer's pointer follows the mouse without a button down.
++            hoverEnabled: win.desktop && win.canControl
+             property bool down: false
+             property double lastMove: 0
++            property var heldButtons: ({})
++            function buttonName(button) {
++                return button === Qt.RightButton ? "right" : button === Qt.MiddleButton ? "middle" : "left"
++            }
+             onPressed: (mouse) => {
+                 video.forceActiveFocus()
++                if (win.desktop) {
++                    if (!win.canControl)
++                        return
++                    const p = video.at(mouse.x, mouse.y)
++                    if (!p.inside)
++                        return
++                    const name = buttonName(mouse.button)
++                    heldButtons[name] = true
++                    Mirror.deskButton(win.mirrorKey, name, true, p.x, p.y)
++                    return
++                }
+                 if (!win.canControl) {
+                     hintClose.closed = false
+                     hintPulse.restart()
+@@ -189,6 +215,19 @@ Window {
+                 Mirror.touch(win.mirrorKey, "down", p.x, p.y)
+             }
+             onPositionChanged: (mouse) => {
++                if (win.desktop) {
++                    if (!win.canControl)
++                        return
++                    // About 60 a second is plenty for a pointer.
++                    const t = Date.now()
++                    if (t - lastMove < 16)
++                        return
++                    lastMove = t
++                    const p = video.at(mouse.x, mouse.y)
++                    if (p.inside)
++                        Mirror.deskPointer(win.mirrorKey, p.x, p.y)
++                    return
++                }
+                 if (!down || !win.canControl) return
+                 // About 60 a second is plenty for a finger.
+                 const now = Date.now()
+@@ -198,6 +237,15 @@ Window {
+                 Mirror.touch(win.mirrorKey, "move", p.x, p.y)
+             }
+             onReleased: (mouse) => {
++                if (win.desktop) {
++                    const name = buttonName(mouse.button)
++                    if (!heldButtons[name])
++                        return
++                    heldButtons[name] = false
++                    const p = video.at(mouse.x, mouse.y)
++                    Mirror.deskButton(win.mirrorKey, name, false, p.x, p.y)
++                    return
++                }
+                 if (!down) return
+                 down = false
+                 if (!win.canControl) return
+@@ -205,6 +253,11 @@ Window {
+                 Mirror.touch(win.mirrorKey, "up", p.x, p.y)
+             }
+             onWheel: (wheel) => {
++                if (win.desktop) {
++                    if (win.canControl)
++                        Mirror.deskScroll(win.mirrorKey, -wheel.angleDelta.x / 120, -wheel.angleDelta.y / 120)
++                    return
++                }
+                 if (!win.canControl) {
+                     hintClose.closed = false
+                     Mirror.requestControl(win.mirrorKey)
+@@ -216,11 +269,26 @@ Window {
+             }
+         }
+ 
++        // Another computer gets every key, shortcuts included: Ctrl+S saves there, not here.
++        Keys.onReleased: (event) => {
++            if (!win.desktop || win.phase !== "showing" || !win.canControl || event.isAutoRepeat)
++                return
++            Mirror.deskKey(win.mirrorKey, event.key, (event.modifiers & Qt.KeypadModifier) !== 0, false)
++            event.accepted = true
++        }
++
+         // The keyboard: shortcuts for screenshots and recording work even
+         // without remote control; text and navigation keys go to the phone.
+         Keys.onPressed: (event) => {
+             if (win.phase !== "showing")
+                 return
++            if (win.desktop) {
++                if (win.canControl) {
++                    Mirror.deskKey(win.mirrorKey, event.key, (event.modifiers & Qt.KeypadModifier) !== 0, true)
++                    event.accepted = true
++                }
++                return
++            }
+             if ((event.modifiers & Qt.ControlModifier) && (event.modifiers & Qt.ShiftModifier) && event.key === Qt.Key_C) {
+                 Mirror.screenshotClipboard(win.mirrorKey)
+                 event.accepted = true
+@@ -344,21 +412,22 @@ Window {
+                 id: copyShotBtn
+                 iconPath: Icons.copy
+                 iconColor: "white"
+-                label: qsTr("Copy screenshot (Ctrl+Shift+C)")
++                label: win.desktop ? qsTr("Copy screenshot") : qsTr("Copy screenshot (Ctrl+Shift+C)")
+                 onClicked: Mirror.screenshotClipboard(win.mirrorKey)
+             }
+             IconButton {
+                 id: saveShotBtn
+                 iconPath: Icons.camera
+                 iconColor: "white"
+-                label: qsTr("Save screenshot (Ctrl+S)")
++                label: win.desktop ? qsTr("Save screenshot") : qsTr("Save screenshot (Ctrl+S)")
+                 onClicked: Mirror.screenshotFile(win.mirrorKey)
+             }
+             IconButton {
+                 id: recordBtn
+                 iconPath: win.info.recording === true ? Icons.stopSquare : Icons.record
+                 iconColor: win.info.recording === true ? Theme.error : "white"
+-                label: win.info.recording === true ? qsTr("Stop recording (Ctrl+R)") : qsTr("Record video (Ctrl+R)")
++                label: win.info.recording === true ? (win.desktop ? qsTr("Stop recording") : qsTr("Stop recording (Ctrl+R)"))
++                                                   : (win.desktop ? qsTr("Record video") : qsTr("Record video (Ctrl+R)"))
+                 onClicked: Mirror.toggleRecording(win.mirrorKey)
+             }
+             Txt {
+@@ -373,6 +442,7 @@ Window {
+             }
+             IconButton {
+                 id: stayAwakeBtn
++                visible: !win.desktop
+                 iconPath: Icons.coffee
+                 iconColor: win.info.stayAwake === true ? Theme.primary : "white"
+                 label: win.info.stayAwake === true
+@@ -382,7 +452,7 @@ Window {
+             }
+             IconButton {
+                 id: screenOffBtn
+-                visible: win.info.canScreenOff === true
++                visible: !win.desktop && win.info.canScreenOff === true
+                 iconPath: Icons.screenOff
+                 iconColor: win.info.screenOff === true ? Theme.primary : "white"
+                 label: win.info.screenOff === true
+@@ -467,7 +537,7 @@ Window {
+         anchors.margins: 12
+         height: Math.max(hint.implicitHeight + 20, 48)
+         radius: Theme.radiusMd
+-        visible: win.phase === "showing" && video.frameSize.width > 0 && !win.canControl && !win.info.app && !hintClose.closed
++        visible: win.phase === "showing" && video.frameSize.width > 0 && !win.canControl && !win.info.app && !win.desktop && !hintClose.closed
+         color: Qt.rgba(0, 0, 0, 0.72)
+ 
+         SequentialAnimation {
+diff --git a/desktop/app/qml/pages/HomePage.qml b/desktop/app/qml/pages/HomePage.qml
+index bfea9db..7b280b1 100644
+--- a/desktop/app/qml/pages/HomePage.qml
++++ b/desktop/app/qml/pages/HomePage.qml
+@@ -1371,6 +1371,26 @@ Item {
+                     feature: home.feature("desktop.files")
+                     onClicked: remoteFilesSheet.openFor(home.deviceId)
+                 }
++                ActionTile {
++                    width: actions.tileWidth
++                    deviceOnline: home.online
++                    visible: home.isComputer
++                    title: qsTr("Control PC")
++                    stateful: true
++                    subtitle: ""
++                    iconPath: Icons.desktop
++                    feature: home.feature("desktop.control")
++                    // Its screen is showing (its session is 0).
++                    active: {
++                        try {
++                            return JSON.parse(Mirror.windows).some(w => w.device === home.deviceId && w.session === 0
++                                                                       && w.phase !== "ended")
++                        } catch (e) {
++                            return false
++                        }
++                    }
++                    onClicked: Mirror.start(home.deviceId)
++                }
+                 ActionTile {
+                     width: actions.tileWidth
+                     deviceOnline: home.online
+diff --git a/desktop/app/src/bridge/mirror.rs b/desktop/app/src/bridge/mirror.rs
+index 6045475..01363e3 100644
+--- a/desktop/app/src/bridge/mirror.rs
++++ b/desktop/app/src/bridge/mirror.rs
+@@ -28,8 +28,8 @@ pub mod qobject {
+         #[qml_element]
+         #[qml_singleton]
+         /// The windows, as JSON: `[{ key, device, session, name, title,
+-        /// phase ("asking", "showing", "ended"), reason, canControl, sound,
+-        /// app }]`.
++        /// phase ("asking", "showing", "ended"), reason, canControl, desktop
++        /// (another computer's screen), sound, app }]`.
+         #[qproperty(QString, windows)]
+         /// The user turned the phones' sound off on this PC.
+         #[qproperty(bool, muted)]
+@@ -87,6 +87,29 @@ pub mod qobject {
+         /// A key without text ("back", "home", "enter"...).
+         #[qinvokable]
+         fn press(self: &Mirror, key: &QString, name: &QString);
++        /// Desktop control of another computer: the pointer at a fraction of
++        /// its screen.
++        #[qinvokable]
++        #[cxx_name = "deskPointer"]
++        fn desk_pointer(self: &Mirror, key: &QString, x: f64, y: f64);
++        /// A mouse button ("left", "right" or "middle") going down or up at a
++        /// fraction of the other computer's screen.
++        #[qinvokable]
++        #[cxx_name = "deskButton"]
++        fn desk_button(self: &Mirror, key: &QString, button: &QString, down: bool, x: f64, y: f64);
++        /// The wheel on the other computer, in notches (positive: down / right).
++        #[qinvokable]
++        #[cxx_name = "deskScroll"]
++        fn desk_scroll(self: &Mirror, key: &QString, dx: f64, dy: f64);
++        /// A physical key going down or up on the other computer: the Qt key
++        /// code, and whether it came from the number pad.
++        #[qinvokable]
++        #[cxx_name = "deskKey"]
++        fn desk_key(self: &Mirror, key: &QString, qt_key: i32, keypad: bool, down: bool);
++        /// Lets go of every key still held down on the other computer.
++        #[qinvokable]
++        #[cxx_name = "deskRelease"]
++        fn desk_release(self: &Mirror, key: &QString);
+         /// Typed text.
+         #[qinvokable]
+         fn text(self: &Mirror, key: &QString, text: &QString);
+@@ -194,9 +217,18 @@ impl qobject::Mirror {
+         let windows: Vec<serde_json::Value> = mirror::windows()
+             .into_iter()
+             .map(|(window, shown)| {
+-                let (control, can_screen_off, name) = hub.read(|s| {
+-                    // The screen needs control turned on; app windows are Elevated already.
+-                    let feature = if window.session == MIRROR_SCREEN {
++                let (control, can_screen_off, name, computer) = hub.read(|s| {
++                    // Another computer's screen is controlled with `desktop.control`; a phone's
++                    // screen needs control turned on; app windows are Elevated already.
++                    let computer = s.device(&window.device).is_some_and(|d| {
++                        matches!(
++                            d.info.kind,
++                            noddy_core::DeviceKind::Desktop | noddy_core::DeviceKind::Laptop
++                        )
++                    });
++                    let feature = if computer {
++                        "desktop.control"
++                    } else if window.session == MIRROR_SCREEN {
+                         "mirroring.control"
+                     } else {
+                         "mirroring.app_windows"
+@@ -205,7 +237,7 @@ impl qobject::Mirror {
+                     let control = matrix.and_then(|m| m.state(feature)) == Some(FeatureState::Available);
+                     let can_screen_off = matrix.and_then(|m| m.state("mirroring.app_windows"))
+                         == Some(FeatureState::Available);
+-                    (control, can_screen_off, s.name_of(&window.device).unwrap_or_default())
++                    (control, can_screen_off, s.name_of(&window.device).unwrap_or_default(), computer)
+                 });
+                 let (phase, reason) = match shown.phase {
+                     Phase::Asking => ("asking", String::new()),
+@@ -232,6 +264,7 @@ impl qobject::Mirror {
+                     "phase": phase,
+                     "reason": reason,
+                     "canControl": control,
++                    "desktop": computer,
+                     "sound": window.session == MIRROR_SCREEN && mirror::has_sound(&window.device),
+                     "recording": mirror::is_recording(&window),
+                     "recordingStartedMs": mirror::recording_started_ms(&window),
+@@ -376,6 +409,36 @@ impl qobject::Mirror {
+         self.send(key, MirrorInput::Key { key: String::from(name) });
+     }
+ 
++    pub fn desk_pointer(&self, key: &QString, x: f64, y: f64) {
++        if let Some(window) = Window::parse(&String::from(key)) {
++            crate::desktop_control::pointer(window, x, y);
++        }
++    }
++
++    pub fn desk_button(&self, key: &QString, button: &QString, down: bool, x: f64, y: f64) {
++        if let Some(window) = Window::parse(&String::from(key)) {
++            crate::desktop_control::button(window, &String::from(button), down, x, y);
++        }
++    }
++
++    pub fn desk_scroll(&self, key: &QString, dx: f64, dy: f64) {
++        if let Some(window) = Window::parse(&String::from(key)) {
++            crate::desktop_control::scroll(window, dx, dy);
++        }
++    }
++
++    pub fn desk_key(&self, key: &QString, qt_key: i32, keypad: bool, down: bool) {
++        if let Some(window) = Window::parse(&String::from(key)) {
++            crate::desktop_control::key(window, qt_key, keypad, down);
++        }
++    }
++
++    pub fn desk_release(&self, key: &QString) {
++        if let Some(window) = Window::parse(&String::from(key)) {
++            crate::desktop_control::release_all(window);
++        }
++    }
++
+     pub fn text(&self, key: &QString, text: &QString) {
+         let text = String::from(text);
+         if !text.is_empty() && text.len() <= noddy_core::MIRROR_MAX_TEXT_BYTES {
+diff --git a/desktop/app/src/core_host.rs b/desktop/app/src/core_host.rs
+index f17f121..3735fb0 100644
+--- a/desktop/app/src/core_host.rs
++++ b/desktop/app/src/core_host.rs
+@@ -183,6 +183,9 @@ pub fn compute_capabilities(
+     if remote_input_enabled && input_available {
+         caps.push(noddy_core::MIRROR_INPUT.into());
+         caps.push(noddy_core::INPUT_INJECT.into());
++        // Desktop control (absolute pointer, key down/up) is Windows-only so far.
++        #[cfg(windows)]
++        caps.push(noddy_core::INPUT_DESKTOP.into());
+     }
+     if crate::win::vcam::is_registered() {
+         caps.push(noddy_core::WEBCAM_ADDON_VCAM.into());
+diff --git a/desktop/app/src/desktop_control.rs b/desktop/app/src/desktop_control.rs
+new file mode 100644
+index 0000000..949a506
+--- /dev/null
++++ b/desktop/app/src/desktop_control.rs
+@@ -0,0 +1,301 @@
++// SPDX-License-Identifier: GPL-3.0-or-later
++//! Controlling another computer from its mirror window
++//! (`docs/protocol/desktop-control.md`): this PC's pointer, buttons, wheel and
++//! physical keys, sent to the computer whose screen the window shows, in order.
++
++use std::{
++    collections::{HashMap, HashSet},
++    sync::{LazyLock, Mutex, OnceLock},
++};
++
++use noddy_core::{ButtonAction, DeviceId, DeviceKind, Error, MouseButton, RemoteInput};
++
++use crate::{
++    core_host,
++    mirror::{self, Phase, Window},
++};
++
++/// The most a wheel notch count may be (the protocol allows more).
++const MAX_NOTCHES: f32 = 50.0;
++
++/// Keys (DOM codes) each window has sent down and not yet up, so a window that
++/// loses focus or closes can let go of them.
++static HELD: LazyLock<Mutex<HashMap<Window, HashSet<&'static str>>>> = LazyLock::new(Default::default);
++
++/// Windows that already asked the other computer to allow control.
++static ASKED: LazyLock<Mutex<HashSet<Window>>> = LazyLock::new(Default::default);
++
++/// What goes to the other computer.
++enum Message {
++    /// The pointer, in a datagram.
++    Pointer(f32, f32),
++    /// Anything else, on the control stream.
++    Input(RemoteInput),
++}
++
++/// Whether `device` is a computer, as opposed to a phone.
++pub fn is_computer(device: &DeviceId) -> bool {
++    core_host::host().hub.read(|s| {
++        s.device(device).is_some_and(|d| matches!(d.info.kind, DeviceKind::Desktop | DeviceKind::Laptop))
++    })
++}
++
++fn showing(window: &Window) -> bool {
++    matches!(mirror::phase(window), Some(Phase::Showing))
++}
++
++/// A position on the screen, kept on it.
++fn fraction(v: f64) -> f32 {
++    if v.is_finite() { v.clamp(0.0, 1.0) as f32 } else { 0.0 }
++}
++
++fn send(window: Window, message: Message) {
++    static QUEUE: OnceLock<tokio::sync::mpsc::UnboundedSender<(Window, Message)>> = OnceLock::new();
++    let queue = QUEUE.get_or_init(|| {
++        let (queue, mut messages) = tokio::sync::mpsc::unbounded_channel::<(Window, Message)>();
++        core_host::spawn(async move {
++            while let Some((window, message)) = messages.recv().await {
++                let Some(node) = core_host::node() else { continue };
++                let result = match message {
++                    Message::Pointer(x, y) => node.remote_abs(window.device, x, y).await,
++                    Message::Input(input) => node.remote_input(window.device, input).await,
++                };
++                match result {
++                    Ok(()) => {}
++                    Err(Error::Denied) => ask_to_allow(window),
++                    Err(Error::Unsupported) => mirror::set_notice(
++                        window,
++                        crate::i18n::tr!("Mirror", "Update Noddy on that computer to control it."),
++                    ),
++                    Err(e) => tracing::debug!(error = %e, "input didn't reach the computer"),
++                }
++            }
++        });
++        queue
++    });
++    let _ = queue.send((window, message));
++}
++
++/// The other computer doesn't allow control yet: asks it to (it shows a prompt)
++/// and says so in the window.
++fn ask_to_allow(window: Window) {
++    let first = ASKED.lock().unwrap_or_else(|e| e.into_inner()).insert(window);
++    if !first {
++        return;
++    }
++    mirror::set_notice(
++        window,
++        crate::i18n::tr!("Mirror", "On the other computer, allow control from this one in Noddy."),
++    );
++    if let Some(node) = core_host::node() {
++        core_host::spawn(async move {
++            let _ = node.remote_check(window.device).await;
++        });
++    }
++}
++
++/// Asks the other computer to allow control (the window's "Notify" button).
++pub fn request_control(window: Window) {
++    ASKED.lock().unwrap_or_else(|e| e.into_inner()).remove(&window);
++    ask_to_allow(window);
++}
++
++/// The pointer at fractions of the other computer's screen.
++pub fn pointer(window: Window, x: f64, y: f64) {
++    if showing(&window) {
++        send(window, Message::Pointer(fraction(x), fraction(y)));
++    }
++}
++
++/// A mouse button going down or up where the pointer is. The position goes first
++/// on the same stream, so the click lands where it was made.
++pub fn button(window: Window, button: &str, down: bool, x: f64, y: f64) {
++    if !showing(&window) {
++        return;
++    }
++    let button = match button {
++        "left" => MouseButton::Left,
++        "right" => MouseButton::Right,
++        "middle" => MouseButton::Middle,
++        _ => return,
++    };
++    let action = if down { ButtonAction::Down } else { ButtonAction::Up };
++    send(window, Message::Input(RemoteInput::Abs { x: fraction(x), y: fraction(y) }));
++    send(window, Message::Input(RemoteInput::Button { button, action }));
++}
++
++/// The wheel, in notches (positive: down / right).
++pub fn scroll(window: Window, dx: f64, dy: f64) {
++    if !showing(&window) {
++        return;
++    }
++    let notches = |v: f64| if v.is_finite() { (v as f32).clamp(-MAX_NOTCHES, MAX_NOTCHES) } else { 0.0 };
++    send(window, Message::Input(RemoteInput::Scroll { dx: notches(dx), dy: notches(dy) }));
++}
++
++/// A physical key going down or up. `qt_key` is the Qt key code, and `keypad`
++/// whether it came from the number pad.
++pub fn key(window: Window, qt_key: i32, keypad: bool, down: bool) {
++    if !showing(&window) {
++        return;
++    }
++    let Some(code) = dom_code(qt_key, keypad) else { return };
++    {
++        let mut held = HELD.lock().unwrap_or_else(|e| e.into_inner());
++        let keys = held.entry(window).or_default();
++        if down {
++            keys.insert(code);
++        } else {
++            keys.remove(code);
++        }
++    }
++    send(window, Message::Input(RemoteInput::KeyEv { code: code.to_owned(), down }));
++}
++
++/// Lets go of every key this window still holds down on the other computer
++/// (the window lost focus or closed).
++pub fn release_all(window: Window) {
++    let held = HELD.lock().unwrap_or_else(|e| e.into_inner()).remove(&window).unwrap_or_default();
++    for code in held {
++        send(window, Message::Input(RemoteInput::KeyEv { code: code.to_owned(), down: false }));
++    }
++}
++
++const LETTERS: [&str; 26] = [
++    "KeyA", "KeyB", "KeyC", "KeyD", "KeyE", "KeyF", "KeyG", "KeyH", "KeyI", "KeyJ", "KeyK", "KeyL", "KeyM",
++    "KeyN", "KeyO", "KeyP", "KeyQ", "KeyR", "KeyS", "KeyT", "KeyU", "KeyV", "KeyW", "KeyX", "KeyY", "KeyZ",
++];
++const DIGITS: [&str; 10] =
++    ["Digit0", "Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit9"];
++const PAD_DIGITS: [&str; 10] = [
++    "Numpad0", "Numpad1", "Numpad2", "Numpad3", "Numpad4", "Numpad5", "Numpad6", "Numpad7", "Numpad8",
++    "Numpad9",
++];
++const FUNCTION_KEYS: [&str; 24] = [
++    "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15", "F16",
++    "F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24",
++];
++
++/// The DOM `KeyboardEvent.code` of the physical key behind a Qt key code.
++/// A shifted symbol maps to the key it is on (US layout), so a key that goes up
++/// after Shift did is the same one that went down.
++pub fn dom_code(qt_key: i32, keypad: bool) -> Option<&'static str> {
++    Some(match qt_key {
++        0x41..=0x5a => LETTERS[(qt_key - 0x41) as usize],
++        0x30..=0x39 if keypad => PAD_DIGITS[(qt_key - 0x30) as usize],
++        0x30..=0x39 => DIGITS[(qt_key - 0x30) as usize],
++        0x21 => "Digit1",
++        0x40 => "Digit2",
++        0x23 => "Digit3",
++        0x24 => "Digit4",
++        0x25 => "Digit5",
++        0x5e => "Digit6",
++        0x26 => "Digit7",
++        0x2a if keypad => "NumpadMultiply",
++        0x2a => "Digit8",
++        0x28 => "Digit9",
++        0x29 => "Digit0",
++        0x20 => "Space",
++        0x2b if keypad => "NumpadAdd",
++        0x2b | 0x3d => "Equal",
++        0x2d if keypad => "NumpadSubtract",
++        0x2d | 0x5f => "Minus",
++        0x2e if keypad => "NumpadDecimal",
++        0x2e | 0x3e => "Period",
++        0x2f if keypad => "NumpadDivide",
++        0x2f | 0x3f => "Slash",
++        0x2c | 0x3c => "Comma",
++        0x3b | 0x3a => "Semicolon",
++        0x27 | 0x22 => "Quote",
++        0x60 | 0x7e => "Backquote",
++        0x5b | 0x7b => "BracketLeft",
++        0x5d | 0x7d => "BracketRight",
++        0x5c | 0x7c => "Backslash",
++        0x0100_0000 => "Escape",
++        0x0100_0001 | 0x0100_0002 => "Tab",
++        0x0100_0003 => "Backspace",
++        0x0100_0004 => "Enter",
++        0x0100_0005 => "NumpadEnter",
++        0x0100_0006 => "Insert",
++        0x0100_0007 => "Delete",
++        0x0100_0008 => "Pause",
++        0x0100_0009 => "PrintScreen",
++        0x0100_0010 => "Home",
++        0x0100_0011 => "End",
++        0x0100_0012 => "ArrowLeft",
++        0x0100_0013 => "ArrowUp",
++        0x0100_0014 => "ArrowRight",
++        0x0100_0015 => "ArrowDown",
++        0x0100_0016 => "PageUp",
++        0x0100_0017 => "PageDown",
++        0x0100_0020 => "ShiftLeft",
++        0x0100_0021 => "ControlLeft",
++        0x0100_0022 => "MetaLeft",
++        0x0100_0023 => "AltLeft",
++        0x0100_0024 => "CapsLock",
++        0x0100_0025 => "NumLock",
++        0x0100_0026 => "ScrollLock",
++        0x0100_0030..=0x0100_0047 => FUNCTION_KEYS[(qt_key - 0x0100_0030) as usize],
++        0x0100_0055 => "ContextMenu",
++        0x0100_1103 => "AltRight",
++        _ => return None,
++    })
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    #[test]
++    fn letters_digits_and_function_keys_map_to_their_keys() {
++        assert_eq!(dom_code(0x41, false), Some("KeyA"));
++        assert_eq!(dom_code(0x5a, false), Some("KeyZ"));
++        assert_eq!(dom_code(0x35, false), Some("Digit5"));
++        assert_eq!(dom_code(0x35, true), Some("Numpad5"));
++        assert_eq!(dom_code(0x0100_0030, false), Some("F1"));
++        assert_eq!(dom_code(0x0100_0047, false), Some("F24"));
++        assert_eq!(dom_code(0x0100_0048, false), None);
++    }
++
++    #[test]
++    fn a_shifted_symbol_is_the_key_it_is_on() {
++        assert_eq!(dom_code(0x21, false), Some("Digit1")); // !
++        assert_eq!(dom_code(0x40, false), Some("Digit2")); // @
++        assert_eq!(dom_code(0x5f, false), Some("Minus")); // _
++        assert_eq!(dom_code(0x2b, false), Some("Equal")); // +
++        assert_eq!(dom_code(0x3f, false), Some("Slash")); // ?
++        // The same characters on the number pad are other keys.
++        assert_eq!(dom_code(0x2b, true), Some("NumpadAdd"));
++        assert_eq!(dom_code(0x2a, true), Some("NumpadMultiply"));
++        assert_eq!(dom_code(0x0100_0005, true), Some("NumpadEnter"));
++    }
++
++    #[test]
++    fn editing_and_modifier_keys_map() {
++        for (qt, code) in [
++            (0x0100_0012, "ArrowLeft"),
++            (0x0100_0003, "Backspace"),
++            (0x0100_0004, "Enter"),
++            (0x0100_0002, "Tab"),
++            (0x0100_0021, "ControlLeft"),
++            (0x0100_1103, "AltRight"),
++            (0x20, "Space"),
++        ] {
++            assert_eq!(dom_code(qt, false), Some(code), "{code}");
++        }
++        assert_eq!(dom_code(0, false), None);
++        assert_eq!(dom_code(0x0100_0099, false), None);
++    }
++
++    #[test]
++    fn every_code_passes_the_protocols_check() {
++        let keypad = [false, true];
++        for qt in (0..0x80).chain(0x0100_0000..0x0100_1200) {
++            for pad in keypad {
++                if let Some(code) = dom_code(qt, pad) {
++                    assert!(RemoteInput::KeyEv { code: code.to_owned(), down: true }.is_valid(), "{code}");
++                }
++            }
++        }
++    }
++}
+diff --git a/desktop/app/src/main.rs b/desktop/app/src/main.rs
+index 5fefa31..6df9ec2 100644
+--- a/desktop/app/src/main.rs
++++ b/desktop/app/src/main.rs
+@@ -17,6 +17,7 @@ mod command_palette;
+ mod continuity_camera;
+ mod core_host;
+ mod deck;
++mod desktop_control;
+ mod doctor;
+ mod folder_sync;
+ mod hotspot;
+diff --git a/desktop/app/src/mirror.rs b/desktop/app/src/mirror.rs
+index e3fb5fb..6096af5 100644
+--- a/desktop/app/src/mirror.rs
++++ b/desktop/app/src/mirror.rs
+@@ -321,7 +321,7 @@ pub fn last_notice(window: &Window) -> String {
+     })
+ }
+ 
+-fn set_notice(window: Window, text: impl Into<String>) {
++pub(crate) fn set_notice(window: Window, text: impl Into<String>) {
+     let token = NOTICE_SEQ.fetch_add(1, Ordering::Relaxed);
+     state(|s| {
+         s.notices.insert(window, (text.into(), Instant::now(), token));
+@@ -1358,6 +1358,10 @@ pub fn drop_files(raw_urls: &[String]) {
+ /// Requests remote input control from the phone for `key` and shows a guidance banner.
+ pub fn request_control(key: &str) {
+     let Some(window) = Window::parse(key) else { return };
++    if crate::desktop_control::is_computer(&window.device) {
++        crate::desktop_control::request_control(window);
++        return;
++    }
+     set_notice(window, "On your phone, tap Allow / turn on Control from your PC in Noddy");
+     input(window, noddy_core::MirrorInput::Touch { action: noddy_core::TouchAction::Up, x: 0.5, y: 0.5 });
+ }
+diff --git a/desktop/app/src/pc_mirror.rs b/desktop/app/src/pc_mirror.rs
+index 73ff908..7ba0c3a 100644
+--- a/desktop/app/src/pc_mirror.rs
++++ b/desktop/app/src/pc_mirror.rs
+@@ -182,6 +182,8 @@ mod imp {
+         };
+         if stopped {
+             win::input::release_held_buttons();
++            #[cfg(windows)]
++            win::desktop_input::release_held_keys();
+             crate::input_share::leave_remote();
+             core_host::host().hub.changed(crate::state::Changes::REMOTE);
+             core_host::refresh_capabilities();
+@@ -206,6 +208,8 @@ mod imp {
+         };
+         if let Some(peer) = stopped {
+             win::input::release_held_buttons();
++            #[cfg(windows)]
++            win::desktop_input::release_held_keys();
+             crate::input_share::leave_remote();
+             if let Some(node) = core_host::node()
+                 && replaced_by != Some(peer)
+diff --git a/desktop/app/src/remote.rs b/desktop/app/src/remote.rs
+index 3d6ac37..cb039b9 100644
+--- a/desktop/app/src/remote.rs
++++ b/desktop/app/src/remote.rs
+@@ -35,6 +35,18 @@ pub fn handle_input(peer: &DeviceId, input: RemoteInput) {
+         RemoteInput::Text { text } => win::input::type_text(&text),
+         RemoteInput::Key { key, mods } => win::input::press_key(&key, &mods),
+         RemoteInput::Slide { action } => win::input::slide(action),
++        // Desktop control (`docs/protocol/desktop-control.md`): Windows only so far. The
++        // core only lets these through when this PC offers `input.desktop`.
++        #[cfg(windows)]
++        RemoteInput::Abs { x, y } => {
++            win::desktop_input::move_absolute_on(win::desktop_input::primary_monitor(), x, y);
++        }
++        #[cfg(windows)]
++        RemoteInput::KeyEv { code, down } => {
++            win::desktop_input::key_event(&code, down);
++        }
++        #[cfg(not(windows))]
++        RemoteInput::Abs { .. } | RemoteInput::KeyEv { .. } => {}
+         RemoteInput::Laser { on: true, x, y } => {
+             let x = x.clamp(0.0, 1.0);
+             let y = y.clamp(0.0, 1.0);
+@@ -73,6 +85,8 @@ pub fn handle_input(peer: &DeviceId, input: RemoteInput) {
+ pub fn stop_all() {
+     let _ = crate::input_share::leave_remote();
+     win::input::release_held_buttons();
++    #[cfg(windows)]
++    win::desktop_input::release_held_keys();
+     hide_laser();
+ }
+ 
+@@ -81,6 +95,8 @@ pub fn on_event(event: &NodeEvent) {
+         NodeEvent::LinkChanged { link: LinkState::Offline { .. }, .. } | NodeEvent::DeviceRemoved(_) => {
+             let _ = crate::input_share::leave_remote();
+             win::input::release_held_buttons();
++            #[cfg(windows)]
++            win::desktop_input::release_held_keys();
+         }
+         NodeEvent::RemoteInputRequested { .. } => {
+             core_host::host().hub.update(|s| s.apply(event));
+diff --git a/desktop/app/src/win/desktop_input.rs b/desktop/app/src/win/desktop_input.rs
+index 7a83cc9..db911e4 100644
+--- a/desktop/app/src/win/desktop_input.rs
++++ b/desktop/app/src/win/desktop_input.rs
+@@ -17,7 +17,8 @@ use windows::Win32::UI::{
+         MOUSEINPUT, SendInput, VIRTUAL_KEY,
+     },
+     WindowsAndMessaging::{
+-        GetSystemMetrics, SM_CXVIRTUALSCREEN, SM_CYVIRTUALSCREEN, SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN,
++        GetSystemMetrics, SM_CXSCREEN, SM_CXVIRTUALSCREEN, SM_CYSCREEN, SM_CYVIRTUALSCREEN,
++        SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN,
+     },
+ };
+ 
+@@ -86,6 +87,20 @@ pub fn virtual_desktop() -> ScreenRect {
+     }
+ }
+ 
++/// The primary monitor, in physical pixels. It always sits at the origin of the
++/// virtual desktop. This is the monitor `pc_mirror` streams today.
++pub fn primary_monitor() -> ScreenRect {
++    // SAFETY: plain system metric queries.
++    unsafe {
++        ScreenRect {
++            left: 0,
++            top: 0,
++            width: GetSystemMetrics(SM_CXSCREEN),
++            height: GetSystemMetrics(SM_CYSCREEN),
++        }
++    }
++}
++
+ /// Turns a point given as fractions (`0.0..=1.0`) of `monitor` into the
+ /// `0..=65535` range `SendInput` takes for the whole virtual desktop `virt`.
+ /// `None` for a point that isn't finite or a rectangle with no area.
+diff --git a/docs/protocol/capabilities.md b/docs/protocol/capabilities.md
+index 822b776..d0f6abd 100644
+--- a/docs/protocol/capabilities.md
++++ b/docs/protocol/capabilities.md
+@@ -94,6 +94,7 @@ capability is missing.
+ | `files.browse` | Lets a paired phone browse and fetch its files | app update |
+ | `storage.mount` | Mounts a paired phone's shared storage in File Explorer ([storage](storage.md)) | app update |
+ | `input.inject` | Accepts pointer, keyboard and presentation input ([remote input](remote.md)) | app update |
++| `input.desktop` | Also accepts desktop control: an absolute pointer and physical key down/up ([desktop control](desktop-control.md)); offered together with `input.inject` | app update |
+ | `recorder` | Saves and converts voice recordings from a phone ([recorder](recorder.md)) | app update |
+ | `deck.actions` | Shares its Deck layout and live tile state and runs Deck actions ([deck](deck.md)) | app update |
+ | `pc.audio` | Reports active audio output devices in `deck.state` and accepts `pc.audio.set` volume/mute changes ([deck](deck.md)) | app update |
+diff --git a/docs/protocol/desktop-control.md b/docs/protocol/desktop-control.md
+index 5f3f71b..7a8c110 100644
+--- a/docs/protocol/desktop-control.md
++++ b/docs/protocol/desktop-control.md
+@@ -18,8 +18,9 @@ monitor, an absolute pointer, and keys that go down and up.
+ | `input.desktop` | host | Accepts the desktop input in §3 |
+ | `desktop.view` | viewer | Shows and controls another computer's screen |
+ 
+-A viewer offers the controls only for a host that offers both `mirror.capture`
+-and `input.desktop`. Both devices must allow it: the `mirroring` toggle on each
++`input.desktop` is offered together with `input.inject`. A viewer offers the
++controls only for a host that offers `mirror.capture` and `input.desktop`. Both
++devices must allow it: the `mirroring` toggle on each
+ side, and `remote_input` on the host, which stays **off by default**.
+ 
+ ## 2. Monitors
+@@ -48,7 +49,6 @@ Input =
+   | { type: "abs",   x: float32, y: float32 }
+   | { type: "keyev", code: text, down: bool }
+ 
+-Button = "left" | "right" | "middle" | "back" | "forward"
+ ```
+ 
+ - **`abs`** places the pointer at fractions of the monitor now streaming
+@@ -61,7 +61,9 @@ Button = "left" | "right" | "middle" | "back" | "forward"
+   physical key means the host's keyboard layout applies, as if typed there.
+   A `down` for a key already held is an auto-repeat. Text from input methods or
+   dead keys uses `text` instead. Sent on the control stream as `remote.input`.
+-  An unknown `code` is `BAD_MESSAGE`; so is a 17th key held at once.
++  `code` is letters and digits only. An invalid `code` is `BAD_MESSAGE`, and a
++  host that doesn't offer `input.desktop` answers `UNSUPPORTED`. A host
++  ignores a 17th key held at once, and a `code` it has no key for.
+ - **Release rules.** The host releases every held key and button when the
+   session ends, when `remote_input` is turned off, and when the connection
+   drops, so nothing stays stuck.
+@@ -77,9 +79,8 @@ Button = "left" | "right" | "middle" | "back" | "forward"
+   shows that it is being controlled for as long as it is, and lets its user end
+   the session from the host. Unattended access is a separate per-device toggle,
+   off by default, and skips only the prompt, never pairing.
+-- Rate limits follow [remote.md](remote.md) §4. Key repeat and fast typing
+-  need more headroom on control requests for `input.desktop` peers: use a burst
+-  of 120.
++- Rate limits follow [remote.md](remote.md) §4; the control-request limit
++  already leaves room for key repeat and fast typing.
+ - Implementations **MUST NOT** log `code` or `text`: key codes reveal
+   passwords as well as text does (v0 §11).
+ 
