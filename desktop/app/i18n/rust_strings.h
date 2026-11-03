@@ -426,6 +426,10 @@ static const char *const noddy_rust_strings[] = {
     QT_TRANSLATE_NOOP("PlayOnPhone", "Update Noddy on %1 to play on it."), // desktop/app/src/play_on_phone.rs
     QT_TRANSLATE_NOOP("Prefs", "Connected to OBS."), // desktop/app/src/bridge/prefs.rs
     QT_TRANSLATE_NOOP("Recordings", "Recording from %1 saved"), // desktop/app/src/recordings.rs
+    QT_TRANSLATE_NOOP("RemoteFiles", "%1 didn't allow that download."), // desktop/app/src/remote_files.rs
+    QT_TRANSLATE_NOOP("RemoteFiles", "%1 hasn't let this computer browse its folders. On that computer, open Settings › Devices, pick this computer and turn on \"Share folders\"."), // desktop/app/src/remote_files.rs
+    QT_TRANSLATE_NOOP("RemoteFiles", "Saved %1 from %2 to Downloads/Noddy."), // desktop/app/src/remote_files.rs
+    QT_TRANSLATE_NOOP("RemoteFiles", "Saved %1 from %2 to Downloads\\Noddy."), // desktop/app/src/remote_files.rs
     QT_TRANSLATE_NOOP("SendTo", "Copied to your phone's clipboard."), // desktop/app/src/send_to.rs
     QT_TRANSLATE_NOOP("SendTo", "Couldn't reach %1."), // desktop/app/src/send_to.rs
     QT_TRANSLATE_NOOP("SendTo", "Couldn't send %1"), // desktop/app/src/send_to.rs
