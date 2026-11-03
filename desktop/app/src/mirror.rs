@@ -321,7 +321,7 @@ pub fn last_notice(window: &Window) -> String {
     })
 }
 
-fn set_notice(window: Window, text: impl Into<String>) {
+pub(crate) fn set_notice(window: Window, text: impl Into<String>) {
     let token = NOTICE_SEQ.fetch_add(1, Ordering::Relaxed);
     state(|s| {
         s.notices.insert(window, (text.into(), Instant::now(), token));
@@ -1362,6 +1362,10 @@ pub fn drop_files(raw_urls: &[String]) {
 /// Requests remote input control from the phone for `key` and shows a guidance banner.
 pub fn request_control(key: &str) {
     let Some(window) = Window::parse(key) else { return };
+    if crate::desktop_control::is_computer(&window.device) {
+        crate::desktop_control::request_control(window);
+        return;
+    }
     set_notice(window, "On your phone, tap Allow / turn on Control from your PC in Noddy");
     input(window, noddy_core::MirrorInput::Touch { action: noddy_core::TouchAction::Up, x: 0.5, y: 0.5 });
 }

@@ -19,6 +19,8 @@ Window {
     readonly property string deviceName: info.name || ""
     readonly property string phase: info.phase || ""
     readonly property bool canControl: info.canControl === true
+    // Another computer's screen: its own mouse and keyboard, not a phone's touch (docs/protocol/desktop-control.md).
+    readonly property bool desktop: info.desktop === true
 
     visible: true
     title: info.app ? qsTr("%1 · %2").arg(info.title).arg(deviceName)
@@ -67,7 +69,12 @@ Window {
         if (phase === "showing")
             video.forceActiveFocus()
     }
-    onActiveChanged: if (win.active) Mirror.syncClipboardOnFocus(win.mirrorKey)
+    onActiveChanged: {
+        if (win.active)
+            Mirror.syncClipboardOnFocus(win.mirrorKey)
+        else if (win.desktop)
+            Mirror.deskRelease(win.mirrorKey)
+    }
 
     onFrameChanged: {
         if (frame.width <= 0)
@@ -106,6 +113,8 @@ Window {
     onClosing: {
         if (info.app && sized)
             Mirror.saveGeometry(mirrorKey, x, y, width, height)
+        if (desktop)
+            Mirror.deskRelease(mirrorKey)
         Mirror.stop(mirrorKey)
     }
 
@@ -118,7 +127,7 @@ Window {
             ? "Noddy.App." + (win.info.device || "").slice(0, 8) + "." + win.info.pkg
             : ""
         focus: true
-        acceptsText: win.phase === "showing" && win.canControl
+        acceptsText: win.phase === "showing" && win.canControl && !win.desktop
         // The emoji panel (Win+.) and input methods give finished text here
         // instead of as key presses.
         onTextCommitted: (text) => Mirror.text(win.mirrorKey, text)
@@ -157,9 +166,9 @@ Window {
             onHoveredChanged: {
                 if (hovered) {
                     toolbarWakeTimer.restart()
-                    if (win.phase === "showing")
+                    if (win.phase === "showing" && !win.desktop)
                         Mirror.enterWindow(win.mirrorKey)
-                } else {
+                } else if (!win.desktop) {
                     Mirror.leaveWindow()
                 }
             }
@@ -170,11 +179,28 @@ Window {
             anchors.fill: parent
             enabled: win.phase === "showing"
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-            cursorShape: win.canControl ? Qt.PointingHandCursor : Qt.ArrowCursor
+            cursorShape: win.canControl && !win.desktop ? Qt.PointingHandCursor : Qt.ArrowCursor
+            // Another computer's pointer follows the mouse without a button down.
+            hoverEnabled: win.desktop && win.canControl
             property bool down: false
             property double lastMove: 0
+            property var heldButtons: ({})
+            function buttonName(button) {
+                return button === Qt.RightButton ? "right" : button === Qt.MiddleButton ? "middle" : "left"
+            }
             onPressed: (mouse) => {
                 video.forceActiveFocus()
+                if (win.desktop) {
+                    if (!win.canControl)
+                        return
+                    const p = video.at(mouse.x, mouse.y)
+                    if (!p.inside)
+                        return
+                    const name = buttonName(mouse.button)
+                    heldButtons[name] = true
+                    Mirror.deskButton(win.mirrorKey, name, true, p.x, p.y)
+                    return
+                }
                 if (!win.canControl) {
                     hintClose.closed = false
                     hintPulse.restart()
@@ -189,6 +215,19 @@ Window {
                 Mirror.touch(win.mirrorKey, "down", p.x, p.y)
             }
             onPositionChanged: (mouse) => {
+                if (win.desktop) {
+                    if (!win.canControl)
+                        return
+                    // About 60 a second is plenty for a pointer.
+                    const t = Date.now()
+                    if (t - lastMove < 16)
+                        return
+                    lastMove = t
+                    const p = video.at(mouse.x, mouse.y)
+                    if (p.inside)
+                        Mirror.deskPointer(win.mirrorKey, p.x, p.y)
+                    return
+                }
                 if (!down || !win.canControl) return
                 // About 60 a second is plenty for a finger.
                 const now = Date.now()
@@ -198,6 +237,15 @@ Window {
                 Mirror.touch(win.mirrorKey, "move", p.x, p.y)
             }
             onReleased: (mouse) => {
+                if (win.desktop) {
+                    const name = buttonName(mouse.button)
+                    if (!heldButtons[name])
+                        return
+                    heldButtons[name] = false
+                    const p = video.at(mouse.x, mouse.y)
+                    Mirror.deskButton(win.mirrorKey, name, false, p.x, p.y)
+                    return
+                }
                 if (!down) return
                 down = false
                 if (!win.canControl) return
@@ -205,6 +253,11 @@ Window {
                 Mirror.touch(win.mirrorKey, "up", p.x, p.y)
             }
             onWheel: (wheel) => {
+                if (win.desktop) {
+                    if (win.canControl)
+                        Mirror.deskScroll(win.mirrorKey, -wheel.angleDelta.x / 120, -wheel.angleDelta.y / 120)
+                    return
+                }
                 if (!win.canControl) {
                     hintClose.closed = false
                     Mirror.requestControl(win.mirrorKey)
@@ -216,11 +269,26 @@ Window {
             }
         }
 
+        // Another computer gets every key, shortcuts included: Ctrl+S saves there, not here.
+        Keys.onReleased: (event) => {
+            if (!win.desktop || win.phase !== "showing" || !win.canControl || event.isAutoRepeat)
+                return
+            Mirror.deskKey(win.mirrorKey, event.key, (event.modifiers & Qt.KeypadModifier) !== 0, false)
+            event.accepted = true
+        }
+
         // The keyboard: shortcuts for screenshots and recording work even
         // without remote control; text and navigation keys go to the phone.
         Keys.onPressed: (event) => {
             if (win.phase !== "showing")
                 return
+            if (win.desktop) {
+                if (win.canControl) {
+                    Mirror.deskKey(win.mirrorKey, event.key, (event.modifiers & Qt.KeypadModifier) !== 0, true)
+                    event.accepted = true
+                }
+                return
+            }
             if ((event.modifiers & Qt.ControlModifier) && (event.modifiers & Qt.ShiftModifier) && event.key === Qt.Key_C) {
                 Mirror.screenshotClipboard(win.mirrorKey)
                 event.accepted = true
@@ -344,21 +412,22 @@ Window {
                 id: copyShotBtn
                 iconPath: Icons.copy
                 iconColor: "white"
-                label: qsTr("Copy screenshot (Ctrl+Shift+C)")
+                label: win.desktop ? qsTr("Copy screenshot") : qsTr("Copy screenshot (Ctrl+Shift+C)")
                 onClicked: Mirror.screenshotClipboard(win.mirrorKey)
             }
             IconButton {
                 id: saveShotBtn
                 iconPath: Icons.camera
                 iconColor: "white"
-                label: qsTr("Save screenshot (Ctrl+S)")
+                label: win.desktop ? qsTr("Save screenshot") : qsTr("Save screenshot (Ctrl+S)")
                 onClicked: Mirror.screenshotFile(win.mirrorKey)
             }
             IconButton {
                 id: recordBtn
                 iconPath: win.info.recording === true ? Icons.stopSquare : Icons.record
                 iconColor: win.info.recording === true ? Theme.error : "white"
-                label: win.info.recording === true ? qsTr("Stop recording (Ctrl+R)") : qsTr("Record video (Ctrl+R)")
+                label: win.info.recording === true ? (win.desktop ? qsTr("Stop recording") : qsTr("Stop recording (Ctrl+R)"))
+                                                   : (win.desktop ? qsTr("Record video") : qsTr("Record video (Ctrl+R)"))
                 onClicked: Mirror.toggleRecording(win.mirrorKey)
             }
             Txt {
@@ -373,6 +442,7 @@ Window {
             }
             IconButton {
                 id: stayAwakeBtn
+                visible: !win.desktop
                 iconPath: Icons.coffee
                 iconColor: win.info.stayAwake === true ? Theme.primary : "white"
                 label: win.info.stayAwake === true
@@ -382,7 +452,7 @@ Window {
             }
             IconButton {
                 id: screenOffBtn
-                visible: win.info.canScreenOff === true
+                visible: !win.desktop && win.info.canScreenOff === true
                 iconPath: Icons.screenOff
                 iconColor: win.info.screenOff === true ? Theme.primary : "white"
                 label: win.info.screenOff === true
@@ -467,7 +537,7 @@ Window {
         anchors.margins: 12
         height: Math.max(hint.implicitHeight + 20, 48)
         radius: Theme.radiusMd
-        visible: win.phase === "showing" && video.frameSize.width > 0 && !win.canControl && !win.info.app && !hintClose.closed
+        visible: win.phase === "showing" && video.frameSize.width > 0 && !win.canControl && !win.info.app && !win.desktop && !hintClose.closed
         color: Qt.rgba(0, 0, 0, 0.72)
 
         SequentialAnimation {

@@ -1374,6 +1374,26 @@ Item {
                 ActionTile {
                     width: actions.tileWidth
                     deviceOnline: home.online
+                    visible: home.isComputer
+                    title: qsTr("Control PC")
+                    stateful: true
+                    subtitle: ""
+                    iconPath: Icons.desktop
+                    feature: home.feature("desktop.control")
+                    // Its screen is showing (its session is 0).
+                    active: {
+                        try {
+                            return JSON.parse(Mirror.windows).some(w => w.device === home.deviceId && w.session === 0
+                                                                       && w.phase !== "ended")
+                        } catch (e) {
+                            return false
+                        }
+                    }
+                    onClicked: Mirror.start(home.deviceId)
+                }
+                ActionTile {
+                    width: actions.tileWidth
+                    deviceOnline: home.online
                     title: home.ringing ? qsTr("Stop ringing")
                                         : (home.isComputer ? qsTr("Find PC") : qsTr("Find phone"))
                     stateful: true

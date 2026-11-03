@@ -8,11 +8,12 @@ change things that need a step from you, and its notes say so.
 
 ### New
 
-- **Desktop control, first part (Windows).** The groundwork for controlling one
-  computer from another: a Windows PC that allows remote input now also accepts
-  an absolute pointer and physical keys going down and up (it announces
-  `input.desktop`), and lets go of any held key when a session ends. There is
-  no viewer window yet, so nothing changes on screen. Protocol draft:
+- **Control another computer (Windows host, first version).** A paired computer
+  now has a **Control PC** button. It opens that computer's screen in a window
+  where your mouse, wheel and keyboard (shortcuts included) act on it. The other
+  computer asks to allow control first, and keys held down are released when
+  the window loses focus or closes. For now the other computer must run Windows,
+  and only its main monitor is shown and controlled. Protocol draft:
   `docs/protocol/desktop-control.md`.
 
 - **Browse another computer's files in the app.** On a paired computer's page,
