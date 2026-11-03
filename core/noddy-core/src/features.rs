@@ -626,6 +626,13 @@ pub const DESKTOP_PAIR_FEATURES: &[FeatureDef] = &[
         requires: &[peer("device.ring")],
         partial: None,
     },
+    // Seeing its screen and controlling it (`docs/protocol/desktop-control.md`).
+    FeatureDef {
+        id: "desktop.control",
+        group: FeatureGroup::Input,
+        requires: &[peer("mirror.capture"), peer("input.desktop"), DeviceToggle("mirroring")],
+        partial: None,
+    },
     // Sending it files and folders.
     FeatureDef {
         id: "desktop.send_files",
@@ -1397,6 +1404,30 @@ mod tests {
         // `share_folders` toggle), not something this device's toggles change.
         let off = HashMap::from([("share_folders".to_owned(), false)]);
         assert_eq!(matrix_with(&other, &pc(), &off).state("desktop.files"), Some(FeatureState::Available));
+    }
+
+    #[test]
+    fn two_computers_can_control_each_other_when_the_other_shares_its_screen_and_takes_input() {
+        let mut other = pc();
+        let m = matrix_with(&other, &pc(), &HashMap::new());
+        assert!(
+            matches!(m.state("desktop.control"), Some(FeatureState::Locked { .. })),
+            "a computer without desktop control can be asked to update: {:?}",
+            m.state("desktop.control")
+        );
+        // It needs both the screen and the input.
+        other.caps.insert("mirror.capture".to_owned());
+        let m = matrix_with(&other, &pc(), &HashMap::new());
+        assert!(matches!(m.state("desktop.control"), Some(FeatureState::Locked { .. })));
+        other.caps.insert("input.desktop".to_owned());
+        let m = matrix_with(&other, &pc(), &HashMap::new());
+        assert_eq!(m.state("desktop.control"), Some(FeatureState::Available));
+        // This computer's own switch for mirroring applies.
+        let off = HashMap::from([("mirroring".to_owned(), false)]);
+        assert!(matches!(
+            matrix_with(&other, &pc(), &off).state("desktop.control"),
+            Some(FeatureState::Locked { .. })
+        ));
     }
 
     #[test]

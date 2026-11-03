@@ -353,6 +353,7 @@ static const char *const noddy_rust_strings[] = {
     QT_TRANSLATE_NOOP("Mirror", "Mirror recording"), // desktop/app/src/mirror.rs
     QT_TRANSLATE_NOOP("Mirror", "Mirror screenshot"), // desktop/app/src/mirror.rs
     QT_TRANSLATE_NOOP("Mirror", "Mirroring is turned off for this phone."), // desktop/app/src/mirror.rs
+    QT_TRANSLATE_NOOP("Mirror", "On the other computer, allow control from this one in Noddy."), // desktop/app/src/desktop_control.rs
     QT_TRANSLATE_NOOP("Mirror", "Recording from %1, saved in Downloads/Noddy"), // desktop/app/src/mirror.rs
     QT_TRANSLATE_NOOP("Mirror", "Recording from %1, saved in Downloads\\Noddy"), // desktop/app/src/mirror.rs
     QT_TRANSLATE_NOOP("Mirror", "Saved %1"), // desktop/app/src/mirror.rs
@@ -371,6 +372,7 @@ static const char *const noddy_rust_strings[] = {
     QT_TRANSLATE_NOOP("Mirror", "The screenshot couldn't be saved."), // desktop/app/src/mirror.rs
     QT_TRANSLATE_NOOP("Mirror", "This PC can't decode the phone's video."), // desktop/app/src/mirror.rs
     QT_TRANSLATE_NOOP("Mirror", "This phone's app doesn't share its screen yet. Update Noddy on the phone."), // desktop/app/src/mirror.rs
+    QT_TRANSLATE_NOOP("Mirror", "Update Noddy on that computer to control it."), // desktop/app/src/desktop_control.rs
     QT_TRANSLATE_NOOP("Mirror", "Wait for the screen to appear first."), // desktop/app/src/mirror.rs
     QT_TRANSLATE_NOOP("Mp4", "No video frames were recorded yet."), // desktop/app/src/win/mp4.rs
     QT_TRANSLATE_NOOP("Notifications", "Code copied"), // desktop/app/src/notifications.rs

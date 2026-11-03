@@ -28,8 +28,8 @@ pub mod qobject {
         #[qml_element]
         #[qml_singleton]
         /// The windows, as JSON: `[{ key, device, session, name, title,
-        /// phase ("asking", "showing", "ended"), reason, canControl, sound,
-        /// app }]`.
+        /// phase ("asking", "showing", "ended"), reason, canControl, desktop
+        /// (another computer's screen), sound, app }]`.
         #[qproperty(QString, windows)]
         /// The user turned the phones' sound off on this PC.
         #[qproperty(bool, muted)]
@@ -87,6 +87,29 @@ pub mod qobject {
         /// A key without text ("back", "home", "enter"...).
         #[qinvokable]
         fn press(self: &Mirror, key: &QString, name: &QString);
+        /// Desktop control of another computer: the pointer at a fraction of
+        /// its screen.
+        #[qinvokable]
+        #[cxx_name = "deskPointer"]
+        fn desk_pointer(self: &Mirror, key: &QString, x: f64, y: f64);
+        /// A mouse button ("left", "right" or "middle") going down or up at a
+        /// fraction of the other computer's screen.
+        #[qinvokable]
+        #[cxx_name = "deskButton"]
+        fn desk_button(self: &Mirror, key: &QString, button: &QString, down: bool, x: f64, y: f64);
+        /// The wheel on the other computer, in notches (positive: down / right).
+        #[qinvokable]
+        #[cxx_name = "deskScroll"]
+        fn desk_scroll(self: &Mirror, key: &QString, dx: f64, dy: f64);
+        /// A physical key going down or up on the other computer: the Qt key
+        /// code, and whether it came from the number pad.
+        #[qinvokable]
+        #[cxx_name = "deskKey"]
+        fn desk_key(self: &Mirror, key: &QString, qt_key: i32, keypad: bool, down: bool);
+        /// Lets go of every key still held down on the other computer.
+        #[qinvokable]
+        #[cxx_name = "deskRelease"]
+        fn desk_release(self: &Mirror, key: &QString);
         /// Typed text.
         #[qinvokable]
         fn text(self: &Mirror, key: &QString, text: &QString);
@@ -194,9 +217,18 @@ impl qobject::Mirror {
         let windows: Vec<serde_json::Value> = mirror::windows()
             .into_iter()
             .map(|(window, shown)| {
-                let (control, can_screen_off, name) = hub.read(|s| {
-                    // The screen needs control turned on; app windows are Elevated already.
-                    let feature = if window.session == MIRROR_SCREEN {
+                let (control, can_screen_off, name, computer) = hub.read(|s| {
+                    // Another computer's screen is controlled with `desktop.control`; a phone's
+                    // screen needs control turned on; app windows are Elevated already.
+                    let computer = s.device(&window.device).is_some_and(|d| {
+                        matches!(
+                            d.info.kind,
+                            noddy_core::DeviceKind::Desktop | noddy_core::DeviceKind::Laptop
+                        )
+                    });
+                    let feature = if computer {
+                        "desktop.control"
+                    } else if window.session == MIRROR_SCREEN {
                         "mirroring.control"
                     } else {
                         "mirroring.app_windows"
@@ -205,7 +237,7 @@ impl qobject::Mirror {
                     let control = matrix.and_then(|m| m.state(feature)) == Some(FeatureState::Available);
                     let can_screen_off = matrix.and_then(|m| m.state("mirroring.app_windows"))
                         == Some(FeatureState::Available);
-                    (control, can_screen_off, s.name_of(&window.device).unwrap_or_default())
+                    (control, can_screen_off, s.name_of(&window.device).unwrap_or_default(), computer)
                 });
                 let (phase, reason) = match shown.phase {
                     Phase::Asking => ("asking", String::new()),
@@ -232,6 +264,7 @@ impl qobject::Mirror {
                     "phase": phase,
                     "reason": reason,
                     "canControl": control,
+                    "desktop": computer,
                     "sound": window.session == MIRROR_SCREEN && mirror::has_sound(&window.device),
                     "recording": mirror::is_recording(&window),
                     "recordingStartedMs": mirror::recording_started_ms(&window),
@@ -374,6 +407,36 @@ impl qobject::Mirror {
 
     pub fn press(&self, key: &QString, name: &QString) {
         self.send(key, MirrorInput::Key { key: String::from(name) });
+    }
+
+    pub fn desk_pointer(&self, key: &QString, x: f64, y: f64) {
+        if let Some(window) = Window::parse(&String::from(key)) {
+            crate::desktop_control::pointer(window, x, y);
+        }
+    }
+
+    pub fn desk_button(&self, key: &QString, button: &QString, down: bool, x: f64, y: f64) {
+        if let Some(window) = Window::parse(&String::from(key)) {
+            crate::desktop_control::button(window, &String::from(button), down, x, y);
+        }
+    }
+
+    pub fn desk_scroll(&self, key: &QString, dx: f64, dy: f64) {
+        if let Some(window) = Window::parse(&String::from(key)) {
+            crate::desktop_control::scroll(window, dx, dy);
+        }
+    }
+
+    pub fn desk_key(&self, key: &QString, qt_key: i32, keypad: bool, down: bool) {
+        if let Some(window) = Window::parse(&String::from(key)) {
+            crate::desktop_control::key(window, qt_key, keypad, down);
+        }
+    }
+
+    pub fn desk_release(&self, key: &QString) {
+        if let Some(window) = Window::parse(&String::from(key)) {
+            crate::desktop_control::release_all(window);
+        }
     }
 
     pub fn text(&self, key: &QString, text: &QString) {

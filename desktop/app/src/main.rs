@@ -17,6 +17,7 @@ mod command_palette;
 mod continuity_camera;
 mod core_host;
 mod deck;
+mod desktop_control;
 mod doctor;
 mod folder_sync;
 mod hotspot;
