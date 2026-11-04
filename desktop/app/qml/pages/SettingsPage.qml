@@ -1064,9 +1064,14 @@ Item {
                         // Re-read when toggles (and so capabilities) change.
                         // Another computer has no phone to control: it only has what
                         // two computers share; a phone never has the folder switch.
+                        // `pc_mirror` and `remote_input` are what this PC needs to allow
+                        // before the other computer can view and control it
+                        // (docs/protocol/desktop-control.md): without them it never
+                        // announces `mirror.capture` and `input.desktop`.
                         readonly property bool isComputer: kind === "desktop" || kind === "laptop"
                                                            || (kind === "unknown" && os !== "" && os !== "android")
-                        readonly property var computerToggles: ["clipboard", "files", "share_folders"]
+                        readonly property var computerToggles: ["clipboard", "files", "share_folders",
+                                                                "pc_mirror", "remote_input"]
                         readonly property var toggles: {
                             if (AppController.capsRevision < 0 || AppController.togglesRevision < 0)
                                 return []
