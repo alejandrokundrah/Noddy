@@ -55,6 +55,8 @@ jobs:
           if (-not (Get-Command makensis -ErrorAction SilentlyContinue) -and
               -not (Test-Path "${env:ProgramFiles(x86)}\NSIS\makensis.exe")) {
             choco install nsis --yes --no-progress
+            # Refresh PATH after choco install
+            $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
           }
 
       - name: Build the installer
