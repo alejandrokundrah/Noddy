@@ -362,9 +362,7 @@ fn main() {
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows") {
         windows_resources();
     }
-    if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("linux") {
-        compile_translations();
-    }
+    compile_translations();
     let module = QmlModule::new("app.noddy")
         .qml_files(QML.iter().map(|f| QmlFile::from(*f)))
         .qml_files(QML_SINGLETONS.iter().map(|f| QmlFile::from(*f).singleton(true)));
