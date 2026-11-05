@@ -4,6 +4,26 @@ All notable changes to Noddy. Versions follow
 [semantic versioning](https://semver.org); before 1.0, a minor version may
 change things that need a step from you, and its notes say so.
 
+## 0.1.5
+
+### New
+
+- **Spanish localization.** The app now speaks Spanish (Español): pick it in
+  Settings, or it follows the system's language. All UI strings are fully
+  translated.
+- **French localization.** The app now speaks French (Français): pick it in
+  Settings, or it follows the system's language. All UI strings are fully
+  translated.
+
+### Changed
+
+- **Updated README** to accurately reflect the project's multi-platform
+  capabilities and cross-platform device management features.
+
+### Fixed
+
+- **Code formatting** to match rustfmt style in the language configuration.
+
 ## Unreleased
 
 ### New
