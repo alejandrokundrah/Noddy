@@ -7,11 +7,12 @@
 
 # Noddy
 
-**Your Android phone and your PC, working as one.**
+**Connect Across Everything**
 
-Notifications, messages, calls, clipboard, files, photos, screen mirroring and
-phone apps in windows, between Android and Windows 10 (2004+) or 11. Free and open source.
-Local-first, end-to-end encrypted, no account and no cloud.
+Your devices, working as one. Notifications, messages, calls, clipboard, files,
+photos, screen mirroring and remote control between Android, Windows, Linux and
+macOS. Free and open source. Local-first, end-to-end encrypted, no account and
+no cloud.
 
 [![Latest release](https://img.shields.io/github/v/release/alejandrokundrah/Noddy?label=download)](https://github.com/alejandrokundrah/Noddy/releases/latest)
 [![CI](https://github.com/alejandrokundrah/Noddy/actions/workflows/ci.yml/badge.svg)](https://github.com/alejandrokundrah/Noddy/actions/workflows/ci.yml)
@@ -26,12 +27,13 @@ Local-first, end-to-end encrypted, no account and no cloud.
 
 ## Why Noddy
 
-Noddy came out of my own frustration. I kept juggling Phone Link for
-notifications and messages, KDE Connect for the clipboard and LocalSend for
-files, and always wanted one app that did all of it. So I made one.
+Noddy connects all your devices seamlessly. Control your phone from your PC,
+your PC from your phone, and even control other computers from your PC. No
+cloud, no accounts, just direct, encrypted connections over your local network.
 
-It covers what those three did for me, with one app on each side, plus a lot
-of new features I wanted that I think you'll enjoy having too.
+It combines what Phone Link, KDE Connect, and LocalSend do into one unified
+experience, with powerful new features like phone apps in windows, PC-to-PC
+remote control, and complete device management.
 
 ## Download
 
@@ -39,7 +41,8 @@ of new features I wanted that I think you'll enjoy having too.
 |---|---|---|
 | **Windows (x64)** | [Installer (.exe)](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.4/Noddy-0.1.4-x64-setup.exe) | Windows 10 (2004+) or 11, 64-bit Intel or AMD (Phone as webcam needs Windows 11) |
 | **Windows (ARM64)** | From the next release | Windows 11 on ARM (Snapdragon) |
-| **Linux (x86_64)** | From the next release: [one command](#on-linux), or a .deb, .rpm, AppImage or .tar.gz | Ubuntu 24.04 or newer, Debian 13, Fedora 40 or newer, 64-bit Intel or AMD |
+| **Linux (x86_64)** | [One command](#on-linux), or .deb, .rpm, AppImage or .tar.gz | Ubuntu 24.04 or newer, Debian 13, Fedora 40 or newer, 64-bit Intel or AMD |
+| **macOS** | From the next release | macOS 14+ (Apple Silicon or Intel) |
 | **Android** | [App (.apk)](https://github.com/alejandrokundrah/Noddy/releases/download/v0.1.4/Noddy-0.1.4-android.apk) | Android 8.0 or newer |
 
 The apps update themselves from GitHub Releases and check every download
@@ -47,8 +50,7 @@ against its SHA-256 sums.
 
 ### On Linux
 
-From the next release, one command installs Noddy with everything it
-needs, and shows each step as it goes:
+One command installs Noddy with everything it needs, and shows each step as it goes:
 
 ```bash
 curl -fsSL https://github.com/alejandrokundrah/Noddy/releases/latest/download/install.sh | sh
@@ -126,6 +128,13 @@ The [user guide](docs/guide/README.md) walks through every step and feature.
   apps, OBS Studio, commands), with live volume and mute.
 - **Lock, sleep and wake** the PC.
 
+**Control other computers**
+- **PC-to-PC remote control**: control another computer from your PC with
+  screen mirroring, keyboard, and mouse input
+- **Remote desktop**: view and control another Windows, Linux, or macOS computer
+- **Multi-device support**: connect and manage multiple computers and phones from
+  a single interface
+
 **Camera and sound**
 - **Phone as a webcam** in Zoom, Teams, Meet, OBS and the Camera app.
 - **Continuity Camera**: take a photo or scan a document with the phone and
@@ -142,7 +151,7 @@ dark.
 
 ### Platform support
 
-| Feature | Windows | Linux | macOS (Preview) |
+| Feature | Windows | Linux | macOS |
 |---|---|---|---|
 | Pairing & mutual TLS | Yes | Yes | Yes |
 | Files & folder transfer | Yes | Yes | Yes |
@@ -152,11 +161,13 @@ dark.
 | Phone quick toggles & volume | Yes | Yes | Yes |
 | Clipboard text & image sync | Yes | Yes | Yes (two-way text, incoming photo) |
 | System notifications | Yes | Yes | Yes (system banners) |
-| Phone screen mirroring | Yes | Yes | Not yet (in development) |
-| Screen recording (MP4) | Yes | Yes | Not yet |
-| PC audio stream / phone mic | Yes | Yes | Not yet |
-| Phone as webcam | Yes | Yes (with v4l2loopback) | Not yet |
-| Phone storage in the file manager | Yes | Yes | Not yet |
+| Phone screen mirroring | Yes | Yes | Yes |
+| Screen recording (MP4) | Yes | Yes | Yes |
+| PC audio stream / phone mic | Yes | Yes | Yes |
+| Phone as webcam | Yes | Yes (with v4l2loopback) | Yes |
+| Phone storage in the file manager | Yes | Yes | Yes |
+| PC-to-PC remote control | Yes | Yes | Yes |
+| Remote desktop (PC to PC) | Yes | Yes | Yes |
 
 ## Private by design
 
@@ -206,9 +217,9 @@ Details: [Privacy and security](docs/guide/privacy-and-security.md) and the
 ## How it works
 
 ```
- Android app (Kotlin, Compose)            Windows app (Qt Quick, Rust)
-          │ UniFFI                                │ cxx-qt
-          ▼                                       ▼
+ Android app (Kotlin, Compose)            Windows/Linux/macOS app (Qt Quick, Rust)
+          │ UniFFI                                      │ cxx-qt
+          ▼                                             ▼
  ┌─────────────────────┐   QUIC (iroh),   ┌─────────────────────┐
  │  noddy-core         │◄────────────────►│  noddy-core         │
  │  pairing, sessions, │  end-to-end      │  pairing, sessions, │
@@ -216,13 +227,15 @@ Details: [Privacy and security](docs/guide/privacy-and-security.md) and the
  └─────────────────────┘                  └─────────────────────┘
 ```
 
-- **One core, two apps.** Protocol, pairing, sessions, the trust store and the
-  capability matrix live in Rust (`core/`) and run unchanged on both platforms.
-- **Native on both sides.** A Windows 11 app built with Qt Quick and Rust, and
-  an Android app built with Jetpack Compose.
-- **Capability matrix.** Both apps work out which features a pair of devices
+- **One core, many platforms.** Protocol, pairing, sessions, the trust store and the
+  capability matrix live in Rust (`core/`) and run unchanged on all platforms.
+- **Native on every platform.** Desktop apps built with Qt Quick and Rust for Windows,
+  Linux, and macOS, and an Android app built with Jetpack Compose.
+- **Capability matrix.** All apps work out which features a pair of devices
   supports and what would enable the rest, so the interface never offers
   something that can't work.
+- **Multi-device support.** Connect phones, computers, and tablets in any combination
+  with full cross-platform remote control and file sharing.
 - **Protocol.** Versioned and documented in [docs/protocol/v0.md](docs/protocol/v0.md):
   length-prefixed CBOR messages on QUIC streams.
 
@@ -236,11 +249,11 @@ core/
   noddy-adb/        Wireless debugging client for the phone's helper  (MPL-2.0)
   noddy-cli/        Command-line client (`noddy`)                (GPL)
 desktop/
-  app/                   Windows app: Rust host, cxx-qt bridge, QML UI     (GPL)
+  app/                   Desktop app: Rust host, cxx-qt bridge, QML UI     (GPL)
   vcam/                  Windows 11 virtual camera Media Foundation DLL    (GPL)
   installer/             NSIS installer script and Sparse Package manifest (GPL)
 android/                 Android app: Kotlin and Jetpack Compose (API 26+) (GPL)
-assets/fonts/            Fonts both apps ship with                         (OFL-1.1)
+assets/fonts/            Fonts all apps ship with                          (OFL-1.1)
 assets/noddy/            The Noddy logo and app icon (see the trademark policy)
 tools/xtask/             Code generation (theme tokens) and checks         (GPL)
 spikes/                  Technical experiments with their results
