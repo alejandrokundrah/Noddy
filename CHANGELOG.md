@@ -4,6 +4,14 @@ All notable changes to Noddy. Versions follow
 [semantic versioning](https://semver.org); before 1.0, a minor version may
 change things that need a step from you, and its notes say so.
 
+## 0.1.6
+
+### Fixed
+
+- **NSIS PATH refresh in GitHub Actions.** Fixed the Windows ARM64 build by
+  refreshing the PATH after installing NSIS via Chocolatey, ensuring makensis
+  is found in subsequent build steps.
+
 ## 0.1.5
 
 ### New

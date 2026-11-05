@@ -13,17 +13,17 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.5"
+version = "0.1.6"
 edition = "2024"
 rust-version = "1.97"
 authors = ["The Noddy contributors"]
 repository = "https://github.com/alejandrokundrah/Noddy"
 
 [workspace.dependencies]
-noddy-adb = { path = "core/noddy-adb", version = "0.1.5" }
-noddy-protocol = { path = "core/noddy-protocol", version = "0.1.5" }
-noddy-core = { path = "core/noddy-core", version = "0.1.5" }
-noddy-vcam = { path = "desktop/vcam", version = "0.1.5" }
+noddy-adb = { path = "core/noddy-adb", version = "0.1.6" }
+noddy-protocol = { path = "core/noddy-protocol", version = "0.1.6" }
+noddy-core = { path = "core/noddy-core", version = "0.1.6" }
+noddy-vcam = { path = "desktop/vcam", version = "0.1.6" }
 
 anyhow = "1"
 ciborium = "0.2"
