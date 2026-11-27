@@ -149,6 +149,21 @@ pub fn compute_capabilities(
             }
         }
         caps.push(noddy_core::MIC_LISTEN.into());
+        // Another computer can play this one's sound; the sharing switches decide
+        // what this one gives (docs/protocol/pc-sharing.md).
+        caps.push(noddy_core::SOUND_PLAY.into());
+        if crate::settings::share_pc_mic() {
+            caps.push(noddy_core::MIC_STREAM.into());
+        }
+        if crate::settings::share_pc_camera() && crate::pc_camera::is_available() {
+            caps.push(noddy_core::WEBCAM_STREAM.into());
+        }
+        if crate::settings::share_pc_sound() {
+            caps.push(noddy_core::SOUND_SHARE.into());
+        }
+        if crate::settings::forward_pc_notifications_to_phone() {
+            caps.push("notify.mirror".into());
+        }
     }
     #[cfg(any(windows, target_os = "linux"))]
     let mut pc_mirror_enabled = crate::pc_mirror::is_active();
@@ -360,6 +375,7 @@ async fn run(data_dir: PathBuf, platform: Arc<dyn Platform>) {
                 crate::storage::on_event(&event);
                 crate::webcam::on_event(&event);
                 crate::phone_mic::on_event(&event);
+                crate::pc_sharing::on_event(&event);
                 crate::automations::on_event(&event);
                 crate::bridge::app::on_home_event(&event);
             }

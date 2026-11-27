@@ -45,8 +45,8 @@ H.265 when the listener offers `camera.virtual.hevc`).
   the camera's own limit.
 - The source **never** starts its camera silently. It starts only for a
   listener the user allows (the `webcam` device toggle, on the source) while
-  camera sharing is on, and it shows that the camera is in use, with a way to
-  stop, for as long as it is.
+  camera sharing is on. It says in the app that the camera is in use and by
+  whom, and turning camera sharing off stops it at once.
 - Either side stops with `webcam.stop`, or by ending the stream with code
   `12`. The source stops its camera when the stream ends.
 
@@ -58,8 +58,8 @@ As [mic](mic.md): `mic.start` from the listener, the source's `ok`, then
 
 - The `mic` device toggle on the source decides which computers may use its
   microphone, and sharing must be on.
-- The source shows that its microphone is in use, with a way to stop, for as
-  long as it is.
+- The source says in the app that its microphone is in use and by whom, and
+  turning microphone sharing off stops it at once.
 
 ## 4. Sound
 
@@ -103,7 +103,7 @@ to a PC. A computer shows them as it shows a phone's.
 - Every kind is off by default on the source and has its own switch.
 - Each paired computer has its own `webcam`, `mic`, `media` and
   `notifications` switch on the source, as phones do.
-- The source shows when its camera or microphone is in use, and who is using
-  it, until it stops.
+- The source tells its user when its camera or microphone starts being used,
+  and by whom; the sharing switches stop them.
 - Nothing here crosses the internet: the sessions are the same end-to-end
   encrypted connections as every other feature (v0 §11).
