@@ -39,8 +39,10 @@ mod notifications;
 mod obs;
 mod palette;
 mod pc_audio_stream;
+mod pc_camera;
 mod pc_mirror;
 mod pc_notifications;
+mod pc_sharing;
 mod pc_storage;
 mod phone_mic;
 mod phone_sound;
@@ -159,6 +161,25 @@ impl Platform for DesktopPlatform {
         session: u32,
     ) -> Option<std::sync::Arc<dyn noddy_core::MirrorSink>> {
         mirror::sink(peer, session)
+    }
+    fn mic_requested(&self, peer: &noddy_core::DeviceId) -> Result<(), String> {
+        pc_sharing::mic_requested(peer)
+    }
+    fn mic_stop_requested(&self, peer: &noddy_core::DeviceId) {
+        pc_sharing::mic_stop_requested(peer);
+    }
+    fn webcam_requested(
+        &self,
+        peer: &noddy_core::DeviceId,
+        options: &noddy_core::WebcamStart,
+    ) -> Result<(), String> {
+        pc_camera::requested(peer, options)
+    }
+    fn webcam_stop_requested(&self, peer: &noddy_core::DeviceId) {
+        pc_camera::stop_requested(peer);
+    }
+    fn webcam_keyframe_requested(&self, peer: &noddy_core::DeviceId) {
+        pc_camera::keyframe_requested(peer);
     }
     fn mic_sink(&self, peer: &noddy_core::DeviceId) -> Option<std::sync::Arc<dyn noddy_core::MicSink>> {
         phone_mic::sink(peer)

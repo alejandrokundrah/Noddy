@@ -671,6 +671,35 @@ pub const DESKTOP_PAIR_FEATURES: &[FeatureDef] = &[
         requires: &[peer("clip.write"), DeviceToggle("clipboard")],
         partial: None,
     },
+    // Showing the other computer's notifications here
+    // (`docs/protocol/pc-sharing.md` §5).
+    FeatureDef {
+        id: "desktop.notifications",
+        group: FeatureGroup::Notifications,
+        requires: &[peer("notify.mirror"), DeviceToggle("notifications")],
+        partial: None,
+    },
+    // Using the other computer's camera as a webcam here (§2).
+    FeatureDef {
+        id: "desktop.camera",
+        group: FeatureGroup::Camera,
+        requires: &[peer("camera.stream"), here("camera.virtual"), DeviceToggle("webcam")],
+        partial: None,
+    },
+    // Using the other computer's microphone here (§3).
+    FeatureDef {
+        id: "desktop.mic",
+        group: FeatureGroup::Media,
+        requires: &[peer("mic.stream"), here("mic.listen"), DeviceToggle("mic")],
+        partial: None,
+    },
+    // Hearing the other computer's sound here (§4).
+    FeatureDef {
+        id: "desktop.sound",
+        group: FeatureGroup::Media,
+        requires: &[peer("sound.share"), here("sound.play"), DeviceToggle("media")],
+        partial: None,
+    },
 ];
 
 /// What a phone and a tablet (or two phones) do for each other, from this
@@ -1526,6 +1555,50 @@ mod tests {
         let phone = facts(DeviceKind::Phone, "android", "16", PowerLevel::Basic, BASIC_PHONE);
         let m = matrix_with(&phone, &pc(), &HashMap::new());
         for id in ["desktop.ring", "desktop.send_files", "desktop.clipboard"] {
+            assert!(matches!(m.state(id), Some(FeatureState::Unsupported { .. })), "{id}");
+        }
+    }
+
+    #[test]
+    fn two_computers_can_share_camera_microphone_sound_and_notifications() {
+        let ids = ["desktop.notifications", "desktop.camera", "desktop.mic", "desktop.sound"];
+        // Nothing is on offer until the other computer says so, and an app that
+        // can't do it yet is asked to update.
+        let bare = || facts(DeviceKind::Laptop, "windows", "10.0.26200", PowerLevel::NotApplicable, &[]);
+        let mut other = bare();
+        let mut here_pc = bare();
+        let m = matrix_with(&other, &here_pc, &HashMap::new());
+        for id in ids {
+            assert!(matches!(m.state(id), Some(FeatureState::Locked { .. })), "{id}: {:?}", m.state(id));
+        }
+        // The other computer is the source; this one is the listener.
+        other.caps.extend(["notify.mirror", "camera.stream", "mic.stream", "sound.share"].map(str::to_owned));
+        let m = matrix_with(&other, &here_pc, &HashMap::new());
+        assert_eq!(m.state("desktop.notifications"), Some(FeatureState::Available));
+        // Camera, microphone and sound also need this computer to receive them.
+        for id in ["desktop.camera", "desktop.mic", "desktop.sound"] {
+            assert!(matches!(m.state(id), Some(FeatureState::Locked { .. })), "{id}");
+        }
+        here_pc.caps.extend(["camera.virtual", "mic.listen", "sound.play"].map(str::to_owned));
+        let m = matrix_with(&other, &here_pc, &HashMap::new());
+        for id in ids {
+            assert_eq!(m.state(id), Some(FeatureState::Available), "{id}");
+        }
+        // The user's per-device switches apply to each.
+        let off = HashMap::from([
+            ("notifications".to_owned(), false),
+            ("webcam".to_owned(), false),
+            ("mic".to_owned(), false),
+            ("media".to_owned(), false),
+        ]);
+        let m = matrix_with(&other, &here_pc, &off);
+        for id in ids {
+            assert!(matches!(m.state(id), Some(FeatureState::Locked { .. })), "{id}");
+        }
+        // Between a phone and a computer these use the phone's own features.
+        let phone = facts(DeviceKind::Phone, "android", "16", PowerLevel::Basic, BASIC_PHONE);
+        let m = matrix_with(&phone, &pc(), &HashMap::new());
+        for id in ids {
             assert!(matches!(m.state(id), Some(FeatureState::Unsupported { .. })), "{id}");
         }
     }

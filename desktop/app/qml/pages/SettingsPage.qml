@@ -377,7 +377,8 @@ Item {
                     }
                 }
             }
-
+        }
+    }
 
     Rectangle {
         visible: page.wideLayout
@@ -1299,6 +1300,61 @@ Item {
                 visible: page.currentSection === "camera_audio"
                 width: visible ? parent.width : 0
                 spacing: Theme.gutter
+
+                // What other computers may use from this one. Off until turned on.
+                Card {
+                    width: parent.width
+                    Column {
+                        width: parent.width
+                        ListRow {
+                            width: parent.width
+                            iconPath: Icons.camera
+                            title: qsTr("Share this computer's camera")
+                            description: qsTr("Let your other computers use its camera as a webcam.")
+                            Toggle {
+                                label: qsTr("Share this computer's camera")
+                                checked: Preferences.sharePcCamera
+                                onToggled: (on) => Preferences.sharePcCamera = on
+                            }
+                        }
+                        Divider { width: parent.width }
+                        ListRow {
+                            width: parent.width
+                            iconPath: Icons.mic
+                            title: qsTr("Share this computer's microphone")
+                            description: qsTr("Let your other computers listen to it.")
+                            Toggle {
+                                label: qsTr("Share this computer's microphone")
+                                checked: Preferences.sharePcMic
+                                onToggled: (on) => Preferences.sharePcMic = on
+                            }
+                        }
+                        Divider { width: parent.width }
+                        ListRow {
+                            width: parent.width
+                            iconPath: Icons.speaker
+                            title: qsTr("Share this computer's sound")
+                            description: qsTr("Let your other computers play what it plays.")
+                            Toggle {
+                                label: qsTr("Share this computer's sound")
+                                checked: Preferences.sharePcSound
+                                onToggled: (on) => Preferences.sharePcSound = on
+                            }
+                        }
+                        Divider { width: parent.width }
+                        ListRow {
+                            width: parent.width
+                            iconPath: Icons.bell
+                            title: qsTr("Share this computer's notifications")
+                            description: qsTr("Show them on your phone and other computers.")
+                            Toggle {
+                                label: qsTr("Share this computer's notifications")
+                                checked: Preferences.forwardPcNotificationsToPhone
+                                onToggled: (on) => Preferences.forwardPcNotificationsToPhone = on
+                            }
+                        }
+                    }
+                }
 
                 Card {
                     width: parent.width
@@ -3502,7 +3558,8 @@ Item {
                     }
                 }
             }
-
+        }
+    }
 
     // Asks before clearing one kind of history: it can't be brought back.
     Sheet {
@@ -3547,7 +3604,8 @@ Item {
                     }
                 }
             }
-
+        }
+    }
 
     Sheet {
         id: clearEverythingSheet
@@ -3581,5 +3639,6 @@ Item {
                     }
                 }
             }
-
+        }
+    }
 }

@@ -1430,6 +1430,43 @@ Item {
                 ActionTile {
                     width: actions.tileWidth
                     deviceOnline: home.online
+                    visible: home.isComputer
+                    title: qsTr("Use its camera")
+                    stateful: true
+                    subtitle: ""
+                    iconPath: Icons.camera
+                    feature: home.feature("desktop.camera")
+                    active: Webcam.activeDevice === home.deviceId
+                            && (Webcam.phase === "streaming" || Webcam.phase === "asking")
+                    onClicked: active ? Webcam.stop() : Webcam.start(home.deviceId)
+                }
+                ActionTile {
+                    width: actions.tileWidth
+                    deviceOnline: home.online
+                    visible: home.isComputer
+                    title: qsTr("Listen to its microphone")
+                    stateful: true
+                    subtitle: ""
+                    iconPath: Icons.mic
+                    feature: home.feature("desktop.mic")
+                    active: PhoneMic.phase !== "off" && PhoneMic.device === home.deviceId
+                    onClicked: active ? PhoneMic.stop() : PhoneMic.start(home.deviceId)
+                }
+                ActionTile {
+                    width: actions.tileWidth
+                    deviceOnline: home.online
+                    visible: home.isComputer
+                    title: qsTr("Play its sound here")
+                    stateful: true
+                    subtitle: ""
+                    iconPath: Icons.speaker
+                    feature: home.feature("desktop.sound")
+                    active: MediaList.pcSoundDevice === home.deviceId && MediaList.pcSoundState !== "off"
+                    onClicked: MediaList.setPcSound(home.deviceId, !active)
+                }
+                ActionTile {
+                    width: actions.tileWidth
+                    deviceOnline: home.online
                     title: home.ringing ? qsTr("Stop ringing")
                                         : (home.isComputer ? qsTr("Find PC") : qsTr("Find phone"))
                     stateful: true

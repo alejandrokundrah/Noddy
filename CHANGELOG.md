@@ -36,6 +36,13 @@ change things that need a step from you, and its notes say so.
 
 ### New
 
+- **Share a computer's camera, microphone, sound and notifications with
+  another computer.** Use a paired computer's camera as a webcam, its
+  microphone, its sound, and see its notifications, using the messages phones
+  already use. Each kind is off until you turn it on on the computer that
+  shares it, and each paired computer has its own switch. See
+  [computer to computer](docs/protocol/pc-sharing.md).
+
 - **Control another computer (Windows host, first version).** A paired computer
   now has a **Control PC** button. It opens that computer's screen in a window
   where your mouse, wheel and keyboard (shortcuts included) act on it. The other

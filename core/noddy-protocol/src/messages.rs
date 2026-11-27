@@ -1845,9 +1845,9 @@ pub fn is_valid_grant(grant: &str) -> bool {
 }
 
 pub mod mic {
-    /// Offered by phones that stream their microphone.
+    /// Offered by phones, and by PCs with a microphone, that stream it.
     pub const STREAM: &str = "mic.stream";
-    /// Offered by PCs that take a phone's microphone.
+    /// Offered by PCs that take another device's microphone.
     pub const LISTEN: &str = "mic.listen";
     pub const SERVICE: &str = "mic";
     pub const OP_PCM: &str = "pcm";
@@ -1856,10 +1856,20 @@ pub mod mic {
     pub const STOPPED: u32 = 13;
 }
 
+/// Playing another computer's sound on this PC (`docs/protocol/pc-sharing.md` §4).
+pub mod sound {
+    /// Offered by PCs whose user turned on sharing their sound: a paired PC
+    /// may ask for it with `pc.audio.set`.
+    pub const SHARE: &str = "sound.share";
+    /// Offered by PCs that play the system sound another paired PC streams to
+    /// them (`audio.pcm`) after asking for it with `pc.audio.set`.
+    pub const PLAY: &str = "sound.play";
+}
+
 pub mod webcam {
-    /// Offered by phones that stream their camera as a webcam.
+    /// Offered by phones, and by PCs with a camera, that stream it as a webcam.
     pub const STREAM: &str = "camera.stream";
-    /// Offered by PCs that receive and decode a phone's webcam stream.
+    /// Offered by PCs that receive and decode another device's webcam stream.
     pub const VIRTUAL: &str = "camera.virtual";
     /// Receiver can decode HEVC webcam streams. Absence means H.264 only.
     pub const HEVC: &str = "camera.virtual.hevc";

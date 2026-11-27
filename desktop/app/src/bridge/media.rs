@@ -52,6 +52,10 @@ pub mod qobject {
         #[qproperty(QString, phone_sound_name, cxx_name = "phoneSoundName")]
         /// Phone sound on this PC: "off", "asking" (the phone may be asking) or "playing".
         #[qproperty(QString, phone_sound_state, cxx_name = "phoneSoundState")]
+        /// The computer whose sound plays here (its device ID), or "".
+        #[qproperty(QString, pc_sound_device, cxx_name = "pcSoundDevice")]
+        /// Another computer's sound on this PC: "off", "asking" or "playing".
+        #[qproperty(QString, pc_sound_state, cxx_name = "pcSoundState")]
         type MediaList = super::MediaListRust;
     }
 
@@ -117,6 +121,10 @@ pub mod qobject {
         #[qinvokable]
         #[cxx_name = "setPhoneSound"]
         fn set_phone_sound(self: &MediaList, on: bool);
+        /// Plays (or stops playing) another computer's sound on this PC.
+        #[qinvokable]
+        #[cxx_name = "setPcSound"]
+        fn set_pc_sound(self: &MediaList, device: &QString, on: bool);
     }
 
     impl cxx_qt::Threading for MediaList {}
@@ -134,6 +142,8 @@ pub struct MediaListRust {
     play_on_phone_state: QString,
     phone_sound_name: QString,
     phone_sound_state: QString,
+    pc_sound_device: QString,
+    pc_sound_state: QString,
     rows: Vec<PlayerView>,
 }
 
@@ -280,8 +290,25 @@ impl qobject::MediaList {
         if *self.phone_sound_state() != sound {
             self.as_mut().set_phone_sound_state(sound);
         }
+        let (pc_device, pc_state) = match crate::pc_sharing::sound_state() {
+            Some((peer, state)) => (peer.to_string(), state),
+            None => (String::new(), "off"),
+        };
+        let (pc_device, pc_state) = (QString::from(pc_device), QString::from(pc_state));
+        if *self.pc_sound_device() != pc_device {
+            self.as_mut().set_pc_sound_device(pc_device);
+        }
+        if *self.pc_sound_state() != pc_state {
+            self.as_mut().set_pc_sound_state(pc_state);
+        }
         let revision = self.revision.wrapping_add(1);
         self.set_revision(revision);
+    }
+
+    pub fn set_pc_sound(&self, device: &QString, on: bool) {
+        if let Ok(peer) = String::from(device).parse::<noddy_core::DeviceId>() {
+            crate::pc_sharing::set_sound(peer, on);
+        }
     }
 
     pub fn set_play_on_phone(&self, on: bool) {

@@ -247,6 +247,16 @@ pub fn handle_set_audio(peer: &DeviceId, volume: Option<u8>, muted: Option<bool>
     if let Some(level) = volume {
         if level == noddy_core::deck::PHONE_SPEAKER_OFF || level == noddy_core::deck::PHONE_SPEAKER_ON {
             let on = level == noddy_core::deck::PHONE_SPEAKER_ON;
+            if crate::pc_sharing::peer_is_computer(peer) {
+                // A computer asks for this one's sound: only when sharing it is on,
+                // and without changing what the user chose for their phone.
+                if on && !crate::settings::share_pc_sound() {
+                    return Err("sound sharing is off on this computer".into());
+                }
+                crate::pc_audio_stream::set_target(on.then_some(*peer));
+                crate::pc_audio_stream::set_enabled(on);
+                return Ok(());
+            }
             crate::pc_audio_stream::set_target(on.then_some(*peer));
             crate::pc_audio_stream::set_enabled(on);
             let dir = &core_host::host().data_dir;

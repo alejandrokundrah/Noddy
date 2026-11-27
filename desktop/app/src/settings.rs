@@ -182,6 +182,9 @@ static ISLAND: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::ne
 static STREAM_PC_AUDIO: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 static SHARE_PC_STORAGE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 static FORWARD_PC_NOTIFICATIONS: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+static SHARE_PC_CAMERA: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+static SHARE_PC_MIC: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+static SHARE_PC_SOUND: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 static AWAY_MODE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 static FLOW_FOLLOW_CLIPBOARD: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(true);
 static OPEN_SHARED_FILES: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
@@ -245,10 +248,53 @@ pub fn forward_pc_notifications_to_phone() -> bool {
 
 pub fn set_forward_pc_notifications_to_phone(on: bool) {
     FORWARD_PC_NOTIFICATIONS.store(on, std::sync::atomic::Ordering::Relaxed);
+    // Other computers see `notify.mirror` only while this is on.
+    crate::core_host::refresh_capabilities();
     #[cfg(target_os = "linux")]
     if on {
         crate::pc_notifications::start_listener();
     }
+}
+
+/// Whether other paired computers may use this computer's camera as a webcam
+/// (`docs/protocol/pc-sharing.md`). Off until the user turns it on.
+pub fn share_pc_camera() -> bool {
+    SHARE_PC_CAMERA.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+pub fn set_share_pc_camera(on: bool) {
+    SHARE_PC_CAMERA.store(on, std::sync::atomic::Ordering::Relaxed);
+    if !on {
+        crate::pc_sharing::stop_camera_for_all();
+    }
+    crate::core_host::refresh_capabilities();
+}
+
+/// Whether other paired computers may use this computer's microphone.
+pub fn share_pc_mic() -> bool {
+    SHARE_PC_MIC.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+pub fn set_share_pc_mic(on: bool) {
+    SHARE_PC_MIC.store(on, std::sync::atomic::Ordering::Relaxed);
+    if !on {
+        crate::pc_sharing::stop_mic_for_all();
+    }
+    crate::core_host::refresh_capabilities();
+}
+
+/// Whether other paired computers may play this computer's sound.
+pub fn share_pc_sound() -> bool {
+    SHARE_PC_SOUND.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+pub fn set_share_pc_sound(on: bool) {
+    SHARE_PC_SOUND.store(on, std::sync::atomic::Ordering::Relaxed);
+    if !on {
+        // Sound already going to a computer stops with the permission (a phone's doesn't).
+        crate::pc_sharing::stop_sound_to_computers();
+    }
+    crate::core_host::refresh_capabilities();
 }
 
 /// Whether the PC's clipboard goes to the phone when control moves to it (`input_share`).
@@ -540,6 +586,15 @@ pub struct Settings {
     /// Forward PC notifications to connected phones (privacy-first: off by default).
     #[serde(default, alias = "forward_pc_notifications_to_phone")]
     pub forward_pc_notifications_to_phone: bool,
+    /// Let other paired computers use this computer's camera as a webcam (off by default).
+    #[serde(default, alias = "share_pc_camera")]
+    pub share_pc_camera: bool,
+    /// Let other paired computers use this computer's microphone (off by default).
+    #[serde(default, alias = "share_pc_mic")]
+    pub share_pc_mic: bool,
+    /// Let other paired computers play this computer's sound (off by default).
+    #[serde(default, alias = "share_pc_sound")]
+    pub share_pc_sound: bool,
     /// Allow staying connected over mobile data (LTE/5G) / relay when away from Wi-Fi.
     #[serde(default, alias = "away_mode")]
     pub away_mode: bool,
@@ -632,6 +687,9 @@ impl Default for Settings {
             stream_pc_audio_to_phone: false,
             share_pc_storage: false,
             forward_pc_notifications_to_phone: false,
+            share_pc_camera: false,
+            share_pc_mic: false,
+            share_pc_sound: false,
             away_mode: false,
             walkthrough_completed: false,
             walkthrough_step: 0,
@@ -698,6 +756,9 @@ impl Settings {
         set_stream_pc_audio_to_phone(self.stream_pc_audio_to_phone);
         set_share_pc_storage(self.share_pc_storage);
         set_forward_pc_notifications_to_phone(self.forward_pc_notifications_to_phone);
+        set_share_pc_camera(self.share_pc_camera);
+        set_share_pc_mic(self.share_pc_mic);
+        set_share_pc_sound(self.share_pc_sound);
         set_away_mode(self.away_mode);
         set_battery_full_threshold(self.battery_full_threshold);
         set_device_nicknames(self.device_nicknames.clone());
@@ -871,6 +932,9 @@ mod tests {
             stream_pc_audio_to_phone: true,
             share_pc_storage: true,
             forward_pc_notifications_to_phone: true,
+            share_pc_camera: true,
+            share_pc_mic: true,
+            share_pc_sound: true,
             away_mode: true,
             walkthrough_completed: true,
             walkthrough_step: 4,

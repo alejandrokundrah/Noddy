@@ -1218,6 +1218,158 @@ async fn two_computers_can_find_each_other_and_send_the_clipboard() {
     }
 }
 
+/// One computer uses another's microphone, camera, sound and notifications
+/// (`docs/protocol/pc-sharing.md`): the same messages a phone uses, with a
+/// computer as the source.
+#[tokio::test(flavor = "multi_thread")]
+async fn a_computer_shares_its_microphone_camera_sound_and_notifications_with_another() {
+    use noddy_core::{
+        MIC_LISTEN, MIC_STREAM, MirrorAudioConfig, MirrorSend, PC_AUDIO, PacketKind, SOUND_PLAY, SOUND_SHARE,
+        WEBCAM_STREAM, WEBCAM_VIRTUAL,
+    };
+
+    let mut listener =
+        device_with("Laptop", DeviceKind::Laptop, &[MIC_LISTEN, WEBCAM_VIRTUAL, SOUND_PLAY]).await;
+    let mut source = device_with(
+        "Desktop",
+        DeviceKind::Desktop,
+        &[MIC_STREAM, WEBCAM_STREAM, PC_AUDIO, SOUND_SHARE, "notify.mirror"],
+    )
+    .await;
+    pair_qr(&mut listener, &mut source).await;
+    let (listener_id, source_id) = (listener.node.device_id(), source.node.device_id());
+
+    // The matrix offers all four to the listening computer.
+    let m = listener.node.capabilities(source_id).unwrap();
+    for id in ["desktop.notifications", "desktop.camera", "desktop.mic", "desktop.sound"] {
+        assert_eq!(m.state(id), Some(noddy_core::FeatureState::Available), "{id}");
+    }
+
+    // Microphone: the source asks its user, then streams.
+    with_timeout("mic_start", listener.node.mic_start(source_id)).await.unwrap();
+    assert_eq!(*source.platform.mic_asks.lock().unwrap(), ["start"]);
+    let mic = Arc::new(with_timeout("mic_open", source.node.mic_open(listener_id)).await.unwrap());
+    let config = MirrorAudioConfig { codec: noddy_core::MIRROR_PCM.into(), rate: 48_000, channels: 1 };
+    let sender = mic.clone();
+    let sent = tokio::task::spawn_blocking(move || {
+        [
+            sender.send(PacketKind::Config, 0, config.to_cbor()),
+            sender.send(PacketKind::Frame, 10_000, vec![0u8; 960]),
+        ]
+    })
+    .await
+    .unwrap();
+    assert!(sent.iter().all(|s| *s == MirrorSend::Queued), "{sent:?}");
+    let deadline = std::time::Instant::now() + WAIT;
+    while listener.platform.mic.got.lock().unwrap().len() < 2 {
+        assert!(std::time::Instant::now() < deadline, "{:?}", listener.platform.mic.got.lock().unwrap());
+        tokio::time::sleep(Duration::from_millis(20)).await;
+    }
+    assert_eq!(listener.platform.mic.got.lock().unwrap()[..2], ["config 48000 Hz x1", "audio 960"]);
+    listener.node.mic_stop(source_id).await;
+
+    // Camera: the same webcam stream a phone sends.
+    let options = noddy_core::WebcamStart {
+        camera: noddy_core::WEBCAM_CAMERA_FRONT.into(),
+        width: 1280,
+        height: 720,
+        fps: 30,
+        bitrate: 4_000_000,
+    };
+    with_timeout("webcam_start", listener.node.webcam_start(source_id, options)).await.unwrap();
+    assert_eq!(*source.platform.webcam_asks.lock().unwrap(), ["start front 1280x720 @ 30"]);
+    let cam = Arc::new(with_timeout("webcam_open", source.node.webcam_open(listener_id)).await.unwrap());
+    let config = noddy_core::WebcamConfig {
+        codec: "h264".into(),
+        width: 1280,
+        height: 720,
+        camera: noddy_core::WEBCAM_CAMERA_FRONT.into(),
+        fps: 30,
+        max_height: 1080,
+    };
+    let sender = cam.clone();
+    let sent = tokio::task::spawn_blocking(move || {
+        [
+            sender.send(PacketKind::Config, 0, config.to_cbor()),
+            sender.send(PacketKind::Keyframe, 1, vec![0; 4_000]),
+        ]
+    })
+    .await
+    .unwrap();
+    assert!(sent.iter().all(|s| *s == MirrorSend::Queued), "{sent:?}");
+    wait_for(&mut listener, "webcam on", |e| matches!(e, NodeEvent::Webcam { on: true, .. }).then_some(()))
+        .await;
+    let sink = listener.platform.webcam.clone();
+    let deadline = tokio::time::Instant::now() + WAIT;
+    while sink.got.lock().unwrap().len() < 2 && tokio::time::Instant::now() < deadline {
+        tokio::time::sleep(Duration::from_millis(20)).await;
+    }
+    assert_eq!(*sink.got.lock().unwrap(), ["config front 1280x720 @ 30", "key 1 4000"]);
+    listener.node.webcam_stop(source_id).await;
+
+    // Sound: the listener asks the source to play its sound here, and the
+    // source's frames arrive on the listener.
+    with_timeout(
+        "sound on",
+        listener.node.set_pc_audio(source_id, Some(noddy_core::deck::PHONE_SPEAKER_ON), None),
+    )
+    .await
+    .unwrap();
+    assert_eq!(
+        *source.platform.pc_audio_changes.lock().unwrap(),
+        vec![(Some(noddy_core::deck::PHONE_SPEAKER_ON), None)]
+    );
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(5);
+    let mut heard = 0;
+    while heard == 0 && tokio::time::Instant::now() < deadline {
+        let _ = source.node.send_pc_audio_pcm(&listener_id, 48_000, 2, vec![1u8; 480]).await;
+        while let Ok(Ok(ev)) = tokio::time::timeout(Duration::from_millis(40), listener.events.recv()).await {
+            if matches!(ev, NodeEvent::PcAudioFrame { device, .. } if device == source_id) {
+                heard += 1;
+            }
+        }
+    }
+    assert!(heard > 0, "the listening computer never got the other's sound");
+
+    // Notifications: what the source shows reaches the listener.
+    source.node.notification_posted(note("n1", "pc.windows", "Build finished", false)).await;
+    let posted = wait_for(&mut listener, "pc notification", |e| match e {
+        NodeEvent::NotificationPosted { device, notification } if *device == source_id => {
+            Some(notification.clone())
+        }
+        _ => None,
+    })
+    .await;
+    assert_eq!(posted.title.as_deref(), Some("Build finished"));
+
+    // The listener's own switches still decide, per computer.
+    source.node.set_device_toggle(listener_id, "mic", false).unwrap();
+    let denied = listener.node.mic_start(source_id).await;
+    assert!(matches!(denied, Err(Error::Denied)), "{denied:?}");
+    source.node.set_device_toggle(listener_id, "webcam", false).unwrap();
+    let denied = listener
+        .node
+        .webcam_start(
+            source_id,
+            noddy_core::WebcamStart {
+                camera: noddy_core::WEBCAM_CAMERA_FRONT.into(),
+                width: 1280,
+                height: 720,
+                fps: 30,
+                bitrate: 4_000_000,
+            },
+        )
+        .await;
+    assert!(matches!(denied, Err(Error::Denied)), "{denied:?}");
+    source.node.set_device_toggle(listener_id, "media", false).unwrap();
+    let denied = listener.node.set_pc_audio(source_id, Some(noddy_core::deck::PHONE_SPEAKER_ON), None).await;
+    assert!(matches!(denied, Err(Error::Denied)), "{denied:?}");
+    source.node.set_device_toggle(listener_id, "notifications", false).unwrap();
+
+    listener.node.shutdown().await;
+    source.node.shutdown().await;
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn a_download_reports_its_progress_including_what_an_earlier_try_kept() {
     let content: Vec<u8> = (0..600_000u32).map(|i| (i % 253) as u8).collect();
