@@ -103,6 +103,7 @@ capability is missing.
 | `sound.play` | Plays the sound another computer streams to it ([computer to computer](pc-sharing.md) §4) | app update |
 | `camera.stream` | Streams its camera when camera sharing is on and a camera is present ([computer to computer](pc-sharing.md) §2) | turning on camera sharing |
 | `mic.stream` | Streams its microphone when microphone sharing is on and one is present ([computer to computer](pc-sharing.md) §3) | turning on microphone sharing |
+| `sound.share` | Plays its sound on a paired computer that asks ([computer to computer](pc-sharing.md) §4) | turning on sound sharing |
 | `notify.mirror` | Sends its notifications to paired computers when notification sharing is on ([computer to computer](pc-sharing.md) §5) | turning on notification sharing |
 | `media.stream` | Streams a player's picture and sound to a phone that watches (Play on phone, [media](media.md) §4) | app update |
 | `addon.vcam` | The virtual camera add-on is installed ([webcam](webcam.md)) | installing the add-on |

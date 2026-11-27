@@ -127,7 +127,7 @@ pub use noddy_protocol::{
             MAX_ATTACHMENT_BYTES as SMS_MAX_ATTACHMENT_BYTES, MAX_ATTACHMENTS as SMS_MAX_ATTACHMENTS,
             READ as SMS_READ, SEND as SMS_SEND, SHOW as SMS_SHOW,
         },
-        sound::PLAY as SOUND_PLAY,
+        sound::{PLAY as SOUND_PLAY, SHARE as SOUND_SHARE},
         storage::{MOUNT as STORAGE_MOUNT, READ as STORAGE_READ, WRITE as STORAGE_WRITE},
         task_notify, toggle_ids,
         toggles::{

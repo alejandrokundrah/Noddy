@@ -673,7 +673,7 @@ pub const DESKTOP_PAIR_FEATURES: &[FeatureDef] = &[
     FeatureDef {
         id: "desktop.sound",
         group: FeatureGroup::Media,
-        requires: &[peer("pc.audio"), here("sound.play"), DeviceToggle("media")],
+        requires: &[peer("sound.share"), here("sound.play"), DeviceToggle("media")],
         partial: None,
     },
 ];
@@ -1498,7 +1498,7 @@ mod tests {
             assert!(matches!(m.state(id), Some(FeatureState::Locked { .. })), "{id}: {:?}", m.state(id));
         }
         // The other computer is the source; this one is the listener.
-        other.caps.extend(["notify.mirror", "camera.stream", "mic.stream", "pc.audio"].map(str::to_owned));
+        other.caps.extend(["notify.mirror", "camera.stream", "mic.stream", "sound.share"].map(str::to_owned));
         let m = matrix_with(&other, &here_pc, &HashMap::new());
         assert_eq!(m.state("desktop.notifications"), Some(FeatureState::Available));
         // Camera, microphone and sound also need this computer to receive them.

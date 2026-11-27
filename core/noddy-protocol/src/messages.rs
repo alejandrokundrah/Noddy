@@ -1779,6 +1779,9 @@ pub mod mic {
 
 /// Playing another computer's sound on this PC (`docs/protocol/pc-sharing.md` §4).
 pub mod sound {
+    /// Offered by PCs whose user turned on sharing their sound: a paired PC
+    /// may ask for it with `pc.audio.set`.
+    pub const SHARE: &str = "sound.share";
     /// Offered by PCs that play the system sound another paired PC streams to
     /// them (`audio.pcm`) after asking for it with `pc.audio.set`.
     pub const PLAY: &str = "sound.play";

@@ -19,13 +19,13 @@ the **listener** is the computer that uses them.
 |---|---|---|
 | `camera.stream` | source | Streams its camera (existing, [webcam](webcam.md) §1) |
 | `mic.stream` | source | Streams its microphone (existing, [mic](mic.md) §1) |
-| `pc.audio` | source | Accepts `pc.audio.set`, including the "play here" values ([deck](deck.md)) |
+| `sound.share` | source | Plays its sound to a computer that asks, with `pc.audio.set` and the "play here" values (new, §4). Offered only while sound sharing is on, unlike `pc.audio`, which every computer offers for volume control |
 | `notify.mirror` | source | Sends `notify.*` events (existing, [notifications](notifications.md) §1) |
 | `camera.virtual` | listener | Receives and decodes a webcam stream (existing) |
 | `mic.listen` | listener | Takes a microphone stream (existing) |
 | `sound.play` | listener | Plays the sound a source streams to it (new, §4) |
 
-A computer offers a source capability only when the user turned that kind of
+A computer offers a source capability (`camera.stream`, `mic.stream`, `sound.share`, `notify.mirror`) only when the user turned that kind of
 sharing on **and** the hardware is there (a camera, a microphone). Every kind
 is **off until the user turns it on** on the source, as the other sharing
 features are.

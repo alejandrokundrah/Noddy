@@ -1224,15 +1224,18 @@ async fn two_computers_can_find_each_other_and_send_the_clipboard() {
 #[tokio::test(flavor = "multi_thread")]
 async fn a_computer_shares_its_microphone_camera_sound_and_notifications_with_another() {
     use noddy_core::{
-        MIC_LISTEN, MIC_STREAM, MirrorAudioConfig, MirrorSend, PC_AUDIO, PacketKind, SOUND_PLAY,
+        MIC_LISTEN, MIC_STREAM, MirrorAudioConfig, MirrorSend, PC_AUDIO, PacketKind, SOUND_PLAY, SOUND_SHARE,
         WEBCAM_STREAM, WEBCAM_VIRTUAL,
     };
 
     let mut listener =
         device_with("Laptop", DeviceKind::Laptop, &[MIC_LISTEN, WEBCAM_VIRTUAL, SOUND_PLAY]).await;
-    let mut source =
-        device_with("Desktop", DeviceKind::Desktop, &[MIC_STREAM, WEBCAM_STREAM, PC_AUDIO, "notify.mirror"])
-            .await;
+    let mut source = device_with(
+        "Desktop",
+        DeviceKind::Desktop,
+        &[MIC_STREAM, WEBCAM_STREAM, PC_AUDIO, SOUND_SHARE, "notify.mirror"],
+    )
+    .await;
     pair_qr(&mut listener, &mut source).await;
     let (listener_id, source_id) = (listener.node.device_id(), source.node.device_id());
 
