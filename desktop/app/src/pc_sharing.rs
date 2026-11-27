@@ -40,7 +40,7 @@ pub fn peer_is_computer(peer: &DeviceId) -> bool {
 }
 
 /// The name a paired device gives itself, for messages.
-fn name_of(peer: &DeviceId) -> String {
+pub(crate) fn name_of(peer: &DeviceId) -> String {
     core_host::host()
         .hub
         .read(|s| s.devices.iter().find(|d| d.id == *peer).map(|d| d.info.name.clone()).unwrap_or_default())

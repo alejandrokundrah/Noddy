@@ -1078,6 +1078,8 @@ impl qobject::Preferences {
             share_pc_camera: p.share_pc_camera,
             share_pc_mic: p.share_pc_mic,
             share_pc_sound: p.share_pc_sound,
+            mesh_enabled: crate::settings::mesh_enabled(),
+            mesh_layout: crate::settings::mesh_layout(),
             away_mode: p.away_mode,
             walkthrough_completed: p.walkthrough_completed,
             walkthrough_step: p.walkthrough_step.clamp(0, 6) as u8,
