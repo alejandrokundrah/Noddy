@@ -15,6 +15,7 @@
 //! Every kind is off until the user turns it on (`settings::share_pc_*`), and
 //! each paired computer has its own switch in the core.
 
+#![cfg_attr(windows, allow(unsafe_code))]
 use std::{
     sync::{
         Arc, Mutex,
