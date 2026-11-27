@@ -120,3 +120,18 @@ Use your phone's microphone to record voice notes, interviews, or meeting memos 
 - **8-Bit SDR Webcam Pipeline**: The webcam pipeline uses 8-bit SDR color (`NV12` / `RGB32` Media Foundation media types) for broad compatibility across Zoom, Teams, Meet, Chrome, and OBS; 10-bit HDR video is not used.
 - **Administrator Prompt for Virtual Camera Registration**: Registering or removing a system-wide Media Foundation virtual camera on Windows 11 (**Virtual camera add-on › Set up**) requires a one-time Administrator (UAC) approval. Previewing the webcam inside Noddy's own window works without Administrator privileges.
 - **Continuity Camera Request Expiry**: If you trigger **Take photo** or **Scan document** while your phone is offline, the queued request expires after **2 minutes** so your phone does not unexpectedly prompt for a photo hours later.
+
+## Using Another Computer's Camera, Microphone, Sound and Notifications
+
+Two paired computers can share these with each other, the same way a phone does. On the computer that **shares**, open **Settings › Camera & Audio** and turn on what you want to share: **Share camera**, **Share microphone**, **Share sound** or **Share notifications**. Each is **off** until you turn it on, and each paired computer has its own **Webcam**, **Microphone**, **Media controls** and **Notifications** switch in **Settings › Devices**.
+
+On the computer that **uses** them, open the other computer's page and choose what to use: its camera as a webcam, its microphone, its sound, or just let its notifications appear. The computer that shares shows when its camera or microphone is in use, and you can stop it from there at any time.
+
+| Feature | What you need |
+| :--- | :--- |
+| **Camera** | A camera on the sharing computer, **Share camera** on, and the **Virtual camera add-on** on the computer that uses it (as for a phone's webcam). |
+| **Microphone** | A microphone on the sharing computer and **Share microphone** on. Play it into a virtual audio cable on the other computer to use it as a microphone in other apps. |
+| **Sound** | **Share sound** on the sharing computer. The other computer plays only what it asked for. |
+| **Notifications** | **Share notifications** on the sharing computer. |
+
+The protocol is described in [computer to computer](../protocol/pc-sharing.md).

@@ -98,8 +98,12 @@ capability is missing.
 | `recorder` | Saves and converts voice recordings from a phone ([recorder](recorder.md)) | app update |
 | `deck.actions` | Shares its Deck layout and live tile state and runs Deck actions ([deck](deck.md)) | app update |
 | `pc.audio` | Reports active audio output devices in `deck.state` and accepts `pc.audio.set` volume/mute changes ([deck](deck.md)) | app update |
-| `camera.virtual` | Receives and decodes a phone's camera stream ([webcam](webcam.md)) | app update |
-| `mic.listen` | Takes a phone's microphone and plays it into an output ([mic](mic.md)) | app update |
+| `camera.virtual` | Receives and decodes a phone's or computer's camera stream ([webcam](webcam.md)) | app update |
+| `mic.listen` | Takes a phone's or computer's microphone and plays it into an output ([mic](mic.md)) | app update |
+| `sound.play` | Plays the sound another computer streams to it ([computer to computer](pc-sharing.md) §4) | app update |
+| `camera.stream` | Streams its camera when camera sharing is on and a camera is present ([computer to computer](pc-sharing.md) §2) | turning on camera sharing |
+| `mic.stream` | Streams its microphone when microphone sharing is on and one is present ([computer to computer](pc-sharing.md) §3) | turning on microphone sharing |
+| `notify.mirror` | Sends its notifications to paired computers when notification sharing is on ([computer to computer](pc-sharing.md) §5) | turning on notification sharing |
 | `media.stream` | Streams a player's picture and sound to a phone that watches (Play on phone, [media](media.md) §4) | app update |
 | `addon.vcam` | The virtual camera add-on is installed ([webcam](webcam.md)) | installing the add-on |
 | `camera.continuity` | Requests and receives Continuity Camera photos and document scans ([Continuity Camera](v0.md#12-continuity-camera-cameracapture)) | app update |
