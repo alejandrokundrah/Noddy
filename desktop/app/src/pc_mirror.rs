@@ -74,8 +74,8 @@ mod imp {
     }
 
     #[cfg(windows)]
-    static APP_SESSIONS: Mutex<std::collections::HashMap<(DeviceId, u32), AppSession>> =
-        Mutex::new(std::collections::HashMap::new());
+    static APP_SESSIONS: std::sync::LazyLock<Mutex<std::collections::HashMap<(DeviceId, u32), AppSession>>> =
+        std::sync::LazyLock::new(|| Mutex::new(std::collections::HashMap::new()));
 
     #[cfg(windows)]
     struct ExtendedSession {
@@ -86,8 +86,9 @@ mod imp {
     }
 
     #[cfg(windows)]
-    static EXTENDED_SESSIONS: Mutex<std::collections::HashMap<(DeviceId, u32), ExtendedSession>> =
-        Mutex::new(std::collections::HashMap::new());
+    static EXTENDED_SESSIONS: std::sync::LazyLock<
+        Mutex<std::collections::HashMap<(DeviceId, u32), ExtendedSession>>,
+    > = std::sync::LazyLock::new(|| Mutex::new(std::collections::HashMap::new()));
 
     /// Lists open top-level application windows on this PC for `mirror.apps`.
     pub fn list_app_windows() -> Vec<noddy_core::PhoneApp> {
@@ -2846,11 +2847,11 @@ mod imp {
                 match action {
                     noddy_core::TouchAction::Down => {
                         win::window_capture::WindowCapture::focus_window(hwnd);
-                        win::input::mouse_button(true);
+                        win::input::mouse_button_left(true);
                     }
                     noddy_core::TouchAction::Move => {}
-                    noddy_core::TouchAction::Up | noddy_core::TouchAction::Cancel => {
-                        win::input::mouse_button(false);
+                    noddy_core::TouchAction::Up => {
+                        win::input::mouse_button_left(false);
                     }
                 }
             }
@@ -3129,288 +3130,7 @@ mod imp {
                 match action {
                     noddy_core::TouchAction::Down => win::input::mouse_button_left(true),
                     noddy_core::TouchAction::Move => {}
-                    noddy_core::TouchAction::Up | noddy_core::TouchAction::Cancel => {
-                        win::input::mouse_button_left(false);
-                    }
-                }
-            }
-            MirrorInput::Scroll { x, y, dx, dy } => {
-                win::desktop_input::move_absolute_on(rect, *x, *y);
-                win::input::scroll(*dx, *dy);
-            }
-            MirrorInput::Text { text } => {
-                win::input::type_text(text);
-            }
-            MirrorInput::Key { key } => match key.as_str() {
-                mirror_keys::BACK => win::input::press_key("escape", &[]),
-                mirror_keys::ENTER => win::input::press_key("enter", &[]),
-                mirror_keys::BACKSPACE => win::input::press_key("backspace", &[]),
-                mirror_keys::DELETE => win::input::press_key("delete", &[]),
-                mirror_keys::LEFT => win::input::press_key("left", &[]),
-                mirror_keys::RIGHT => win::input::press_key("right", &[]),
-                mirror_keys::UP => win::input::press_key("up", &[]),
-                mirror_keys::DOWN => win::input::press_key("down", &[]),
-                mirror_keys::TAB => win::input::press_key("tab", &[]),
-                _ => {}
-            },
-            MirrorInput::Pen { action, x, y, pressure, tilt_x, tilt_y, barrel, eraser } => {
-                win::desktop_input::inject_pen(
-                    rect, *action, *x, *y, *pressure, *tilt_x, *tilt_y, *barrel, *eraser,
-                );
-            }
-            MirrorInput::Gamepad { .. } => {}
-        }
-        true
-    }
-
-    #[cfg(windows)]
-    #[allow(clippy::too_many_arguments)]
-    fn run_extended_capture_loop(
-        peer: DeviceId,
-        options: MirrorStart,
-        width: u32,
-        height: u32,
-        stop: Arc<AtomicBool>,
-        force_keyframe: Arc<AtomicBool>,
-        shared_rect: Arc<Mutex<win::desktop_input::ScreenRect>>,
-        pending_resize: Arc<Mutex<Option<(u32, u32)>>>,
-    ) {
-        let session_id = options.session;
-        let cleanup = || {
-            let mut ext = EXTENDED_SESSIONS.lock().unwrap_or_else(|e| e.into_inner());
-            if ext.get(&(peer, session_id)).is_some_and(|s| Arc::ptr_eq(&s.stop, &stop)) {
-                ext.remove(&(peer, session_id));
-            }
-        };
-        let Some(node) = core_host::node() else {
-            cleanup();
-            return;
-        };
-        let runtime = &core_host::host().runtime;
-        let mut monitor = match win::virtual_display::acquire(width, height) {
-            Ok(m) => m,
-            Err(reason) => {
-                tracing::warn!(%peer, session = session_id, %reason, "virtual display unavailable");
-                crate::bridge::app::show_message(reason);
-                cleanup();
-                runtime.block_on(node.mirror_stop(peer, session_id));
-                return;
-            }
-        };
-        *shared_rect.lock().unwrap_or_else(|e| e.into_inner()) = monitor.rect();
-
-        let Ok(sender) = runtime.block_on(node.mirror_open(peer)) else {
-            tracing::warn!(%peer, session = session_id, "couldn't open extended display stream");
-            cleanup();
-            return;
-        };
-        std::thread::sleep(Duration::from_millis(100));
-
-        let fps = options.fps.clamp(10, 60);
-        let max_bitrate = options.bitrate.clamp(500_000, 45_000_000);
-        let mut bitrate = max_bitrate;
-        let frame_interval = Duration::from_micros(1_000_000 / u64::from(fps));
-        let dur_hns = (10_000_000 / u64::from(fps)) as i64;
-        let mut codec = if node.mirror_codecs(peer).is_ok_and(|codecs| codecs.iter().any(|c| c == "h265")) {
-            "h265".to_owned()
-        } else {
-            "h264".to_owned()
-        };
-
-        let mut bgra = Vec::new();
-        let mut nv12 = Vec::new();
-        let mut stream_dims: Option<(u32, u32)> = None;
-        let mut encoder: Option<ScreenEncoder> = None;
-        let started = Instant::now();
-        let mut last_reinit = Instant::now() - Duration::from_secs(5);
-        let mut last_rate_change = Instant::now();
-
-        tracing::info!(%peer, session = session_id, width, height, codec, fps, "extended display started");
-
-        while !stop.load(Ordering::Relaxed) {
-            let tick_start = Instant::now();
-            if let Some((rw, rh)) = pending_resize.lock().unwrap_or_else(|e| e.into_inner()).take()
-                && let Ok(new_rect) = monitor.resize(rw, rh)
-            {
-                *shared_rect.lock().unwrap_or_else(|e| e.into_inner()) = new_rect;
-                stream_dims = None;
-                encoder = None;
-            }
-
-            let rect = monitor.rect();
-            let dims = target_dimensions(rect.width as u32, rect.height as u32, 3840);
-            if stream_dims != Some(dims) {
-                stream_dims = Some(dims);
-                encoder = None;
-            }
-            let (dst_w, dst_h) = dims;
-            let requested_kf = force_keyframe.swap(false, Ordering::SeqCst);
-            let keyframe_in_place =
-                requested_kf && encoder.as_ref().is_some_and(ScreenEncoder::request_keyframe);
-            let need_reinit = encoder.is_none()
-                || (requested_kf
-                    && !keyframe_in_place
-                    && last_reinit.elapsed() >= Duration::from_millis(1400));
-
-            if need_reinit {
-                match new_pc_encoder_with_fallback(&mut codec, dst_w, dst_h, fps, bitrate) {
-                    Ok(enc) => {
-                        let cfg = MirrorConfig {
-                            codec: codec.clone(),
-                            width: dst_w,
-                            height: dst_h,
-                            session: session_id,
-                        };
-                        if matches!(sender.send(PacketKind::Config, 0, cfg.to_cbor()), MirrorSend::Closed) {
-                            break;
-                        }
-                        encoder = Some(enc);
-                        last_reinit = Instant::now();
-                    }
-                    Err(e) => {
-                        tracing::warn!(error = %e, codec, session = session_id, "extended display encoder init failed");
-                        break;
-                    }
-                }
-            }
-
-            let win_rect = windows::Win32::Foundation::RECT {
-                left: rect.left,
-                top: rect.top,
-                right: rect.left + rect.width,
-                bottom: rect.top + rect.height,
-            };
-            if capture_screen(Some(win_rect), dst_w, dst_h, &mut bgra).is_some()
-                && let Some(enc) = encoder.as_mut()
-            {
-                bgra_to_nv12(&bgra, dst_w as usize, dst_h as usize, &mut nv12);
-                let time_us = started.elapsed().as_micros() as u64;
-                let hns = (time_us * 10) as i64;
-                match enc.encode(&nv12, hns, dur_hns, &stop) {
-                    Ok(packets) => {
-                        let mut send_failed = false;
-                        for (is_keyframe, bytes) in packets {
-                            let kind = if is_keyframe { PacketKind::Keyframe } else { PacketKind::Frame };
-                            match sender.send(kind, time_us, bytes) {
-                                MirrorSend::Queued | MirrorSend::Dropped => {}
-                                MirrorSend::NeedKeyframe => {
-                                    force_keyframe.store(true, Ordering::SeqCst);
-                                    if last_rate_change.elapsed() >= Duration::from_secs(2) {
-                                        let lower = (bitrate / 4 * 3).max(MIN_BITRATE);
-                                        if lower < bitrate && enc.set_bitrate(lower) {
-                                            bitrate = lower;
-                                            last_rate_change = Instant::now();
-                                        }
-                                    }
-                                }
-                                MirrorSend::Closed => {
-                                    send_failed = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if send_failed {
-                            break;
-                        }
-                    }
-                    Err(e) => {
-                        if stop.load(Ordering::Relaxed) {
-                            break;
-                        }
-                        if codec == "h265" {
-                            codec = "h264".into();
-                        } else {
-                            tracing::warn!(error = %e, session = session_id, "extended display encode error");
-                        }
-                        encoder = None;
-                    }
-                }
-            }
-
-            if let Some(rem) = frame_interval.checked_sub(tick_start.elapsed()) {
-                std::thread::sleep(rem);
-            }
-        }
-
-        tracing::info!(%peer, session = session_id, "extended display stopped");
-        sender.close();
-        drop(monitor);
-        cleanup();
-        runtime.block_on(node.mirror_stop(peer, session_id));
-    }
-
-    #[cfg(windows)]
-    fn start_extended_display(peer: DeviceId, options: MirrorStart) {
-        let session_id = options.session;
-        let width = options.width.unwrap_or(1920).clamp(320, 3840);
-        let height = options.height.unwrap_or(1080).clamp(240, 2160);
-        let stop = Arc::new(AtomicBool::new(false));
-        let force_keyframe = Arc::new(AtomicBool::new(false));
-        let rect = Arc::new(Mutex::new(win::desktop_input::ScreenRect {
-            left: 0,
-            top: 0,
-            width: width as i32,
-            height: height as i32,
-        }));
-        let pending_resize = Arc::new(Mutex::new(None));
-        {
-            let mut ext = EXTENDED_SESSIONS.lock().unwrap_or_else(|e| e.into_inner());
-            if let Some(prev) = ext.insert(
-                (peer, session_id),
-                ExtendedSession {
-                    stop: Arc::clone(&stop),
-                    force_keyframe: Arc::clone(&force_keyframe),
-                    rect: Arc::clone(&rect),
-                    pending_resize: Arc::clone(&pending_resize),
-                },
-            ) {
-                prev.stop.store(true, Ordering::SeqCst);
-            }
-        }
-        let stop_on_failure = Arc::clone(&stop);
-        if let Err(e) =
-            std::thread::Builder::new().name(format!("noddy-pc-ext-{session_id}")).spawn(move || {
-                run_extended_capture_loop(
-                    peer,
-                    options,
-                    width,
-                    height,
-                    stop,
-                    force_keyframe,
-                    rect,
-                    pending_resize,
-                )
-            })
-        {
-            tracing::warn!(error = %e, session = session_id, "can't start extended display");
-            stop_on_failure.store(true, Ordering::SeqCst);
-            EXTENDED_SESSIONS.lock().unwrap_or_else(|e| e.into_inner()).remove(&(peer, session_id));
-        }
-    }
-
-    #[cfg(windows)]
-    fn handle_extended_input(peer: &DeviceId, session: u32, input: &MirrorInput) -> bool {
-        let rect = {
-            let ext = EXTENDED_SESSIONS.lock().unwrap_or_else(|e| e.into_inner());
-            let Some(s) = ext.get(&(*peer, session)) else {
-                return false;
-            };
-            *s.rect.lock().unwrap_or_else(|e| e.into_inner())
-        };
-        let remote_input_on = core_host::node()
-            .and_then(|n| n.device_toggles(*peer).ok())
-            .is_some_and(|toggles| toggles.iter().any(|(k, v)| *k == "remote_input" && *v));
-        if !remote_input_on {
-            return true;
-        }
-        let _ = crate::input_share::enter_remote(*peer);
-        match input {
-            MirrorInput::Touch { action, x, y } => {
-                win::desktop_input::move_absolute_on(rect, *x, *y);
-                match action {
-                    noddy_core::TouchAction::Down => win::input::mouse_button_left(true),
-                    noddy_core::TouchAction::Move => {}
-                    noddy_core::TouchAction::Up | noddy_core::TouchAction::Cancel => {
+                    noddy_core::TouchAction::Up => {
                         win::input::mouse_button_left(false);
                     }
                 }

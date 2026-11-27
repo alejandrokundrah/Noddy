@@ -10,8 +10,8 @@ use windows::{
         Graphics::Gdi::{
             CDS_NORESET, CDS_RESET, CDS_UPDATEREGISTRY, ChangeDisplaySettingsExW, DEVMODEW,
             DISP_CHANGE_SUCCESSFUL, DISPLAY_DEVICE_ACTIVE, DISPLAY_DEVICE_PRIMARY_DEVICE, DISPLAY_DEVICEW,
-            DM_PELSHEIGHT, DM_PELSWIDTH, DM_POSITION, ENUM_CURRENT_SETTINGS, EnumDisplayDevicesW,
-            EnumDisplaySettingsExW,
+            DM_PELSHEIGHT, DM_PELSWIDTH, DM_POSITION, ENUM_CURRENT_SETTINGS, ENUM_DISPLAY_SETTINGS_FLAGS,
+            EnumDisplayDevicesW, EnumDisplaySettingsExW,
         },
     },
     core::PCWSTR,
@@ -101,11 +101,11 @@ fn find_extended_device() -> Option<(Vec<u16>, bool)> {
         if !ok {
             break;
         }
-        let is_primary = (dev.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) != 0;
+        let is_primary = (dev.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE).0 != 0;
         if is_primary {
             continue;
         }
-        let is_active = (dev.StateFlags & DISPLAY_DEVICE_ACTIVE) != 0;
+        let is_active = (dev.StateFlags & DISPLAY_DEVICE_ACTIVE).0 != 0;
         let name_len = dev.DeviceName.iter().position(|&c| c == 0).unwrap_or(dev.DeviceName.len());
         let mut name = dev.DeviceName[..name_len].to_vec();
         name.push(0);
@@ -135,7 +135,13 @@ fn apply_mode(device_name: &[u16], width: u32, height: u32, x: i32, y: i32) -> R
     let mut dm = DEVMODEW { dmSize: std::mem::size_of::<DEVMODEW>() as u16, ..Default::default() };
     // SAFETY: `device_name` is NUL-terminated UTF-16 and `dm` is properly sized.
     let has_current = unsafe {
-        EnumDisplaySettingsExW(PCWSTR(device_name.as_ptr()), ENUM_CURRENT_SETTINGS, &mut dm, 0).as_bool()
+        EnumDisplaySettingsExW(
+            PCWSTR(device_name.as_ptr()),
+            ENUM_CURRENT_SETTINGS,
+            &mut dm,
+            ENUM_DISPLAY_SETTINGS_FLAGS(0),
+        )
+        .as_bool()
     };
     if !has_current {
         dm.dmSize = std::mem::size_of::<DEVMODEW>() as u16;

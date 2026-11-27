@@ -962,42 +962,6 @@ pub fn reopen(window: Window) {
     );
 }
 
-/// Opens a virtual extended display from another computer at `width` x `height`
-/// (up to 4K 3840x2160 H.265) in a window of its own.
-pub fn start_extended_display(device: DeviceId, width: u32, height: u32) {
-    let w = width.clamp(320, 3840);
-    let h = height.clamp(240, 2160);
-    let window = state(|s| {
-        let session = NEXT_SESSION.fetch_add(1, Ordering::Relaxed);
-        let window = Window { device, session };
-        s.windows.insert(
-            window,
-            Shown { phase: Phase::Asking, app: Some(format!("Extended display ({w}×{h})")), pkg: None },
-        );
-        window
-    });
-    ffi::video_clear(&window.key());
-    let bitrate = if w >= 3840 || h >= 2160 { 35_000_000 } else { 16_000_000 };
-    request(
-        window,
-        MirrorStart {
-            max_size: w.max(h),
-            fps: 60,
-            bitrate,
-            audio: false,
-            session: window.session,
-            app: None,
-            stay_awake: false,
-            screen_off: false,
-            watch: None,
-            sound_only: false,
-            extended_display: true,
-            width: Some(w),
-            height: Some(h),
-        },
-    );
-}
-
 /// Resizes an app window's display on the phone (`width` and `height` are the
 /// window's logical dimensions on the PC).
 pub fn resize(window: Window, width: u32, height: u32) {

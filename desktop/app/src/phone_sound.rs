@@ -94,6 +94,9 @@ pub fn set_on(on: bool) {
             screen_off: false,
             watch: None,
             sound_only: true,
+            extended_display: false,
+            width: None,
+            height: None,
         };
         if let Err(e) = node.mirror_start(device, options).await {
             set_active(None);

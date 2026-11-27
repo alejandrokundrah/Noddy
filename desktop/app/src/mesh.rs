@@ -97,8 +97,9 @@ fn device_on_edge(layout: &[MeshDeviceLayout], edge: ScreenEdge) -> Option<Devic
 #[cfg(windows)]
 fn primary_monitor_bounds() -> (i32, i32, i32, i32) {
     use windows::Win32::Foundation::POINT;
-    use windows::Win32::Graphics::Gdi::{GetMonitorInfoW, MONITOR_DEFAULTTOPRIMARY, MONITORINFO};
-    use windows::Win32::UI::WindowsAndMessaging::MonitorFromPoint;
+    use windows::Win32::Graphics::Gdi::{
+        GetMonitorInfoW, MONITOR_DEFAULTTOPRIMARY, MONITORINFO, MonitorFromPoint,
+    };
 
     // `MonitorFromPoint` with `MONITOR_DEFAULTTOPRIMARY` always returns a handle.
     let monitor = unsafe { MonitorFromPoint(POINT { x: 0, y: 0 }, MONITOR_DEFAULTTOPRIMARY) };

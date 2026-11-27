@@ -184,14 +184,16 @@ pub fn inject_pen(
         Foundation::POINT,
         UI::{
             Controls::{
-                CreateSyntheticPointerDevice, HSYNTHETICPOINTERDEVICE, InjectSyntheticPointerInput,
-                POINTER_FEEDBACK_DEFAULT, POINTER_TYPE_INFO, POINTER_TYPE_INFO_0,
+                CreateSyntheticPointerDevice, HSYNTHETICPOINTERDEVICE, POINTER_FEEDBACK_DEFAULT,
+                POINTER_TYPE_INFO, POINTER_TYPE_INFO_0,
             },
             Input::Pointer::{
-                PEN_FLAG_BARREL, PEN_FLAG_ERASER, PEN_FLAG_NONE, PEN_MASK_PRESSURE, PEN_MASK_TILT_X,
-                PEN_MASK_TILT_Y, POINTER_FLAG_DOWN, POINTER_FLAG_INCONTACT, POINTER_FLAG_INRANGE,
+                InjectSyntheticPointerInput, POINTER_FLAG_DOWN, POINTER_FLAG_INCONTACT, POINTER_FLAG_INRANGE,
                 POINTER_FLAG_NONE, POINTER_FLAG_UP, POINTER_FLAG_UPDATE, POINTER_INFO, POINTER_PEN_INFO,
-                PT_PEN,
+            },
+            WindowsAndMessaging::{
+                PEN_FLAG_BARREL, PEN_FLAG_ERASER, PEN_FLAG_NONE, PEN_MASK_PRESSURE, PEN_MASK_TILT_X,
+                PEN_MASK_TILT_Y, PT_PEN,
             },
         },
     };

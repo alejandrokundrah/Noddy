@@ -1866,7 +1866,7 @@ impl qobject::AppController {
         if path_str.is_empty() {
             return;
         }
-        crate::transfers::install_apk(device, PathBuf::from(path_str));
+        crate::transfers::install_apk(device, std::path::PathBuf::from(path_str));
     }
 
     pub fn refresh_data_retention(self: Pin<&mut Self>) {
