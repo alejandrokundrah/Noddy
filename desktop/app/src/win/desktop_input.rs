@@ -163,6 +163,114 @@ pub fn release_held_keys() {
     send_inputs(&inputs);
 }
 
+static PEN_DEVICE: std::sync::OnceLock<Option<usize>> = std::sync::OnceLock::new();
+
+/// Injects stylus / pen / tablet input mapped onto `monitor` using Windows'
+/// synthetic pen pointer API (`InjectSyntheticPointerInput`), falling back to
+/// mouse positioning when synthetic pointer injection is unavailable.
+#[allow(clippy::too_many_arguments)]
+pub fn inject_pen(
+    monitor: ScreenRect,
+    action: noddy_core::PenAction,
+    x: f32,
+    y: f32,
+    pressure: f32,
+    tilt_x: i8,
+    tilt_y: i8,
+    barrel: bool,
+    eraser: bool,
+) {
+    use windows::Win32::{
+        Foundation::POINT,
+        UI::{
+            Controls::{
+                CreateSyntheticPointerDevice, HSYNTHETICPOINTERDEVICE, InjectSyntheticPointerInput,
+                POINTER_FEEDBACK_DEFAULT, POINTER_TYPE_INFO, POINTER_TYPE_INFO_0,
+            },
+            Input::Pointer::{
+                PEN_FLAG_BARREL, PEN_FLAG_ERASER, PEN_FLAG_NONE, PEN_MASK_PRESSURE, PEN_MASK_TILT_X,
+                PEN_MASK_TILT_Y, POINTER_FLAG_DOWN, POINTER_FLAG_INCONTACT, POINTER_FLAG_INRANGE,
+                POINTER_FLAG_NONE, POINTER_FLAG_UP, POINTER_FLAG_UPDATE, POINTER_INFO, POINTER_PEN_INFO,
+                PT_PEN,
+            },
+        },
+    };
+
+    if !x.is_finite() || !y.is_finite() || monitor.width <= 0 || monitor.height <= 0 {
+        return;
+    }
+    let px = (f64::from(monitor.left) + f64::from(x.clamp(0.0, 1.0)) * f64::from(monitor.width - 1)).round()
+        as i32;
+    let py = (f64::from(monitor.top) + f64::from(y.clamp(0.0, 1.0)) * f64::from(monitor.height - 1)).round()
+        as i32;
+
+    let handle = *PEN_DEVICE.get_or_init(|| {
+        // SAFETY: creates a process-lifetime synthetic pen pointer device.
+        unsafe {
+            CreateSyntheticPointerDevice(PT_PEN, 1, POINTER_FEEDBACK_DEFAULT).ok().map(|h| h.0 as usize)
+        }
+    });
+    let Some(raw_handle) = handle else {
+        // Fallback when synthetic pen injection isn't permitted/supported.
+        move_absolute_on(monitor, x, y);
+        match action {
+            noddy_core::PenAction::Down => crate::win::input::mouse_button_left(true),
+            noddy_core::PenAction::Up => crate::win::input::mouse_button_left(false),
+            noddy_core::PenAction::Hover | noddy_core::PenAction::Move => {}
+        }
+        return;
+    };
+
+    let pointer_flags = match action {
+        noddy_core::PenAction::Hover => POINTER_FLAG_INRANGE | POINTER_FLAG_UPDATE,
+        noddy_core::PenAction::Down => POINTER_FLAG_INRANGE | POINTER_FLAG_INCONTACT | POINTER_FLAG_DOWN,
+        noddy_core::PenAction::Move => POINTER_FLAG_INRANGE | POINTER_FLAG_INCONTACT | POINTER_FLAG_UPDATE,
+        noddy_core::PenAction::Up => POINTER_FLAG_INRANGE | POINTER_FLAG_UP,
+    };
+    let mut pen_flags = PEN_FLAG_NONE;
+    if barrel {
+        pen_flags |= PEN_FLAG_BARREL;
+    }
+    if eraser {
+        pen_flags |= PEN_FLAG_ERASER;
+    }
+    let scaled_pressure = (pressure.clamp(0.0, 1.0) * 1024.0).round() as u32;
+    let info = POINTER_TYPE_INFO {
+        r#type: PT_PEN,
+        Anonymous: POINTER_TYPE_INFO_0 {
+            penInfo: POINTER_PEN_INFO {
+                pointerInfo: POINTER_INFO {
+                    pointerType: PT_PEN,
+                    pointerId: 1,
+                    frameId: 0,
+                    pointerFlags: pointer_flags | POINTER_FLAG_NONE,
+                    sourceDevice: Default::default(),
+                    hwndTarget: Default::default(),
+                    ptPixelLocation: POINT { x: px, y: py },
+                    ptHimetricLocation: POINT::default(),
+                    ptPixelLocationRaw: POINT { x: px, y: py },
+                    ptHimetricLocationRaw: POINT::default(),
+                    dwTime: 0,
+                    historyCount: 1,
+                    InputData: 0,
+                    dwKeyStates: 0,
+                    PerformanceCount: 0,
+                    ButtonChangeType: Default::default(),
+                },
+                penFlags: pen_flags,
+                penMask: PEN_MASK_PRESSURE | PEN_MASK_TILT_X | PEN_MASK_TILT_Y,
+                pressure: scaled_pressure,
+                rotation: 0,
+                tiltX: i32::from(tilt_x.clamp(-90, 90)),
+                tiltY: i32::from(tilt_y.clamp(-90, 90)),
+            },
+        },
+    };
+    let device = HSYNTHETICPOINTERDEVICE(raw_handle as *mut std::ffi::c_void);
+    // SAFETY: `device` is a valid synthetic pointer handle and `info` is stack-allocated.
+    let _ = unsafe { InjectSyntheticPointerInput(device, &[info]) };
+}
+
 /// Maps a DOM `KeyboardEvent.code` to a Windows virtual-key code and whether
 /// the key is an "extended" one (the arrow and edit clusters, the right-hand
 /// Ctrl and Alt, the Windows keys, Numpad `/` and Enter).

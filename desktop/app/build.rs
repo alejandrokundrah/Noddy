@@ -388,6 +388,7 @@ fn main() {
             "src/bridge/devices.rs",
             "src/bridge/history.rs",
             "src/bridge/media.rs",
+            "src/bridge/mesh.rs",
             "src/bridge/messages.rs",
             "src/bridge/mirror.rs",
             "src/bridge/notifications.rs",

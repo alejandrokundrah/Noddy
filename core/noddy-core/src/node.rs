@@ -2099,6 +2099,17 @@ impl Node {
         transfer::send_recording(&self.shared, peer, file, markers).await
     }
 
+    /// Installs an `.apk` file on a USB-connected phone from this computer over ADB.
+    /// Progress and the outcome arrive as [`NodeEvent::ApkInstall`].
+    pub async fn install_apk(&self, peer: DeviceId, apk_path: std::path::PathBuf) -> Result<()> {
+        crate::install_apk::install(&self.shared, peer, apk_path).await
+    }
+
+    /// Whether `peer` is currently reachable over ADB/USB from this computer.
+    pub fn is_usb_connected(&self, peer: &DeviceId) -> bool {
+        lock(&self.shared.usb_serials).contains_key(peer)
+    }
+
     /// Accepts an incoming transfer waiting for user confirmation (LocalSend).
     pub fn accept_transfer(&self, id: &str) {
         self.shared.localsend.resolve_transfer_approval(id, true);

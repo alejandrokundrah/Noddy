@@ -2174,6 +2174,9 @@ async fn the_phone_sound_plays_on_the_pc_without_its_screen() {
         screen_off: false,
         watch: None,
         sound_only: true,
+        extended_display: false,
+        width: None,
+        height: None,
     };
 
     // An older phone: no mirror.sound, so the request is refused, not
@@ -2274,6 +2277,9 @@ async fn the_phone_screen_streams_to_the_pc() {
         screen_off: false,
         watch: None,
         sound_only: false,
+        extended_display: false,
+        width: None,
+        height: None,
     };
     with_timeout("start", pc.node.mirror_start(phone_id, options)).await.unwrap();
     assert_eq!(*phone.platform.mirror_asks.lock().unwrap(), ["start 1920 with sound"]);
@@ -2391,6 +2397,9 @@ async fn phone_apps_open_in_windows_of_their_own() {
         screen_off: false,
         watch: None,
         sound_only: false,
+        extended_display: false,
+        width: None,
+        height: None,
     };
 
     // Not Elevated yet: no apps, no app windows.
@@ -5969,6 +5978,9 @@ async fn usb_transport_carries_features_when_wifi_unavailable() {
         screen_off: false,
         watch: None,
         sound_only: false,
+        extended_display: false,
+        width: None,
+        height: None,
     };
     with_timeout("start mirror over USB", pc.node.mirror_start(phone_id, options)).await.unwrap();
     let stream = Arc::new(with_timeout("open mirror over USB", phone.node.mirror_open(pc_id)).await.unwrap());
@@ -6025,6 +6037,9 @@ async fn reverse_mirror_requires_pc_consent_and_remote_input_toggle() {
         screen_off: false,
         watch: None,
         sound_only: false,
+        extended_display: false,
+        width: None,
+        height: None,
     };
 
     // (a) A paired phone calling `mirror_start` against a PC is denied by default
@@ -6662,6 +6677,9 @@ async fn play_on_phone_lets_the_phone_watch_only_what_the_pc_offered() {
         screen_off: false,
         watch: Some(player.into()),
         sound_only: false,
+        extended_display: false,
+        width: None,
+        height: None,
     };
 
     // Not offered: the phone can't watch, and the PC isn't asked to share its screen.
@@ -7088,6 +7106,9 @@ async fn one_time_screen_consent_ends_with_the_pairing() {
         screen_off: false,
         watch: None,
         sound_only: false,
+        extended_display: false,
+        width: None,
+        height: None,
     };
 
     // "Allow once" lets the phone view the PC's screen during this connection

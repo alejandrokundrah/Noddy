@@ -174,6 +174,12 @@ pub fn compute_capabilities(
     #[cfg(any(windows, target_os = "linux"))]
     if pc_mirror_enabled && crate::pc_mirror::is_capture_available() {
         caps.push(noddy_core::MIRROR_CAPTURE.into());
+        #[cfg(windows)]
+        {
+            caps.push(noddy_core::MIRROR_VIRTUAL_DISPLAY.into());
+            caps.push(noddy_core::MIRROR_EXTENDED_DISPLAY.into());
+            caps.push(noddy_core::MIRROR_PEN.into());
+        }
     }
     #[cfg(windows)]
     let input_available = true;
@@ -227,6 +233,11 @@ async fn run(data_dir: PathBuf, platform: Arc<dyn Platform>) {
                 Changes::STATUS
             });
             host.started.notify_waiters();
+
+            // Start Mesh cursor-edge monitor if the user had it enabled.
+            if crate::settings::mesh_enabled() {
+                crate::mesh::start_monitoring();
+            }
             return;
         }
     };
@@ -281,6 +292,11 @@ async fn run(data_dir: PathBuf, platform: Arc<dyn Platform>) {
         changes
     });
     host.started.notify_waiters();
+
+    // Start Mesh cursor-edge monitor if the user had it enabled.
+    if crate::settings::mesh_enabled() {
+        crate::mesh::start_monitoring();
+    }
 
     host.runtime.spawn(async {
         let mut was_active = false;
@@ -346,6 +362,7 @@ async fn run(data_dir: PathBuf, platform: Arc<dyn Platform>) {
                 crate::media::on_event(&event);
                 crate::notifications::update_toasts(&event);
                 crate::clipboard::on_event(&event);
+                crate::mesh::on_event(&event);
                 crate::photos::on_event(&event);
                 crate::photo_backup::on_event(&event);
                 crate::continuity_camera::on_event(&event);

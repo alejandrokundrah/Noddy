@@ -353,6 +353,10 @@ pub mod qobject {
         /// Opens a paired phone's storage sync root in File Explorer.
         #[qinvokable]
         fn open_phone_storage(self: &AppController, device: &QString);
+        /// Installs an `.apk` file on a USB-connected phone from this computer.
+        #[qinvokable]
+        #[cxx_name = "installApk"]
+        fn install_apk(self: &AppController, device: &QString, url: &QString);
         /// Tells the event-driven Home summary which phone the Home page is showing (`""` when hidden).
         #[qinvokable]
         fn watch_home_summary(self: &AppController, device: &QString);
@@ -1853,6 +1857,16 @@ impl qobject::AppController {
         crate::messages::release_idle_resources();
         crate::calls::release_idle_resources();
         super::native::ffi::trim_memory_caches();
+    }
+
+    pub fn install_apk(&self, device: &QString, url: &QString) {
+        let Some(device) = super::parse_device(device) else { return };
+        let Some(local) = cxx_qt_lib::QUrl::from(url).to_local_file() else { return };
+        let path_str = String::from(&local);
+        if path_str.is_empty() {
+            return;
+        }
+        crate::transfers::install_apk(device, PathBuf::from(path_str));
     }
 
     pub fn refresh_data_retention(self: Pin<&mut Self>) {

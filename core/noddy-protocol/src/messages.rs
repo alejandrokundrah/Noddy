@@ -1353,6 +1353,10 @@ pub mod mirror {
     /// Offered by phones that run an app on a display of its own, shown in
     /// a window of its own (Elevated).
     pub const VIRTUAL_DISPLAY: &str = "mirror.virtual_display";
+    /// Offered by PCs that can create and stream a virtual extended monitor.
+    pub const EXTENDED_DISPLAY: &str = "mirror.extended_display";
+    /// Offered by hosts that accept pen/stylus/tablet input (`MirrorInput::Pen`).
+    pub const PEN: &str = "mirror.pen";
     /// The session of the phone's own screen; app windows have others.
     pub const SCREEN: u32 = 0;
     /// Apps in a `mirror.apps` answer, at most.
@@ -1369,6 +1373,17 @@ pub fn is_package_name(name: &str) -> bool {
         && name.split('.').all(|part| {
             part.chars().next().is_some_and(|c| c.is_ascii_alphabetic())
                 && part.chars().all(|c| c.is_ascii_alphanumeric() || c == '_')
+        })
+}
+
+/// Whether `name` is a valid app identifier for `mirror.start` / `mirror.apps`:
+/// an Android package name (`com.example.app`) or a desktop window ID (`win:<id>`).
+pub fn is_app_id(name: &str) -> bool {
+    is_package_name(name)
+        || name.strip_prefix("win:").is_some_and(|id| {
+            !id.is_empty()
+                && id.len() <= 64
+                && id.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_')
         })
 }
 
@@ -1407,10 +1422,19 @@ pub struct MirrorStart {
     /// phone that offers [`mirror::SOUND`]). The PC plays it without a window.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub sound_only: bool,
+    /// Create and stream a virtual extended monitor (`session != SCREEN`, no `app`).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub extended_display: bool,
+    /// Custom width in pixels for `extended_display` (320..=3840).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width: Option<u32>,
+    /// Custom height in pixels for `extended_display` (240..=2160).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub height: Option<u32>,
 }
 
 impl MirrorStart {
-    /// The screen without an app, or an app with a session of its own.
+    /// The screen without an app, an app with a session of its own, or an extended display.
     pub fn is_valid(&self) -> bool {
         if self.sound_only {
             // The phone's own sound: no app, no player, nothing about the screen.
@@ -1419,7 +1443,26 @@ impl MirrorStart {
                 && self.app.is_none()
                 && self.watch.is_none()
                 && !self.stay_awake
-                && !self.screen_off;
+                && !self.screen_off
+                && !self.extended_display
+                && self.width.is_none()
+                && self.height.is_none();
+        }
+        if self.extended_display {
+            let size_ok = match (self.width, self.height) {
+                (None, None) => true,
+                (Some(w), Some(h)) => (320..=3840).contains(&w) && (240..=2160).contains(&h),
+                _ => false,
+            };
+            return self.session != mirror::SCREEN
+                && self.app.is_none()
+                && self.watch.is_none()
+                && !self.stay_awake
+                && !self.screen_off
+                && size_ok;
+        }
+        if self.width.is_some() || self.height.is_some() {
+            return false;
         }
         let watch_ok = self
             .watch
@@ -1429,10 +1472,7 @@ impl MirrorStart {
             && match &self.app {
                 None => self.session == mirror::SCREEN,
                 Some(app) => {
-                    self.session != mirror::SCREEN
-                        && is_package_name(app)
-                        && !self.stay_awake
-                        && !self.screen_off
+                    self.session != mirror::SCREEN && is_app_id(app) && !self.stay_awake && !self.screen_off
                 }
             }
     }
@@ -1515,6 +1555,36 @@ pub enum MirrorInput {
     Text { text: String },
     /// Gamepad controller state (XInput-style buttons bitmask, stick axes, and triggers).
     Gamepad { buttons: u16, lx: i16, ly: i16, rx: i16, ry: i16, lt: u8, rt: u8 },
+    /// Stylus / pen / drawing tablet input at normalized display coordinates (`0.0..=1.0`).
+    Pen {
+        action: PenAction,
+        x: f32,
+        y: f32,
+        /// Tip pressure in `0.0..=1.0` (`0.0` while hovering).
+        #[serde(default)]
+        pressure: f32,
+        /// X tilt in degrees (`-90..=90`).
+        #[serde(default)]
+        tilt_x: i8,
+        /// Y tilt in degrees (`-90..=90`).
+        #[serde(default)]
+        tilt_y: i8,
+        /// Barrel / side button pressed.
+        #[serde(default)]
+        barrel: bool,
+        /// Eraser end of the stylus.
+        #[serde(default)]
+        eraser: bool,
+    },
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PenAction {
+    Hover,
+    Down,
+    Move,
+    Up,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -1591,6 +1661,7 @@ impl std::fmt::Debug for MirrorInput {
             MirrorInput::Key { key } => write!(f, "Key({key})"),
             MirrorInput::Text { text } => write!(f, "Text({} bytes)", text.len()),
             MirrorInput::Gamepad { buttons, .. } => write!(f, "Gamepad({buttons:#06x})"),
+            MirrorInput::Pen { action, .. } => write!(f, "Pen({action:?})"),
         }
     }
 }
@@ -1611,6 +1682,14 @@ impl MirrorInput {
             MirrorInput::Key { key } => mirror_keys::ALL.contains(&key.as_str()),
             MirrorInput::Text { text } => !text.is_empty() && text.len() <= mirror::MAX_TEXT_BYTES,
             MirrorInput::Gamepad { .. } => true,
+            MirrorInput::Pen { x, y, pressure, tilt_x, tilt_y, .. } => {
+                on_screen(*x)
+                    && on_screen(*y)
+                    && pressure.is_finite()
+                    && (0.0..=1.0).contains(pressure)
+                    && (-90..=90).contains(tilt_x)
+                    && (-90..=90).contains(tilt_y)
+            }
         }
     }
 }
@@ -4350,6 +4429,9 @@ mod tests {
             screen_off: false,
             watch: None,
             sound_only: true,
+            extended_display: false,
+            width: None,
+            height: None,
         };
         assert!(sound.is_valid());
         assert!(!MirrorStart { audio: false, ..sound.clone() }.is_valid(), "the sound is the point");
@@ -5521,6 +5603,9 @@ mod tests {
             screen_off: false,
             watch: Some("Chrome".into()),
             sound_only: false,
+            extended_display: false,
+            width: None,
+            height: None,
         };
         assert!(screen.is_valid());
         // Watching is of the PC's screen session only, never with an app.
@@ -5529,6 +5614,59 @@ mod tests {
             !MirrorStart { session: 3, app: Some("com.example.app".into()), ..screen.clone() }.is_valid()
         );
         assert!(!MirrorStart { watch: Some(String::new()), ..screen.clone() }.is_valid());
+        assert!(
+            MirrorStart { session: 2, app: Some("win:123456".into()), watch: None, ..screen.clone() }
+                .is_valid()
+        );
+        assert!(
+            !MirrorStart { session: 2, app: Some("win:".into()), watch: None, ..screen.clone() }.is_valid()
+        );
+        let ext = MirrorStart {
+            max_size: 3840,
+            fps: 60,
+            bitrate: 35_000_000,
+            audio: false,
+            session: 4,
+            app: None,
+            stay_awake: false,
+            screen_off: false,
+            watch: None,
+            sound_only: false,
+            extended_display: true,
+            width: Some(3840),
+            height: Some(2160),
+        };
+        assert!(ext.is_valid());
+        assert!(!MirrorStart { session: mirror::SCREEN, ..ext.clone() }.is_valid());
+        assert!(!MirrorStart { width: Some(4096), ..ext.clone() }.is_valid());
+        assert!(!MirrorStart { height: None, ..ext.clone() }.is_valid());
+
+        let pen = MirrorInput::Pen {
+            action: PenAction::Move,
+            x: 0.5,
+            y: 0.5,
+            pressure: 0.75,
+            tilt_x: -15,
+            tilt_y: 20,
+            barrel: true,
+            eraser: false,
+        };
+        assert!(pen.is_valid());
+        let env = Envelope::new(types::MIRROR_INPUT, &pen).unwrap();
+        assert_eq!(Envelope::from_cbor(&env.to_cbor()).unwrap().body::<MirrorInput>().unwrap(), pen);
+        assert!(
+            !MirrorInput::Pen {
+                action: PenAction::Down,
+                x: 0.5,
+                y: 0.5,
+                pressure: 1.5,
+                tilt_x: 0,
+                tilt_y: 0,
+                barrel: false,
+                eraser: false,
+            }
+            .is_valid()
+        );
         // Older PCs and phones leave it out.
         let plain = MirrorStart { watch: None, ..screen };
         let mut bytes = Vec::new();

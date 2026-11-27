@@ -195,6 +195,64 @@ fn is_bind_failure(reason: &str) -> bool {
     reason.contains("cannot bind") || reason.contains("already in use")
 }
 
+/// Installs an APK on `serial` via `adb -s <serial> install <path>`. The APK
+/// file is read from `apk_path` on the **local** machine, pushed to the device
+/// with the ADB sync service, then installed with `pm install`.
+///
+/// Returns the final message from `pm install` on success, or an error.
+pub async fn install_apk(
+    server: SocketAddr,
+    serial: &str,
+    apk_path: &std::path::Path,
+) -> Result<String, AdbError> {
+    if !is_serial_allowed(serial) {
+        return Err(AdbError::BlockedSerial(serial.to_owned()));
+    }
+
+    // The local ADB server's `host:exec` service handles everything when
+    // given `install <serial> <path>`-style commands, but the simplest
+    // route that works with every ADB server version is:
+    //
+    //   1. Push the APK to a temporary path on the device.
+    //   2. Run `pm install` through the shell service.
+    //   3. Remove the temporary file.
+    //
+    // We use `adb -s <serial> shell cmd package install -S <size>` which
+    // streams the APK bytes through stdin — no temp file needed.
+    // This is equivalent to `adb install` and works on Android 7+.
+
+    let file_len = tokio::fs::metadata(apk_path).await?.len();
+
+    // Connect and select the device transport.
+    let mut stream = TcpStream::connect(server).await?;
+    send_command(&mut stream, &format!("host:transport:{serial}")).await?;
+
+    // Open an exec (or shell) with the streaming install command.
+    // `cmd package install -S <size>` reads exactly <size> bytes from stdin
+    // and installs them as an APK. Available since Android 7 (API 24).
+    let install_cmd = format!("exec:cmd package install -S {file_len}");
+    send_command(&mut stream, &install_cmd).await?;
+
+    // Stream the APK file contents.
+    let mut file = tokio::fs::File::open(apk_path).await.map_err(AdbError::Io)?;
+    tokio::io::copy(&mut file, &mut stream).await.map_err(AdbError::Io)?;
+    stream.flush().await.map_err(AdbError::Io)?;
+
+    // Shut down the write half so `pm` knows the APK is complete.
+    stream.shutdown().await.map_err(AdbError::Io)?;
+
+    // Read the response (pm install prints "Success" or "Failure [...]").
+    let mut output = String::new();
+    stream.read_to_string(&mut output).await.map_err(AdbError::Io)?;
+
+    let trimmed = output.trim();
+    if trimmed.starts_with("Success") {
+        Ok(trimmed.to_owned())
+    } else {
+        Err(AdbError::Remote(trimmed.to_owned()))
+    }
+}
+
 /// Runs `command` in a shell on `serial` (`adb -s <serial> shell <command>`)
 /// and returns the connection carrying its output. The command runs as long
 /// as the connection stays open; dropping it ends the command.

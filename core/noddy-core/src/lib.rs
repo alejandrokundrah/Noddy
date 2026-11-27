@@ -22,6 +22,7 @@ mod events;
 pub mod features;
 pub mod handoff;
 mod identity;
+pub mod install_apk;
 pub mod localsend;
 mod media;
 pub mod mic;
@@ -72,6 +73,7 @@ pub use handoff::{
     with_video_timestamp,
 };
 pub use identity::{KeyProtector, PlainKeyProtector, default_protector, install_id_from};
+pub use install_apk::ApkInstallState;
 pub use localsend::{
     LOCALSEND_DEFAULT_PORT, LOCALSEND_MULTICAST_ADDR, LOCALSEND_PROTOCOL_VERSION, LocalSendPeer,
     peer_device_id as localsend_peer_device_id,
@@ -90,12 +92,12 @@ pub use noddy_protocol::{
         CameraCaptureResultMeta, Contact, ContactNumber, DeviceInfo, DeviceKind, LivePoint, LiveSegment,
         MediaPlayer, MirrorAudioConfig, MirrorConfig, MirrorInput, MirrorPower, MirrorResize, MirrorStart,
         Notification, NotificationAction, NotificationChatMessage, NotificationConversation,
-        NotificationLive, PcAudioSet, PcWakeInfo, PhoneApp, PhoneToggleSet, PhoneToggleValue, PhoneToggles,
-        PhotoAlbum, PhotoItem, PhotoNew as Photo, PhotoThumb, PowerLevel, ScreenCorners, ScreenRect,
-        ScreenShape, SmsAttachment, SmsMessage, SmsPart, SmsThread, StorageChanged, StorageDelete,
-        StorageEntries, StorageEntry, StorageList, StorageMkdir, StorageRead, StorageReadMeta, StorageRename,
-        StorageWriteAccept, StorageWriteDone, StorageWriteOffer, TaskNotify, TouchAction, WatchFile,
-        WebcamConfig, WebcamStart,
+        NotificationLive, PcAudioSet, PcWakeInfo, PenAction, PhoneApp, PhoneToggleSet, PhoneToggleValue,
+        PhoneToggles, PhotoAlbum, PhotoItem, PhotoNew as Photo, PhotoThumb, PowerLevel, ScreenCorners,
+        ScreenRect, ScreenShape, SmsAttachment, SmsMessage, SmsPart, SmsThread, StorageChanged,
+        StorageDelete, StorageEntries, StorageEntry, StorageList, StorageMkdir, StorageRead, StorageReadMeta,
+        StorageRename, StorageWriteAccept, StorageWriteDone, StorageWriteOffer, TaskNotify, TouchAction,
+        WatchFile, WebcamConfig, WebcamStart,
         calls::{
             CONTROL as CALLS_CONTROL, DIAL as CALLS_DIAL, IN_CALL as CALLS_IN_CALL, LOG as CALLS_LOG,
             SHOW as CALLS_SHOW, STATE as CALLS_STATE,
@@ -105,15 +107,16 @@ pub use noddy_protocol::{
             CAPTURE as CAMERA_CAPTURE, MAX_IMAGE_BYTES as CAMERA_CAPTURE_MAX_IMAGE_BYTES,
             RECEIVE as CAMERA_CONTINUITY,
         },
-        format_mac, ipv4_broadcast, is_package_name, is_valid_storage_dir_path, is_valid_storage_id,
-        is_valid_storage_name, is_valid_storage_path, magic_packet,
+        format_mac, ipv4_broadcast, is_app_id, is_package_name, is_valid_storage_dir_path,
+        is_valid_storage_id, is_valid_storage_name, is_valid_storage_path, magic_packet,
         media_watch::{MAX_READ as MEDIA_WATCH_MAX_READ, STREAM as MEDIA_STREAM, WATCH as MEDIA_WATCH},
         mic::{LISTEN as MIC_LISTEN, STREAM as MIC_STREAM},
         mirror::{
             AUDIO as MIRROR_AUDIO, AUDIO_PLAYBACK as MIRROR_AUDIO_PLAYBACK, AV1 as MIRROR_AV1,
-            CAPTURE as MIRROR_CAPTURE, H264 as MIRROR_H264, H265 as MIRROR_H265, HEVC as MIRROR_HEVC,
-            INPUT as MIRROR_INPUT, LISTEN as MIRROR_LISTEN, MAX_TEXT_BYTES as MIRROR_MAX_TEXT_BYTES,
-            PCM as MIRROR_PCM, SCREEN as MIRROR_SCREEN, SOUND as MIRROR_SOUND, VIEW as MIRROR_VIEW,
+            CAPTURE as MIRROR_CAPTURE, EXTENDED_DISPLAY as MIRROR_EXTENDED_DISPLAY, H264 as MIRROR_H264,
+            H265 as MIRROR_H265, HEVC as MIRROR_HEVC, INPUT as MIRROR_INPUT, LISTEN as MIRROR_LISTEN,
+            MAX_TEXT_BYTES as MIRROR_MAX_TEXT_BYTES, PCM as MIRROR_PCM, PEN as MIRROR_PEN,
+            SCREEN as MIRROR_SCREEN, SOUND as MIRROR_SOUND, VIEW as MIRROR_VIEW,
             VIRTUAL_DISPLAY as MIRROR_VIRTUAL_DISPLAY,
         },
         mirror_keys, notify_limits, parse_mac,

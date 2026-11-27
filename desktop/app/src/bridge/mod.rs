@@ -18,6 +18,8 @@ pub mod history;
 #[allow(unsafe_code)]
 pub mod media;
 #[allow(unsafe_code)]
+pub mod mesh;
+#[allow(unsafe_code)]
 pub mod messages;
 #[allow(unsafe_code)]
 pub mod mirror;

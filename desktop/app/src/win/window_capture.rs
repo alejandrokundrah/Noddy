@@ -125,6 +125,114 @@ impl WindowCapture {
         self.hwnd
     }
 
+    /// Returns `(hwnd_isize, title)` for each visible, non-cloaked top-level
+    /// application window on this PC (excluding Noddy itself).
+    pub fn list_windows() -> Vec<(isize, String)> {
+        use windows::Win32::{
+            Foundation::LPARAM,
+            Graphics::Dwm::{DWMWA_CLOAKED, DwmGetWindowAttribute},
+            System::Threading::GetCurrentProcessId,
+            UI::WindowsAndMessaging::{
+                EnumWindows, GWL_EXSTYLE, GetWindowLongW, GetWindowTextLengthW, GetWindowTextW,
+                GetWindowThreadProcessId, IsIconic, IsWindowVisible, WS_EX_TOOLWINDOW,
+            },
+        };
+        use windows_core::BOOL;
+
+        struct State {
+            self_pid: u32,
+            out: Vec<(isize, String)>,
+        }
+
+        unsafe extern "system" fn enum_cb(hwnd: HWND, lparam: LPARAM) -> BOOL {
+            // SAFETY: `lparam` points to `State` for the duration of `EnumWindows`.
+            let state = unsafe { &mut *(lparam.0 as *mut State) };
+            unsafe {
+                if !IsWindowVisible(hwnd).as_bool() || IsIconic(hwnd).as_bool() {
+                    return BOOL(1);
+                }
+                let mut pid = 0u32;
+                GetWindowThreadProcessId(hwnd, Some(&mut pid));
+                if pid == state.self_pid {
+                    return BOOL(1);
+                }
+                let ex_style = GetWindowLongW(hwnd, GWL_EXSTYLE) as u32;
+                if (ex_style & WS_EX_TOOLWINDOW.0) != 0 {
+                    return BOOL(1);
+                }
+                let mut cloaked: u32 = 0;
+                if DwmGetWindowAttribute(
+                    hwnd,
+                    DWMWA_CLOAKED,
+                    (&raw mut cloaked).cast(),
+                    std::mem::size_of::<u32>() as u32,
+                )
+                .is_ok()
+                    && cloaked != 0
+                {
+                    return BOOL(1);
+                }
+                let len = GetWindowTextLengthW(hwnd);
+                if len <= 0 {
+                    return BOOL(1);
+                }
+                let mut buf = vec![0u16; (len as usize) + 1];
+                let copied = GetWindowTextW(hwnd, &mut buf);
+                if copied <= 0 {
+                    return BOOL(1);
+                }
+                let title = String::from_utf16_lossy(&buf[..copied as usize]).trim().to_owned();
+                if title.is_empty() {
+                    return BOOL(1);
+                }
+                if let Some(rect) = window_rect(hwnd.0 as isize)
+                    && (rect.right - rect.left) >= 64
+                    && (rect.bottom - rect.top) >= 64
+                {
+                    state.out.push((hwnd.0 as isize, title));
+                }
+            }
+            BOOL(1)
+        }
+
+        // SAFETY: `GetCurrentProcessId` and `EnumWindows` with stack-pinned `State`.
+        let mut state = State { self_pid: unsafe { GetCurrentProcessId() }, out: Vec::new() };
+        let _ = unsafe { EnumWindows(Some(enum_cb), LPARAM((&raw mut state) as isize)) };
+        state.out
+    }
+
+    /// Returns the bounding rectangle of `hwnd_val` in screen coordinates if the
+    /// window still exists and has non-zero area.
+    pub fn window_rect(hwnd_val: isize) -> Option<RECT> {
+        use windows::Win32::UI::WindowsAndMessaging::{GetWindowRect, IsWindow};
+        let hwnd = HWND(hwnd_val as *mut std::ffi::c_void);
+        // SAFETY: `IsWindow` and `GetWindowRect` validate the handle.
+        unsafe {
+            if !IsWindow(Some(hwnd)).as_bool() {
+                return None;
+            }
+            let mut rect = RECT::default();
+            if GetWindowRect(hwnd, &mut rect).is_ok() && rect.right > rect.left && rect.bottom > rect.top {
+                Some(rect)
+            } else {
+                None
+            }
+        }
+    }
+
+    /// Brings `hwnd_val` to the foreground so injected keyboard/mouse events
+    /// reach that window.
+    pub fn focus_window(hwnd_val: isize) {
+        use windows::Win32::UI::WindowsAndMessaging::{IsWindow, SetForegroundWindow};
+        let hwnd = HWND(hwnd_val as *mut std::ffi::c_void);
+        // SAFETY: `IsWindow` checks handle validity before `SetForegroundWindow`.
+        unsafe {
+            if IsWindow(Some(hwnd)).as_bool() {
+                let _ = SetForegroundWindow(hwnd);
+            }
+        }
+    }
+
     /// The window's latest picture of `crop` (in the window's own pixels,
     /// from its top-left), scaled to `dst_w` × `dst_h` into `bgra`. Without
     /// a new frame (nothing changed on screen), the last one again. False

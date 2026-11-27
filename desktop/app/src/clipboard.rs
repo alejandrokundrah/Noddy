@@ -364,6 +364,30 @@ pub fn on_event(event: &NodeEvent) {
         } else {
             None
         };
+        // Mesh unified clipboard pool: when one device sends a clip to this PC
+        // the core already lands it on the Windows clipboard via `Platform::set_clipboard`.
+        // Silently rebroadcast it to every other connected device that is capable.
+        if crate::settings::mesh_enabled() {
+            let sender = *device;
+            let others: Vec<DeviceId> = receivers().into_iter().filter(|&id| id != sender).collect();
+            if !others.is_empty() {
+                if let Some(node) = core_host::node() {
+                    let clip = crate::win::clipboard::read();
+                    core_host::spawn(async move {
+                        let Some(content) = Content::from_clip(clip).await else { return };
+                        for peer in others {
+                            if let Err(e) = content.send(&node, peer).await {
+                                tracing::debug!(
+                                    peer = %peer.short(),
+                                    error = %e,
+                                    "mesh clipboard rebroadcast skipped"
+                                );
+                            }
+                        }
+                    });
+                }
+            }
+        }
         if let Some(suggestion) = suggestion {
             let label = suggestion.action_label();
             *LAST_SUGGESTION.lock().unwrap_or_else(|e| e.into_inner()) = Some((*device, suggestion));
