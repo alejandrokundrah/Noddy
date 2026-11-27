@@ -31,6 +31,7 @@ mod logging;
 mod mark;
 mod media;
 mod media_file;
+mod mesh;
 mod messages;
 mod mirror;
 mod notification_store;
@@ -131,22 +132,25 @@ impl Platform for DesktopPlatform {
     ) -> Result<(), MediaError> {
         win::media_sessions::command(player, action, position)
     }
+    fn phone_apps(&self) -> Result<Vec<noddy_core::PhoneApp>, String> {
+        Ok(pc_mirror::list_app_windows())
+    }
     fn mirror_requested(&self, peer: &noddy_core::DeviceId, options: &MirrorStart) -> Result<(), String> {
-        if options.session != noddy_core::MIRROR_SCREEN {
+        if options.session != noddy_core::MIRROR_SCREEN && options.app.is_none() && !options.extended_display
+        {
             return Err("unsupported mirror session on PC".into());
         }
         pc_mirror::start(*peer, options.clone());
         Ok(())
     }
     fn mirror_stop_requested(&self, peer: &noddy_core::DeviceId, session: u32) {
-        if session == noddy_core::MIRROR_SCREEN {
-            pc_mirror::stop_for(peer);
-        }
+        pc_mirror::stop_session_for(peer, session);
     }
     fn mirror_keyframe_requested(&self, peer: &noddy_core::DeviceId, session: u32) {
-        if session == noddy_core::MIRROR_SCREEN {
-            pc_mirror::request_keyframe(peer);
-        }
+        pc_mirror::request_keyframe_for(peer, session);
+    }
+    fn mirror_resize_requested(&self, peer: &noddy_core::DeviceId, session: u32, width: u32, height: u32) {
+        pc_mirror::resize_session_for(peer, session, width, height);
     }
     fn mirror_input(&self, peer: &noddy_core::DeviceId, session: u32, input: MirrorInput) {
         pc_mirror::handle_input(peer, session, input);

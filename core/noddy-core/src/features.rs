@@ -633,6 +633,30 @@ pub const DESKTOP_PAIR_FEATURES: &[FeatureDef] = &[
         requires: &[peer("mirror.capture"), peer("input.desktop"), DeviceToggle("mirroring")],
         partial: None,
     },
+    // Opening the other computer's apps in their own windows.
+    FeatureDef {
+        id: "desktop.app_windows",
+        group: FeatureGroup::Input,
+        requires: &[
+            peer("mirror.virtual_display"),
+            peer("input.desktop"),
+            here("mirror.view"),
+            DeviceToggle("mirroring"),
+        ],
+        partial: None,
+    },
+    // Extending the other computer onto a virtual monitor (up to 4K H.265, with pen/tablet input).
+    FeatureDef {
+        id: "desktop.extended_display",
+        group: FeatureGroup::Input,
+        requires: &[
+            peer("mirror.extended_display"),
+            peer("input.desktop"),
+            here("mirror.view"),
+            DeviceToggle("mirroring"),
+        ],
+        partial: None,
+    },
     // Sending it files and folders.
     FeatureDef {
         id: "desktop.send_files",
@@ -1023,6 +1047,17 @@ pub const FEATURES: &[FeatureDef] = &[
             phone("mirror.sound", UPDATE),
             desktop("mirror.listen", UPDATE),
             DeviceToggle("mirroring"),
+        ],
+        partial: None,
+    },
+    // Extending this PC onto a phone or tablet as a second display (with pen/stylus input).
+    FeatureDef {
+        id: "mirroring.extended_display",
+        group: FeatureGroup::Mirroring,
+        requires: &[
+            desktop("mirror.extended_display", UPDATE),
+            phone("mirror.view", UPDATE),
+            DeviceToggle("pc_mirror"),
         ],
         partial: None,
     },
@@ -1455,6 +1490,45 @@ mod tests {
         let off = HashMap::from([("mirroring".to_owned(), false)]);
         assert!(matches!(
             matrix_with(&other, &pc(), &off).state("desktop.control"),
+            Some(FeatureState::Locked { .. })
+        ));
+    }
+
+    #[test]
+    fn two_computers_can_open_each_others_apps_in_windows() {
+        let mut other = pc();
+        other.caps.extend(["mirror.virtual_display", "input.desktop"].map(str::to_owned));
+        let mut here = pc();
+        here.caps.insert("mirror.view".to_owned());
+        let m = matrix_with(&other, &here, &HashMap::new());
+        assert_eq!(m.state("desktop.app_windows"), Some(FeatureState::Available));
+        let off = HashMap::from([("mirroring".to_owned(), false)]);
+        assert!(matches!(
+            matrix_with(&other, &here, &off).state("desktop.app_windows"),
+            Some(FeatureState::Locked { .. })
+        ));
+    }
+
+    #[test]
+    fn extended_display_works_for_computer_pairs_and_tablets() {
+        let mut host = pc();
+        host.caps.extend(["mirror.extended_display", "input.desktop"].map(str::to_owned));
+        let mut viewer = pc();
+        viewer.caps.insert("mirror.view".to_owned());
+        let m = matrix_with(&host, &viewer, &HashMap::new());
+        assert_eq!(m.state("desktop.extended_display"), Some(FeatureState::Available));
+
+        let mut tablet = facts(DeviceKind::Tablet, "android", "15", PowerLevel::Basic, &["mirror.view"]);
+        let m_locked = matrix_with(&tablet, &host, &HashMap::new());
+        assert!(matches!(m_locked.state("mirroring.extended_display"), Some(FeatureState::Locked { .. })));
+        let pc_mirror_on = HashMap::from([("pc_mirror".to_owned(), true)]);
+        assert_eq!(
+            matrix_with(&tablet, &host, &pc_mirror_on).state("mirroring.extended_display"),
+            Some(FeatureState::Available)
+        );
+        tablet.caps.clear();
+        assert!(matches!(
+            matrix_with(&tablet, &host, &pc_mirror_on).state("mirroring.extended_display"),
             Some(FeatureState::Locked { .. })
         ));
     }

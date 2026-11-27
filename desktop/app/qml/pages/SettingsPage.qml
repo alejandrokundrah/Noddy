@@ -24,7 +24,8 @@ Item {
         { id: "files_sync", title: qsTr("Files & Sync"), icon: Icons.folder, subtitle: qsTr("Folder sync, storage & recordings") },
         { id: "shortcuts", title: qsTr("Shortcuts & Rules"), icon: Icons.bolt, subtitle: qsTr("Hotkeys & automations") },
         { id: "storage", title: qsTr("Storage & Privacy"), icon: Icons.clipboardList, subtitle: qsTr("History, caches & retention") },
-        { id: "connection", title: qsTr("Connection & About"), icon: Icons.wifi, subtitle: qsTr("Doctor, Wake-on-LAN, API & version") }
+        { id: "connection", title: qsTr("Connection & About"), icon: Icons.wifi, subtitle: qsTr("Doctor, Wake-on-LAN, API & version") },
+        { id: "mesh", title: qsTr("Mesh"), icon: Icons.grid, subtitle: qsTr("One pointer, clipboard & notification pool") }
     ]
 
     // The languages the app speaks besides the system's ({ code, name }).
@@ -3128,6 +3129,252 @@ Item {
                             }
                         }
                     }
+                }
+            }
+
+            // ================================================================
+            // 10. MESH
+            // ================================================================
+            Column {
+                visible: page.currentSection === "mesh"
+                width: visible ? parent.width : 0
+                spacing: Theme.gutter
+
+                Card {
+                    width: parent.width
+                    Column {
+                        width: parent.width
+
+                        ListRow {
+                            width: parent.width
+                            iconPath: Icons.apps
+                            title: qsTr("Mesh")
+                            description: qsTr("One pointer, clipboard and notification pool across all your paired devices. Move the mouse to a screen edge to flow to the device on that side.")
+                            Toggle {
+                                label: qsTr("Enable Mesh")
+                                checked: Mesh.enabled
+                                onToggled: function(on) { Mesh.setMeshEnabled(on) }
+                            }
+                        }
+
+                        Divider { width: parent.width }
+
+                        ListRow {
+                            width: parent.width
+                            iconPath: Icons.desktop
+                            title: qsTr("Monitor layout")
+                            description: qsTr("Set which screen edge each device sits against so the cursor knows where to go.")
+                            Button {
+                                variant: "tonal"
+                                size: "sm"
+                                text: qsTr("Configure")
+                                onClicked: monitorMapSheet.open()
+                            }
+                        }
+
+                        Divider { width: parent.width }
+
+                        ListRow {
+                            width: parent.width
+                            iconPath: Icons.clipboardList
+                            title: qsTr("Unified clipboard")
+                            description: qsTr("Copying on any Mesh device automatically pushes the clip to all other connected devices.")
+                        }
+
+                        Divider { width: parent.width }
+
+                        ListRow {
+                            width: parent.width
+                            iconPath: Icons.bell
+                            title: qsTr("Unified notifications")
+                            description: qsTr("Notifications from all devices appear in one merged feed. Use the Timeline or Notifications page — select \"All devices\" — to see them together.")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // ── Monitor Map Sheet ────────────────────────────────────────────────────
+    Sheet {
+        id: monitorMapSheet
+        cardWidth: 520
+
+        readonly property var layoutArr: {
+            try { return JSON.parse(Mesh.layoutJson) } catch(e) { return [] }
+        }
+        readonly property var devicesArr: {
+            try { return JSON.parse(Mesh.pairedDevicesJson()) } catch(e) { return [] }
+        }
+
+        Column {
+            width: parent.width
+            spacing: Theme.gutter
+
+            Txt {
+                role: "title"
+                text: qsTr("Monitor layout")
+            }
+
+            Txt {
+                width: parent.width
+                wrapMode: Text.Wrap
+                text: qsTr("Assign each device to the edge where it sits relative to your PC monitor. Click an assigned chip to remove it.")
+                color: Theme.surfaceContentVariant
+                font.pixelSize: 13
+            }
+
+            // PC monitor diagram
+            Item {
+                width: parent.width
+                height: 240
+
+                Rectangle {
+                    id: pcMonitor
+                    anchors.centerIn: parent
+                    width: Math.min(parent.width - 140, 280)
+                    height: 150
+                    radius: Theme.radiusMd
+                    color: Theme.surfaceContainer
+                    border.color: Theme.outline
+                    border.width: 1
+
+                    Txt {
+                        anchors.centerIn: parent
+                        text: qsTr("This PC")
+                        font.pixelSize: 14
+                        font.bold: true
+                        color: Theme.surfaceContentVariant
+                    }
+
+                    Repeater {
+                        model: ["left", "right", "top", "bottom"]
+                        delegate: Item {
+                            required property string modelData
+                            readonly property string edge: modelData
+                            readonly property var assignedDevices: monitorMapSheet.layoutArr.filter(d => d.edge === edge)
+
+                            x: edge === "left"   ? -chipStrip.width - 6
+                             : edge === "right"  ? pcMonitor.width + 6
+                             : (pcMonitor.width - chipStrip.implicitWidth) / 2
+                            y: edge === "top"    ? -chipStrip.height - 6
+                             : edge === "bottom" ? pcMonitor.height + 6
+                             : (pcMonitor.height - chipStrip.implicitHeight) / 2
+
+                            Row {
+                                id: chipStrip
+                                spacing: 4
+
+                                Repeater {
+                                    model: assignedDevices
+                                    delegate: Rectangle {
+                                        required property var modelData
+                                        width: deviceLabel.implicitWidth + 16
+                                        height: 28
+                                        radius: 14
+                                        color: Theme.primaryContainer
+                                        border.color: Theme.primary
+                                        border.width: 1
+
+                                        Txt {
+                                            id: deviceLabel
+                                            anchors.centerIn: parent
+                                            text: {
+                                                const d = monitorMapSheet.devicesArr.find(x => x.id === parent.parent.modelData.deviceId)
+                                                return d ? d.name : parent.parent.modelData.deviceId.slice(0, 8)
+                                            }
+                                            font.pixelSize: 11
+                                            color: Theme.primaryContainerContent
+                                        }
+
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                const dId = parent.modelData.deviceId
+                                                const newLayout = monitorMapSheet.layoutArr.filter(x => x.deviceId !== dId)
+                                                Mesh.setMeshLayout(JSON.stringify(newLayout))
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Unassigned devices list — tap an edge button to assign
+            Repeater {
+                model: monitorMapSheet.devicesArr.filter(d => !monitorMapSheet.layoutArr.find(l => l.deviceId === d.id))
+                delegate: Item {
+                    required property var modelData
+                    readonly property var device: modelData
+                    width: parent.width
+                    height: row.implicitHeight
+
+                    Row {
+                        id: row
+                        width: parent.width
+                        spacing: 8
+
+                        Txt {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: device.name
+                            font.pixelSize: 14
+                            color: Theme.surfaceContent
+                            elide: Text.ElideRight
+                            width: Math.max(40, parent.width - edgePicker.implicitWidth - 8)
+                        }
+
+                        Row {
+                            id: edgePicker
+                            spacing: 4
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            Repeater {
+                                model: ["left", "right", "top", "bottom"]
+                                delegate: Button {
+                                    required property string modelData
+                                    readonly property string edgeChoice: modelData
+                                    variant: "outline"
+                                    size: "sm"
+                                    text: {
+                                        switch(edgeChoice) {
+                                        case "left":   return qsTr("←")
+                                        case "right":  return qsTr("→")
+                                        case "top":    return qsTr("↑")
+                                        case "bottom": return qsTr("↓")
+                                        }
+                                    }
+                                    onClicked: {
+                                        const existing = monitorMapSheet.layoutArr.filter(x => x.edge === edgeChoice)
+                                        const order = existing.length
+                                        const newLayout = [...monitorMapSheet.layoutArr,
+                                            { deviceId: device.id, edge: edgeChoice, order: order }]
+                                        Mesh.setMeshLayout(JSON.stringify(newLayout))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Row {
+                spacing: 8
+                Button {
+                    visible: monitorMapSheet.layoutArr.length > 0
+                    variant: "outline"
+                    size: "sm"
+                    text: qsTr("Clear layout")
+                    onClicked: Mesh.setMeshLayout("[]")
+                }
+                Button {
+                    variant: "tonal"
+                    size: "sm"
+                    text: qsTr("Done")
+                    onClicked: monitorMapSheet.close()
                 }
             }
         }

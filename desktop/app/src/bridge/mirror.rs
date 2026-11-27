@@ -60,6 +60,10 @@ pub mod qobject {
         #[qinvokable]
         #[cxx_name = "startApp"]
         fn start_app(self: &Mirror, device: &QString, pkg: &QString, label: &QString);
+        /// Opens a virtual extended display on a paired computer at a custom resolution.
+        #[qinvokable]
+        #[cxx_name = "startExtendedDisplay"]
+        fn start_extended_display(self: &Mirror, device: &QString, width: u32, height: u32);
         /// Reopens an ended window (the screen or an app window).
         #[qinvokable]
         fn reopen(self: &Mirror, key: &QString);
@@ -339,8 +343,14 @@ impl qobject::Mirror {
 
     pub fn start_app(&self, device: &QString, pkg: &QString, label: &QString) {
         let pkg = String::from(pkg);
-        if let (Some(device), true) = (super::parse_device(device), noddy_core::is_package_name(&pkg)) {
+        if let (Some(device), true) = (super::parse_device(device), noddy_core::is_app_id(&pkg)) {
             mirror::start_app(device, pkg, String::from(label));
+        }
+    }
+
+    pub fn start_extended_display(&self, device: &QString, width: u32, height: u32) {
+        if let Some(device) = super::parse_device(device) {
+            mirror::start_extended_display(device, width, height);
         }
     }
 

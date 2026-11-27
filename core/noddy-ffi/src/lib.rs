@@ -1045,6 +1045,25 @@ pub enum MirrorInputEvent {
         lt: u8,
         rt: u8,
     },
+    /// Stylus / pen / drawing tablet input.
+    Pen {
+        action: PenPhase,
+        x: f32,
+        y: f32,
+        pressure: f32,
+        tilt_x: i8,
+        tilt_y: i8,
+        barrel: bool,
+        eraser: bool,
+    },
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum PenPhase {
+    Hover,
+    Down,
+    Move,
+    Up,
 }
 
 pub type MirrorInput = MirrorInputEvent;
@@ -1058,6 +1077,7 @@ impl std::fmt::Debug for MirrorInputEvent {
             MirrorInputEvent::Scroll { .. } => f.write_str("Scroll"),
             MirrorInputEvent::Key { key } => write!(f, "Key({key})"),
             MirrorInputEvent::Gamepad { buttons, .. } => write!(f, "Gamepad({buttons:#06x})"),
+            MirrorInputEvent::Pen { action, .. } => write!(f, "Pen({action:?})"),
         }
     }
 }
@@ -1087,6 +1107,23 @@ impl From<core::MirrorInput> for MirrorInputEvent {
             core::MirrorInput::Gamepad { buttons, lx, ly, rx, ry, lt, rt } => {
                 MirrorInputEvent::Gamepad { buttons, lx, ly, rx, ry, lt, rt }
             }
+            core::MirrorInput::Pen { action, x, y, pressure, tilt_x, tilt_y, barrel, eraser } => {
+                MirrorInputEvent::Pen {
+                    action: match action {
+                        core::PenAction::Hover => PenPhase::Hover,
+                        core::PenAction::Down => PenPhase::Down,
+                        core::PenAction::Move => PenPhase::Move,
+                        core::PenAction::Up => PenPhase::Up,
+                    },
+                    x,
+                    y,
+                    pressure,
+                    tilt_x,
+                    tilt_y,
+                    barrel,
+                    eraser,
+                }
+            }
         }
     }
 }
@@ -1108,6 +1145,23 @@ impl From<MirrorInputEvent> for core::MirrorInput {
             MirrorInputEvent::Text { text } => core::MirrorInput::Text { text },
             MirrorInputEvent::Gamepad { buttons, lx, ly, rx, ry, lt, rt } => {
                 core::MirrorInput::Gamepad { buttons, lx, ly, rx, ry, lt, rt }
+            }
+            MirrorInputEvent::Pen { action, x, y, pressure, tilt_x, tilt_y, barrel, eraser } => {
+                core::MirrorInput::Pen {
+                    action: match action {
+                        PenPhase::Hover => core::PenAction::Hover,
+                        PenPhase::Down => core::PenAction::Down,
+                        PenPhase::Move => core::PenAction::Move,
+                        PenPhase::Up => core::PenAction::Up,
+                    },
+                    x,
+                    y,
+                    pressure,
+                    tilt_x,
+                    tilt_y,
+                    barrel,
+                    eraser,
+                }
             }
         }
     }
@@ -2450,6 +2504,7 @@ impl Event {
             | NodeEvent::CameraCaptureReceived { .. }
             | NodeEvent::CameraCaptureCancelled { .. }
             | NodeEvent::PcMirrorRequested { .. }
+            | NodeEvent::ApkInstall { .. }
             // A phone's microphone arrives on PCs only.
             | NodeEvent::Mic { .. } => return None,
             NodeEvent::RemoteInputRequested { device } => {
@@ -4054,6 +4109,9 @@ impl NoddyNode {
             screen_off: false,
             watch,
             sound_only: false,
+            extended_display: false,
+            width: None,
+            height: None,
         };
         self.run(async move { Ok(node.mirror_start(id, options).await?) }).await
     }

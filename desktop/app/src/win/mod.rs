@@ -33,6 +33,7 @@ pub mod sound;
 pub mod toast;
 pub mod tray;
 pub mod vcam;
+pub mod virtual_display;
 pub mod wallpaper;
 pub mod widget;
 pub mod wifi;

@@ -12,6 +12,55 @@ use serde::{Deserialize, Serialize};
 
 const FILE_NAME: &str = "desktop-settings.json";
 
+/// Which edge of the PC monitor a mesh device sits against.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum MeshEdge {
+    Left,
+    Right,
+    Top,
+    Bottom,
+}
+
+/// Position of one paired device in the Mesh monitor layout.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MeshDeviceLayout {
+    /// Device ID as a hex string.
+    pub device_id: String,
+    /// Which edge of the PC monitor this device sits against.
+    pub edge: MeshEdge,
+    /// Tie-breaking order when multiple devices share the same edge (0 = first).
+    pub order: u32,
+}
+
+static MESH_ENABLED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+static MESH_LAYOUT: std::sync::Mutex<Option<Vec<MeshDeviceLayout>>> = std::sync::Mutex::new(None);
+
+/// Whether the Mesh unified-pointer/clipboard/notification feature is active.
+pub fn mesh_enabled() -> bool {
+    MESH_ENABLED.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+pub fn set_mesh_enabled(on: bool) {
+    MESH_ENABLED.store(on, std::sync::atomic::Ordering::Relaxed);
+    if on {
+        crate::mesh::start_monitoring();
+    } else {
+        crate::mesh::stop_monitoring();
+    }
+}
+
+/// Current monitor-layout for the Mesh feature.
+pub fn mesh_layout() -> Vec<MeshDeviceLayout> {
+    MESH_LAYOUT.lock().unwrap_or_else(|e| e.into_inner()).clone().unwrap_or_default()
+}
+
+pub fn set_mesh_layout(layout: Vec<MeshDeviceLayout>) {
+    *MESH_LAYOUT.lock().unwrap_or_else(|e| e.into_inner()) = Some(layout.clone());
+    crate::mesh::update_layout(layout);
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum Theme {
@@ -580,6 +629,12 @@ pub struct Settings {
     /// Whether the main window was maximized when last open.
     #[serde(default, alias = "window_maximized")]
     pub window_maximized: bool,
+    /// Whether the Mesh unified-pointer/clipboard/notification feature is active.
+    #[serde(default, alias = "mesh_enabled")]
+    pub mesh_enabled: bool,
+    /// Monitor-layout positions for connected devices in Mesh mode.
+    #[serde(default, skip_serializing_if = "Vec::is_empty", alias = "mesh_layout")]
+    pub mesh_layout: Vec<MeshDeviceLayout>,
 }
 
 impl Default for Settings {
@@ -647,6 +702,8 @@ impl Default for Settings {
             window_width: DEFAULT_WINDOW_WIDTH,
             window_height: DEFAULT_WINDOW_HEIGHT,
             window_maximized: false,
+            mesh_enabled: false,
+            mesh_layout: Vec::new(),
         }
     }
 }
@@ -713,6 +770,11 @@ impl Settings {
             self.window_height,
             self.window_maximized,
         );
+        // Mesh: initialise in-memory layout without starting the monitor (the
+        // mesh module starts it once the node is ready, if mesh_enabled is set).
+        *MESH_LAYOUT.lock().unwrap_or_else(|e| e.into_inner()) = Some(self.mesh_layout.clone());
+        MESH_ENABLED.store(self.mesh_enabled, std::sync::atomic::Ordering::Relaxed);
+        crate::mesh::update_layout(self.mesh_layout.clone());
     }
 
     /// Loads the settings, falling back to defaults if the file is missing.
@@ -885,6 +947,12 @@ mod tests {
             window_width: 1280,
             window_height: 820,
             window_maximized: true,
+            mesh_enabled: true,
+            mesh_layout: vec![MeshDeviceLayout {
+                device_id: "aabb".repeat(8),
+                edge: MeshEdge::Right,
+                order: 0,
+            }],
         };
         settings.save(dir.path()).unwrap();
         assert_eq!(Settings::load(dir.path()), settings);

@@ -1347,6 +1347,16 @@ Item {
                 ActionTile {
                     width: actions.tileWidth
                     deviceOnline: home.online
+                    visible: !home.isComputer
+                    title: qsTr("Install APK")
+                    subtitle: ""
+                    iconPath: Icons.download
+                    feature: ({ state: "available" })
+                    onClicked: apkFilePicker.open()
+                }
+                ActionTile {
+                    width: actions.tileWidth
+                    deviceOnline: home.online
                     queueableWhenOffline: true
                     title: qsTr("Send clipboard")
                     subtitle: ""
@@ -1390,6 +1400,32 @@ Item {
                         }
                     }
                     onClicked: Mirror.start(home.deviceId)
+                    sideIcon: home.feature("desktop.app_windows").state === "available" ? Icons.apps : ""
+                    sideLabel: qsTr("Open an app")
+                    onSideClicked: appsSheet.openFor(home.deviceId, home.name)
+                }
+                ActionTile {
+                    width: actions.tileWidth
+                    deviceOnline: home.online
+                    visible: home.isComputer
+                    title: qsTr("Extended display")
+                    subtitle: qsTr("Up to 4K H.265")
+                    iconPath: Icons.mirror
+                    feature: home.feature("desktop.extended_display")
+                    onClicked: extendedDisplaySheet.openFor(home.deviceId, home.name)
+                }
+                ActionTile {
+                    width: actions.tileWidth
+                    deviceOnline: home.online
+                    title: qsTr("Mesh")
+                    subtitle: Mesh.enabled ? qsTr("Active") : qsTr("Off")
+                    iconPath: Icons.apps
+                    stateful: true
+                    active: Mesh.enabled
+                    onClicked: {
+                        AppController.currentPage = "settings"
+                        AppController.highlightTarget = "settings:mesh"
+                    }
                 }
                 ActionTile {
                     width: actions.tileWidth
@@ -1456,6 +1492,13 @@ Item {
                 title: qsTr("Hand off & open on %1").arg(home.name)
                 fileMode: FileDialog.OpenFile
                 onAccepted: TransferList.sendHandoff(home.deviceId, [selectedFile.toString()])
+            }
+            FileDialog {
+                id: apkFilePicker
+                title: qsTr("Install APK on %1").arg(home.name)
+                fileMode: FileDialog.OpenFile
+                nameFilters: [qsTr("Android packages (*.apk)"), qsTr("All files (*)")]
+                onAccepted: AppController.installApk(home.deviceId, selectedFile.toString())
             }
             Connections {
                 target: AppController
@@ -2825,6 +2868,130 @@ Item {
     // Notifications from the last day that are gone from the phone.
     AppsSheet {
         id: appsSheet
+    }
+
+    Sheet {
+        id: extendedDisplaySheet
+        property string deviceId
+        property string deviceName
+        property int customWidth: 2560
+        property int customHeight: 1440
+        cardWidth: 460
+
+        function openFor(device, name) {
+            deviceId = device
+            deviceName = name
+            widthInput.text = String(customWidth)
+            heightInput.text = String(customHeight)
+            open()
+        }
+
+        function launch(w, h) {
+            Mirror.startExtendedDisplay(deviceId, w, h)
+            close()
+        }
+
+        Column {
+            width: parent.width
+            spacing: 14
+            Txt {
+                width: parent.width
+                text: qsTr("Extended display on %1").arg(extendedDisplaySheet.deviceName)
+                role: "headline"
+                elide: Text.ElideRight
+            }
+            Txt {
+                width: parent.width
+                role: "body"
+                muted: true
+                wrapMode: Text.WordWrap
+                text: qsTr("Create a virtual extended monitor (up to 4K H.265) with mouse, keyboard, and pen/tablet input.")
+            }
+            Column {
+                width: parent.width
+                spacing: 8
+                Button {
+                    width: parent.width
+                    text: qsTr("1920 × 1080 (Full HD)")
+                    onClicked: extendedDisplaySheet.launch(1920, 1080)
+                }
+                Button {
+                    width: parent.width
+                    text: qsTr("2560 × 1440 (QHD)")
+                    onClicked: extendedDisplaySheet.launch(2560, 1440)
+                }
+                Button {
+                    width: parent.width
+                    primary: true
+                    text: qsTr("3840 × 2160 (4K H.265)")
+                    onClicked: extendedDisplaySheet.launch(3840, 2160)
+                }
+            }
+            Divider { width: parent.width }
+            Txt {
+                width: parent.width
+                text: qsTr("Custom size")
+                role: "title"
+            }
+            Row {
+                width: parent.width
+                spacing: 8
+                Rectangle {
+                    width: (parent.width - 104) / 2
+                    height: 36
+                    radius: Theme.radiusSm
+                    color: Theme.surfaceContainerHighest
+                    border.width: widthInput.activeFocus ? 2 : 1
+                    border.color: widthInput.activeFocus ? Theme.primary : Theme.outlineVariant
+                    TextInput {
+                        id: widthInput
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        verticalAlignment: TextInput.AlignVCenter
+                        font.family: Theme.fontUi
+                        font.pixelSize: 13
+                        color: Theme.surfaceContent
+                        validator: IntValidator { bottom: 320; top: 3840 }
+                    }
+                }
+                Txt {
+                    height: 36
+                    verticalAlignment: Text.AlignVCenter
+                    text: "×"
+                    role: "body"
+                    muted: true
+                }
+                Rectangle {
+                    width: (parent.width - 104) / 2
+                    height: 36
+                    radius: Theme.radiusSm
+                    color: Theme.surfaceContainerHighest
+                    border.width: heightInput.activeFocus ? 2 : 1
+                    border.color: heightInput.activeFocus ? Theme.primary : Theme.outlineVariant
+                    TextInput {
+                        id: heightInput
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        verticalAlignment: TextInput.AlignVCenter
+                        font.family: Theme.fontUi
+                        font.pixelSize: 13
+                        color: Theme.surfaceContent
+                        validator: IntValidator { bottom: 240; top: 2160 }
+                    }
+                }
+                Button {
+                    width: 80
+                    text: qsTr("Open")
+                    onClicked: {
+                        const w = parseInt(widthInput.text) || 1920
+                        const h = parseInt(heightInput.text) || 1080
+                        extendedDisplaySheet.customWidth = Math.max(320, Math.min(3840, w))
+                        extendedDisplaySheet.customHeight = Math.max(240, Math.min(2160, h))
+                        extendedDisplaySheet.launch(extendedDisplaySheet.customWidth, extendedDisplaySheet.customHeight)
+                    }
+                }
+            }
+        }
     }
 
     RemoteFilesSheet {

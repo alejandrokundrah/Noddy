@@ -277,4 +277,10 @@ pub enum NodeEvent {
         peer_name: String,
         dropped_count: u32,
     },
+    /// Progress or outcome of installing an APK on a USB-connected phone.
+    ApkInstall {
+        device: DeviceId,
+        path: PathBuf,
+        state: crate::ApkInstallState,
+    },
 }

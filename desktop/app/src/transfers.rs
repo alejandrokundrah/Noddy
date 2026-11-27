@@ -46,6 +46,21 @@ pub fn send_handoff(device: DeviceId, paths: Vec<PathBuf>) {
     send_with_mode(device, paths, true);
 }
 
+/// Installs an `.apk` file on a USB-connected phone via ADB.
+pub fn install_apk(device: DeviceId, path: PathBuf) {
+    let Some(node) = core_host::node() else { return };
+    core_host::spawn(async move {
+        match node.install_apk(device, path).await {
+            Ok(()) => {}
+            Err(Error::Unsupported) => show_message(tr!(
+                "Transfers",
+                "Connect this phone over USB with USB debugging enabled to install APKs."
+            )),
+            Err(e) => show_message(describe(&e)),
+        }
+    });
+}
+
 fn send_with_mode(device: DeviceId, paths: Vec<PathBuf>, handoff: bool) {
     let Some(node) = core_host::node() else { return };
     core_host::spawn(async move {
@@ -253,6 +268,23 @@ pub fn show_in_folder(path: &Path) {
 
 /// A Windows notification when files from a phone or LocalSend peer are requested or saved.
 pub fn on_event(event: &NodeEvent) {
+    if let NodeEvent::ApkInstall { device, path, state } = event {
+        let file_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("app.apk");
+        let device_name =
+            core_host::host().hub.read(|s| s.name_of(device)).unwrap_or_else(|| tr!("Transfers", "Phone"));
+        match state {
+            noddy_core::ApkInstallState::Installing => {
+                show_message(tr!("Transfers", "Installing %1 on %2…", file_name, device_name));
+            }
+            noddy_core::ApkInstallState::Done { .. } => {
+                show_message(tr!("Transfers", "Installed %1 on %2.", file_name, device_name));
+            }
+            noddy_core::ApkInstallState::Failed { reason } => {
+                show_message(tr!("Transfers", "Couldn't install %1: %2", file_name, reason));
+            }
+        }
+        return;
+    }
     let NodeEvent::Transfer(t) = event else { return };
     // Photos the user asked to open or copy say nothing about being saved.
     if t.direction != Direction::Incoming || crate::photos::handles(&t.id) || crate::photo_backup::claims(t) {

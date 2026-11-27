@@ -176,7 +176,7 @@ pub(crate) async fn apps(shared: &Shared, session: &Session) -> Result<Vec<Phone
     let env = Envelope::empty(types::MIRROR_APPS);
     let PhoneApps { mut apps } =
         session.request(env, crate::session::REQUEST_TIMEOUT).await?.expect_body(types::MIRROR_APPS)?;
-    apps.retain(|a| noddy_protocol::messages::is_package_name(&a.pkg));
+    apps.retain(|a| noddy_protocol::messages::is_app_id(&a.pkg));
     apps.truncate(mirror::MAX_APPS);
     for app in &mut apps {
         app.label = app.label.chars().take(100).collect();
@@ -337,6 +337,8 @@ pub(crate) async fn handle(shared: &Arc<Shared>, session: &Arc<Session>, env: &E
             let desktop = is_local_desktop(shared);
             let needs = if options.sound_only {
                 mirror::SOUND
+            } else if options.extended_display {
+                mirror::EXTENDED_DISPLAY
             } else if options.app.is_some() {
                 mirror::VIRTUAL_DISPLAY
             } else if desktop && options.watch.is_some() {
@@ -356,7 +358,7 @@ pub(crate) async fn handle(shared: &Arc<Shared>, session: &Arc<Session>, env: &E
             let reply = if !options.is_valid() {
                 Envelope::error(ErrorCode::BadMessage, "invalid mirroring options")
             } else if !allowed {
-                if desktop && options.app.is_none() && options.watch.is_none() {
+                if desktop && options.watch.is_none() {
                     shared.emit(NodeEvent::PcMirrorRequested { device: peer, options: options.clone() });
                 }
                 Envelope::error(ErrorCode::Denied, "mirroring is off for this device")
@@ -400,7 +402,13 @@ pub(crate) async fn handle(shared: &Arc<Shared>, session: &Arc<Session>, env: &E
         }
         types::MIRROR_RESIZE => {
             let resize: MirrorResize = env.body()?;
-            let allowed = shared.toggle_on(&peer, TOGGLE) && shared.we_offer(mirror::VIRTUAL_DISPLAY);
+            let mirror_on = if is_local_desktop(shared) {
+                pc_mirror_allowed(shared, &peer)
+            } else {
+                shared.toggle_on(&peer, TOGGLE)
+            };
+            let allowed = mirror_on
+                && (shared.we_offer(mirror::VIRTUAL_DISPLAY) || shared.we_offer(mirror::EXTENDED_DISPLAY));
             if allowed && resize.is_valid() {
                 tokio::task::spawn_blocking(move || {
                     platform.mirror_resize_requested(&peer, resize.session, resize.width, resize.height);
@@ -419,13 +427,19 @@ pub(crate) async fn handle(shared: &Arc<Shared>, session: &Arc<Session>, env: &E
         types::MIRROR_INPUT => {
             let input: MirrorInput = env.body()?;
             let MirrorSession { session: mirroring } = env.body()?;
-            // App windows take input as they're Elevated; the screen, with mirror.input.
-            let needs = if mirroring == mirror::SCREEN { mirror::INPUT } else { mirror::VIRTUAL_DISPLAY };
+            // App windows and extended displays take input on non-screen sessions; the screen uses mirror.input.
+            let _ = mirroring == mirror::SCREEN;
             let desktop = is_local_desktop(shared);
             let mirror_on =
                 if desktop { pc_mirror_allowed(shared, &peer) } else { shared.toggle_on(&peer, TOGGLE) };
             let remote_input_on = !desktop || shared.toggle_on(&peer, crate::remote::TOGGLE);
-            let has_cap = shared.we_offer(needs);
+            let has_cap = if matches!(input, MirrorInput::Pen { .. }) {
+                shared.we_offer(mirror::PEN) || shared.we_offer(mirror::EXTENDED_DISPLAY)
+            } else if mirroring == mirror::SCREEN {
+                shared.we_offer(mirror::INPUT)
+            } else {
+                shared.we_offer(mirror::VIRTUAL_DISPLAY) || shared.we_offer(mirror::EXTENDED_DISPLAY)
+            };
             let allowed = mirror_on && remote_input_on && has_cap;
             if allowed && input.is_valid() {
                 platform.mirror_input(&peer, mirroring, input);
@@ -470,7 +484,7 @@ pub(crate) async fn handle(shared: &Arc<Shared>, session: &Arc<Session>, env: &E
 /// Apps within the limits: at most [`mirror::MAX_APPS`], icons small and
 /// within [`ICONS_BUDGET`] all together.
 fn fit_apps(mut apps: Vec<PhoneApp>) -> Vec<PhoneApp> {
-    apps.retain(|a| noddy_protocol::messages::is_package_name(&a.pkg));
+    apps.retain(|a| noddy_protocol::messages::is_app_id(&a.pkg));
     apps.truncate(mirror::MAX_APPS);
     let mut budget = ICONS_BUDGET;
     for app in &mut apps {
