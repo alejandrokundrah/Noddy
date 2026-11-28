@@ -102,6 +102,8 @@ impl qobject::Mesh {
                         "id": d.id.to_string(),
                         "name": name,
                         "online": matches!(d.link, noddy_core::LinkState::Online { .. }),
+                        // Only computers can take the pointer (crate::mesh).
+                        "computer": matches!(d.info.kind, noddy_core::DeviceKind::Desktop | noddy_core::DeviceKind::Laptop),
                     })
                 })
                 .collect::<Vec<_>>()

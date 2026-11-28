@@ -2,8 +2,8 @@
 //! Which paired device the PC is controlling (a mirror window the mouse is in,
 //! or a remote control session), and the clipboard following along: with
 //! `flow_follow_clipboard` on, the PC's clipboard goes to the device when
-//! control moves to it. Moving the cursor across a screen edge onto the phone
-//! (`ScreenEdge`) is planned, not built.
+//! control moves to it. Moving the pointer across a screen edge onto another
+//! computer is `crate::mesh`, which calls `enter_remote` / `leave_remote`.
 
 use std::sync::{
     Mutex, OnceLock,

@@ -36,6 +36,17 @@ change things that need a step from you, and its notes say so.
 
 ### New
 
+- **Mesh moves your mouse and keyboard to the computer next to you (Windows).**
+  Turning on Mesh used to only watch the screen edges: the pointer never left
+  this computer. Now pushing the pointer against an edge assigned in
+  **Settings › Mesh › Monitor layout** hands this computer's mouse, wheel and
+  keyboard to that computer, and moving back across the edge (or pressing
+  **Ctrl+Alt+M**) brings them back. Keys and buttons held over there are let
+  go when they return. The other computer must allow remote control from this
+  one, as for Control PC (it asks the first time). Phones can't take a mouse
+  and keyboard, so the layout lists computers only. A computer that went
+  offline for a moment no longer drops out of the layout.
+
 - **Share a computer's camera, microphone, sound and notifications with
   another computer.** Use a paired computer's camera as a webcam, its
   microphone, its sound, and see its notifications, using the messages phones
