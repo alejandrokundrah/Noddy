@@ -205,8 +205,14 @@ mod tests {
     use super::*;
     use crate::settings::{MeshDeviceLayout, MeshEdge};
 
+    /// A device ID in the form the layout stores it: the 52-character
+    /// z-base-32 text of a real `DeviceId` (not hex, which never parses).
+    fn id_text(fill: u8) -> String {
+        DeviceId([fill; 32]).to_string()
+    }
+
     fn layout_with(edge: MeshEdge) -> Vec<MeshDeviceLayout> {
-        vec![MeshDeviceLayout { device_id: "aa".repeat(16), edge, order: 0 }]
+        vec![MeshDeviceLayout { device_id: id_text(0xaa), edge, order: 0 }]
     }
 
     #[test]
@@ -220,8 +226,8 @@ mod tests {
 
     #[test]
     fn device_on_edge_picks_lowest_order_when_multiple_on_same_edge() {
-        let id_first = "aa".repeat(16);
-        let id_second = "bb".repeat(16);
+        let id_first = id_text(0xaa);
+        let id_second = id_text(0xbb);
         let layout = vec![
             MeshDeviceLayout { device_id: id_second.clone(), edge: MeshEdge::Right, order: 1 },
             MeshDeviceLayout { device_id: id_first.clone(), edge: MeshEdge::Right, order: 0 },
