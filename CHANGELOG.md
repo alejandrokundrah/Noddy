@@ -6,6 +6,12 @@ change things that need a step from you, and its notes say so.
 
 ## 0.1.6
 
+### New
+
+- **Files follow Mesh.** Files you copied are sent to the computer your pointer
+  crosses to, and Ctrl+Alt+V sends what you copied (files, text or a picture)
+  to the computer that has the pointer or the first one in your layout.
+
 ### Fixed
 
 - **NSIS PATH refresh in GitHub Actions.** Fixed the Windows ARM64 build by

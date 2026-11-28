@@ -81,6 +81,22 @@ You can browse your phone's internal storage or selected folders directly inside
 2. If you want to browse PC files while away from home over mobile data (**Connect over mobile data**), also turn on **Remote PC file access** (`remote_files`) for that phone in **Settings › Devices**.
 3. On your phone, tap **PC files** on the Home screen to browse your PC's shared folders (`Downloads`, `Documents`, `Desktop`, `Pictures`, and `Noddy Shared`), download files to your phone on demand, or upload files from your phone to a PC folder.
 
+### Sending Files to a Computer Next to This One (Mesh)
+
+With Mesh on (Settings › Mesh) and a computer placed against a screen edge:
+
+- **Copy, then cross the edge.** Copy files in File Explorer, then push the
+  pointer across the edge to the other computer. The files are sent with it,
+  once, and put on its clipboard, so Ctrl+V there pastes them. Turn this off with
+  "Clipboard follows the pointer".
+- **Ctrl+Alt+V.** Sends what you copied (files, text or a picture) to the
+  computer that has the pointer, or else the first computer in your Mesh layout,
+  without moving the pointer.
+
+Both work between computers; a phone gets text and pictures from the clipboard.
+Dragging a file with the mouse button held across the edge isn't supported yet:
+copy it first.
+
 ### Browsing Another Computer's Files
 
 Two paired computers can look at each other's shared folders and download from them. Nothing is shared until its owner allows it.

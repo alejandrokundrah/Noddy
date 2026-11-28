@@ -342,6 +342,39 @@ pub fn send_history_item(device: DeviceId, id: &str) {
     });
 }
 
+/// The files last sent along with the pointer, and to whom.
+static FOLLOWED: Mutex<Option<(DeviceId, Vec<std::path::PathBuf>)>> = Mutex::new(None);
+
+/// Whether `files` are new for `peer`: not the ones just sent to it with the
+/// pointer (crossing back and forth must not send them again).
+fn is_new_for(
+    last: Option<&(DeviceId, Vec<std::path::PathBuf>)>,
+    peer: DeviceId,
+    files: &[std::path::PathBuf],
+) -> bool {
+    last.is_none_or(|(to, sent)| *to != peer || sent.as_slice() != files)
+}
+
+/// The pointer crossed to the computer `peer`: files copied here (in Explorer
+/// or a file manager) go with it, so pasting over there pastes them. Only for
+/// computers, and once for each set of files.
+pub fn send_files_following(peer: DeviceId) {
+    if !crate::pc_sharing::peer_is_computer(&peer) {
+        return;
+    }
+    let Some(files) = clipboard::read_files() else { return };
+    {
+        let mut last = FOLLOWED.lock().unwrap_or_else(|e| e.into_inner());
+        if !is_new_for(last.as_ref(), peer, &files) {
+            return;
+        }
+        *last = Some((peer, files.clone()));
+    }
+    let name = crate::pc_sharing::name_of(&peer);
+    crate::transfers::send(peer, files);
+    show_message(tr!("Clipboard", "Sending copied files to %1…", name));
+}
+
 /// Places received file paths onto the Windows clipboard (`CF_HDROP`) when
 /// `clipboard_auto_copy_received_files` is enabled, so the user can immediately
 /// press `Ctrl+V` in File Explorer or any desktop app to paste them.
@@ -350,6 +383,25 @@ pub fn copy_received_files_to_clipboard(paths: &[std::path::PathBuf]) -> bool {
         return false;
     }
     clipboard::write_files(paths)
+}
+
+#[cfg(test)]
+mod follow_tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    #[test]
+    fn copied_files_follow_the_pointer_once() {
+        let (a, b) = (DeviceId([1; 32]), DeviceId([2; 32]));
+        let files = vec![PathBuf::from("/x/one.txt"), PathBuf::from("/x/two.txt")];
+        assert!(is_new_for(None, a, &files));
+        let sent = Some((a, files.clone()));
+        // Crossing back to the same computer with the same files sends nothing.
+        assert!(!is_new_for(sent.as_ref(), a, &files));
+        // Another computer, or other files, are new.
+        assert!(is_new_for(sent.as_ref(), b, &files));
+        assert!(is_new_for(sent.as_ref(), a, &files[..1]));
+    }
 }
 
 /// Feedback for clipboard events.

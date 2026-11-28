@@ -63,6 +63,8 @@ pub fn enter_remote_with_setting(peer: DeviceId, follow_clipboard: bool) -> bool
         CLIPBOARD_SYNC_COUNT.fetch_add(1, Ordering::SeqCst);
         if core_host::node().is_some() {
             crate::mirror::sync_clipboard_for_device(peer);
+            // Copied files go along too (to computers; phones take text and pictures).
+            crate::clipboard::send_files_following(peer);
         }
         true
     } else {

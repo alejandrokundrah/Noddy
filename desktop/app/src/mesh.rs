@@ -15,7 +15,10 @@
 //! keyboard. Capturing this computer's mouse and keyboard is Windows only so far.
 //! The clipboard and notifications are shared by `clipboard::on_event` and the
 //! "All devices" notification list; the clipboard also follows the pointer
-//! (`input_share::enter_remote`).
+//! (`input_share::enter_remote`), files you copied included: they are sent to
+//! the computer the pointer crosses to. Ctrl+Alt+V sends what you copied (files,
+//! text or a picture) to the computer that has the pointer, or the first one in
+//! the layout.
 
 // Capturing the mouse and keyboard is Windows only so far; elsewhere the
 // pointer logic is built (and tested) but nothing drives it.
@@ -59,6 +62,40 @@ fn devices_on_edge(layout: &[MeshDeviceLayout], edge: ScreenEdge) -> Vec<DeviceI
     let mut on_edge: Vec<&MeshDeviceLayout> = layout.iter().filter(|d| d.edge == target).collect();
     on_edge.sort_by_key(|d| d.order);
     on_edge.iter().filter_map(|d| d.device_id.parse().ok()).collect()
+}
+
+/// The computer a copy/paste hotkey sends to when the pointer is here: the
+/// first in the layout (lowest `order`, then Left, Right, Top, Bottom).
+fn default_target(layout: &[MeshDeviceLayout]) -> Option<DeviceId> {
+    let rank = |edge: MeshEdge| match edge {
+        MeshEdge::Left => 0,
+        MeshEdge::Right => 1,
+        MeshEdge::Top => 2,
+        MeshEdge::Bottom => 3,
+    };
+    layout
+        .iter()
+        .filter_map(|d| Some(((d.order, rank(d.edge)), d.device_id.parse::<DeviceId>().ok()?)))
+        .min_by_key(|(key, _)| *key)
+        .map(|(_, id)| id)
+}
+
+/// Ctrl+Alt+V: sends what is copied on this computer (files, text or a
+/// picture) to the computer that has the pointer, or else to the first one in
+/// the layout. The files land in its Noddy folder and are put on its clipboard,
+/// ready to paste.
+pub fn send_copied() {
+    let target = away_at().or_else(|| default_target(&LAYOUT.lock().unwrap_or_else(|e| e.into_inner())));
+    match target {
+        // Off the hook's thread: this reads the clipboard and the device list.
+        Some(peer) => {
+            std::thread::spawn(move || crate::clipboard::send_now(peer));
+        }
+        None => crate::bridge::app::show_message(crate::i18n::tr!(
+            "Mesh",
+            "Put a computer next to this screen in Settings › Mesh to send it what you copied."
+        )),
+    }
 }
 
 // ── Who can take the pointer ────────────────────────────────────────────────
@@ -424,6 +461,8 @@ mod hook {
     static THREAD: AtomicU32 = AtomicU32::new(0);
     /// The M key, for Ctrl+Alt+M.
     const VK_M: u32 = 0x4D;
+    /// The V key, for Ctrl+Alt+V.
+    const VK_V: u32 = 0x56;
     /// The most wheel notches sent at once.
     const MAX_NOTCHES: f32 = 50.0;
 
@@ -618,11 +657,18 @@ mod hook {
         if info.flags.0 & LLKHF_INJECTED.0 != 0 {
             return pass(code, wparam, lparam);
         }
+        let message = wparam.0 as u32;
+        let down = message == WM_KEYDOWN || message == WM_SYSKEYDOWN;
+        // Ctrl+Alt+V sends what is copied to the other computer, from here or there.
+        if info.vkCode == VK_V && held(VK_CONTROL) && held(VK_MENU) {
+            if down {
+                super::send_copied();
+            }
+            return TAKEN;
+        }
         let Some(peer) = flow().away.map(|a| a.peer) else {
             return pass(code, wparam, lparam);
         };
-        let message = wparam.0 as u32;
-        let down = message == WM_KEYDOWN || message == WM_SYSKEYDOWN;
         // Ctrl+Alt+M brings the pointer back from anywhere.
         if down && info.vkCode == VK_M && held(VK_CONTROL) && held(VK_MENU) {
             super::come_back(None);
@@ -721,6 +767,19 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn the_hotkey_sends_to_the_lowest_order_computer_then_the_first_edge() {
+        let layout = vec![
+            MeshDeviceLayout { device_id: id_text(3), edge: MeshEdge::Top, order: 1 },
+            MeshDeviceLayout { device_id: id_text(2), edge: MeshEdge::Right, order: 0 },
+            MeshDeviceLayout { device_id: id_text(1), edge: MeshEdge::Left, order: 0 },
+        ];
+        // Order 0 on the Left comes before order 0 on the Right.
+        assert_eq!(default_target(&layout), Some(DeviceId([1; 32])));
+        assert_eq!(default_target(&layout[..2]), Some(DeviceId([2; 32])));
+        assert_eq!(default_target(&[]), None);
     }
 
     #[test]
