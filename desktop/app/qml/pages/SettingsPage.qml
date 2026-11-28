@@ -3149,7 +3149,9 @@ Item {
                             width: parent.width
                             iconPath: Icons.apps
                             title: qsTr("Mesh")
-                            description: qsTr("One pointer, clipboard and notification pool across all your paired devices. Move the mouse to a screen edge to flow to the device on that side.")
+                            description: Qt.platform.os === "windows"
+                                ? qsTr("One mouse and keyboard for your computers. Push the pointer against a screen edge to move to the computer on that side; move back, or press Ctrl+Alt+M, to return. The other computer must allow remote control from this one.")
+                                : qsTr("Moving the pointer to another computer works from Windows so far. The clipboard and notifications are shared here too.")
                             Toggle {
                                 label: qsTr("Enable Mesh")
                                 checked: Mesh.enabled
@@ -3163,7 +3165,7 @@ Item {
                             width: parent.width
                             iconPath: Icons.desktop
                             title: qsTr("Monitor layout")
-                            description: qsTr("Set which screen edge each device sits against so the cursor knows where to go.")
+                            description: qsTr("Set which screen edge each computer sits against so the pointer knows where to go.")
                             Button {
                                 variant: "tonal"
                                 size: "sm"
@@ -3219,7 +3221,7 @@ Item {
             Txt {
                 width: parent.width
                 wrapMode: Text.Wrap
-                text: qsTr("Assign each device to the edge where it sits relative to your PC monitor. Click an assigned chip to remove it.")
+                text: qsTr("Assign each computer to the edge where it sits relative to this screen. Click an assigned chip to remove it. Phones can't take a mouse and keyboard, so they aren't listed.")
                 color: Theme.surfaceContentVariant
                 font.pixelSize: 13
             }
@@ -3306,7 +3308,8 @@ Item {
 
             // Unassigned devices list — tap an edge button to assign
             Repeater {
-                model: monitorMapSheet.devicesArr.filter(d => !monitorMapSheet.layoutArr.find(l => l.deviceId === d.id))
+                model: monitorMapSheet.devicesArr.filter(d => d.computer !== false
+                                                          && !monitorMapSheet.layoutArr.find(l => l.deviceId === d.id))
                 delegate: Item {
                     required property var modelData
                     readonly property var device: modelData
