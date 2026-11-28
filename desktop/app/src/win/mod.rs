@@ -25,6 +25,7 @@ pub mod media_sessions;
 pub mod mp4;
 pub mod net;
 pub mod share_target;
+pub mod notification_listener;
 pub mod shell;
 pub mod shortcut;
 pub mod single_instance;
