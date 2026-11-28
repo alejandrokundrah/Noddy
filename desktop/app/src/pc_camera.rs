@@ -341,20 +341,69 @@ impl Camera {
         if devices.is_empty() {
             return Err("no camera found".into());
         }
+        // Windows lists Noddy's own virtual webcam beside the real ones. It
+        // has no picture of its own (it shows what a phone sends), so opening
+        // it here fails with "catastrophic failure"; never pick it.
+        let devices: Vec<IMFActivate> = devices
+            .into_iter()
+            .filter(|activate| {
+                let name = Self::friendly_name(activate);
+                let own = name.starts_with(crate::win::vcam::FRIENDLY_NAME);
+                if own {
+                    tracing::debug!(%name, "skipping Noddy's own virtual camera");
+                }
+                !own
+            })
+            .collect();
+        if devices.is_empty() {
+            return Err("no camera found (only Noddy's virtual webcam is here)".into());
+        }
         let mut last = "no camera could be opened".to_owned();
         for activate in devices {
+            let name = Self::friendly_name(&activate);
             // SAFETY: activating and configuring a device the system listed.
             let opened = unsafe {
-                activate
-                    .ActivateObject::<IMFMediaSource>()
-                    .and_then(|source| Self::from_source(activate.clone(), source, width, height, fps))
+                activate.ActivateObject::<IMFMediaSource>().and_then(|source| {
+                    Self::from_source(activate.clone(), source.clone(), width, height, fps).inspect_err(|_| {
+                        // Let go of a camera that did not work out, so the next
+                        // one (or the next try) does not find it still held.
+                        let _ = source.Shutdown();
+                    })
+                })
             };
             match opened {
-                Ok(camera) => return Ok(camera),
-                Err(e) => last = e.to_string(),
+                Ok(camera) => {
+                    tracing::info!(%name, "opened the camera");
+                    return Ok(camera);
+                }
+                Err(e) => {
+                    tracing::warn!(%name, error = %e, "this camera could not be opened");
+                    last = format!("{name}: {e}");
+                }
             }
         }
         Err(last)
+    }
+
+    /// The camera's name as Windows shows it; empty if it has none.
+    fn friendly_name(activate: &windows::Win32::Media::MediaFoundation::IMFActivate) -> String {
+        use windows::{
+            Win32::{Media::MediaFoundation::MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME, System::Com::CoTaskMemFree},
+            core::PWSTR,
+        };
+
+        let mut text = PWSTR::null();
+        let mut length = 0u32;
+        // SAFETY: GetAllocatedString fills `text` with a CoTaskMem string,
+        // read once and then freed.
+        unsafe {
+            if activate.GetAllocatedString(&MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME, &mut text, &mut length).is_err() {
+                return String::new();
+            }
+            let name = text.to_string().unwrap_or_default();
+            CoTaskMemFree(Some(text.0.cast()));
+            name
+        }
     }
 
     /// # Safety
