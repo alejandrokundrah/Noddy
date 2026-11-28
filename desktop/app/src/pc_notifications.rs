@@ -47,7 +47,7 @@ pub fn build_pc_notification(
 
 /// Returns `true` when the notification originated from Noddy itself or a
 /// blocked system self-source so we never create a forwarding loop.
-#[cfg(any(target_os = "linux", test))]
+#[cfg(any(target_os = "linux", windows, test))]
 pub fn is_blocked_self_source(app_name: &str) -> bool {
     let lower = app_name.trim().to_lowercase();
     lower.is_empty()
@@ -58,7 +58,7 @@ pub fn is_blocked_self_source(app_name: &str) -> bool {
 
 /// Forwards a captured PC notification if it is not from a blocked self-source,
 /// has non-empty content, and `forward_pc_notifications_to_phone` is enabled.
-#[cfg(any(target_os = "linux", test))]
+#[cfg(any(target_os = "linux", windows, test))]
 pub fn forward_pc_toast(app_name: &str, title: &str, text: &str) -> bool {
     if is_blocked_self_source(app_name) {
         return false;

@@ -64,6 +64,7 @@ windows = { workspace = true, features = [
     "Graphics_DirectX",
     "Graphics_DirectX_Direct3D11",
     "UI_Notifications",
+    "UI_Notifications_Management",
     "Win32_Foundation",
     "Win32_UI_Input_XboxController",
     "Win32_Graphics_Direct3D",

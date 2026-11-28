@@ -255,6 +255,10 @@ pub fn set_forward_pc_notifications_to_phone(on: bool) {
     if on {
         crate::pc_notifications::start_listener();
     }
+    #[cfg(windows)]
+    if on {
+        crate::win::notification_listener::start();
+    }
 }
 
 /// Whether other paired computers may use this computer's camera as a webcam
