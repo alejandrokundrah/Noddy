@@ -95,6 +95,7 @@ fn device_on_edge(layout: &[MeshDeviceLayout], edge: ScreenEdge) -> Option<Devic
 
 /// Returns the primary monitor bounds `(left, top, right, bottom)` in screen pixels.
 #[cfg(windows)]
+#[allow(unsafe_code)]
 fn primary_monitor_bounds() -> (i32, i32, i32, i32) {
     use windows::Win32::Foundation::POINT;
     use windows::Win32::Graphics::Gdi::{
@@ -119,6 +120,7 @@ fn primary_monitor_bounds() -> (i32, i32, i32, i32) {
 
 /// Returns the current cursor position `(x, y)` in screen pixels.
 #[cfg(windows)]
+#[allow(unsafe_code)]
 fn cursor_pos() -> Option<(i32, i32)> {
     use windows::Win32::Foundation::POINT;
     use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
@@ -187,11 +189,9 @@ fn monitor_loop() {
                 ),
             ];
             for (edge, hit) in edges {
-                if hit {
-                    if let Some(peer) = device_on_edge(&layout, edge) {
-                        input_share::enter_remote(peer);
-                        break;
-                    }
+                if hit && let Some(peer) = device_on_edge(&layout, edge) {
+                    input_share::enter_remote(peer);
+                    break;
                 }
             }
         }
