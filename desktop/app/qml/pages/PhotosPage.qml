@@ -14,8 +14,14 @@ Item {
     property string deviceName
 
     readonly property var albums: { try { return JSON.parse(Photos.albums) } catch (e) { return [] } }
-    readonly property var photosFeature: AppController.capsRevision >= 0 && page.deviceId.length > 0
-        ? AppController.featureState(page.deviceId, "files.recent_photos") : ({})
+    // Another computer's photos are "desktop.photos"; a phone's gallery is
+    // "files.recent_photos". Each is Unsupported for the other kind of device.
+    readonly property var computerPhotosFeature: AppController.capsRevision >= 0 && page.deviceId.length > 0
+        ? AppController.featureState(page.deviceId, "desktop.photos") : ({})
+    readonly property bool isComputer: !!computerPhotosFeature.state && computerPhotosFeature.state !== "unsupported"
+    readonly property var photosFeature: page.isComputer ? page.computerPhotosFeature
+        : (AppController.capsRevision >= 0 && page.deviceId.length > 0
+            ? AppController.featureState(page.deviceId, "files.recent_photos") : ({}))
 
     // Multi-select state: map of itemId -> true, and ordered array of selected IDs.
     property var selectedMap: ({})
@@ -608,7 +614,9 @@ Item {
                     role: "title"
                     size: 16
                     text: Photos.status === "off" ? qsTr("Photos are off for %1").arg(page.deviceName)
-                        : Photos.status === "unsupported" ? qsTr("Allow photos on %1").arg(page.deviceName)
+                        : Photos.status === "unsupported"
+                          ? (page.isComputer ? qsTr("%1 isn't sharing its photos").arg(page.deviceName)
+                                             : qsTr("Allow photos on %1").arg(page.deviceName))
                         : Photos.status === "offline" ? qsTr("%1 isn't connected").arg(page.deviceName)
                         : qsTr("Couldn't load photos")
                 }
@@ -621,7 +629,9 @@ Item {
                     text: Photos.status === "off"
                         ? qsTr("Enable Photos in Settings.")
                         : Photos.status === "unsupported"
-                          ? qsTr("Grant photos permission on %1.").arg(page.deviceName)
+                          ? (page.isComputer
+                             ? qsTr("On %1, turn on Settings › Camera & Audio › Share this computer's photos.").arg(page.deviceName)
+                             : qsTr("Grant photos permission on %1.").arg(page.deviceName))
                           : Photos.status === "offline"
                             ? qsTr("Connect %1 to view photos.").arg(page.deviceName)
                             : qsTr("Unable to load photos.")

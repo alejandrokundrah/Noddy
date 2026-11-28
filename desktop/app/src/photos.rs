@@ -108,7 +108,12 @@ pub fn on_event(event: &NodeEvent) {
             gallery_changed();
         }
         NodeEvent::Capabilities(matrix) if Some(matrix.device) == page_device => {
-            match matrix.state("files.recent_photos") {
+            // A phone's gallery, or another computer's photos (crate::photo_share).
+            let state = match matrix.state("desktop.photos") {
+                Some(FeatureState::Unsupported { .. }) | None => matrix.state("files.recent_photos"),
+                computer => computer,
+            };
+            match state {
                 Some(FeatureState::Available)
                     if gallery_state(|s| !matches!(s.status, Status::Ready | Status::Loading)) =>
                 {

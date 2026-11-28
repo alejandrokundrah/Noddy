@@ -1071,7 +1071,7 @@ Item {
                         // announces `mirror.capture` and `input.desktop`.
                         readonly property bool isComputer: kind === "desktop" || kind === "laptop"
                                                            || (kind === "unknown" && os !== "" && os !== "android")
-                        readonly property var computerToggles: ["clipboard", "files", "share_folders",
+                        readonly property var computerToggles: ["clipboard", "files", "share_folders", "photos",
                                                                 "pc_mirror", "remote_input"]
                         readonly property var toggles: {
                             if (AppController.capsRevision < 0 || AppController.togglesRevision < 0)
@@ -1339,6 +1339,20 @@ Item {
                                 label: qsTr("Share this computer's sound")
                                 checked: Preferences.sharePcSound
                                 onToggled: (on) => Preferences.sharePcSound = on
+                            }
+                        }
+                        // Windows and Linux so far (crate::photo_share).
+                        Divider { width: parent.width; visible: Qt.platform.os !== "osx" }
+                        ListRow {
+                            width: parent.width
+                            visible: Qt.platform.os !== "osx"
+                            iconPath: Icons.photo
+                            title: qsTr("Share this computer's photos")
+                            description: qsTr("Let your other computers browse the photos and screenshots in its Pictures folder.")
+                            Toggle {
+                                label: qsTr("Share this computer's photos")
+                                checked: Preferences.sharePcPhotos
+                                onToggled: (on) => Preferences.sharePcPhotos = on
                             }
                         }
                         Divider { width: parent.width }

@@ -51,6 +51,13 @@ change things that need a step from you, and its notes say so.
   and only its main monitor is shown and controlled. Protocol draft:
   `docs/protocol/desktop-control.md`.
 
+- **Browse another computer's photos.** A paired computer's photos and
+  screenshots (its Pictures folder and the folders in it) now open on the
+  **Photos** page, with thumbnails, the in-app viewer, Save and Copy, as with a
+  phone. The other computer decides: turn on **Settings › Camera & Audio ›
+  Share this computer's photos** there (Windows and Linux so far). Each
+  computer's **Photos** switch in **Settings › Devices** applies too.
+
 - **Browse another computer's files in the app.** On a paired computer's page,
   **Browse files** opens its shared folders: open folders, go back up, and
   download a file into Downloads/Noddy (an interrupted download carries on).

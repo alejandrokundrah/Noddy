@@ -195,7 +195,7 @@ pub(crate) async fn handle(shared: &Arc<Shared>, session: &Arc<Session>, env: &E
                     Envelope::error(ErrorCode::Denied, "photos or files are off for this device")
                 }
                 Err(Error::Unsupported) => {
-                    Envelope::error(ErrorCode::Unsupported, "this phone doesn't share photos")
+                    Envelope::error(ErrorCode::Unsupported, "this device doesn't share photos")
                 }
                 Err(Error::NotFound) => Envelope::error(ErrorCode::NotFound, "no such photo"),
                 Err(Error::Protocol(_)) => Envelope::error(ErrorCode::BadMessage, "invalid photo request"),
@@ -211,12 +211,26 @@ pub(crate) async fn handle(shared: &Arc<Shared>, session: &Arc<Session>, env: &E
     }
 }
 
+/// Whether this device shares its gallery with `peer`: a phone or tablet
+/// with the PCs it's paired with, and a computer (whose Pictures folder it
+/// is, `docs/protocol/photos.md`) only with other computers, never a phone.
+fn shares_with(shared: &Shared, peer: &DeviceId) -> bool {
+    let we_are_phone = matches!(
+        shared.local.read().unwrap_or_else(|e| e.into_inner()).device.kind,
+        noddy_protocol::messages::DeviceKind::Phone | noddy_protocol::messages::DeviceKind::Tablet
+    );
+    we_are_phone || shared.is_desktop(peer)
+}
+
 async fn answer_query(shared: &Arc<Shared>, peer: DeviceId, env: &Envelope) -> Result<Envelope> {
+    if !shares_with(shared, &peer) {
+        return Ok(Envelope::error(ErrorCode::Unsupported, "this device doesn't share photos with you"));
+    }
     if !shared.toggle_on(&peer, TOGGLE) {
         return Ok(Envelope::error(ErrorCode::Denied, "photos are off for this device"));
     }
     if !shared.we_offer(photos::READ) {
-        return Ok(Envelope::error(ErrorCode::Unsupported, "this phone doesn't share photos"));
+        return Ok(Envelope::error(ErrorCode::Unsupported, "this device doesn't share photos"));
     }
     let platform = shared.platform.clone();
     let result = match env.t.as_str() {
@@ -267,7 +281,7 @@ async fn answer_query(shared: &Arc<Shared>, peer: DeviceId, env: &Envelope) -> R
     };
     Ok(result.unwrap_or_else(|reason| {
         tracing::warn!(reason, "a photos request failed");
-        Envelope::error(ErrorCode::Internal, "the phone couldn't read photos")
+        Envelope::error(ErrorCode::Internal, "couldn't read photos")
     }))
 }
 
@@ -310,6 +324,9 @@ fn sanitize_thumbs(thumbs: Vec<PhotoThumb>) -> Vec<PhotoThumb> {
 }
 
 async fn send_photos(shared: &Arc<Shared>, peer: DeviceId, mut ids: Vec<String>) -> Result<String> {
+    if !shares_with(shared, &peer) {
+        return Err(Error::Unsupported);
+    }
     if !shared.toggle_on(&peer, TOGGLE) {
         return Err(Error::Denied);
     }

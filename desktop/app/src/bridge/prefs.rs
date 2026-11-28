@@ -120,6 +120,8 @@ pub mod qobject {
         #[qproperty(bool, share_pc_mic)]
         /// Let other paired computers play this computer's sound.
         #[qproperty(bool, share_pc_sound)]
+        /// Let other paired computers browse this computer's photos.
+        #[qproperty(bool, share_pc_photos)]
         /// Stay connected over mobile data (LTE/5G) or relay when away from Wi-Fi.
         #[qproperty(bool, away_mode)]
         /// Alias for `start_with_windows` used by the walkthrough and settings bindings.
@@ -330,6 +332,7 @@ pub struct PreferencesRust {
     share_pc_camera: bool,
     share_pc_mic: bool,
     share_pc_sound: bool,
+    share_pc_photos: bool,
     away_mode: bool,
     start_at_login: bool,
     walkthrough_completed: bool,
@@ -419,6 +422,7 @@ impl cxx_qt::Initialize for qobject::Preferences {
         self.as_mut().set_share_pc_camera(settings.share_pc_camera);
         self.as_mut().set_share_pc_mic(settings.share_pc_mic);
         self.as_mut().set_share_pc_sound(settings.share_pc_sound);
+        self.as_mut().set_share_pc_photos(settings.share_pc_photos);
         self.as_mut().set_away_mode(settings.away_mode);
         self.as_mut().set_walkthrough_completed(settings.walkthrough_completed);
         self.as_mut().set_walkthrough_step(i32::from(settings.walkthrough_step.min(6)));
@@ -705,6 +709,12 @@ impl cxx_qt::Initialize for qobject::Preferences {
         self.as_mut()
             .on_share_pc_sound_changed(|p| {
                 crate::settings::set_share_pc_sound(p.share_pc_sound);
+                p.save();
+            })
+            .release();
+        self.as_mut()
+            .on_share_pc_photos_changed(|p| {
+                crate::settings::set_share_pc_photos(p.share_pc_photos);
                 p.save();
             })
             .release();
@@ -1078,6 +1088,7 @@ impl qobject::Preferences {
             share_pc_camera: p.share_pc_camera,
             share_pc_mic: p.share_pc_mic,
             share_pc_sound: p.share_pc_sound,
+            share_pc_photos: p.share_pc_photos,
             mesh_enabled: crate::settings::mesh_enabled(),
             mesh_layout: crate::settings::mesh_layout(),
             away_mode: p.away_mode,

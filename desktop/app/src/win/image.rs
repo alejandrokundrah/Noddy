@@ -6,8 +6,9 @@
 use windows::{
     Win32::{
         Graphics::Imaging::{
-            CLSID_WICImagingFactory, GUID_ContainerFormatPng, GUID_WICPixelFormat32bppBGRA,
-            IWICImagingFactory, WICBitmapDitherTypeNone, WICBitmapEncoderNoCache, WICBitmapPaletteTypeCustom,
+            CLSID_WICImagingFactory, GUID_ContainerFormatJpeg, GUID_ContainerFormatPng,
+            GUID_WICPixelFormat24bppBGR, GUID_WICPixelFormat32bppBGRA, IWICImagingFactory,
+            WICBitmapDitherTypeNone, WICBitmapEncoderNoCache, WICBitmapPaletteTypeCustom,
             WICDecodeMetadataCacheOnDemand,
         },
         System::Com::{CLSCTX_INPROC_SERVER, CoCreateInstance, STATFLAG_NONAME, STREAM_SEEK_SET},
@@ -104,6 +105,59 @@ pub fn encode_png(bitmap: &Bitmap) -> Result<Vec<u8>> {
                 .ok()?;
             png.truncate(read as usize);
             Ok(png)
+        }
+    })
+}
+
+/// Encodes pixels as a JPEG file (WIC's default quality; alpha is dropped),
+/// for gallery thumbnails (`crate::photo_share`).
+pub fn encode_jpeg(bitmap: &Bitmap) -> Result<Vec<u8>> {
+    let len = (bitmap.width as usize).checked_mul(bitmap.height as usize).and_then(|n| n.checked_mul(4));
+    let len = len.ok_or_else(|| invalid("image too large"))?;
+    if bitmap.width == 0 || bitmap.height == 0 || bitmap.bgra.len() < len {
+        return Err(invalid("not a bitmap"));
+    }
+    let bgr: Vec<u8> = bitmap.bgra[..len].chunks_exact(4).flat_map(|p| [p[0], p[1], p[2]]).collect();
+    with_com(|| {
+        // SAFETY: as in `encode_png`; the source bitmap copies `bgr`, whose
+        // stride is three bytes a pixel.
+        unsafe {
+            let factory = factory()?;
+            let source = factory.CreateBitmapFromMemory(
+                bitmap.width,
+                bitmap.height,
+                &GUID_WICPixelFormat24bppBGR,
+                bitmap.width * 3,
+                &bgr,
+            )?;
+            let stream = SHCreateMemStream(None).ok_or_else(|| invalid("no memory stream"))?;
+            let encoder = factory.CreateEncoder(&GUID_ContainerFormatJpeg, std::ptr::null())?;
+            encoder.Initialize(&stream, WICBitmapEncoderNoCache)?;
+            let mut frame = None;
+            encoder.CreateNewFrame(&mut frame, std::ptr::null_mut())?;
+            let frame = frame.ok_or_else(|| invalid("no frame"))?;
+            frame.Initialize(None)?;
+            frame.SetSize(bitmap.width, bitmap.height)?;
+            let mut format = GUID_WICPixelFormat24bppBGR;
+            frame.SetPixelFormat(&mut format)?;
+            frame.WriteSource(&source, std::ptr::null())?;
+            frame.Commit()?;
+            encoder.Commit()?;
+
+            let mut stat = Default::default();
+            stream.Stat(&mut stat, STATFLAG_NONAME)?;
+            let mut jpeg = vec![0u8; usize::try_from(stat.cbSize).map_err(|_| invalid("too large"))?];
+            stream.Seek(0, STREAM_SEEK_SET, None)?;
+            let mut read = 0;
+            stream
+                .Read(
+                    jpeg.as_mut_ptr().cast(),
+                    u32::try_from(jpeg.len()).unwrap_or(u32::MAX),
+                    Some(&mut read),
+                )
+                .ok()?;
+            jpeg.truncate(read as usize);
+            Ok(jpeg)
         }
     })
 }
@@ -222,6 +276,14 @@ mod tests {
             })
             .collect();
         Bitmap { width, height, bgra }
+    }
+
+    #[test]
+    fn jpeg_thumbnails_round_trip() {
+        let jpeg = encode_jpeg(&checker(64, 48)).unwrap();
+        assert_eq!(&jpeg[..2], [0xff, 0xd8]);
+        let back = decode(&jpeg).unwrap();
+        assert_eq!((back.width, back.height), (64, 48));
     }
 
     #[test]

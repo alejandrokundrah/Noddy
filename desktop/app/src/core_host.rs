@@ -161,6 +161,11 @@ pub fn compute_capabilities(
         if crate::settings::share_pc_sound() {
             caps.push(noddy_core::SOUND_SHARE.into());
         }
+        // Other computers can browse this one's photos while it shares them
+        // (crate::photo_share); phones never ask a computer for photos.
+        if crate::settings::share_pc_photos() && crate::photo_share::is_available() {
+            caps.push(noddy_core::PHOTOS_READ.into());
+        }
         if crate::settings::forward_pc_notifications_to_phone() {
             caps.push("notify.mirror".into());
         }

@@ -13,8 +13,14 @@ the PC asks, as an ordinary files transfer.
 
 | ID | Offered by | Meaning |
 |---|---|---|
-| `photos.read` | phone | Announces new photos, lists albums and items, serves thumbnails, and sends full files on request (needs the phone's photos permission) |
+| `photos.read` | phone, or a computer for other computers | Announces new photos, lists albums and items, serves thumbnails, and sends full files on request (needs the phone's photos permission; a computer offers it only while its user shares its photos) |
 | `photos.show` | PC | Shows announced photos and the phone's gallery |
+
+A computer can be the source too: while "Share this computer's photos" is on,
+it offers `photos.read` and answers `photos.albums`, `photos.list`,
+`photos.thumbs` and `photos.get` from its Pictures folder (the folder and the
+folders in it, still images only), to other computers only. It answers a
+phone with `unsupported`, and never sends `photos.new`.
 
 A phone announces photos and library changes only to PCs that offer
 `photos.show`, and only while both devices allow it (the `photos` device
