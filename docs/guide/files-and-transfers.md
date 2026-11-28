@@ -88,7 +88,7 @@ With Mesh on (Settings › Mesh) and a computer placed against a screen edge:
 - **Copy, then cross the edge.** Copy files in File Explorer, then push the
   pointer across the edge to the other computer. The files are sent with it,
   once, and put on its clipboard, so Ctrl+V there pastes them. Turn this off with
-  "Clipboard follows the pointer".
+  "Clipboard follows control".
 - **Ctrl+Alt+V.** Sends what you copied (files, text or a picture) to the
   computer that has the pointer, or else the first computer in your Mesh layout,
   without moving the pointer.
