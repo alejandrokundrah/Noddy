@@ -98,6 +98,8 @@ class InputService : AccessibilityService() {
                     input.rt.toInt(),
                 )
             }
+            // A phone has no pen to inject; a PC's stylus input is dropped here.
+            is MirrorInputEvent.Pen -> Unit
         }
     }
 

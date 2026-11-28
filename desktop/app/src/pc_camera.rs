@@ -56,9 +56,13 @@ pub fn is_available() -> bool {
             .map(|e| e.flatten().any(|e| e.file_name().to_string_lossy().starts_with("video")))
             .unwrap_or(false)
     }
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(windows)]
     {
         true
+    }
+    #[cfg(not(any(windows, target_os = "linux")))]
+    {
+        false
     }
 }
 
@@ -573,6 +577,50 @@ impl Drop for Camera {
     fn drop(&mut self) {
         let _ = self.child.kill();
         let _ = self.child.wait();
+    }
+}
+
+// ---- Other platforms: no camera to share yet ----
+
+#[cfg(not(any(windows, target_os = "linux")))]
+struct Camera;
+
+#[cfg(not(any(windows, target_os = "linux")))]
+impl Camera {
+    fn open(_width: u32, _height: u32, _fps: u32) -> Result<Camera, String> {
+        Err("sharing the camera isn't supported on this system yet".into())
+    }
+
+    fn size(&self) -> (u32, u32) {
+        (0, 0)
+    }
+
+    fn next(&mut self) -> Result<&[u8], String> {
+        Err("sharing the camera isn't supported on this system yet".into())
+    }
+}
+
+#[cfg(not(any(windows, target_os = "linux")))]
+struct Encoder;
+
+#[cfg(not(any(windows, target_os = "linux")))]
+impl Encoder {
+    fn new(_width: u32, _height: u32, _fps: u32, _bitrate: u32) -> Result<Self, String> {
+        Err("sharing the camera isn't supported on this system yet".into())
+    }
+
+    fn encode(
+        &mut self,
+        _nv12: &[u8],
+        _hns: i64,
+        _dur_hns: i64,
+        _stop: &AtomicBool,
+    ) -> Result<Vec<(bool, Vec<u8>)>, String> {
+        Err("sharing the camera isn't supported on this system yet".into())
+    }
+
+    fn request_keyframe(&self) -> bool {
+        false
     }
 }
 

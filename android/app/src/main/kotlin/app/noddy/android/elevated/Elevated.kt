@@ -759,6 +759,8 @@ object Elevated {
             }
             is MirrorInputEvent.Gamepad ->
                 "G ${event.buttons} ${event.lx} ${event.ly} ${event.rx} ${event.ry} ${event.lt} ${event.rt}"
+            // A phone has no pen to inject; a PC's stylus input is dropped here.
+            is MirrorInputEvent.Pen -> return true
         }
         return send(writer, line)
     }

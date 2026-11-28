@@ -388,6 +388,13 @@ static const char *const noddy_rust_strings[] = {
     QT_TRANSLATE_NOOP("Obs", "OBS: %1"), // desktop/app/src/obs.rs
     QT_TRANSLATE_NOOP("Obs", "The service on that port isn't OBS."), // desktop/app/src/obs.rs
     QT_TRANSLATE_NOOP("PcMirror", "Can't find the player's window. Play the video on this PC again, then turn on Play on phone."), // desktop/app/src/pc_mirror.rs
+    QT_TRANSLATE_NOOP("PcSharing", "%1 is using this computer's camera."), // desktop/app/src/pc_camera.rs
+    QT_TRANSLATE_NOOP("PcSharing", "%1 is using this computer's microphone."), // desktop/app/src/pc_sharing.rs
+    QT_TRANSLATE_NOOP("PcSharing", "%1 isn't sharing its sound. Turn on Share sound there."), // desktop/app/src/pc_sharing.rs
+    QT_TRANSLATE_NOOP("PcSharing", "%1's sound can't be played now."), // desktop/app/src/pc_sharing.rs
+    QT_TRANSLATE_NOOP("PcSharing", "This computer's camera can't be used: %1"), // desktop/app/src/pc_camera.rs
+    QT_TRANSLATE_NOOP("PcSharing", "This computer's microphone can't be used: %1"), // desktop/app/src/pc_sharing.rs
+    QT_TRANSLATE_NOOP("PcSharing", "Update Noddy on %1 to play its sound here."), // desktop/app/src/pc_sharing.rs
     QT_TRANSLATE_NOOP("PhoneMic", "Tap Start on %1 to use its microphone."), // desktop/app/src/phone_mic.rs
     QT_TRANSLATE_NOOP("PhoneMic", "The microphone is turned off for this PC on %1."), // desktop/app/src/phone_mic.rs
     QT_TRANSLATE_NOOP("PhoneMic", "Update Noddy on %1 to use its microphone."), // desktop/app/src/phone_mic.rs
@@ -482,10 +489,15 @@ static const char *const noddy_rust_strings[] = {
     QT_TRANSLATE_NOOP("Timeline", "With %1"), // desktop/app/src/bridge/timeline.rs
     QT_TRANSLATE_NOOP("Timeline", "device"), // desktop/app/src/bridge/timeline.rs
     QT_TRANSLATE_NOOP("Transfers", "Accept in Noddy to save to Downloads\\Noddy"), // desktop/app/src/transfers.rs
+    QT_TRANSLATE_NOOP("Transfers", "Connect this phone over USB with USB debugging enabled to install APKs."), // desktop/app/src/transfers.rs
+    QT_TRANSLATE_NOOP("Transfers", "Couldn't install %1: %2"), // desktop/app/src/transfers.rs
     QT_TRANSLATE_NOOP("Transfers", "Files are turned off for that device."), // desktop/app/src/transfers.rs
     QT_TRANSLATE_NOOP("Transfers", "From %1, opened from Downloads\\Noddy"), // desktop/app/src/transfers.rs
     QT_TRANSLATE_NOOP("Transfers", "From %1, saved in Downloads\\Noddy"), // desktop/app/src/transfers.rs
+    QT_TRANSLATE_NOOP("Transfers", "Installed %1 on %2."), // desktop/app/src/transfers.rs
+    QT_TRANSLATE_NOOP("Transfers", "Installing %1 on %2…"), // desktop/app/src/transfers.rs
     QT_TRANSLATE_NOOP("Transfers", "Nearby device"), // desktop/app/src/transfers.rs
+    QT_TRANSLATE_NOOP("Transfers", "Phone"), // desktop/app/src/transfers.rs
     QT_TRANSLATE_NOOP("Transfers", "That's too many files to send at once."), // desktop/app/src/transfers.rs
     QT_TRANSLATE_NOOP("Transfers", "There's nothing to send in there."), // desktop/app/src/transfers.rs
     QT_TRANSLATE_NOOP("Updater", "Couldn't check for updates. Check your internet connection."), // desktop/app/src/updater.rs

@@ -70,6 +70,7 @@ impl Drop for VirtualMonitor {
 
 /// Returns `true` if a secondary or Indirect Display (IddCx) adapter is present
 /// on this Windows PC that can be used as an extended monitor.
+#[allow(dead_code)]
 pub fn is_available() -> bool {
     find_extended_device().is_some()
 }
