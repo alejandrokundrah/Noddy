@@ -22,6 +22,7 @@ Rectangle {
         case "enablePath": return qsTr("Connect over mobile data")
         case "enableToggle": return qsTr("Off")
         case "updateApp": return qsTr("Update app")
+        case "askPeerToggle": return qsTr("Turn on on the other PC")
         default: return s.state === "unsupported" ? qsTr("Unavailable") : ""
         }
     }
@@ -62,6 +63,10 @@ Rectangle {
             return qsTr("Open Settings › Connection & About and turn on Connect over mobile data.")
         case "enableToggle":
             return qsTr("This feature is turned off for this phone in Settings › Devices.")
+        case "askPeerToggle":
+            return s.target === "remote_input"
+                ? qsTr("On the other computer, open Settings › Devices, pick this computer and turn on Remote mouse, keyboard & Deck.")
+                : qsTr("On the other computer, open Settings › Devices, pick this computer and turn on Share PC screen to phone.")
         default:
             return label
         }

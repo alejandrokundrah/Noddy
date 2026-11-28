@@ -555,6 +555,8 @@ Item {
                     return { label: qsTr("Needs Elevated"), tone: "basic", visible: true }
                 if (actionName === "raisePower")
                     return { label: qsTr("Needs Assist"), tone: "basic", visible: true }
+                if (actionName === "askPeerToggle")
+                    return { label: qsTr("Off on the other PC"), tone: "off", visible: true }
                 if (actionName === "updateApp")
                     return { label: qsTr("Needs an update"), tone: "warn", visible: true }
                 return { label: qsTr("Needs phone permission"), tone: "warn", visible: true }
