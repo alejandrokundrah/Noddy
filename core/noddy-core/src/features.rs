@@ -67,6 +67,9 @@ pub enum Unlock {
     Addon(&'static str),
     /// Every current app version offers it, so the device's app is too old.
     UpdateApp,
+    /// The other computer offers it once its user turns on this sharing
+    /// switch for this device (`pc_mirror`, `remote_input`, ...).
+    PeerSwitch(&'static str),
 }
 
 /// One condition a feature depends on.
@@ -141,6 +144,9 @@ pub enum UpgradeAction {
     EnableDeviceToggle(&'static str),
     /// Update the app on that device.
     UpdateApp(Role),
+    /// The user of the other computer must turn on this sharing switch for
+    /// this device; it can't be done from here.
+    AskPeerToggle(&'static str),
 }
 
 impl UpgradeAction {
@@ -163,6 +169,7 @@ impl UpgradeAction {
             UpgradeAction::EnablePath(ConnectionPath::Lan) => ("enablePath", "lan".into()),
             UpgradeAction::EnablePath(ConnectionPath::Usb) => ("enablePath", "usb".into()),
             UpgradeAction::EnableDeviceToggle(toggle) => ("enableToggle", toggle.into()),
+            UpgradeAction::AskPeerToggle(toggle) => ("askPeerToggle", toggle.into()),
             UpgradeAction::UpdateApp(Role::Phone) => ("updateApp", "phone".into()),
             UpgradeAction::UpdateApp(Role::Desktop) => ("updateApp", "desktop".into()),
         }
@@ -191,7 +198,8 @@ impl Upgrade {
             UpgradeAction::UpdateApp(_) => Effort::Minutes(2),
             UpgradeAction::GrantPermission(_)
             | UpgradeAction::EnablePath(_)
-            | UpgradeAction::EnableDeviceToggle(_) => Effort::Instant,
+            | UpgradeAction::EnableDeviceToggle(_)
+            | UpgradeAction::AskPeerToggle(_) => Effort::Instant,
         };
         Upgrade { action, effort }
     }
@@ -482,6 +490,7 @@ fn check(req: &Requirement, ctx: &Context<'_>) -> Check {
                 Unlock::Permission(p) => Check::Unlockable(Upgrade::new(UpgradeAction::GrantPermission(p))),
                 Unlock::Addon(addon) => Check::Unlockable(Upgrade::new(UpgradeAction::EnableAddon(addon))),
                 Unlock::UpdateApp => Check::Unlockable(Upgrade::new(UpgradeAction::UpdateApp(role))),
+                Unlock::PeerSwitch(toggle) => Check::Unlockable(Upgrade::new(UpgradeAction::AskPeerToggle(toggle))),
             }
         }
         Requirement::Peer { id, unlock } | Requirement::Here { id, unlock } => {
@@ -493,6 +502,7 @@ fn check(req: &Requirement, ctx: &Context<'_>) -> Check {
             match unlock {
                 Unlock::Permission(p) => Check::Unlockable(Upgrade::new(UpgradeAction::GrantPermission(p))),
                 Unlock::Addon(addon) => Check::Unlockable(Upgrade::new(UpgradeAction::EnableAddon(addon))),
+                Unlock::PeerSwitch(toggle) => Check::Unlockable(Upgrade::new(UpgradeAction::AskPeerToggle(toggle))),
                 Unlock::Power(_) | Unlock::UpdateApp => {
                     Check::Unlockable(Upgrade::new(UpgradeAction::UpdateApp(role)))
                 }
@@ -605,6 +615,12 @@ const fn peer(id: &'static str) -> Requirement {
     Requirement::Peer { id, unlock: Unlock::UpdateApp }
 }
 
+/// A capability the other computer announces only while its user has turned
+/// on the sharing switch `toggle` for this device.
+const fn peer_switch(id: &'static str, toggle: &'static str) -> Requirement {
+    Requirement::Peer { id, unlock: Unlock::PeerSwitch(toggle) }
+}
+
 const fn here(id: &'static str) -> Requirement {
     Requirement::Here { id, unlock: Unlock::UpdateApp }
 }
@@ -630,7 +646,11 @@ pub const DESKTOP_PAIR_FEATURES: &[FeatureDef] = &[
     FeatureDef {
         id: "desktop.control",
         group: FeatureGroup::Input,
-        requires: &[peer("mirror.capture"), peer("input.desktop"), DeviceToggle("mirroring")],
+        requires: &[
+            peer_switch("mirror.capture", "pc_mirror"),
+            peer_switch("input.desktop", "remote_input"),
+            DeviceToggle("mirroring"),
+        ],
         partial: None,
     },
     // Opening the other computer's apps in their own windows.
@@ -638,8 +658,8 @@ pub const DESKTOP_PAIR_FEATURES: &[FeatureDef] = &[
         id: "desktop.app_windows",
         group: FeatureGroup::Input,
         requires: &[
-            peer("mirror.virtual_display"),
-            peer("input.desktop"),
+            peer_switch("mirror.virtual_display", "pc_mirror"),
+            peer_switch("input.desktop", "remote_input"),
             here("mirror.view"),
             DeviceToggle("mirroring"),
         ],
@@ -650,8 +670,8 @@ pub const DESKTOP_PAIR_FEATURES: &[FeatureDef] = &[
         id: "desktop.extended_display",
         group: FeatureGroup::Input,
         requires: &[
-            peer("mirror.extended_display"),
-            peer("input.desktop"),
+            peer_switch("mirror.extended_display", "pc_mirror"),
+            peer_switch("input.desktop", "remote_input"),
             here("mirror.view"),
             DeviceToggle("mirroring"),
         ],
@@ -1516,6 +1536,21 @@ mod tests {
             matrix_with(&other, &here, &off).state("desktop.app_windows"),
             Some(FeatureState::Locked { .. })
         ));
+    }
+
+    #[test]
+    fn a_computer_that_is_not_sharing_is_asked_to_turn_the_switch_on() {
+        // The other computer announces neither screen capture nor input until
+        // its user turns the switches on, which is not an app update.
+        let other = pc();
+        let mut here = pc();
+        here.caps.insert("mirror.view".to_owned());
+        let m = matrix_with(&other, &here, &HashMap::new());
+        for id in ["desktop.control", "desktop.app_windows"] {
+            let Some(FeatureState::Locked { upgrade }) = m.state(id) else { panic!("{id} should be locked") };
+            let (action, _) = upgrade.action.describe();
+            assert_eq!(action, "askPeerToggle", "{id}");
+        }
     }
 
     #[test]

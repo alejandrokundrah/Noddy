@@ -5150,6 +5150,7 @@ fn describe_upgrade(upgrade: &Upgrade) -> String {
         UpgradeAction::EnablePath(ConnectionPath::Relay) => "turn on Away mode".into(),
         UpgradeAction::EnablePath(path) => format!("enable the {path:?} connection"),
         UpgradeAction::EnableDeviceToggle(t) => format!("allow {t} (noddy toggle <device> {t} on)"),
+        UpgradeAction::AskPeerToggle(t) => format!("ask the other computer to turn on {t} for this one"),
         UpgradeAction::UpdateApp(Role::Phone) => "update the app on the phone".into(),
         UpgradeAction::UpdateApp(Role::Desktop) => "update the app on the PC".into(),
     };
