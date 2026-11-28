@@ -216,6 +216,17 @@ pub trait Platform: Send + Sync + 'static {
         Err("this device doesn't open links".into())
     }
 
+    /// Open a window a paired PC offered (`window.offer`; `key` is the
+    /// sender's `mirror.apps` ID for it). Runs without blocking the network.
+    fn window_offered(
+        &self,
+        _from: &noddy_protocol::DeviceId,
+        _key: &str,
+        _title: &str,
+    ) -> Result<(), String> {
+        Err("this device doesn't open offered windows".into())
+    }
+
     /// Show or update an ongoing or completed task notification sent by a paired
     /// device (`task.notify`, `docs/protocol/actions.md`).
     fn task_notify(&self, _from: &noddy_protocol::DeviceId, _task: &crate::TaskNotify) -> Result<(), String> {

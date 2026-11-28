@@ -125,6 +125,10 @@ impl Platform for DesktopPlatform {
     fn open_link(&self, _from: &noddy_core::DeviceId, url: &str) -> Result<(), String> {
         links::open_here(url)
     }
+    fn window_offered(&self, from: &noddy_core::DeviceId, key: &str, title: &str) -> Result<(), String> {
+        mirror::start_app(*from, key.to_owned(), title.to_owned());
+        Ok(())
+    }
     fn media_command(
         &self,
         player: &str,

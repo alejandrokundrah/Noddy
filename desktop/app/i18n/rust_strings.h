@@ -347,6 +347,7 @@ static const char *const noddy_rust_strings[] = {
     QT_TRANSLATE_NOOP("Media", "That player isn't playing anymore."), // desktop/app/src/media.rs
     QT_TRANSLATE_NOOP("Mesh", "On the other computer, allow remote control from this one in Noddy, then try again."), // desktop/app/src/mesh.rs
     QT_TRANSLATE_NOOP("Mesh", "Put a computer next to this screen in Settings › Mesh to send it what you copied."), // desktop/app/src/mesh.rs
+    QT_TRANSLATE_NOOP("Mesh", "That computer can't open windows from this one yet. Update Noddy there."), // desktop/app/src/mesh.rs
     QT_TRANSLATE_NOOP("Mesh", "That computer can't take this mouse and keyboard yet. Update Noddy there."), // desktop/app/src/mesh.rs
     QT_TRANSLATE_NOOP("Messages", "Attachment is %1 (MMS supports up to 900 KB)"), // desktop/app/src/messages.rs
     QT_TRANSLATE_NOOP("Messages", "Group texts can't be sent from the PC yet."), // desktop/app/src/messages.rs

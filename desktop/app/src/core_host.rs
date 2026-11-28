@@ -123,6 +123,8 @@ pub fn compute_capabilities(
         caps.push(noddy_core::STORAGE_READ.into());
         caps.push(noddy_core::STORAGE_WRITE.into());
         caps.push(noddy_core::MIRROR_VIEW.into());
+        // Another computer can offer this one a window (Mesh window drag).
+        caps.push(noddy_core::WINDOW_RECEIVE.into());
         caps.push(noddy_core::MIRROR_LISTEN.into());
         caps.push(noddy_core::DECK_ACTIONS.into());
         caps.push(noddy_core::PC_AUDIO.into());

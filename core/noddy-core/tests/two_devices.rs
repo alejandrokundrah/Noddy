@@ -34,6 +34,7 @@ struct RecordingPlatform {
     media: Mutex<Vec<(String, MediaAction, Option<u64>)>>,
     power: Mutex<Vec<PowerAction>>,
     links: Mutex<Vec<String>>,
+    windows: Mutex<Vec<(String, String)>>,
     calls: Mutex<Vec<(String, noddy_core::CallCommand)>>,
     dialed: Mutex<Vec<String>>,
     texts: Mutex<Vec<(Vec<String>, String)>>,
@@ -106,6 +107,10 @@ impl Platform for RecordingPlatform {
     }
     fn open_link(&self, _from: &noddy_core::DeviceId, url: &str) -> Result<(), String> {
         self.links.lock().unwrap().push(url.to_owned());
+        Ok(())
+    }
+    fn window_offered(&self, _from: &noddy_core::DeviceId, key: &str, title: &str) -> Result<(), String> {
+        self.windows.lock().unwrap().push((key.to_owned(), title.to_owned()));
         Ok(())
     }
     fn task_notify(&self, _from: &noddy_core::DeviceId, task: &noddy_core::TaskNotify) -> Result<(), String> {
@@ -2189,6 +2194,28 @@ async fn phones_lock_pcs_and_links_open_on_either_side() {
     let script = pc.node.open_link(phone_id, "javascript:alert(1)".into()).await;
     assert!(script.is_err());
     assert_eq!(phone.platform.links.lock().unwrap().len(), 1);
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn a_computer_offers_a_window_to_another_that_opens_it() {
+    let mut left = device_with("Left", DeviceKind::Desktop, &[]).await;
+    let mut right = device_with("Right", DeviceKind::Desktop, &["window.receive"]).await;
+    pair_qr(&mut left, &mut right).await;
+    let (left_id, right_id) = (left.node.device_id(), right.node.device_id());
+
+    with_timeout("offer", left.node.offer_window(right_id, "win:4242".into(), "Notes".into()))
+        .await
+        .expect("offered");
+    assert_eq!(*right.platform.windows.lock().unwrap(), [("win:4242".to_owned(), "Notes".to_owned())]);
+
+    // Only a window ID goes; the offer never reaches the platform.
+    let bad = left.node.offer_window(right_id, "com.example.app".into(), "x".into()).await;
+    assert!(bad.is_err());
+    // A computer that doesn't announce opening windows isn't asked.
+    let none = right.node.offer_window(left_id, "win:1".into(), "x".into()).await;
+    assert!(matches!(none, Err(Error::Unsupported)), "{none:?}");
+    assert_eq!(right.platform.windows.lock().unwrap().len(), 1);
+    assert!(left.platform.windows.lock().unwrap().is_empty());
 }
 
 /// Deterministic, incompressible-looking test data.
