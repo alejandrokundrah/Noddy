@@ -148,6 +148,11 @@ pub fn mirror_touch(action: TouchAction, x: f32, y: f32) {
     send_inputs(&[mouse_input(ax, ay, 0, flags)]);
 }
 
+/// Presses (`true`) or releases (`false`) the left mouse button.
+pub fn mouse_button_left(down: bool) {
+    mouse_button(MouseButton::Left, if down { ButtonAction::Down } else { ButtonAction::Up });
+}
+
 /// Presses, releases or clicks a mouse button.
 pub fn mouse_button(button: MouseButton, action: ButtonAction) {
     let (down_flag, up_flag) = match button {

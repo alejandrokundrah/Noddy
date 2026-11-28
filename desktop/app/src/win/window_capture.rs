@@ -185,7 +185,7 @@ impl WindowCapture {
                 if title.is_empty() {
                     return BOOL(1);
                 }
-                if let Some(rect) = window_rect(hwnd.0 as isize)
+                if let Some(rect) = WindowCapture::window_rect(hwnd.0 as isize)
                     && (rect.right - rect.left) >= 64
                     && (rect.bottom - rect.top) >= 64
                 {

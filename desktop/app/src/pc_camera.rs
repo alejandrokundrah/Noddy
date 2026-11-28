@@ -10,6 +10,8 @@
 //! Capture is Media Foundation on Windows. On Linux it is `ffmpeg` reading
 //! the first working `/dev/video*`, the way the microphone uses `parec`.
 
+#![cfg_attr(windows, allow(unsafe_code))]
+
 use std::{
     sync::{
         Arc, Mutex,
