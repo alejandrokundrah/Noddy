@@ -2922,7 +2922,7 @@ Item {
                 }
                 Button {
                     width: parent.width
-                    primary: true
+                    variant: "fill"
                     text: qsTr("3840 × 2160 (4K H.265)")
                     onClicked: extendedDisplaySheet.launch(3840, 2160)
                 }
