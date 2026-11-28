@@ -47,6 +47,7 @@ mod pc_storage;
 mod phone_mic;
 mod phone_sound;
 mod photo_backup;
+mod photo_share;
 mod photos;
 mod play_on_phone;
 mod qr;
@@ -205,6 +206,24 @@ impl Platform for DesktopPlatform {
         muted: Option<bool>,
     ) -> Result<(), String> {
         deck::handle_set_audio(peer, volume, muted)
+    }
+    // This computer's photos, for another paired computer (crate::photo_share).
+    fn photo_albums(&self) -> Result<Vec<noddy_core::PhotoAlbum>, String> {
+        photo_share::albums()
+    }
+    fn photo_list(
+        &self,
+        album: Option<&str>,
+        before: Option<(i64, &str)>,
+        limit: u32,
+    ) -> Result<Vec<noddy_core::PhotoItem>, String> {
+        photo_share::list(album, before, limit)
+    }
+    fn photo_thumbs(&self, ids: &[String]) -> Result<Vec<noddy_core::PhotoThumb>, String> {
+        photo_share::thumbs(ids)
+    }
+    fn open_photo(&self, id: &str) -> Result<noddy_core::OutgoingFile, String> {
+        photo_share::open(id)
     }
     fn storage_list(&self, path: &str) -> Result<Vec<StorageEntry>, StorageError> {
         pc_storage::storage_list(path)

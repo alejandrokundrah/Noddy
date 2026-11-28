@@ -185,6 +185,7 @@ static FORWARD_PC_NOTIFICATIONS: std::sync::atomic::AtomicBool = std::sync::atom
 static SHARE_PC_CAMERA: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 static SHARE_PC_MIC: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 static SHARE_PC_SOUND: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+static SHARE_PC_PHOTOS: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 static AWAY_MODE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 static FLOW_FOLLOW_CLIPBOARD: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(true);
 static OPEN_SHARED_FILES: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
@@ -293,6 +294,21 @@ pub fn set_share_pc_sound(on: bool) {
     if !on {
         // Sound already going to a computer stops with the permission (a phone's doesn't).
         crate::pc_sharing::stop_sound_to_computers();
+    }
+    crate::core_host::refresh_capabilities();
+}
+
+/// Whether other paired computers may browse this computer's photos and
+/// screenshots (its Pictures folder; `crate::photo_share`). Off until the
+/// user turns it on.
+pub fn share_pc_photos() -> bool {
+    SHARE_PC_PHOTOS.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+pub fn set_share_pc_photos(on: bool) {
+    SHARE_PC_PHOTOS.store(on, std::sync::atomic::Ordering::Relaxed);
+    if !on {
+        crate::photo_share::forget();
     }
     crate::core_host::refresh_capabilities();
 }
@@ -595,6 +611,9 @@ pub struct Settings {
     /// Let other paired computers play this computer's sound (off by default).
     #[serde(default, alias = "share_pc_sound")]
     pub share_pc_sound: bool,
+    /// Let other paired computers browse this computer's photos (off by default).
+    #[serde(default)]
+    pub share_pc_photos: bool,
     /// Allow staying connected over mobile data (LTE/5G) / relay when away from Wi-Fi.
     #[serde(default, alias = "away_mode")]
     pub away_mode: bool,
@@ -690,6 +709,7 @@ impl Default for Settings {
             share_pc_camera: false,
             share_pc_mic: false,
             share_pc_sound: false,
+            share_pc_photos: false,
             away_mode: false,
             walkthrough_completed: false,
             walkthrough_step: 0,
@@ -759,6 +779,7 @@ impl Settings {
         set_share_pc_camera(self.share_pc_camera);
         set_share_pc_mic(self.share_pc_mic);
         set_share_pc_sound(self.share_pc_sound);
+        set_share_pc_photos(self.share_pc_photos);
         set_away_mode(self.away_mode);
         set_battery_full_threshold(self.battery_full_threshold);
         set_device_nicknames(self.device_nicknames.clone());
@@ -935,6 +956,7 @@ mod tests {
             share_pc_camera: true,
             share_pc_mic: true,
             share_pc_sound: true,
+            share_pc_photos: true,
             away_mode: true,
             walkthrough_completed: true,
             walkthrough_step: 4,

@@ -700,6 +700,15 @@ pub const DESKTOP_PAIR_FEATURES: &[FeatureDef] = &[
         requires: &[peer("sound.share"), here("sound.play"), DeviceToggle("media")],
         partial: None,
     },
+    // Browsing the other computer's photos and screenshots here, as with a
+    // phone's gallery (`docs/protocol/photos.md`). The other computer offers
+    // `photos.read` only while it shares its photos.
+    FeatureDef {
+        id: "desktop.photos",
+        group: FeatureGroup::Files,
+        requires: &[peer("photos.read"), here("photos.show"), DeviceToggle("photos")],
+        partial: None,
+    },
 ];
 
 /// What a phone and a tablet (or two phones) do for each other, from this
@@ -1601,6 +1610,34 @@ mod tests {
         for id in ids {
             assert!(matches!(m.state(id), Some(FeatureState::Unsupported { .. })), "{id}");
         }
+    }
+
+    #[test]
+    fn two_computers_can_browse_each_others_photos_when_the_other_shares_them() {
+        let mut other = pc();
+        let mut here_pc = pc();
+        here_pc.caps.insert("photos.show".to_owned());
+        // Not on offer until the other computer shares its photos.
+        let m = matrix_with(&other, &here_pc, &HashMap::new());
+        assert!(
+            matches!(m.state("desktop.photos"), Some(FeatureState::Locked { .. })),
+            "{:?}",
+            m.state("desktop.photos")
+        );
+        other.caps.insert("photos.read".to_owned());
+        let m = matrix_with(&other, &here_pc, &HashMap::new());
+        assert_eq!(m.state("desktop.photos"), Some(FeatureState::Available));
+        // This computer's per-device Photos switch applies.
+        let off = HashMap::from([("photos".to_owned(), false)]);
+        assert!(matches!(
+            matrix_with(&other, &here_pc, &off).state("desktop.photos"),
+            Some(FeatureState::Locked { .. })
+        ));
+        // A phone's gallery uses the phone's own feature.
+        let phone = facts(DeviceKind::Phone, "android", "16", PowerLevel::Basic, BASIC_PHONE);
+        let m = matrix_with(&phone, &here_pc, &HashMap::new());
+        assert!(matches!(m.state("desktop.photos"), Some(FeatureState::Unsupported { .. })));
+        assert_eq!(m.state("files.recent_photos"), Some(FeatureState::Available));
     }
 
     #[test]

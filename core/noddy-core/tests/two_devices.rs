@@ -3053,6 +3053,30 @@ async fn contacts_list_search_page_and_respect_permissions_and_toggles() {
     assert!(matches!(pc.node.contacts(phone_id, None, 0, 10).await, Err(Error::Denied)));
 }
 
+/// One computer browses another's photos with the gallery messages a phone
+/// answers; a computer never shows its photos to a phone.
+#[tokio::test(flavor = "multi_thread")]
+async fn a_computer_browses_another_computers_photos_but_a_phone_cant() {
+    use noddy_core::{PHOTOS_READ, PHOTOS_SHOW};
+
+    let mut viewer = device_with("Laptop", DeviceKind::Laptop, &[PHOTOS_SHOW]).await;
+    let mut source = device_with("Desktop", DeviceKind::Desktop, &[PHOTOS_SHOW, PHOTOS_READ]).await;
+    pair_qr(&mut viewer, &mut source).await;
+    let source_id = source.node.device_id();
+
+    let m = viewer.node.capabilities(source_id).unwrap();
+    assert_eq!(m.state("desktop.photos"), Some(FeatureState::Available));
+    let albums = with_timeout("albums", viewer.node.photo_albums(source_id)).await.unwrap();
+    assert_eq!(albums.len(), 2);
+    let items = with_timeout("list", viewer.node.photo_list(source_id, None, None, 2)).await.unwrap();
+    assert_eq!(items.iter().map(|i| i.id.as_str()).collect::<Vec<_>>(), ["media:4", "media:3"]);
+
+    // The same computer refuses a phone, whatever its Photos switch says.
+    let mut phone = device_with("Pixel", DeviceKind::Phone, &[PHOTOS_SHOW]).await;
+    pair_qr(&mut source, &mut phone).await;
+    assert!(matches!(phone.node.photo_albums(source_id).await, Err(Error::Unsupported)));
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn gallery_albums_paging_thumbs_download_and_toggles() {
     let mut pc = device_with("Desktop", DeviceKind::Desktop, &[noddy_core::PHOTOS_SHOW]).await;
