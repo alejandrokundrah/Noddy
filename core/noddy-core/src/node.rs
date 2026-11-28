@@ -2511,6 +2511,13 @@ impl Node {
         crate::actions::pc_power(&self.shared, &session, action).await
     }
 
+    /// Offers one of this PC's windows (`key`, as `mirror.apps` lists it) to
+    /// a paired PC, which opens it in a window of its own.
+    pub async fn offer_window(&self, peer: DeviceId, key: String, title: String) -> Result<()> {
+        let session = self.connected(&peer)?;
+        crate::actions::offer_window(&self.shared, &session, key, title).await
+    }
+
     /// Sets this PC's Wake-on-LAN adapter addresses (`pc.wake_info`) and sends
     /// them to every connected phone when they changed.
     pub async fn set_wake_info(&self, info: noddy_protocol::messages::PcWakeInfo) {

@@ -11,6 +11,11 @@ change things that need a step from you, and its notes say so.
 - **Files follow Mesh.** Files you copied are sent to the computer your pointer
   crosses to, and Ctrl+Alt+V sends what you copied (files, text or a picture)
   to the computer that has the pointer or the first one in your layout.
+- **Drag windows to the next computer.** With Mesh on, drag a window by its
+  title bar against a screen edge that has a computer on it: the window opens
+  there, showing the one here, and its mouse and keyboard work back on this
+  computer. Windows PCs share windows this way (they need Noddy sharing on for
+  each other, as for opening app windows).
 
 ### Fixed
 

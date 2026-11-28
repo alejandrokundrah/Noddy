@@ -97,6 +97,16 @@ Both work between computers; a phone gets text and pictures from the clipboard.
 Dragging a file with the mouse button held across the edge isn't supported yet:
 copy it first.
 
+### Dragging a Window to the Next Computer (Mesh)
+
+With Mesh on, drag a window by its title bar against a screen edge that has a
+computer on it. The window opens on that computer, in a window of its own, and
+shows the one on this computer; clicking and typing there work in it back here.
+The window itself stays on this computer, and the pointer stays with it. Both
+computers must be Windows PCs that are paired and share with each other
+(**Settings › Devices**: let this computer be viewed, and allow remote
+control), as for opening another computer's app windows.
+
 ### Browsing Another Computer's Files
 
 Two paired computers can look at each other's shared folders and download from them. Nothing is shared until its owner allows it.

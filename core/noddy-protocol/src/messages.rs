@@ -43,6 +43,7 @@ pub mod types {
     pub const MEDIA_FILE_META: &str = "media.file.meta";
     pub const PC_POWER: &str = "pc.power";
     pub const PC_WAKE_INFO: &str = "pc.wake_info";
+    pub const WINDOW_OFFER: &str = "window.offer";
     pub const LINK_OPEN: &str = "link.open";
     pub const TASK_NOTIFY: &str = "task.notify";
     pub const PHOTOS_NEW: &str = "photos.new";
@@ -1126,6 +1127,49 @@ pub struct PcPower {
     pub action: String,
 }
 
+/// Body of `window.offer`: a PC offers one of its windows to another PC,
+/// which opens it the way it opens an app window it asked for
+/// (`docs/protocol/mirror.md` §6).
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct WindowOffer {
+    /// The window's `mirror.apps` ID on the sender (`win:<handle>`).
+    pub key: String,
+    /// The window's title, for the new window's header.
+    pub title: String,
+}
+
+/// The longest window ID in a `window.offer`, in bytes.
+pub const WINDOW_KEY_MAX_BYTES: usize = 64;
+/// The longest window title in a `window.offer`, in bytes.
+pub const WINDOW_TITLE_MAX_BYTES: usize = 256;
+
+impl WindowOffer {
+    /// Whether this is a window ID in the shape `mirror.apps` lists
+    /// (`win:` and digits), with a title of sensible length.
+    #[must_use]
+    pub fn is_valid(&self) -> bool {
+        self.key.len() <= WINDOW_KEY_MAX_BYTES
+            && self.title.len() <= WINDOW_TITLE_MAX_BYTES
+            && self
+                .key
+                .strip_prefix("win:")
+                .is_some_and(|n| !n.is_empty() && n.bytes().all(|b| b.is_ascii_digit()))
+    }
+}
+
+/// Never prints the window's title (protocol v0 §11).
+impl std::fmt::Debug for WindowOffer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("WindowOffer").finish_non_exhaustive()
+    }
+}
+
+/// Opening a window another computer offers (`docs/protocol/mirror.md` §6.3).
+pub mod window_offer {
+    /// Offered by PCs that open a window a paired PC offers with `window.offer`.
+    pub const RECEIVE: &str = "window.receive";
+}
+
 /// The longest link sent, in bytes.
 pub const LINK_MAX_BYTES: usize = 4096;
 
@@ -1854,6 +1898,29 @@ pub mod mic {
     pub const VERSION: u32 = 1;
     /// Stream reset code: the microphone stopped.
     pub const STOPPED: u32 = 13;
+}
+
+#[cfg(test)]
+mod window_offer_tests {
+    use super::WindowOffer;
+
+    fn offer(key: &str, title: &str) -> WindowOffer {
+        WindowOffer { key: key.into(), title: title.into() }
+    }
+
+    #[test]
+    fn only_window_ids_pass() {
+        assert!(offer("win:12345", "Notes").is_valid());
+        assert!(!offer("win:", "x").is_valid());
+        assert!(!offer("com.app", "x").is_valid());
+        assert!(!offer("win:12a", "x").is_valid());
+        assert!(!offer("win:1", &"t".repeat(257)).is_valid());
+    }
+
+    #[test]
+    fn debug_hides_the_title() {
+        assert!(!format!("{:?}", offer("win:1", "Secret plans")).contains("Secret"));
+    }
 }
 
 /// Playing another computer's sound on this PC (`docs/protocol/pc-sharing.md` §4).

@@ -14,6 +14,7 @@ either device opens a web link on the other.
 | `pc.power` | PC | Locks or sleeps when a paired phone asks |
 | `pc.wake` | PC | Shares its network adapter MAC and subnet broadcast addresses (`pc.wake_info`) so a paired phone can wake it |
 | `link.open` | both | Opens web links a paired device sends |
+| `window.offer` | PC | Opens a window a paired PC offers (`docs/protocol/mirror.md` §6.3); announced as `window.receive` |
 | `task.notify` | both | Sends or shows watched PC task notifications (`task.notify`) |
 
 Senders check the other device's capabilities first and don't send a

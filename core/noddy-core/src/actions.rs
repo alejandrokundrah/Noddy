@@ -11,7 +11,8 @@ use std::{
 use noddy_protocol::{
     DeviceId, Envelope, ErrorCode,
     messages::{
-        LinkOpen, PcPower, PcWakeInfo, TaskNotify, magic_packet, parse_mac, task_notify, types, wake,
+        LinkOpen, PcPower, PcWakeInfo, TaskNotify, WindowOffer, magic_packet, parse_mac, task_notify, types,
+        wake,
     },
 };
 
@@ -216,6 +217,30 @@ pub(crate) async fn pc_power(shared: &Arc<Shared>, session: &Session, action: Po
         return Err(Error::Unsupported);
     }
     let env = Envelope::new(types::PC_POWER, &PcPower { action: action.as_str().into() })?;
+    session.request(env, crate::session::REQUEST_TIMEOUT).await?.expect(types::OK)?;
+    Ok(())
+}
+
+/// Offers one of this PC's windows (`key`, as `mirror.apps` lists it) to
+/// `peer`, which opens it in a window of its own.
+pub(crate) async fn offer_window(
+    shared: &Arc<Shared>,
+    session: &Session,
+    key: String,
+    title: String,
+) -> Result<()> {
+    if !shared.offers(&session.peer, noddy_protocol::messages::window_offer::RECEIVE)? {
+        return Err(Error::Unsupported);
+    }
+    let mut title = title;
+    while title.len() > noddy_protocol::messages::WINDOW_TITLE_MAX_BYTES {
+        title.pop();
+    }
+    let offer = WindowOffer { key, title };
+    if !offer.is_valid() {
+        return Err(Error::Unsupported);
+    }
+    let env = Envelope::new(types::WINDOW_OFFER, &offer)?;
     session.request(env, crate::session::REQUEST_TIMEOUT).await?.expect(types::OK)?;
     Ok(())
 }
@@ -477,6 +502,26 @@ pub(crate) async fn handle(shared: &Arc<Shared>, session: &Arc<Session>, env: &E
                     }
                     Err(reason) => {
                         tracing::warn!(reason, "can't open a link");
+                        Envelope::error(ErrorCode::Internal, "can't open it")
+                    }
+                }
+            }
+        }
+        types::WINDOW_OFFER => {
+            let offer: WindowOffer = env.body()?;
+            if !offer.is_valid() {
+                Envelope::error(ErrorCode::BadMessage, "not a window")
+            } else {
+                let platform = shared.platform.clone();
+                match tokio::task::spawn_blocking(move || {
+                    platform.window_offered(&peer, &offer.key, &offer.title)
+                })
+                .await
+                .unwrap_or_else(|e| Err(e.to_string()))
+                {
+                    Ok(()) => Envelope::empty(types::OK),
+                    Err(reason) => {
+                        tracing::warn!(reason, "can't open an offered window");
                         Envelope::error(ErrorCode::Internal, "can't open it")
                     }
                 }

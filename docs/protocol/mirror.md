@@ -219,6 +219,20 @@ soft keyboard, attaches an H.264 encoder drawing from it, and starts the app
 there; the phone shows a notification while any app window is open, with a
 button to close them all.
 
+### 6.3 Offering a window to another computer
+
+A PC can push one of its windows to a paired PC instead of waiting to be
+asked. It sends `window.offer` (`b = { key: "win:<handle>", title: text }`,
+`key` as `mirror.apps` lists it, at most 64 bytes; `title` at most 256) on the
+control stream, to a PC that announces `window.receive`. The receiver answers
+`ok` and opens that window as if its user had picked it from the sender's
+`mirror.apps`: it sends `mirror.start` with `app = key` and shows the stream,
+sending its input back. The offer opens nothing the sender wouldn't already
+let that PC open: the sender's `pc_mirror` and `remote_input` switches for it
+still decide. A `key` that isn't `win:` and digits is refused with
+`bad_message`. Mesh sends this when a window is dragged to a screen edge that
+has a computer on it.
+
 ## 7. Latency over completeness
 
 The stream is reliable, so a slow network would otherwise build up delay.

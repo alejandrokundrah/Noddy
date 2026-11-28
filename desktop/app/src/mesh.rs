@@ -19,6 +19,12 @@
 //! the computer the pointer crosses to. Ctrl+Alt+V sends what you copied (files,
 //! text or a picture) to the computer that has the pointer, or the first one in
 //! the layout.
+//!
+//! Dragging a window by its title bar to such an edge offers it to that
+//! computer (`window.offer`): it opens there, in a window of its own that shows
+//! this one's window and sends its mouse and keyboard back (the same as opening
+//! one of its app windows from there). The pointer stays here, and the window
+//! stays here too.
 
 // Capturing the mouse and keyboard is Windows only so far; elsewhere the
 // pointer logic is built (and tested) but nothing drives it.
@@ -96,6 +102,28 @@ pub fn send_copied() {
             "Put a computer next to this screen in Settings › Mesh to send it what you copied."
         )),
     }
+}
+
+/// Offers the window being dragged (`hwnd`, titled `title`) to `peer`: it
+/// opens there as a window of its own, showing this one. Runs off the hook's
+/// thread.
+fn offer_window(peer: DeviceId, hwnd: isize, title: String) {
+    core_host::spawn(async move {
+        let Some(node) = core_host::node() else { return };
+        match node.offer_window(peer, window_key(hwnd), title).await {
+            Ok(()) => {}
+            Err(Error::Unsupported) => crate::bridge::app::show_message(crate::i18n::tr!(
+                "Mesh",
+                "That computer can't open windows from this one yet. Update Noddy there."
+            )),
+            Err(e) => tracing::debug!(error = %e, "Mesh couldn't offer the window"),
+        }
+    });
+}
+
+/// A window's ID in `mirror.apps` (`docs/protocol/mirror.md` §6).
+fn window_key(hwnd: isize) -> String {
+    format!("win:{hwnd}")
 }
 
 // ── Who can take the pointer ────────────────────────────────────────────────
@@ -443,13 +471,14 @@ mod hook {
         Foundation::{LPARAM, LRESULT, POINT, WPARAM},
         System::Threading::GetCurrentThreadId,
         UI::{
-            Input::KeyboardAndMouse::{GetAsyncKeyState, VK_CONTROL, VK_MENU},
+            Input::KeyboardAndMouse::{GetAsyncKeyState, VK_CONTROL, VK_LBUTTON, VK_MENU},
             WindowsAndMessaging::{
-                CallNextHookEx, DispatchMessageW, GetMessageW, KBDLLHOOKSTRUCT, LLKHF_EXTENDED,
-                LLKHF_INJECTED, LLMHF_INJECTED, MSG, MSLLHOOKSTRUCT, PostThreadMessageW, SetCursorPos,
-                SetWindowsHookExW, TranslateMessage, UnhookWindowsHookEx, WH_KEYBOARD_LL, WH_MOUSE_LL,
-                WM_KEYDOWN, WM_LBUTTONDOWN, WM_LBUTTONUP, WM_MBUTTONDOWN, WM_MBUTTONUP, WM_MOUSEHWHEEL,
-                WM_MOUSEMOVE, WM_MOUSEWHEEL, WM_QUIT, WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SYSKEYDOWN,
+                CallNextHookEx, DispatchMessageW, GUI_INMOVESIZE, GUITHREADINFO, GetGUIThreadInfo,
+                GetMessageW, KBDLLHOOKSTRUCT, LLKHF_EXTENDED, LLKHF_INJECTED, LLMHF_INJECTED, MSG,
+                MSLLHOOKSTRUCT, PostThreadMessageW, SetCursorPos, SetWindowsHookExW, TranslateMessage,
+                UnhookWindowsHookEx, WH_KEYBOARD_LL, WH_MOUSE_LL, WM_KEYDOWN, WM_LBUTTONDOWN, WM_LBUTTONUP,
+                WM_MBUTTONDOWN, WM_MBUTTONUP, WM_MOUSEHWHEEL, WM_MOUSEMOVE, WM_MOUSEWHEEL, WM_QUIT,
+                WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SYSKEYDOWN,
             },
         },
     };
@@ -463,8 +492,47 @@ mod hook {
     const VK_M: u32 = 0x4D;
     /// The V key, for Ctrl+Alt+V.
     const VK_V: u32 = 0x56;
+    /// Windows already offered during the current drag, so each goes once.
+    static OFFERED: std::sync::Mutex<Vec<isize>> = std::sync::Mutex::new(Vec::new());
     /// The most wheel notches sent at once.
     const MAX_NOTCHES: f32 = 50.0;
+
+    /// The window the user is moving or resizing by its title bar or border
+    /// right now, with its title, if it's one other computers can be shown.
+    fn dragged_window() -> Option<(isize, String)> {
+        let mut info =
+            GUITHREADINFO { cbSize: std::mem::size_of::<GUITHREADINFO>() as u32, ..Default::default() };
+        // SAFETY: `info` is sized as the call requires; 0 means the foreground thread.
+        unsafe { GetGUIThreadInfo(0, &mut info) }.ok()?;
+        if info.flags.0 & GUI_INMOVESIZE.0 == 0 {
+            return None;
+        }
+        let hwnd = info.hwndMoveSize.0 as isize;
+        crate::win::window_capture::WindowCapture::list_windows().into_iter().find(|(h, _)| *h == hwnd)
+    }
+
+    /// Dragging a window against an edge with a computer there offers it to
+    /// that computer. True when a window is being dragged (the pointer then
+    /// stays with it).
+    fn offer_dragged(edge: ScreenEdge) -> bool {
+        if !held(VK_LBUTTON) {
+            return false;
+        }
+        let Some((hwnd, title)) = dragged_window() else { return false };
+        let fresh = {
+            let mut offered = OFFERED.lock().unwrap_or_else(|e| e.into_inner());
+            if offered.contains(&hwnd) {
+                false
+            } else {
+                offered.push(hwnd);
+                true
+            }
+        };
+        if fresh && let Some(peer) = super::target_at(edge) {
+            super::offer_window(peer, hwnd, title);
+        }
+        true
+    }
 
     pub fn start() {
         std::thread::Builder::new().name("mesh-hooks".into()).spawn(run).ok();
@@ -573,6 +641,17 @@ mod hook {
         let message = wparam.0 as u32;
         let away = flow().away;
         let Some(mut away) = away else {
+            if message == WM_LBUTTONUP {
+                OFFERED.lock().unwrap_or_else(|e| e.into_inner()).clear();
+            }
+            if message == WM_MOUSEMOVE
+                && let Some((edge, _)) = edge_at(info.pt)
+                && offer_dragged(edge)
+            {
+                // A window is being dragged: it goes over as a window, and the
+                // pointer stays with it.
+                return pass(code, wparam, lparam);
+            }
             if message == WM_MOUSEMOVE
                 && let Some((edge, along)) = edge_at(info.pt)
                 && let Some(peer) = super::target_at(edge)
@@ -780,6 +859,13 @@ mod tests {
         assert_eq!(default_target(&layout), Some(DeviceId([1; 32])));
         assert_eq!(default_target(&layout[..2]), Some(DeviceId([2; 32])));
         assert_eq!(default_target(&[]), None);
+    }
+
+    #[test]
+    fn a_dragged_window_is_offered_by_its_app_window_id() {
+        let offer = noddy_core::WindowOffer { key: window_key(264_526), title: "Notes".into() };
+        assert_eq!(offer.key, "win:264526");
+        assert!(offer.is_valid());
     }
 
     #[test]

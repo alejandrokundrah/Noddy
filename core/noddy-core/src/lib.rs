@@ -97,7 +97,7 @@ pub use noddy_protocol::{
         ScreenRect, ScreenShape, SmsAttachment, SmsMessage, SmsPart, SmsThread, StorageChanged,
         StorageDelete, StorageEntries, StorageEntry, StorageList, StorageMkdir, StorageRead, StorageReadMeta,
         StorageRename, StorageWriteAccept, StorageWriteDone, StorageWriteOffer, TaskNotify, TouchAction,
-        WatchFile, WebcamConfig, WebcamStart,
+        WatchFile, WebcamConfig, WebcamStart, WindowOffer,
         calls::{
             CONTROL as CALLS_CONTROL, DIAL as CALLS_DIAL, IN_CALL as CALLS_IN_CALL, LOG as CALLS_LOG,
             SHOW as CALLS_SHOW, STATE as CALLS_STATE,
@@ -143,6 +143,7 @@ pub use noddy_protocol::{
             CAMERA_FRONT as WEBCAM_CAMERA_FRONT, H264 as WEBCAM_H264, H265 as WEBCAM_H265,
             HEVC as WEBCAM_HEVC, STREAM as WEBCAM_STREAM, VIRTUAL as WEBCAM_VIRTUAL,
         },
+        window_offer::RECEIVE as WINDOW_RECEIVE,
     },
     pairing::PairingUri,
 };
