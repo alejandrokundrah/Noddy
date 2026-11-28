@@ -2699,7 +2699,7 @@ Item {
                                 anchors.fill: parent
                                 anchors.margins: -4
                                 radius: Theme.radiusSm
-                                color: previewHover.hovered ? Theme.surfaceContainerHigh : "transparent"
+                                color: rowHover.hovered ? Theme.surfaceContainerHigh : "transparent"
                                 border.width: Theme.focusVisible(previewRow) ? 2 : 0
                                 border.color: Theme.primary
                             }
@@ -2738,7 +2738,7 @@ Item {
                                     text: previewRow.modelData.subtitle || ""
                                 }
                             }
-                            HoverHandler { id: previewHover; cursorShape: Qt.PointingHandCursor }
+                            HoverHandler { id: rowHover; cursorShape: Qt.PointingHandCursor }
                             TapHandler { onTapped: AppController.currentPage = "timeline" }
                         }
                     }
